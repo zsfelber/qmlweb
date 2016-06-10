@@ -9,7 +9,7 @@ const iife = require("gulp-iife");
 const babel = require("gulp-babel");
 const replace = require("gulp-replace");
 const karma = require("karma");
-const istanbul = require("gulp-istanbul");
+const istanbul = require("gulp-babel-istanbul");
 const path = require("path");
 
 const qtcoreSources = [
