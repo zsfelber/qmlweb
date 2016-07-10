@@ -132,10 +132,15 @@ const Qt = {
     return engine.removeDotSegments( detectedBasePath + url )
   },
 
-  size: function size(width, height)
-  {
-    return new QSizeF(width, height);
-  },
+  // Basic QML types constructors
+  point: (...args) => new QPointF(...args),
+  rect: (...args) => new QRectF(...args),
+  size: (...args) => new QSizeF(...args),
+  vector2d: (...args) => new QVector2D(...args),
+  vector3d: (...args) => new QVector3D(...args),
+  vector4d: (...args) => new QVector4D(...args),
+  quaternion: (...args) => new QQuaternion(...args),
+  matrix4x4: (...args) => new QMatrix4x4(...args),
 
   // Buttons masks
   LeftButton: 1,

@@ -53,3 +53,7 @@ class QObject {
     this.$delete();
   }
 }
+
+QObject.prototype.$toString = function(...args) {
+    return `${this.constructor.name}(${args.join(', ')})`;
+};
