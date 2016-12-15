@@ -128,3 +128,9 @@ See [Extending](docs/Extending.md).
 3. [@Plaristote/qmlweb](https://github.com/Plaristote/qmlweb),
 4. [@labsin/qmlweb](https://github.com/labsin/qmlweb),
 5. [@arnopaehler/qmlweb](https://github.com/arnopaehler/qmlweb).
+
+
+
+## This Fork/Branch
+
+Intended to fix parse errors (like that of readonly property) and maybe another simple bugs which prevent my actual qml model to be compiled and used.
