@@ -34,16 +34,18 @@ class QMLMethod extends QmlWeb.QMLBinding {
  * @return {Object} Object representing the defintion
  */
 class QMLPropertyDefinition {
-  constructor(type, value) {
+  constructor(type, value, readonly) {
     this.type = type;
     this.value = value;
+    this.readonly = readonly;
   }
 }
 
 class QMLAliasDefinition {
-  constructor(objName, propName) {
+  constructor(objName, propName, readonly) {
     this.objectName = objName;
     this.propertyName = propName;
+    this.readonly = readonly;
   }
 }
 
@@ -75,6 +77,7 @@ class QMLMetaElement {
     this.$class = type;
     this.$children = [];
     this.$on = onProp;
+    this.readonly = false;
   }
 }
 
@@ -129,7 +132,7 @@ convertToEngine.walkers = {
           break;
         case "qmlpropdefro":
         case "qmlaliasdefro":
-          ro = 1;
+          val.readonly = true;
         case "qmlprop":
         case "qmlpropdef":
         case "qmlaliasdef":
@@ -190,8 +193,16 @@ convertToEngine.walkers = {
         type,
         tree ? convertToEngine.bindout(tree, src) : undefined
     ),
+  qmlpropdefro: (name, type, tree, src) =>
+    new QMLPropertyDefinition(
+        type,
+        tree ? convertToEngine.bindout(tree, src) : undefined,
+        true
+    ),
   qmlaliasdef: (name, objName, propName) =>
     new QMLAliasDefinition(objName, propName),
+  qmlaliasdefro: (name, objName, propName) =>
+    new QMLAliasDefinition(objName, propName, true),
   qmlsignaldef: (name, params) =>
     new QMLSignalDefinition(params),
   qmldefaultprop: tree => convertToEngine.walk(tree),
