@@ -94,7 +94,7 @@ function stringifyDots(elem) {
   return path.join(".");
 }
 
-function applyProp(item, name, val) {
+function applyProp(item, name, val, readonly) {
   let curr = item; // output structure
   let sub = name; // input structure
   while (sub[0] === "dot") {
@@ -121,17 +121,21 @@ convertToEngine.walkers = {
       const statement = statements[i];
       const name = statement[1];
       const val = convertToEngine.walk(statement);
+      var ro = 0;
       switch (statement[0]) {
         case "qmldefaultprop":
           item.$defaultProperty = name;
           item[name] = val;
           break;
+        case "qmlpropdefro":
+        case "qmlaliasdefro":
+          ro = 1;
         case "qmlprop":
         case "qmlpropdef":
         case "qmlaliasdef":
         case "qmlmethod":
         case "qmlsignaldef":
-          applyProp(item, name, val);
+          applyProp(item, name, val, ro);
           break;
         case "qmlelem":
           item.$children.push(val);
