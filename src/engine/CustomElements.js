@@ -42,9 +42,9 @@ function registerElement(name, file) {
   }
 
   // Bail out if Custom Elements v1 are not present
-  if (!window.customElements) {
+  if (!vindov.customElements) {
     throw new Error(
-      "window.customElements are not supported. Consider installing a polyfill."
+      "vindov.customElements are not supported. Consider installing a polyfill."
     );
   }
 
@@ -59,7 +59,7 @@ function registerElement(name, file) {
   const QmlElement = class extends HTMLElement {
     connectedCallback() {
       // Default wrapper display is inline-block to support native width/height
-      const computedStyle = window.getComputedStyle(this);
+      const computedStyle = vindov.getComputedStyle(this);
       if (computedStyle.display === "inline") {
         this.style.display = "inline-block";
       }
@@ -144,7 +144,7 @@ function registerElement(name, file) {
     }
   };
 
-  window.customElements.define(name, QmlElement);
+  vindov.customElements.define(name, QmlElement);
 }
 
 QmlWeb.registerElement = registerElement;

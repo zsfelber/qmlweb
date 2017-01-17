@@ -1,4 +1,4 @@
-window.addEventListener("load", () => {
+vindov.addEventListener("load", () => {
   const metaTags = document.getElementsByTagName("body");
   for (let i = 0; i < metaTags.length; ++i) {
     const metaTag = metaTags[i];

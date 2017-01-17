@@ -107,7 +107,7 @@ class QMLEngine {
 
     // Needed to make absolute positioning work
     if (!this.dom.style.position) {
-      const style = window.getComputedStyle(this.dom);
+      const style = vindov.getComputedStyle(this.dom);
       if (style.getPropertyValue("position") === "static") {
         this.dom.style.position = "relative";
         this.dom.style.top = "0";
@@ -115,7 +115,7 @@ class QMLEngine {
       }
     }
 
-    window.addEventListener("resize", () => this.updateGeometry());
+    vindov.addEventListener("resize", () => this.updateGeometry());
   }
 
   //---------- Public Methods ----------
@@ -127,10 +127,10 @@ class QMLEngine {
     let width;
     let height;
     if (this.dom === document.body) {
-      width = window.innerWidth;
-      height = window.innerHeight;
+      width = vindov.innerWidth;
+      height = vindov.innerHeight;
     } else {
-      const style = window.getComputedStyle(this.dom);
+      const style = vindov.getComputedStyle(this.dom);
       width = parseFloat(style.getPropertyValue("width"), 10);
       height = parseFloat(style.getPropertyValue("height"), 10);
     }
@@ -493,7 +493,7 @@ class QMLEngine {
   $initKeyboard() {
     document.onkeypress = e => {
       let focusedElement = this.focusedElement();
-      const event = QmlWeb.eventToKeyboard(e || window.event);
+      const event = QmlWeb.eventToKeyboard(e || vindov.event);
       const eventName = QmlWeb.keyboardSignals[event.key];
 
       while (focusedElement && !event.accepted) {
@@ -514,7 +514,7 @@ class QMLEngine {
 
     document.onkeyup = e => {
       let focusedElement = this.focusedElement();
-      const event = QmlWeb.eventToKeyboard(e || window.event);
+      const event = QmlWeb.eventToKeyboard(e || vindov.event);
 
       while (focusedElement && !event.accepted) {
         const backup = focusedElement.$context.event;
