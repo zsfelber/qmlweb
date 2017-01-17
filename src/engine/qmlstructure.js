@@ -97,7 +97,7 @@ function stringifyDots(elem) {
   return path.join(".");
 }
 
-function applyProp(item, name, val, readonly) {
+convertToEngine.applyProp = function(item, name, val, readonly) {
   let curr = item; // output structure
   let sub = name; // input structure
   while (sub[0] === "dot") {
@@ -138,7 +138,7 @@ convertToEngine.walkers = {
         case "qmlaliasdef":
         case "qmlmethod":
         case "qmlsignaldef":
-          applyProp(item, name, val, ro);
+          convertToEngine.applyProp(item, name, val, ro);
           break;
         case "qmlelem":
           item.$children.push(val);
@@ -181,7 +181,7 @@ convertToEngine.walkers = {
       const name = statement[1];
       const val = convertToEngine.walk(statement);
       if (statement[0] === "qmlprop") {
-        applyProp(item, name, val);
+        convertToEngine.applyProp(item, name, val);
       }
     }
     return item;
@@ -281,6 +281,19 @@ function convertToDescriptor(tree) {
   return convertToDescriptor.walk(tree);
 }
 
+convertToDescriptor.applyProp = function(props, name, val, readonly) {
+  let curr = props; // output structure
+  let sub = name; // input structure
+  while (sub[0] === "dot") {
+    if (!curr[sub[1]]) {
+      curr[sub[1]] = new QMLMetaPropertyGroup();
+    }
+    curr = curr[sub[1]];
+    sub = sub[2];
+  }
+  curr[sub] = val;
+}
+
 convertToDescriptor.walkers = {
     toplevel: (imports, statement) => {
       __result.$imports = imports;
@@ -290,6 +303,8 @@ convertToDescriptor.walkers = {
     qmlelem: (elem, onProp, statements) => {
 
       const qtypename = stringifyDots(elem);
+      var props = this.__result.properties;
+      var funcs = this.__result.$functions;
 
       for (const i in statements) {
         const statement = statements[i];
@@ -299,17 +314,29 @@ convertToDescriptor.walkers = {
         switch (statement[0]) {
           case "qmldefaultprop":
             //item.$defaultProperty = name;
-            item[name] = val;
+            props[name] = val;
             break;
           case "qmlpropdefro":
           case "qmlaliasdefro":
             val.readonly = true;
-          case "qmlprop":
           case "qmlpropdef":
           case "qmlaliasdef":
+            if (val instanceof QmlWeb.QMLBinding) {
+                props[name] = qtypename;
+
+            } else {
+                props[name] = { type:qtypename, initialValue:val }
+            }
+
+            break;
+          case "qmlprop":
+
           case "qmlmethod":
-          case "qmlsignaldef":
-            applyProp(item, name, val, ro);
+            funcs[name] = statement[2];
+            break;
+        case "qmlsignaldef":
+            convertToDescriptor.applyProp(props, name, val, ro);
+            props
             break;
           case "qmlelem":
             item.$children.push(val);
@@ -352,7 +379,7 @@ convertToDescriptor.walkers = {
         const name = statement[1];
         const val = convertToDescriptor.walk(statement);
         if (statement[0] === "qmlprop") {
-          applyProp(item, name, val);
+          convertToDescriptor.applyProp(item, name, val);
         }
       }
       return item;
