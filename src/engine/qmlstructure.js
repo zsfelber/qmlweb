@@ -275,6 +275,188 @@ convertToEngine.amIn = function(str, tree) {
   if (tree) console.log(JSON.stringify(tree, null, "  "));
 };
 
+
+// Convert parser tree to the format understood by engine (and a serializable version)
+function convertToDescriptor(tree) {
+  return convertToDescriptor.walk(tree);
+}
+
+convertToDescriptor.walkers = {
+    toplevel: (imports, statement) => {
+      __result.$imports = imports;
+      convertToDescriptor.walk(statement);
+      return __result;
+    },
+    qmlelem: (elem, onProp, statements) => {
+
+      const qtypename = stringifyDots(elem);
+
+      for (const i in statements) {
+        const statement = statements[i];
+        const name = statement[1];
+        const val = convertToDescriptor.walk(statement);
+        var ro = 0;
+        switch (statement[0]) {
+          case "qmldefaultprop":
+            //item.$defaultProperty = name;
+            item[name] = val;
+            break;
+          case "qmlpropdefro":
+          case "qmlaliasdefro":
+            val.readonly = true;
+          case "qmlprop":
+          case "qmlpropdef":
+          case "qmlaliasdef":
+          case "qmlmethod":
+          case "qmlsignaldef":
+            applyProp(item, name, val, ro);
+            break;
+          case "qmlelem":
+            item.$children.push(val);
+            break;
+          case "qmlobjdef":
+            throw new Error(
+              "qmlobjdef support was removed, update qmlweb-parser to ^0.3.0."
+            );
+          case "qmlobj":
+            // Create object to item
+            item[name] = item[name] || new QMLMetaPropertyGroup();
+            for (const j in val) {
+              item[name][j] = val[j];
+            }
+            break;
+          default:
+            console.log("Unknown statement", statement);
+        }
+      }
+      // Make $children be either a single item or an array, if it's more than one
+      if (item.$children.length === 1) {
+        item.$children = item.$children[0];
+      }
+
+      return item;
+    },
+    qmlprop: (name, tree, src) => {
+      if (name === "id") {
+        // id property
+        return tree[1][1];
+      }
+      return convertToDescriptor.bindout(tree, src);
+    },
+    qmlobjdef: (name, property, tree, src) =>
+      convertToDescriptor.bindout(tree, src),
+    qmlobj: (elem, statements) => {
+      const item = {};
+      for (const i in statements) {
+        const statement = statements[i];
+        const name = statement[1];
+        const val = convertToDescriptor.walk(statement);
+        if (statement[0] === "qmlprop") {
+          applyProp(item, name, val);
+        }
+      }
+      return item;
+    },
+    qmlmethod: (name, tree, src) => {
+      this.__result.$functions[name] = src;
+      return null;
+    },
+    qmlpropdef: (name, type, tree, src) =>
+      new QMLPropertyDefinition(
+          type,
+          tree ? convertToDescriptor.bindout(tree, src) : undefined
+      ),
+    qmlpropdefro: (name, type, tree, src) =>
+      new QMLPropertyDefinition(
+          type,
+          tree ? convertToDescriptor.bindout(tree, src) : undefined,
+          true
+      ),
+    qmlaliasdef: (name, objName, propName) =>
+      new QMLAliasDefinition(objName, propName),
+    qmlaliasdefro: (name, objName, propName) =>
+      new QMLAliasDefinition(objName, propName, true),
+    qmlsignaldef: (name, params) => {
+        this.__result.signals[name] = params;
+        return null;
+    },
+    qmldefaultprop: tree => convertToDescriptor.walk(tree),
+    name: src => {
+      if (src === "true" || src === "false") {
+        return src === "true";
+      } else if (typeof src === "boolean") {
+        // TODO: is this needed? kept for compat with ==
+        return src;
+      }
+      return new QmlWeb.QMLBinding(src, ["name", src]);
+    },
+    num: src => +src,
+    string: src => String(src),
+    array: (tree, src) => {
+      const a = [];
+      let isList = false;
+      let hasBinding = false;
+      for (const i in tree) {
+        const val = convertToDescriptor.bindout(tree[i]);
+        a.push(val);
+
+        if (val instanceof QMLMetaElement) {
+          isList = true;
+        } else if (val instanceof QmlWeb.QMLBinding) {
+          hasBinding = true;
+        }
+      }
+
+      if (hasBinding) {
+        if (isList) {
+          throw new TypeError(
+            "An array may either contain bindings or Element definitions."
+          );
+        }
+        return new QmlWeb.QMLBinding(src, tree);
+      }
+
+      return a;
+    }
+};
+
+// Try to bind out tree and return static variable instead of binding
+convertToDescriptor.bindout = function(statement, binding) {
+  // We want to process the content of the statement
+  // (but still handle the case, we get the content directly)
+  const tree = statement[0] === "stat" ? statement[1] : statement;
+
+  const type = tree[0];
+  const walker = convertToDescriptor.walkers[type];
+  if (walker) {
+    return walker.apply(type, tree.slice(1));
+  }
+  return new QmlWeb.QMLBinding(binding, tree);
+};
+
+convertToDescriptor.walk = function(tree) {
+  const type = tree[0];
+  convertToDescriptor.walkers.__result = {
+        //module: "",
+        //name: "",
+        //versions: //,
+        //baseClass: ,
+        enums: {},
+        signals: {},
+        //defaultProperty: options.defaultProperty,
+        properties: {},
+        $functions:{}
+    };
+
+  const walker = convertToDescriptor.walkers[type];
+  if (!walker) {
+    console.log(`No walker for ${type}`);
+    return undefined;
+  }
+  return walker.apply(walker, tree.slice(1));
+};
+
+
 function loadParser() {
   if (typeof QmlWeb.parse !== "undefined") {
     return;
@@ -316,5 +498,6 @@ QmlWeb.QMLSignalDefinition = QMLSignalDefinition;
 QmlWeb.QMLMetaPropertyGroup = QMLMetaPropertyGroup;
 QmlWeb.QMLMetaElement = QMLMetaElement;
 QmlWeb.convertToEngine = convertToEngine;
+QmlWeb.convertToDescriptor = convertToDescriptor;
 QmlWeb.loadParser = loadParser;
 QmlWeb.parseQML = parseQML;
