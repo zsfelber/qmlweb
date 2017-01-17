@@ -146,9 +146,10 @@ function serializeObj(object, path) {
 
             for (var propname in object) {
                 if (propname === "serializedTypeId") continue;
+                var prop = object[propname];
+                if ("$children"===propname && prop instanceof Array && !prop.length) continue;
 
                 path.push(propname);
-                var prop = object[propname];
                 var value = serializeObj(prop, path);
                 if (value) {
                     result += '"'+propname+'" : '+value + ", ";
