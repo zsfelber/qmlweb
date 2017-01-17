@@ -25,7 +25,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 class QMLMethod extends QmlWeb.QMLBinding {
-    var serializedTypeId = "m";
+    constructor(src) {
+        super(src);
+        this.serializedTypeId = "m";
+    }
 }
 
 /**
@@ -39,8 +42,8 @@ class QMLPropertyDefinition {
     this.type = type;
     this.value = value;
     this.readonly = readonly;
+        this.serializedTypeId = "p";
   }
-  var serializedTypeId = "p";
 }
 
 class QMLAliasDefinition {
@@ -48,8 +51,8 @@ class QMLAliasDefinition {
     this.objectName = objName;
     this.propertyName = propName;
     this.readonly = readonly;
+        this.serializedTypeId = "a";
   }
-  var serializedTypeId = "a";
 }
 
 /**
@@ -60,8 +63,8 @@ class QMLAliasDefinition {
 class QMLSignalDefinition {
   constructor(params) {
     this.parameters = params;
+        this.serializedTypeId = "s";
   }
-  var serializedTypeId = "s";
 }
 
 /**
@@ -69,7 +72,10 @@ class QMLSignalDefinition {
  * @return {Object} Object representing the group
  */
 class QMLMetaPropertyGroup {
-  var serializedTypeId = "g";
+    constructor() {
+        this.serializedTypeId = "g";
+    }
+
 }
 
 /**
@@ -83,8 +89,8 @@ class QMLMetaElement {
     this.$children = [];
     this.$on = onProp;
     this.readonly = false;
+        this.serializedTypeId = "e";
   }
-  var serializedTypeId = "e";
 }
 
 function copy() {
@@ -109,22 +115,24 @@ function copy() {
 }
 
 function serializeObj(object, path) {
-    var result = "";
     var top = !path;
     if (top) path = [];
 
     if (object instanceof Object) {
+        var result = "";
 
         if (object instanceof Array) {
             result += "[";
+            var l0 = result.length;
+
             var i = 0;
             object.forEach(function(propval) {
                 path.push([i]);
-                result += qtjs.serializeObj(propval)+", ";
+                result += serializeObj(propval)+", ";
                 path.pop();
                 ++i;
             });
-            if (result.length>2) {
+            if (result.length>l0) {
                 result = result.substring(0, result.length-2);
             }
             result += "]";
@@ -134,14 +142,20 @@ function serializeObj(object, path) {
             } else {
                 result += "{";
             }
+            var l0 = result.length;
 
             for (var propname in object) {
+                if (propname === "serializedTypeId") continue;
+
                 path.push(propname);
                 var prop = object[propname];
-                result += '"'+propname+'" : '+serializeObj(prop, path) + ", ";
+                var value = serializeObj(prop, path);
+                if (value) {
+                    result += '"'+propname+'" : '+value + ", ";
+                }
                 path.pop();
             }
-            if (result.length>2) {
+            if (result.length>l0) {
                 result = result.substring(0, result.length-2);
             }
 
@@ -151,14 +165,16 @@ function serializeObj(object, path) {
                 result += "}";
             }
         }
+        return result;
 
     } else if (typeof object === "string") {
         return JSON.stringify(object);
-    } else {
+    } else if (object && object.toString){
         return object.toString();
+    } else {
+        return undefined;
     }
 
-    return result;
 }
 
 
@@ -204,6 +220,8 @@ resolve.walkers = {
 
     for (const i in statements) {
       const statement = statements[i];
+      if (!statement) continue;
+
       const name = statement[1];
       const val = resolve.walk(statement);
       var ro = 0;
@@ -369,32 +387,38 @@ function serializeParserFuncs() {
     var result = "";
     function b(init) {
         var result = new QmlWeb.QMLBinding();
-        copy(result, init);
+        QmlWeb.copy(result, init);
+        return result;
     }
 
     function m(init) {
         var result = new QMLMethod();
-        copy(result, init);
+        QmlWeb.copy(result, init);
+        return result;
     }
 
     function p(init) {
         var result = new QMLPropertyDefinition();
-        copy(result, init);
+        QmlWeb.copy(result, init);
+        return result;
     }
 
     function a(init) {
         var result = new QMLAliasDefinition();
-        copy(result, init);
+        QmlWeb.copy(result, init);
+        return result;
     }
 
     function s(init) {
         var result = new QMLSignalDefinition();
-        copy(result, init);
+        QmlWeb.copy(result, init);
+        return result;
     }
 
     function e(init) {
         var result = new QMLMetaElement();
-        copy(result, init);
+        QmlWeb.copy(result, init);
+        return result;
     }
 
     result += b.toString();
@@ -451,6 +475,7 @@ QmlWeb.QMLAliasDefinition = QMLAliasDefinition;
 QmlWeb.QMLSignalDefinition = QMLSignalDefinition;
 QmlWeb.QMLMetaPropertyGroup = QMLMetaPropertyGroup;
 QmlWeb.QMLMetaElement = QMLMetaElement;
+QmlWeb.copy = copy;
 QmlWeb.serialize = serialize;
 QmlWeb.serializeParserFuncs = serializeParserFuncs;
 QmlWeb.convertToEngine = convertToEngine;

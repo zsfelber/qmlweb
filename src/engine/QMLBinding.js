@@ -15,6 +15,8 @@ class QMLBinding {
                       tree[1][0] && tree[1][0][0] !== "label");
     this.src = val;
     this.compiled = false;
+
+    this.serializedTypeId = "b";
   }
 
   toJSON() {
@@ -51,7 +53,6 @@ class QMLBinding {
     `);
   }
 
-  var serializedTypeId = "b";
 }
 
 QmlWeb.QMLBinding = QMLBinding;

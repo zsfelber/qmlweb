@@ -41,6 +41,7 @@
     "build": "gulp build",
     "watch": "gulp watch"
   },
+  "main": "lib/qt.js",
   "files": [
     "AUTHORS",
     "LICENSE",
