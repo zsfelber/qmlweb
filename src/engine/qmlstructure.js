@@ -25,6 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 class QMLMethod extends QmlWeb.QMLBinding {
+    var serializedTypeId = "m";
 }
 
 /**
@@ -39,6 +40,7 @@ class QMLPropertyDefinition {
     this.value = value;
     this.readonly = readonly;
   }
+  var serializedTypeId = "p";
 }
 
 class QMLAliasDefinition {
@@ -47,6 +49,7 @@ class QMLAliasDefinition {
     this.propertyName = propName;
     this.readonly = readonly;
   }
+  var serializedTypeId = "a";
 }
 
 /**
@@ -58,6 +61,7 @@ class QMLSignalDefinition {
   constructor(params) {
     this.parameters = params;
   }
+  var serializedTypeId = "s";
 }
 
 /**
@@ -65,6 +69,7 @@ class QMLSignalDefinition {
  * @return {Object} Object representing the group
  */
 class QMLMetaPropertyGroup {
+  var serializedTypeId = "g";
 }
 
 /**
@@ -79,11 +84,88 @@ class QMLMetaElement {
     this.$on = onProp;
     this.readonly = false;
   }
+  var serializedTypeId = "e";
 }
 
+function copy() {
+    var result = arguments[0];
+    arguments.shift();
+    arguments.forEach(function(arg){
+        if (arg) {
+            for (var prop in arg) {
+                result[prop] = arg[prop];
+            }
+            if (result instanceof Array) {
+                if (!(arg instanceof Array)) {
+                    throw new Error("Copy from Object to Array");
+                }
+                if (arg.length > result.length) {
+                    result.length = arg.length;
+                }
+            }
+        }
+    });
+    return result;
+}
+
+function serializeObj(object, path) {
+    var result = "";
+    var top = !path;
+    if (top) path = [];
+
+    if (object instanceof Object) {
+
+        if (object instanceof Array) {
+            result += "[";
+            var i = 0;
+            object.forEach(function(propval) {
+                path.push([i]);
+                result += qtjs.serializeObj(propval)+", ";
+                path.pop();
+                ++i;
+            });
+            if (result.length>2) {
+                result = result.substring(0, result.length-2);
+            }
+            result += "]";
+        } else {
+            if (object.serializedTypeId) {
+                result += object.serializedTypeId+"({";
+            } else {
+                result += "{";
+            }
+
+            for (var propname in object) {
+                path.push(propname);
+                var prop = object[propname];
+                result += '"'+propname+'" : '+serializeObj(prop, path) + ", ";
+                path.pop();
+            }
+            if (result.length>2) {
+                result = result.substring(0, result.length-2);
+            }
+
+            if (object.serializedTypeId) {
+                result += "})";
+            } else {
+                result += "}";
+            }
+        }
+
+    } else if (typeof object === "string") {
+        return JSON.stringify(object);
+    } else {
+        return object.toString();
+    }
+
+    return result;
+}
+
+
+
 // Convert parser tree to the format understood by engine
-function convertToEngine(tree) {
-  return convertToEngine.walk(tree);
+function resolve(tree) {
+  return resolve.walk(tree);
 }
 
 function stringifyDots(elem) {
@@ -97,7 +179,7 @@ function stringifyDots(elem) {
   return path.join(".");
 }
 
-convertToEngine.applyProp = function(item, name, val, readonly) {
+resolve.applyProp = function(item, name, val, readonly) {
   let curr = item; // output structure
   let sub = name; // input structure
   while (sub[0] === "dot") {
@@ -110,11 +192,11 @@ convertToEngine.applyProp = function(item, name, val, readonly) {
   curr[sub] = val;
 }
 
-convertToEngine.walkers = {
+resolve.walkers = {
   toplevel: (imports, statement) => {
     const item = { $class: "Component" };
     item.$imports = imports;
-    item.$children = [convertToEngine.walk(statement)];
+    item.$children = [resolve.walk(statement)];
     return item;
   },
   qmlelem: (elem, onProp, statements) => {
@@ -123,7 +205,7 @@ convertToEngine.walkers = {
     for (const i in statements) {
       const statement = statements[i];
       const name = statement[1];
-      const val = convertToEngine.walk(statement);
+      const val = resolve.walk(statement);
       var ro = 0;
       switch (statement[0]) {
         case "qmldefaultprop":
@@ -138,7 +220,7 @@ convertToEngine.walkers = {
         case "qmlaliasdef":
         case "qmlmethod":
         case "qmlsignaldef":
-          convertToEngine.applyProp(item, name, val, ro);
+          resolve.applyProp(item, name, val, ro);
           break;
         case "qmlelem":
           item.$children.push(val);
@@ -170,18 +252,18 @@ convertToEngine.walkers = {
       // id property
       return tree[1][1];
     }
-    return convertToEngine.bindout(tree, src);
+    return resolve.bindout(tree, src);
   },
   qmlobjdef: (name, property, tree, src) =>
-    convertToEngine.bindout(tree, src),
+    resolve.bindout(tree, src),
   qmlobj: (elem, statements) => {
     const item = {};
     for (const i in statements) {
       const statement = statements[i];
       const name = statement[1];
-      const val = convertToEngine.walk(statement);
+      const val = resolve.walk(statement);
       if (statement[0] === "qmlprop") {
-        convertToEngine.applyProp(item, name, val);
+        resolve.applyProp(item, name, val);
       }
     }
     return item;
@@ -191,12 +273,12 @@ convertToEngine.walkers = {
   qmlpropdef: (name, type, tree, src) =>
     new QMLPropertyDefinition(
         type,
-        tree ? convertToEngine.bindout(tree, src) : undefined
+        tree ? resolve.bindout(tree, src) : undefined
     ),
   qmlpropdefro: (name, type, tree, src) =>
     new QMLPropertyDefinition(
         type,
-        tree ? convertToEngine.bindout(tree, src) : undefined,
+        tree ? resolve.bindout(tree, src) : undefined,
         true
     ),
   qmlaliasdef: (name, objName, propName) =>
@@ -205,7 +287,7 @@ convertToEngine.walkers = {
     new QMLAliasDefinition(objName, propName, true),
   qmlsignaldef: (name, params) =>
     new QMLSignalDefinition(params),
-  qmldefaultprop: tree => convertToEngine.walk(tree),
+  qmldefaultprop: tree => resolve.walk(tree),
   name: src => {
     if (src === "true" || src === "false") {
       return src === "true";
@@ -222,7 +304,7 @@ convertToEngine.walkers = {
     let isList = false;
     let hasBinding = false;
     for (const i in tree) {
-      const val = convertToEngine.bindout(tree[i]);
+      const val = resolve.bindout(tree[i]);
       a.push(val);
 
       if (val instanceof QMLMetaElement) {
@@ -245,9 +327,9 @@ convertToEngine.walkers = {
   }
 };
 
-convertToEngine.walk = function(tree) {
+resolve.walk = function(tree) {
   const type = tree[0];
-  const walker = convertToEngine.walkers[type];
+  const walker = resolve.walkers[type];
   if (!walker) {
     console.log(`No walker for ${type}`);
     return undefined;
@@ -256,13 +338,13 @@ convertToEngine.walk = function(tree) {
 };
 
 // Try to bind out tree and return static variable instead of binding
-convertToEngine.bindout = function(statement, binding) {
+resolve.bindout = function(statement, binding) {
   // We want to process the content of the statement
   // (but still handle the case, we get the content directly)
   const tree = statement[0] === "stat" ? statement[1] : statement;
 
   const type = tree[0];
-  const walker = convertToEngine.walkers[type];
+  const walker = resolve.walkers[type];
   if (walker) {
     return walker.apply(type, tree.slice(1));
   }
@@ -270,218 +352,59 @@ convertToEngine.bindout = function(statement, binding) {
 };
 
 // Help logger
-convertToEngine.amIn = function(str, tree) {
+resolve.amIn = function(str, tree) {
   console.log(str);
   if (tree) console.log(JSON.stringify(tree, null, "  "));
 };
 
 
 // Convert parser tree to the format understood by engine (and a serializable version)
-function convertToDescriptor(tree) {
-  return convertToDescriptor.walk(tree);
+function serialize(tree) {
+  var e = resolve(tree);
+  var s = serializeObj(e);
+  return s;
 }
 
-convertToDescriptor.applyProp = function(props, name, val, readonly) {
-  let curr = props; // output structure
-  let sub = name; // input structure
-  while (sub[0] === "dot") {
-    if (!curr[sub[1]]) {
-      curr[sub[1]] = new QMLMetaPropertyGroup();
+function serializeParserFuncs() {
+    var result = "";
+    function b(init) {
+        var result = new QmlWeb.QMLBinding();
+        copy(result, init);
     }
-    curr = curr[sub[1]];
-    sub = sub[2];
-  }
-  curr[sub] = val;
+
+    function m(init) {
+        var result = new QMLMethod();
+        copy(result, init);
+    }
+
+    function p(init) {
+        var result = new QMLPropertyDefinition();
+        copy(result, init);
+    }
+
+    function a(init) {
+        var result = new QMLAliasDefinition();
+        copy(result, init);
+    }
+
+    function s(init) {
+        var result = new QMLSignalDefinition();
+        copy(result, init);
+    }
+
+    function e(init) {
+        var result = new QMLMetaElement();
+        copy(result, init);
+    }
+
+    result += b.toString();
+    result += m.toString();
+    result += p.toString();
+    result += a.toString();
+    result += s.toString();
+    result += e.toString();
+    return result;
 }
-
-convertToDescriptor.walkers = {
-    toplevel: (imports, statement) => {
-      __result.$imports = imports;
-      convertToDescriptor.walk(statement);
-      return __result;
-    },
-    qmlelem: (elem, onProp, statements) => {
-
-      const qtypename = stringifyDots(elem);
-      var props = this.__result.properties;
-      var funcs = this.__result.$functions;
-
-      for (const i in statements) {
-        const statement = statements[i];
-        const name = statement[1];
-        const val = convertToDescriptor.walk(statement);
-        var ro = 0;
-        switch (statement[0]) {
-          case "qmldefaultprop":
-            //item.$defaultProperty = name;
-            props[name] = val;
-            break;
-          case "qmlpropdefro":
-          case "qmlaliasdefro":
-            val.readonly = true;
-          case "qmlpropdef":
-          case "qmlaliasdef":
-            if (val instanceof QmlWeb.QMLBinding) {
-                props[name] = qtypename;
-
-            } else {
-                props[name] = { type:qtypename, initialValue:val }
-            }
-
-            break;
-          case "qmlprop":
-
-          case "qmlmethod":
-            funcs[name] = statement[2];
-            break;
-        case "qmlsignaldef":
-            convertToDescriptor.applyProp(props, name, val, ro);
-            props
-            break;
-          case "qmlelem":
-            item.$children.push(val);
-            break;
-          case "qmlobjdef":
-            throw new Error(
-              "qmlobjdef support was removed, update qmlweb-parser to ^0.3.0."
-            );
-          case "qmlobj":
-            // Create object to item
-            item[name] = item[name] || new QMLMetaPropertyGroup();
-            for (const j in val) {
-              item[name][j] = val[j];
-            }
-            break;
-          default:
-            console.log("Unknown statement", statement);
-        }
-      }
-      // Make $children be either a single item or an array, if it's more than one
-      if (item.$children.length === 1) {
-        item.$children = item.$children[0];
-      }
-
-      return item;
-    },
-    qmlprop: (name, tree, src) => {
-      if (name === "id") {
-        // id property
-        return tree[1][1];
-      }
-      return convertToDescriptor.bindout(tree, src);
-    },
-    qmlobjdef: (name, property, tree, src) =>
-      convertToDescriptor.bindout(tree, src),
-    qmlobj: (elem, statements) => {
-      const item = {};
-      for (const i in statements) {
-        const statement = statements[i];
-        const name = statement[1];
-        const val = convertToDescriptor.walk(statement);
-        if (statement[0] === "qmlprop") {
-          convertToDescriptor.applyProp(item, name, val);
-        }
-      }
-      return item;
-    },
-    qmlmethod: (name, tree, src) => {
-      this.__result.$functions[name] = src;
-      return null;
-    },
-    qmlpropdef: (name, type, tree, src) =>
-      new QMLPropertyDefinition(
-          type,
-          tree ? convertToDescriptor.bindout(tree, src) : undefined
-      ),
-    qmlpropdefro: (name, type, tree, src) =>
-      new QMLPropertyDefinition(
-          type,
-          tree ? convertToDescriptor.bindout(tree, src) : undefined,
-          true
-      ),
-    qmlaliasdef: (name, objName, propName) =>
-      new QMLAliasDefinition(objName, propName),
-    qmlaliasdefro: (name, objName, propName) =>
-      new QMLAliasDefinition(objName, propName, true),
-    qmlsignaldef: (name, params) => {
-        this.__result.signals[name] = params;
-        return null;
-    },
-    qmldefaultprop: tree => convertToDescriptor.walk(tree),
-    name: src => {
-      if (src === "true" || src === "false") {
-        return src === "true";
-      } else if (typeof src === "boolean") {
-        // TODO: is this needed? kept for compat with ==
-        return src;
-      }
-      return new QmlWeb.QMLBinding(src, ["name", src]);
-    },
-    num: src => +src,
-    string: src => String(src),
-    array: (tree, src) => {
-      const a = [];
-      let isList = false;
-      let hasBinding = false;
-      for (const i in tree) {
-        const val = convertToDescriptor.bindout(tree[i]);
-        a.push(val);
-
-        if (val instanceof QMLMetaElement) {
-          isList = true;
-        } else if (val instanceof QmlWeb.QMLBinding) {
-          hasBinding = true;
-        }
-      }
-
-      if (hasBinding) {
-        if (isList) {
-          throw new TypeError(
-            "An array may either contain bindings or Element definitions."
-          );
-        }
-        return new QmlWeb.QMLBinding(src, tree);
-      }
-
-      return a;
-    }
-};
-
-// Try to bind out tree and return static variable instead of binding
-convertToDescriptor.bindout = function(statement, binding) {
-  // We want to process the content of the statement
-  // (but still handle the case, we get the content directly)
-  const tree = statement[0] === "stat" ? statement[1] : statement;
-
-  const type = tree[0];
-  const walker = convertToDescriptor.walkers[type];
-  if (walker) {
-    return walker.apply(type, tree.slice(1));
-  }
-  return new QmlWeb.QMLBinding(binding, tree);
-};
-
-convertToDescriptor.walk = function(tree) {
-  const type = tree[0];
-  convertToDescriptor.walkers.__result = {
-        //module: "",
-        //name: "",
-        //versions: //,
-        //baseClass: ,
-        enums: {},
-        signals: {},
-        //defaultProperty: options.defaultProperty,
-        properties: {},
-        $functions:{}
-    };
-
-  const walker = convertToDescriptor.walkers[type];
-  if (!walker) {
-    console.log(`No walker for ${type}`);
-    return undefined;
-  }
-  return walker.apply(walker, tree.slice(1));
-};
 
 
 function loadParser() {
@@ -515,7 +438,11 @@ function parseQML(src, file) {
   loadParser();
   QmlWeb.parse.nowParsingFile = file;
   const parsetree = QmlWeb.parse(src, QmlWeb.parse.QmlDocument);
-  return convertToEngine(parsetree);
+  return resolve(parsetree);
+}
+
+function convertToEngine() {
+  parseObj
 }
 
 QmlWeb.QMLMethod = QMLMethod;
@@ -524,7 +451,8 @@ QmlWeb.QMLAliasDefinition = QMLAliasDefinition;
 QmlWeb.QMLSignalDefinition = QMLSignalDefinition;
 QmlWeb.QMLMetaPropertyGroup = QMLMetaPropertyGroup;
 QmlWeb.QMLMetaElement = QMLMetaElement;
+QmlWeb.serialize = serialize;
+QmlWeb.serializeParserFuncs = serializeParserFuncs;
 QmlWeb.convertToEngine = convertToEngine;
-QmlWeb.convertToDescriptor = convertToDescriptor;
 QmlWeb.loadParser = loadParser;
 QmlWeb.parseQML = parseQML;

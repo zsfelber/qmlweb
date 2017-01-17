@@ -5,14 +5,14 @@ class QMLBinding {
  * @param {Array} tree Parser tree of the binding
  * @return {Object} Object representing the binding
  */
-  constructor(val, tree) {
+  constructor(val, tree, isfunc) {
     // this.isFunction states whether the binding is a simple js statement or a
     // function containing a return statement. We decide this on whether it is a
     // code block or not. If it is, we require a return statement. If it is a
     // code block it could though also be a object definition, so we need to
     // check that as well (it is, if the content is labels).
-    this.isFunction = tree && tree[0] === "block" &&
-                      tree[1][0] && tree[1][0][0] !== "label";
+    this.isFunction = isfunc || (tree && tree[0] === "block" &&
+                      tree[1][0] && tree[1][0][0] !== "label");
     this.src = val;
     this.compiled = false;
   }
@@ -50,6 +50,8 @@ class QMLBinding {
       }
     `);
   }
+
+  var serializedTypeId = "b";
 }
 
 QmlWeb.QMLBinding = QMLBinding;
