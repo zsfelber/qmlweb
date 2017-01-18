@@ -415,7 +415,7 @@ class QMLEngine {
     let name = entry[1];
 
     // is it url to remote resource
-    const nameIsUrl = name.indexOf("//") === 0 || name.indexOf("://") >= 0;
+    const nameIsUrl = name.indexOf("//") === 0 || name.indexOf(":/") >= 0;
     // is it a module name, e.g. QtQuick, QtQuick.Controls, etc
     const nameIsQualifiedModuleName = entry[4];
     // is it a js file
@@ -570,9 +570,13 @@ class QMLEngine {
       if (!tree) {
         return undefined;
       }
+
       // QmlWeb.qrc contains pre-parsed Component objects, but they still need
       // convertToEngine called on them.
-      tree = QmlWeb.convertToEngine(tree);
+      if (!tree.$class) {
+         console.warn("Using legacy semi-pre-parsed qrc is deprecated : "+src);
+         tree = QmlWeb.convertToEngine(tree);
+      }
     } else {
       const src = QmlWeb.getUrlContents(file, true);
       if (!src) {
@@ -719,7 +723,7 @@ class QMLEngine {
   // Return a path to load the file
   $resolvePath(file, basePath = this.$basePath) {
     // probably, replace :// with :/ ?
-    if (!file || file.indexOf("://") !== -1 || file.indexOf("data:") === 0 ||
+    if (!file || file.indexOf(":/") !== -1 || file.indexOf("data:") === 0 ||
       file.indexOf("blob:") === 0) {
       return file;
     }

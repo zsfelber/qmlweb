@@ -118,7 +118,7 @@ function readQmlDir(url) {
   // In that case, item path is meant to be absolute, and we have no need to
   // prefix it with base url
   function makeurl(path) {
-    if (path.indexOf("://") > 0) {
+    if (path.indexOf(":/") > 0) {
       return path;
     }
     return `${url}/${path}`;
