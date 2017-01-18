@@ -4,6 +4,11 @@ QmlWeb.registerQmlType({
   module: "QtQml",
   name: "QtObject",
   versions: /.*/,
+  properties : {
+     container: "QtQuick.Item",
+     index: "int",
+     resourceIndex: "int",
+  },
 }, class extends QmlWeb.QObject {
   constructor(meta) {
     super(meta.parent);
@@ -52,6 +57,13 @@ QmlWeb.registerQmlType({
     this.Keys.volumeDownPressed = Signal.signal();
     this.Keys.volumeUpPressed = Signal.signal();
     this.Keys.yesPressed = Signal.signal();
+
+    this.containerChanged.connect(this, this.$onContainerChanged_);
+  }
+
+  $onContainerChanged_(newContainer, oldContainer, propName) {
+    if (oldContainer) oldContainer.elementRemove(this);
+    if (newContainer) newContainer.elementAdd(this);
   }
   getAttributes() {
     return this.$attributes;

@@ -377,7 +377,7 @@ class QMLEngine {
       // module.
       for (const module in QmlWeb.modules) {
         if (module !== "Main") {
-          this.qmldirsContents[module] = {};
+          this.qmldirsContents[module] = { module:module };
         }
       }
     }

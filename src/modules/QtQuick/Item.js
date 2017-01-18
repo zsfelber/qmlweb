@@ -5,7 +5,7 @@ QmlWeb.registerQmlType({
   baseClass: "QtQml.QtObject",
   properties: {
     $opacity: { type: "real", initialValue: 1 },
-    parent: "Item",
+    parent: { type: "alias", initialValue: this.container },
     state: "string",
     states: "list",
     transitions: "list",
@@ -13,7 +13,7 @@ QmlWeb.registerQmlType({
     children: "list",
     resources: "list",
     transform: "list",
-    childIndex: { type: "int" },
+    childIndex: "int",
     x: "real",
     y: "real",
     z: "real",
@@ -33,6 +33,9 @@ QmlWeb.registerQmlType({
     visible: { type: "bool", initialValue: true },
     clip: "bool",
     focus: "bool"
+  },
+  aliases: {
+
   },
   signals: {
      elementAdd: [

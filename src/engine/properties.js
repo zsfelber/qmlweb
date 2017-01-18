@@ -11,20 +11,42 @@ function createProperty(type, obj, propName, options = {}) {
   obj.$properties[propName] = prop;
   obj.$properties[propName].set(options.initialValue, QMLProperty.ReasonInit);
 
-  const getter = () => obj.$properties[propName].get();
+  let getter;
   let setter;
-  if (options.readOnly) {
-    setter = function(newVal) {
-      if (!obj.$canEditReadOnlyProperties) {
-        throw new Error(`property '${propName}' has read only access`);
+
+  if (type === "alias") {
+    // TODO verify,  code moved from outside parse, see "alias"
+    // item.$properties[propName].g/set =   ->    g/setter =
+    getter = function() {
+      const obj = this.componentScope[this.val.objectName];
+      const propertyName = this.val.propertyName;
+      return propertyName ? obj.$properties[propertyName].get() : obj;
+    };
+    setter = function(newVal, reason, _objectScope,
+                                       _componentScope) {
+      if (!this.val.propertyName) {
+        throw new Error("Cannot set alias property pointing to an QML object.");
       }
-      obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
+      const obj = this.componentScope[this.val.objectName];
+      const prop = obj.$properties[this.val.propertyName];
+      prop.set(newVal, reason, _objectScope, _componentScope);
     };
   } else {
-    setter = function(newVal) {
-      obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
-    };
+    getter = () => obj.$properties[propName].get();
+    if (options.readOnly) {
+      setter = function(newVal) {
+        if (!obj.$canEditReadOnlyProperties) {
+          throw new Error(`property '${propName}' has read only access`);
+        }
+        obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
+      };
+    } else {
+      setter = function(newVal) {
+        obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
+      };
+    }
   }
+
   QmlWeb.setupGetterSetter(obj, propName, getter, setter);
   if (obj.$isComponentRoot) {
     QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter);
@@ -139,20 +161,7 @@ function applyProperty(item, i, value, objectScope, componentScope) {
     item.$properties[i].componentScope = componentScope;
     item.$properties[i].componentScopeBasePath = componentScope.$basePath;
     item.$properties[i].val = value;
-    item.$properties[i].get = function() {
-      const obj = this.componentScope[this.val.objectName];
-      const propertyName = this.val.propertyName;
-      return propertyName ? obj.$properties[propertyName].get() : obj;
-    };
-    item.$properties[i].set = function(newVal, reason, _objectScope,
-                                       _componentScope) {
-      if (!this.val.propertyName) {
-        throw new Error("Cannot set alias property pointing to an QML object.");
-      }
-      const obj = this.componentScope[this.val.objectName];
-      const prop = obj.$properties[this.val.propertyName];
-      prop.set(newVal, reason, _objectScope, _componentScope);
-    };
+    // NOTE getter/setter moved inside createProperty
 
     if (value.propertyName) {
       const con = function(prop) {

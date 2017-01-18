@@ -67,6 +67,7 @@ function registerQmlType(options, constructor) {
 
   const descriptor = typeof options === "function" ? {
     module: options.module,
+    // TODO ok?   >     <
     name: options.element,
     versions: options.versions,
     baseClass: options.baseClass,
@@ -88,7 +89,7 @@ function registerQmlType(options, constructor) {
     registerGlobalQmlType(descriptor.name, descriptor.constructor);
   }
 
-  const moduleDescriptor = {
+  const moduleClassDescriptor = {
     name: descriptor.name,
     versions: descriptor.versions,
     constructor: descriptor.constructor
@@ -97,8 +98,7 @@ function registerQmlType(options, constructor) {
   if (typeof modules[descriptor.module] === "undefined") {
     modules[descriptor.module] = [];
   }
-  modules[descriptor.module].push(moduleDescriptor);
-
+  modules[descriptor.module].push(moduleClassDescriptor);
 
   if (typeof descriptor.baseClass !== "undefined") {
     inherit(descriptor.constructor, descriptor.baseClass);
@@ -138,7 +138,7 @@ function getModuleConstructors(moduleName, version) {
   return constructors;
 }
 
-function loadImports(self, imports) {
+function loadImports(component, imports) {
   const mergeObjects = QmlWeb.helpers.mergeObjects;
   let constructors = mergeObjects(modules.Main);
   if (imports.filter(row => row[1] === "QtQml").length === 0 &&
@@ -153,7 +153,7 @@ function loadImports(self, imports) {
                             moduleVersion.toString();
     const moduleConstructors = getModuleConstructors(moduleName, versionString);
 
-    if (moduleAlias !== "") {
+    if (moduleAlias /*!== ""  it was undefined*/) {
       constructors[moduleAlias] = mergeObjects(
         constructors[moduleAlias],
         moduleConstructors
@@ -162,8 +162,8 @@ function loadImports(self, imports) {
       constructors = mergeObjects(constructors, moduleConstructors);
     }
   }
-  self.importContextId = importContextIds++;
-  perImportContextConstructors[self.importContextId] = constructors;
+  component.importContextId = importContextIds++;
+  perImportContextConstructors[component.importContextId] = constructors;
   QmlWeb.constructors = constructors; // TODO: why do we need this?
 }
 
@@ -220,6 +220,17 @@ function callSuper(self, meta) {
 function construct(meta) {
   let item;
 
+  // Load component from file. Please look at import.js for main notes.
+  // Actually, we have to use that order:
+  // 1) try to load component from current basePath
+  // 2) from importPathList
+  // 3) from directories in imports statements and then
+  // 4) from qmldir files
+  // Currently we use order: 3, 4, 1, 2
+  // TODO: engine.qmldirs is global for all loaded components.
+  //       That's not qml's original behaviour.
+
+  // 3 (from Component.constructor -> QmlWeb.loadImports)
   let constructors = perImportContextConstructors[meta.context.importContextId];
 
   const classComponents = meta.object.$class.split(".");
@@ -237,15 +248,8 @@ function construct(meta) {
     item = new constructor(meta);
     meta.super = undefined;
   } else {
-    // Load component from file. Please look at import.js for main notes.
-    // Actually, we have to use that order:
-    // 1) try to load component from current basePath
-    // 2) from importPathList
-    // 3) from directories in imports statements and then
-    // 4) from qmldir files
-    // Currently we support only 1,2 and 4 and use order: 4,1,2
-    // TODO: engine.qmldirs is global for all loaded components.
-    //       That's not qml's original behaviour.
+
+    // 4)
     const qdirInfo = QmlWeb.engine.qmldirs[meta.object.$class];
     // Are we have info on that component in some imported qmldir files?
 
@@ -264,6 +268,8 @@ function construct(meta) {
     } else {
       filePath = `${classComponents[0]}.qml`;
     }
+
+    // 1) through engine.$resolvePath(name);
 
     const component = QmlWeb.Qt.createComponent(filePath);
 
