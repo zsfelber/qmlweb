@@ -15,8 +15,27 @@ function createProperty(type, obj, propName, options = {}) {
   let setter;
 
   if (type === "alias") {
+    // TODO
+    // 1. Alias must be able to point to prop or id of local object,
+    //    eg: property alias q: t
+    // 2. Alias may have same name as id it points to: property alias
+    //    someid: someid
+    // 3. Alias proxy (or property proxy) to proxy prop access to selected
+    //    incapsulated object. (think twice).
+
+
     // TODO verify,  code moved from outside parse, see "alias"
     // item.$properties[propName].g/set =   ->    g/setter =
+
+    var objectScope = obj.$properties[propName].objectScope,
+        componentScope = obj.$properties[propName].componentScope;
+    if (!componentScope) {
+      objectScope = obj;
+      componentScope = obj.$context;
+      obj.$properties[propName].componentScope = componentScope;
+      obj.$properties[propName].componentScopeBasePath = componentScope.$basePath;
+    }
+
     getter = function() {
       const obj = this.componentScope[options.objectName];
       const propertyName = options.propertyName;
@@ -25,18 +44,13 @@ function createProperty(type, obj, propName, options = {}) {
     setter = function(newVal, reason, _objectScope,
                                        _componentScope) {
       if (!options.propertyName) {
-        throw new Error("Cannot set alias property pointing to an QML object.");
+        throw new Error("Cannot set alias property pointing to a QML object.");
       }
       const obj = this.componentScope[options.objectName];
       const prop = obj.$properties[options.propertyName];
       prop.set(newVal, reason, _objectScope, _componentScope);
     };
     if (options.propertyName) {
-      if (!obj.$properties[propName].componentScope) {
-        var objectScope = obj, componentScope = obj.$context;
-        obj.$properties[propName].componentScope = componentScope;
-        obj.$properties[propName].componentScopeBasePath = componentScope.$basePath;
-      }
 
       const con = function(prop) {
         const obj = prop.componentScope[options.objectName];
@@ -51,26 +65,28 @@ function createProperty(type, obj, propName, options = {}) {
               options.propertyName, " not found for alias ", prop.name
             );
           } else {
-            // targetProp.changed.connect( prop.changed );
-            // it is not sufficient to connect to `changed` of source property
-            // we have to propagate own changed to it too
-            // seems the best way to do this is to make them identical?..
-            // prop.changed = targetProp.changed;
-            // obj[`${i}Changed`] = prop.changed;
-            // no. because those object might be destroyed later.
-            let loopWatchdog = false;
-            targetProp.changed.connect(obj, (...args) => {
-              if (loopWatchdog) return;
-              loopWatchdog = true;
-              prop.changed.apply(obj, args);
-              loopWatchdog = false;
-            });
-            prop.changed.connect(obj, (...args) => {
-              if (loopWatchdog) return;
-              loopWatchdog = true;
-              targetProp.changed.apply(obj, args);
-              loopWatchdog = false;
-            });
+            // TODO remove when needed:
+            prop.changed = targetProp.changed;
+//            // targetProp.changed.connect( prop.changed );
+//            // it is not sufficient to connect to `changed` of source property
+//            // we have to propagate own changed to it too
+//            // seems the best way to do this is to make them identical?..
+//            // prop.changed = targetProp.changed;
+//            // obj[`${i}Changed`] = prop.changed;
+//            // no. because that object might be destroyed later.
+//            let loopWatchdog = false;
+//            targetProp.changed.connect(obj, (...args) => {
+//              if (loopWatchdog) return;
+//              loopWatchdog = true;
+//              prop.changed.apply(obj, args);
+//              loopWatchdog = false;
+//            });
+//            prop.changed.connect(obj, (...args) => {
+//              if (loopWatchdog) return;
+//              loopWatchdog = true;
+//              targetProp.changed.apply(obj, args);
+//              loopWatchdog = false;
+//            });
           }
         }
       };
@@ -195,14 +211,8 @@ function applyProperty(item, i, value, objectScope, componentScope) {
   }
 
   if (value instanceof QmlWeb.QMLAliasDefinition) {
-    // TODO
-    // 1. Alias must be able to point to prop or id of local object,
-    //    eg: property alias q: t
-    // 2. Alias may have same name as id it points to: property alias
-    //    someid: someid
-    // 3. Alias proxy (or property proxy) to proxy prop access to selected
-    //    incapsulated object. (think twice).
     createProperty("alias", item, i, {propertyName:value.propertyName, objectName:value.objectName});
+    item.$properties[i].objectScope = objectScope;
     item.$properties[i].componentScope = componentScope;
     item.$properties[i].componentScopeBasePath = componentScope.$basePath;
     item.$properties[i].val = value;
