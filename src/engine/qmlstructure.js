@@ -127,12 +127,13 @@ function ssplice(str, startIndex, length, insertString){
 
 function serializeObj(object, path, backrefs, dups, pos) {
     var top = !path;
-    var pos0 = pos;
     if (top) {
       path = [];
       backrefs = {};
       dups = {};
+      pos = 0;
     }
+    var pos0 = pos;
 
     if (!object) {
       return undefined;
@@ -145,7 +146,7 @@ function serializeObj(object, path, backrefs, dups, pos) {
       dups[id] = ref;
       return "__"+id;
     } else {
-      backrefs[id] = ref = {path:slice(path), pos:pos, length:0};
+      backrefs[id] = ref = {pos:pos, length:0};
     }
 
     var result;
@@ -184,7 +185,7 @@ function serializeObj(object, path, backrefs, dups, pos) {
                 if ("$children"===propname && prop instanceof Array && !prop.length) continue;
 
                 path.push(propname);
-                var lab = '"'+propname+'" : ';
+                var lab = JSON.stringify(propname)+" : ";
                 pos += lab.length;
                 var value = serializeObj(prop, path, backrefs, dups, pos);
                 if (value) {
