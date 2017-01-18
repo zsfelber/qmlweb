@@ -5,7 +5,7 @@ QmlWeb.registerQmlType({
   baseClass: "QtQml.QtObject",
   properties: {
     $opacity: { type: "real", initialValue: 1 },
-    parent: { type: "alias", initialValue: this.container },
+    parent: { type: "alias", objectName: "container" },
     state: "string",
     states: "list",
     transitions: "list",

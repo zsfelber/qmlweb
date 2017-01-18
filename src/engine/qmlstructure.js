@@ -51,7 +51,7 @@ class QMLAliasDefinition {
     this.objectName = objName;
     this.propertyName = propName;
     this.readonly = readonly;
-        this.serializedTypeId = "a";
+    this.serializedTypeId = "a";
   }
 }
 

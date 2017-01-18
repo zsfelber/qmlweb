@@ -18,19 +18,64 @@ function createProperty(type, obj, propName, options = {}) {
     // TODO verify,  code moved from outside parse, see "alias"
     // item.$properties[propName].g/set =   ->    g/setter =
     getter = function() {
-      const obj = this.componentScope[this.val.objectName];
-      const propertyName = this.val.propertyName;
+      const obj = this.componentScope[options.objectName];
+      const propertyName = options.propertyName;
       return propertyName ? obj.$properties[propertyName].get() : obj;
     };
     setter = function(newVal, reason, _objectScope,
                                        _componentScope) {
-      if (!this.val.propertyName) {
+      if (!options.propertyName) {
         throw new Error("Cannot set alias property pointing to an QML object.");
       }
-      const obj = this.componentScope[this.val.objectName];
-      const prop = obj.$properties[this.val.propertyName];
+      const obj = this.componentScope[options.objectName];
+      const prop = obj.$properties[options.propertyName];
       prop.set(newVal, reason, _objectScope, _componentScope);
     };
+    if (options.propertyName) {
+      if (!obj.$properties[propName].componentScope) {
+        var objectScope = obj, componentScope = obj.$context;
+        obj.$properties[propName].componentScope = componentScope;
+        obj.$properties[propName].componentScopeBasePath = componentScope.$basePath;
+      }
+
+      const con = function(prop) {
+        const obj = prop.componentScope[options.objectName];
+        if (!obj) {
+          console.error("qtcore: target object ", options.objectName,
+                        " not found for alias ", prop);
+        } else {
+          const targetProp = obj.$properties[options.propertyName];
+          if (!targetProp) {
+            console.error(
+              "qtcore: target property [", options.objectName, "].",
+              options.propertyName, " not found for alias ", prop.name
+            );
+          } else {
+            // targetProp.changed.connect( prop.changed );
+            // it is not sufficient to connect to `changed` of source property
+            // we have to propagate own changed to it too
+            // seems the best way to do this is to make them identical?..
+            // prop.changed = targetProp.changed;
+            // obj[`${i}Changed`] = prop.changed;
+            // no. because those object might be destroyed later.
+            let loopWatchdog = false;
+            targetProp.changed.connect(obj, (...args) => {
+              if (loopWatchdog) return;
+              loopWatchdog = true;
+              prop.changed.apply(obj, args);
+              loopWatchdog = false;
+            });
+            prop.changed.connect(obj, (...args) => {
+              if (loopWatchdog) return;
+              loopWatchdog = true;
+              targetProp.changed.apply(obj, args);
+              loopWatchdog = false;
+            });
+          }
+        }
+      };
+      QmlWeb.engine.pendingOperations.push([con, obj.$properties[propName]]);
+    }
   } else {
     getter = () => obj.$properties[propName].get();
     if (options.readOnly) {
@@ -157,51 +202,12 @@ function applyProperty(item, i, value, objectScope, componentScope) {
     //    someid: someid
     // 3. Alias proxy (or property proxy) to proxy prop access to selected
     //    incapsulated object. (think twice).
-    createProperty("alias", item, i);
+    createProperty("alias", item, i, {propertyName:value.propertyName, objectName:value.objectName});
     item.$properties[i].componentScope = componentScope;
     item.$properties[i].componentScopeBasePath = componentScope.$basePath;
     item.$properties[i].val = value;
-    // NOTE getter/setter moved inside createProperty
+    // NOTE getter/setter/target moved to inside createProperty
 
-    if (value.propertyName) {
-      const con = function(prop) {
-        const obj = prop.componentScope[prop.val.objectName];
-        if (!obj) {
-          console.error("qtcore: target object ", prop.val.objectName,
-                        " not found for alias ", prop);
-        } else {
-          const targetProp = obj.$properties[prop.val.propertyName];
-          if (!targetProp) {
-            console.error(
-              "qtcore: target property [", prop.val.objectName, "].",
-              prop.val.propertyName, " not found for alias ", prop.name
-            );
-          } else {
-            // targetProp.changed.connect( prop.changed );
-            // it is not sufficient to connect to `changed` of source property
-            // we have to propagate own changed to it too
-            // seems the best way to do this is to make them identical?..
-            // prop.changed = targetProp.changed;
-            // obj[`${i}Changed`] = prop.changed;
-            // no. because those object might be destroyed later.
-            let loopWatchdog = false;
-            targetProp.changed.connect(item, (...args) => {
-              if (loopWatchdog) return;
-              loopWatchdog = true;
-              prop.changed.apply(item, args);
-              loopWatchdog = false;
-            });
-            prop.changed.connect(obj, (...args) => {
-              if (loopWatchdog) return;
-              loopWatchdog = true;
-              targetProp.changed.apply(obj, args);
-              loopWatchdog = false;
-            });
-          }
-        }
-      };
-      QmlWeb.engine.pendingOperations.push([con, item.$properties[i]]);
-    }
     return true;
   }
 
