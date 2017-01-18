@@ -13,6 +13,7 @@ QmlWeb.registerQmlType({
     children: "list",
     resources: "list",
     transform: "list",
+    childIndex: { type: "int" },
     x: "real",
     y: "real",
     z: "real",
@@ -131,14 +132,42 @@ QmlWeb.registerQmlType({
     this.css.left = `${this.x}px`;
     this.css.top = `${this.y}px`;
   }
+  $onElementAdd(element) {
+    const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
+    element.index = this.data.length;
+    this.data.push(element);
+    if (element instanceof QMLItem) {
+      element.childIndex = this.children.length;
+      this.children.push(element);
+    } else {
+      element.resourceIndex = this.resources.length;
+      this.resources.push(element);
+    }
+  }
+  $onElementRemove(element) {
+   const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
+   for (var i = element.index+1; i < this.data.length; ++i) {
+     this.data[i].index--;
+   }
+   this.data.splice(element.index, 1);
+   if (element instanceof QMLItem) {
+     for (var i = element.childIndex+1; i < this.children.length; ++i) {
+       this.children[i].childIndex--;
+     }
+     this.children.splice(element.childIndex, 1);
+   } else {
+     for (var i = element.resourceIndex+1; i < this.resources.length; ++i) {
+       this.resources[i].resourceIndex--;
+     }
+     this.resources.splice(element.resourceIndex, 1);
+   }
+  }
   $onParentChanged_(newParent, oldParent, propName) {
     if (oldParent) {
-      oldParent.children.splice(oldParent.children.indexOf(this), 1);
       oldParent.childrenChanged();
       oldParent.dom.removeChild(this.dom);
     }
     if (newParent && newParent.children.indexOf(this) === -1) {
-      newParent.children.push(this);
       newParent.childrenChanged();
     }
     if (newParent) {

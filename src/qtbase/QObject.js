@@ -9,7 +9,11 @@ class QObject {
 
     // List of things to tidy up when deleting this object.
     this.$tidyupList = [];
-    this.$properties = {};
+    this.$properties = {
+      container: "Item",
+      index: { type: "int" },
+      resourceIndex: { type: "int" },
+    };
     this.$signals = [];
 
     this.objectId = objectIds++;
