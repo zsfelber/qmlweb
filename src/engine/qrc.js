@@ -11,8 +11,8 @@ within the resource system to the following pieces of data:
    the DOM. This is mainly a convenience until support for images is added to
    gulp-qmlweb.
 
-The "data-qml" tag on <body> can be set to a "qrc://" URL like
-"qrc:///root.qml" to use a pre-parsed "/root.qml" from QmlWeb.qrc.
+The "data-qml" tag on <body> can be set to a "qrc:/" URL like
+"qrc://root.qml" to use a pre-parsed "/root.qml" from QmlWeb.qrc.
 
 Since relative URLs are resolved relative to the URL of the containing
 component, any relative URL set within a file in the resource system will also
@@ -22,7 +22,7 @@ system, a full URL must be used (e.g. "http://www.example.com/images/foo.png").
 
 Vice-versa, in order to access a Component, JavaScript or image file that is
 stored within the resource system from outside of the resource system, a full
-"qrc://" URL must be used (e.g. "qrc:///images/foo.png").
+"qrc:/" URL must be used (e.g. "qrc://images/foo.png").
 
 More details here: http://doc.qt.io/qt-5/qml-url.html
 

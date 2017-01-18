@@ -233,7 +233,7 @@ class QMLEngine {
   }
 
   loadQRC(url, parentComponent = null, file = undefined) {
-    const uri = this.$parseURInormal(url);
+    const uri = this.$parseURI(url);
     tree = QmlWeb.qrc[uri.path];
     if (!tree) {
       throw new Error("Not found : "+url);
@@ -565,7 +565,7 @@ class QMLEngine {
     }
 
     let tree;
-    if (uri.scheme === "qrc://") {
+    if (uri.scheme === "qrc:/") {
       tree = QmlWeb.qrc[uri.path];
       if (!tree) {
         return undefined;
@@ -611,7 +611,7 @@ class QMLEngine {
     }
 
     let jsData;
-    if (uri.scheme === "qrc://") {
+    if (uri.scheme === "qrc:/") {
       jsData = QmlWeb.qrc[uri.path];
     } else {
       QmlWeb.loadParser();
@@ -690,9 +690,22 @@ class QMLEngine {
     this.$initializeAliasSignals();
   }
 
-  // This parses the full URL into scheme, authority and path
+  // This parses the full URL into scheme and path
   $parseURI(uri) {
-    const match = uri.match(/^([^/]*?:\/\/)(.*?)(\/.*)$/);
+    const match = uri.match(/^([^/]*?:\/)(.*?)$/);
+    if (match) {
+      return {
+        scheme: match[1],
+        path: match[2],
+        authority: "",
+      };
+    }
+    return undefined;
+  }
+
+  // This parses the full URL into scheme, authority and path
+  $parseURIwAuth(uri) {
+    const match = uri.match(/^([^/]*?:\/)(.*?)(\/.*)$/);
     if (match) {
       return {
         scheme: match[1],
@@ -702,17 +715,6 @@ class QMLEngine {
     }
     return undefined;
   }
-
-    $parseURInormal(uri) {
-      const match = uri.match(/^([^/]*?:\/\/)(.*?)$/);
-      if (match) {
-        return {
-          scheme: match[1],
-          path: match[2]
-        };
-      }
-      return undefined;
-    }
 
   // Return a path to load the file
   $resolvePath(file, basePath = this.$basePath) {
@@ -746,8 +748,8 @@ class QMLEngine {
     const uri = this.$parseURI(fileURL);
     // If we are within the resource system, look up a "real" path that can be
     // used by the DOM. If not found, return the path itself without the
-    // "qrc://" scheme.
-    if (uri && uri.scheme === "qrc://") {
+    // "qrc:/" scheme.
+    if (uri && uri.scheme === "qrc:/") {
       return QmlWeb.qrc[uri.path] || uri.path;
     }
 

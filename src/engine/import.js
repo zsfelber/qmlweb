@@ -95,9 +95,13 @@ function readQmlDir(url) {
   const qmldirFileUrl = url.length > 0 ? `${url}/qmldir` : "qmldir";
 
   const parsedUrl = QmlWeb.engine.$parseURI(qmldirFileUrl);
+  if (!parsedUrl) {
+    console.warn("Unable to parse directory url : "+qmldirFileUrl);
+    return false;
+  }
 
   let qmldir;
-  if (parsedUrl.scheme === "qrc://") {
+  if (parsedUrl.scheme === "qrc:/") {
     qmldir = QmlWeb.qrc[parsedUrl.path];
   } else {
     qmldir = getUrlContents(qmldirFileUrl, true) || undefined;
