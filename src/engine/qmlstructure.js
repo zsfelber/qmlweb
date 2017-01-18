@@ -119,24 +119,53 @@ function copy() {
     return result;
 }
 
-function serializeObj(object, path) {
-    var top = !path;
-    if (top) path = [];
+var s_objectIds = 0;
 
+function ssplice(str, startIndex, length, insertString){
+    return str.substring(0,startIndex) + insertString + str.substring(startIndex + length);
+}
+
+function serializeObj(object, path, backrefs, dups, pos) {
+    var top = !path;
+    var pos0 = pos;
+    if (top) {
+      path = [];
+      backrefs = {};
+      dups = {};
+    }
+
+    if (!object) {
+      return undefined;
+    }
+
+    var id = object.s_objectId;
+    if (!id) object.s_objectId = id = ++s_objectIds;
+    var ref = backrefs[id];
+    if (ref) {
+      dups[id] = ref;
+      return "__"+id;
+    } else {
+      backrefs[id] = ref = {path:slice(path), pos:pos, length:0};
+    }
+
+    var result;
     if (object instanceof Object) {
-        var result = "";
+        result = "";
 
         if (object instanceof Array) {
             result += "[";
             var l0 = result.length;
 
             var i = 0;
-            object.forEach(function(propval) {
+            for (var propname in object) {
+                if (propname === "serializedTypeId" || propname === "s_objectId") continue;
+                var prop = object[propname];
                 path.push([i]);
-                result += serializeObj(propval)+", ";
+                result += serializeObj(prop, path, backrefs, dups, pos)+", ";
+                pos = pos0 + result.length;
                 path.pop();
                 ++i;
-            });
+            }
             if (result.length>l0) {
                 result = result.substring(0, result.length-2);
             }
@@ -150,15 +179,18 @@ function serializeObj(object, path) {
             var l0 = result.length;
 
             for (var propname in object) {
-                if (propname === "serializedTypeId") continue;
+                if (propname === "serializedTypeId" || propname === "s_objectId") continue;
                 var prop = object[propname];
                 if ("$children"===propname && prop instanceof Array && !prop.length) continue;
 
                 path.push(propname);
-                var value = serializeObj(prop, path);
+                var lab = '"'+propname+'" : ';
+                pos += lab.length;
+                var value = serializeObj(prop, path, backrefs, dups, pos);
                 if (value) {
-                    result += '"'+propname+'" : '+value + ", ";
+                    result += lab + value + ", ";
                 }
+                pos = pos0 + result.length;
                 path.pop();
             }
             if (result.length>l0) {
@@ -171,16 +203,28 @@ function serializeObj(object, path) {
                 result += "}";
             }
         }
-        return result;
 
     } else if (typeof object === "string") {
-        return JSON.stringify(object);
-    } else if (object && object.toString){
-        return object.toString();
+        result = JSON.stringify(object);
+    } else if (object.toString){
+        result = object.toString();
     } else {
-        return undefined;
+        result = "/*json:*/"+JSON.stringify(object);
     }
 
+    ref.length = result.length;
+    if (top) {
+      var pref = "";
+      for (var objid in dups) {
+        var dup = dups[objid];
+        var def = result.substring(dup.pos, dup.pos+dup.length);
+        result = ssplice(result, dup.pos, dup.length, "__"+objid);
+        pref += "var __"+objid+" = "+def+";\n";
+      }
+      result = {body:result, decl:pref};
+    }
+
+    return result;
 }
 
 

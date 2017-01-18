@@ -151,7 +151,7 @@ class QMLProperty {
           QMLProperty.popEvaluatingProperty();
         }
       } else {
-        QmlWeb.engine.bindedProperties.push(this);
+        QmlWeb.engine.boundProperties.push(this);
         return;
       }
     } else {

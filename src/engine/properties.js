@@ -55,7 +55,7 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
     }
   }
   // We purposefully set the default property AFTER using it, in order to only
-  // have it applied for instanciations of this component, but not for its
+  // have it applied for instantiations of this component, but not for its
   // internal children
   if (metaObject.$defaultProperty) {
     item.$defaultProperty = metaObject.$defaultProperty;

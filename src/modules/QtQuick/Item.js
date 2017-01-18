@@ -192,8 +192,6 @@ QmlWeb.registerQmlType({
       const child = newData[i];
       if (child instanceof QMLItem) {
         child.parent = this; // This will also add it to children.
-      } else {
-        this.resources.push(child);
       }
     }
   }

@@ -37,7 +37,7 @@ class QMLEngine {
     this.operationState = 1;
 
     // List of properties whose values are bindings. For internal use only.
-    this.bindedProperties = [];
+    this.boundProperties = [];
 
     // List of operations to perform later after init. For internal use only.
     this.pendingOperations = [];
@@ -664,8 +664,8 @@ class QMLEngine {
     // Initialize property bindings
     // we use `while`, because $initializePropertyBindings may be called
     // recursive (because of Loader and/or createQmlObject )
-    while (this.bindedProperties.length > 0) {
-      const property = this.bindedProperties.shift();
+    while (this.boundProperties.length > 0) {
+      const property = this.boundProperties.shift();
 
       if (!property.binding) {
         // Probably, the binding was overwritten by an explicit value. Ignore.
