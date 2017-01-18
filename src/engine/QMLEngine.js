@@ -232,22 +232,6 @@ class QMLEngine {
     return this.loadQMLTree(QmlWeb.parseQML(src, file), parentComponent, file);
   }
 
-  loadQRC(url, parentComponent = null, file = undefined) {
-    const uri = this.$parseURI(url);
-    tree = QmlWeb.qrc[uri.path];
-    if (!tree) {
-      throw new Error("Not found : "+url);
-    }
-    // QmlWeb.qrc contains pre-parsed Component objects, but they still need
-    // convertToEngine called on them.
-    if (!tree.$class) {
-       console.warn("Using legacy semi-pre-parsed qrc is deprecated : "+src);
-       tree = QmlWeb.convertToEngine(tree);
-    }
-
-    return this.loadQMLTree(tree, parentComponent, file);
-  }
-
   loadQMLTree(tree, parentComponent = null, file = undefined) {
     QmlWeb.engine = this;
 
@@ -483,7 +467,7 @@ class QMLEngine {
       return;
     }
 
-    // copy founded externals to global var
+    // copy found externals to global var
     // TODO actually we have to copy it to current component
     for (const attrname in content.externals) {
       this.qmldirs[attrname] = content.externals[attrname];
