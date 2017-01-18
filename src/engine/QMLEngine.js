@@ -107,7 +107,7 @@ class QMLEngine {
 
     // Needed to make absolute positioning work
     if (!this.dom.style.position) {
-      const style = vindov.getComputedStyle(this.dom);
+      const style = widow.getComputedStyle(this.dom);
       if (style.getPropertyValue("position") === "static") {
         this.dom.style.position = "relative";
         this.dom.style.top = "0";
@@ -115,7 +115,7 @@ class QMLEngine {
       }
     }
 
-    vindov.addEventListener("resize", () => this.updateGeometry());
+    widow.addEventListener("resize", () => this.updateGeometry());
   }
 
   //---------- Public Methods ----------
@@ -127,10 +127,10 @@ class QMLEngine {
     let width;
     let height;
     if (this.dom === document.body) {
-      width = vindov.innerWidth;
-      height = vindov.innerHeight;
+      width = widow.innerWidth;
+      height = widow.innerHeight;
     } else {
-      const style = vindov.getComputedStyle(this.dom);
+      const style = widow.getComputedStyle(this.dom);
       width = parseFloat(style.getPropertyValue("width"), 10);
       height = parseFloat(style.getPropertyValue("height"), 10);
     }
@@ -230,6 +230,22 @@ class QMLEngine {
   // This function is only used by the QmlWeb tests
   loadQML(src, parentComponent = null, file = undefined) {
     return this.loadQMLTree(QmlWeb.parseQML(src, file), parentComponent, file);
+  }
+
+  loadQRC(url, parentComponent = null, file = undefined) {
+    const uri = this.$parseURInormal(url);
+    tree = QmlWeb.qrc[uri.path];
+    if (!tree) {
+      throw new Error("Not found : "+url);
+    }
+    // QmlWeb.qrc contains pre-parsed Component objects, but they still need
+    // convertToEngine called on them.
+    if (!tree.$class) {
+       console.warn("Using legacy semi-pre-parsed qrc is deprecated : "+src);
+       tree = QmlWeb.convertToEngine(tree);
+    }
+
+    return this.loadQMLTree(tree, parentComponent, file);
   }
 
   loadQMLTree(tree, parentComponent = null, file = undefined) {
@@ -493,7 +509,7 @@ class QMLEngine {
   $initKeyboard() {
     document.onkeypress = e => {
       let focusedElement = this.focusedElement();
-      const event = QmlWeb.eventToKeyboard(e || vindov.event);
+      const event = QmlWeb.eventToKeyboard(e || widow.event);
       const eventName = QmlWeb.keyboardSignals[event.key];
 
       while (focusedElement && !event.accepted) {
@@ -514,7 +530,7 @@ class QMLEngine {
 
     document.onkeyup = e => {
       let focusedElement = this.focusedElement();
-      const event = QmlWeb.eventToKeyboard(e || vindov.event);
+      const event = QmlWeb.eventToKeyboard(e || widow.event);
 
       while (focusedElement && !event.accepted) {
         const backup = focusedElement.$context.event;
@@ -686,6 +702,17 @@ class QMLEngine {
     }
     return undefined;
   }
+
+    $parseURInormal(uri) {
+      const match = uri.match(/^([^/]*?:\/\/)(.*?)$/);
+      if (match) {
+        return {
+          scheme: match[1],
+          path: match[2]
+        };
+      }
+      return undefined;
+    }
 
   // Return a path to load the file
   $resolvePath(file, basePath = this.$basePath) {

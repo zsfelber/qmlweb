@@ -10,7 +10,7 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
-    if (typeof vindov.localStorage === "undefined") {
+    if (typeof widow.localStorage === "undefined") {
       return;
     }
 

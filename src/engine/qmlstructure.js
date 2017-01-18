@@ -93,10 +93,15 @@ class QMLMetaElement {
   }
 }
 
+function slice(a, start) {
+    return Array.prototype.slice.call(a, start || 0);
+}
+
 function copy() {
-    var result = arguments[0];
-    arguments.shift();
-    arguments.forEach(function(arg){
+    var args = slice(arguments);
+    var result = args[0];
+    args.shift();
+    args.forEach(function(arg){
         if (arg) {
             for (var prop in arg) {
                 result[prop] = arg[prop];
@@ -181,8 +186,8 @@ function serializeObj(object, path) {
 
 
 // Convert parser tree to the format understood by engine
-function resolve(tree) {
-  return resolve.walk(tree);
+function convertToEngine(parsetree) {
+  return convertToEngine.walk(parsetree);
 }
 
 function stringifyDots(elem) {
@@ -196,7 +201,7 @@ function stringifyDots(elem) {
   return path.join(".");
 }
 
-resolve.applyProp = function(item, name, val, readonly) {
+convertToEngine.applyProp = function(item, name, val, readonly) {
   let curr = item; // output structure
   let sub = name; // input structure
   while (sub[0] === "dot") {
@@ -209,11 +214,11 @@ resolve.applyProp = function(item, name, val, readonly) {
   curr[sub] = val;
 }
 
-resolve.walkers = {
+convertToEngine.walkers = {
   toplevel: (imports, statement) => {
     const item = { $class: "Component" };
     item.$imports = imports;
-    item.$children = [resolve.walk(statement)];
+    item.$children = [convertToEngine.walk(statement)];
     return item;
   },
   qmlelem: (elem, onProp, statements) => {
@@ -224,7 +229,7 @@ resolve.walkers = {
       if (!statement) continue;
 
       const name = statement[1];
-      const val = resolve.walk(statement);
+      const val = convertToEngine.walk(statement);
       var ro = 0;
       switch (statement[0]) {
         case "qmldefaultprop":
@@ -239,7 +244,7 @@ resolve.walkers = {
         case "qmlaliasdef":
         case "qmlmethod":
         case "qmlsignaldef":
-          resolve.applyProp(item, name, val, ro);
+          convertToEngine.applyProp(item, name, val, ro);
           break;
         case "qmlelem":
           item.$children.push(val);
@@ -271,18 +276,18 @@ resolve.walkers = {
       // id property
       return tree[1][1];
     }
-    return resolve.bindout(tree, src);
+    return convertToEngine.bindout(tree, src);
   },
   qmlobjdef: (name, property, tree, src) =>
-    resolve.bindout(tree, src),
+    convertToEngine.bindout(tree, src),
   qmlobj: (elem, statements) => {
     const item = {};
     for (const i in statements) {
       const statement = statements[i];
       const name = statement[1];
-      const val = resolve.walk(statement);
+      const val = convertToEngine.walk(statement);
       if (statement[0] === "qmlprop") {
-        resolve.applyProp(item, name, val);
+        convertToEngine.applyProp(item, name, val);
       }
     }
     return item;
@@ -292,12 +297,12 @@ resolve.walkers = {
   qmlpropdef: (name, type, tree, src) =>
     new QMLPropertyDefinition(
         type,
-        tree ? resolve.bindout(tree, src) : undefined
+        tree ? convertToEngine.bindout(tree, src) : undefined
     ),
   qmlpropdefro: (name, type, tree, src) =>
     new QMLPropertyDefinition(
         type,
-        tree ? resolve.bindout(tree, src) : undefined,
+        tree ? convertToEngine.bindout(tree, src) : undefined,
         true
     ),
   qmlaliasdef: (name, objName, propName) =>
@@ -306,7 +311,7 @@ resolve.walkers = {
     new QMLAliasDefinition(objName, propName, true),
   qmlsignaldef: (name, params) =>
     new QMLSignalDefinition(params),
-  qmldefaultprop: tree => resolve.walk(tree),
+  qmldefaultprop: tree => convertToEngine.walk(tree),
   name: src => {
     if (src === "true" || src === "false") {
       return src === "true";
@@ -323,7 +328,7 @@ resolve.walkers = {
     let isList = false;
     let hasBinding = false;
     for (const i in tree) {
-      const val = resolve.bindout(tree[i]);
+      const val = convertToEngine.bindout(tree[i]);
       a.push(val);
 
       if (val instanceof QMLMetaElement) {
@@ -346,9 +351,9 @@ resolve.walkers = {
   }
 };
 
-resolve.walk = function(tree) {
+convertToEngine.walk = function(tree) {
   const type = tree[0];
-  const walker = resolve.walkers[type];
+  const walker = convertToEngine.walkers[type];
   if (!walker) {
     console.log(`No walker for ${type}`);
     return undefined;
@@ -357,13 +362,13 @@ resolve.walk = function(tree) {
 };
 
 // Try to bind out tree and return static variable instead of binding
-resolve.bindout = function(statement, binding) {
+convertToEngine.bindout = function(statement, binding) {
   // We want to process the content of the statement
   // (but still handle the case, we get the content directly)
   const tree = statement[0] === "stat" ? statement[1] : statement;
 
   const type = tree[0];
-  const walker = resolve.walkers[type];
+  const walker = convertToEngine.walkers[type];
   if (walker) {
     return walker.apply(type, tree.slice(1));
   }
@@ -371,7 +376,7 @@ resolve.bindout = function(statement, binding) {
 };
 
 // Help logger
-resolve.amIn = function(str, tree) {
+convertToEngine.amIn = function(str, tree) {
   console.log(str);
   if (tree) console.log(JSON.stringify(tree, null, "  "));
 };
@@ -379,7 +384,7 @@ resolve.amIn = function(str, tree) {
 
 // Convert parser tree to the format understood by engine (and a serializable version)
 function serialize(tree) {
-  var e = resolve(tree);
+  var e = convertToEngine(tree);
   var s = serializeObj(e);
   return s;
 }
@@ -393,31 +398,37 @@ function serializeParserFuncs() {
     }
 
     function m(init) {
-        var result = new QMLMethod();
+        var result = new QmlWeb.QMLMethod();
         QmlWeb.copy(result, init);
         return result;
     }
 
     function p(init) {
-        var result = new QMLPropertyDefinition();
+        var result = new QmlWeb.QMLPropertyDefinition();
         QmlWeb.copy(result, init);
         return result;
     }
 
     function a(init) {
-        var result = new QMLAliasDefinition();
+        var result = new QmlWeb.QMLAliasDefinition();
         QmlWeb.copy(result, init);
         return result;
     }
 
     function s(init) {
-        var result = new QMLSignalDefinition();
+        var result = new QmlWeb.QMLSignalDefinition();
+        QmlWeb.copy(result, init);
+        return result;
+    }
+
+    function g(init) {
+        var result = new QmlWeb.QMLMetaPropertyGroup();
         QmlWeb.copy(result, init);
         return result;
     }
 
     function e(init) {
-        var result = new QMLMetaElement();
+        var result = new QmlWeb.QMLMetaElement();
         QmlWeb.copy(result, init);
         return result;
     }
@@ -427,6 +438,7 @@ function serializeParserFuncs() {
     result += p.toString();
     result += a.toString();
     result += s.toString();
+    result += g.toString();
     result += e.toString();
     return result;
 }
@@ -463,11 +475,7 @@ function parseQML(src, file) {
   loadParser();
   QmlWeb.parse.nowParsingFile = file;
   const parsetree = QmlWeb.parse(src, QmlWeb.parse.QmlDocument);
-  return resolve(parsetree);
-}
-
-function convertToEngine() {
-  parseObj
+  return convertToEngine(parsetree);
 }
 
 QmlWeb.QMLMethod = QMLMethod;

@@ -1,17 +1,10 @@
-var vindov, mojule;
+var widow;
 if (typeof window === 'undefined') {
   console.log("window object doesn't exist : server context")
-  vindov = { addEventListener:function(){} };
+  widow = { addEventListener:function(){} };
 } else {
   console.log("window object exists : client context")
-  vindov = window;
-}
-if (typeof module === 'undefined') {
-  console.log("module object doesn't exist : not an npm/gulp context")
-  mojule = {};
-} else {
-  console.log("module object exists : npm/gulp context")
-  mojule = module;
+  widow = window;
 }
 
 
@@ -19,4 +12,9 @@ const QmlWeb = {};
 
 global.QmlWeb = QmlWeb;
 
-mojule.exports = QmlWeb;
+if (typeof module === 'undefined') {
+  console.log("module object doesn't exist : not an npm/gulp context")
+} else {
+  console.log("module object exists : npm/gulp context")
+  module.exports = QmlWeb;
+}
