@@ -34,6 +34,14 @@ QmlWeb.registerQmlType({
     clip: "bool",
     focus: "bool"
   },
+  signals: {
+     elementAdd: [
+       { type: "QObject", name: "element" }
+     ],
+     elementRemove: [
+       { type: "QObject", name: "element" }
+     ]
+  },
   defaultProperty: "data"
 }, class {
   constructor(meta) {
@@ -59,6 +67,8 @@ QmlWeb.registerQmlType({
       createProperty("var", this, "activeFocus");
     }
 
+    this.elementAdd.connect(this, this.$onElementAdd);
+    this.elementRemove.connect(this, this.$onElementRemove);
     this.parentChanged.connect(this, this.$onParentChanged_);
     this.dataChanged.connect(this, this.$onDataChanged);
     this.stateChanged.connect(this, this.$onStateChanged);

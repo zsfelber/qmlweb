@@ -10,13 +10,20 @@ class QObject {
     // List of things to tidy up when deleting this object.
     this.$tidyupList = [];
     this.$properties = {
-      container: "Item",
+      container: "QtQuick.Item",
       index: { type: "int" },
       resourceIndex: { type: "int" },
     };
     this.$signals = [];
 
+    this.containerChanged.connect(this, this.$onContainerChanged_);
+
     this.objectId = objectIds++;
+  }
+
+  $onContainerChanged_(newContainer, oldContainer, propName) {
+      if (oldContainer) oldContainer.elementRemove(this);
+      if (newContainer) newContainer.elementAdd(this);
   }
 
   $delete() {
