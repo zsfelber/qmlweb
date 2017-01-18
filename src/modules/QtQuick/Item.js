@@ -34,9 +34,6 @@ QmlWeb.registerQmlType({
     clip: "bool",
     focus: "bool"
   },
-  aliases: {
-
-  },
   signals: {
      elementAdd: [
        { type: "QObject", name: "element" }
@@ -453,7 +450,7 @@ QmlWeb.registerQmlType({
     const left = this.parent ? this.parent.left : 0;
 
     // Width
-    if (propName === "width") {
+    if (propName === "width") {createProperty
       this.$isUsingImplicitWidth = false;
     }
 
