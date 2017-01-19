@@ -6,10 +6,13 @@
  */
 function createProperty(type, obj, propName, options = {}) {
   const QMLProperty = QmlWeb.QMLProperty;
+  const QMLBinding = QmlWeb.QMLBinding;
   const prop = new QMLProperty(type, obj, propName);
-  obj[`${propName}Changed`] = prop.changed;
-  obj.$properties[propName] = prop;
-  obj.$properties[propName].set(options.initialValue, QMLProperty.ReasonInit);
+  function _set_prop(propName, prop) {
+    obj[`${propName}Changed`] = prop.changed;
+    obj.$properties[propName] = prop;
+    obj.$properties[propName].set(options.initialValue, QMLProperty.ReasonInit);
+  }
 
   let getter;
   let setter;
@@ -23,9 +26,18 @@ function createProperty(type, obj, propName, options = {}) {
     // 3. Alias proxy (or property proxy) to proxy prop access to selected
     //    incapsulated object. (think twice).
 
-
     // TODO verify,  code moved from outside parse, see "alias"
     // item.$properties[propName].g/set =   ->    g/setter =
+
+    var oldprop = obj.$properties[propName];
+    // relink old property (see QML alias specification)
+    // alias overrides a same name property but itself still can refer to that
+    if (oldprop) {
+      _set_prop("__old_"+propName, oldprop);
+    }
+
+    _set_prop(propName, prop);
+
 
     var objectScope = obj.$properties[propName].objectScope,
         componentScope = obj.$properties[propName].componentScope;
@@ -90,6 +102,8 @@ function createProperty(type, obj, propName, options = {}) {
     QmlWeb.engine.pendingOperations.push([con, obj.$properties[propName]]);
 
   } else {
+    _set_prop(propName, prop);
+
     getter = () => obj.$properties[propName].get();
     if (options.readOnly) {
       setter = function(newVal) {
