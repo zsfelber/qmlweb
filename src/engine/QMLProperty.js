@@ -79,17 +79,15 @@ class QMLProperty {
       if (!this.binding.compiled) {
         this.binding.compile();
       }
-      var oldEvalTreeConnections = this.evalTreeConnections;
+
+      this.obsoleteConnections = this.evalTreeConnections.slice(0);
       this.evalTreeConnections = {};
 
       this.$setVal(this.binding.eval(this.objectScope, this.componentScope,
         this.componentScopeBasePath), this.componentScope);
 
-      for (var i in oldEvalTreeConnections) {
-        if (!this.evalTreeConnections[i]) {
-          // obsolete
-          oldEvalTreeConnections[i].disconnect();
-        }
+      for (var i in this.obsoleteConnections) {
+        obsoleteConnections[i].disconnect();
       }
 
 
@@ -148,7 +146,9 @@ class QMLProperty {
       var parent = QMLProperty.evaluatingProperty;
 
       var con = parent.evalTreeConnections[this.propertyId];
-      if (!con) {
+      if (con) {
+        delete parent.obsoleteConnections[this.propertyId];
+      } else {
         con = this.changed.connect(
           parent,
           QMLProperty.prototype.updateLater,
