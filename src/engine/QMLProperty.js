@@ -62,9 +62,20 @@ class QMLProperty {
     }
   }
 
+  resetAnimation() {
+    this.animation.running = false;
+    this.animation.$actions = [{
+      target: this.animation.target || this.obj,
+      property: this.animation.property || this.name,
+      from: this.animation.from || oldVal,
+      to: this.animation.to || this.val
+    }];
+    this.animation.running = true;
+  }
+
   // Updater recalculates the value of a property if one of the dependencies
   // changed
-  update(preventimpltail) {
+  update(preventhacks) {
     this.needsUpdate = false;
 
     if (!this.binding) {
@@ -108,26 +119,17 @@ class QMLProperty {
       }
     }
 
-    if (!preventimpltail) {
+    if (!preventhacks && this.val !== oldVal) {
       if (this.animation) {
-        this.animation.$actions = [{
-          target: this.animation.target || this.obj,
-          property: this.animation.property || this.name,
-          from: this.animation.from || oldVal,
-          to: this.animation.to || this.val
-        }];
-        this.animation.restart();
+        this.resetAnimation();
       }
-
-      if (this.val !== oldVal) {
-        this.changed(this.val, oldVal, this.name);
-      }
+      this.changed(this.val, oldVal, this.name);
     }
   }
 
   updateLater() {
     if (this.animation || this.changed.connectedSlots.length) {
-      update();
+      this.update();
     } else  {
       this.needsUpdate = true;
     }
@@ -212,20 +214,16 @@ class QMLProperty {
     }
 
     if (this.val !== oldVal) {
-      if (this.animation && reason === QMLProperty.ReasonUser) {
-        this.animation.running = false;
-        this.animation.$actions = [{
-          target: this.animation.target || this.obj,
-          property: this.animation.property || this.name,
-          from: this.animation.from || oldVal,
-          to: this.animation.to || this.val
-        }];
-        this.animation.running = true;
-      }
-      if (this.obj.$syncPropertyToRemote instanceof Function &&
-          reason === QMLProperty.ReasonUser) {
-        // is a remote object from e.g. a QWebChannel
-        this.obj.$syncPropertyToRemote(this.name, val);
+      if (reason === QMLProperty.ReasonUser) {
+        if (this.animation) {
+          this.resetAnimation();
+        }
+        if (this.obj.$syncPropertyToRemote instanceof Function) {
+          // is a remote object from e.g. a QWebChannel
+          this.obj.$syncPropertyToRemote(this.name, val);
+        } else {
+          this.changed(this.val, oldVal, this.name);
+        }
       } else {
         this.changed(this.val, oldVal, this.name);
       }
