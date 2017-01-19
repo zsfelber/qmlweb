@@ -20,7 +20,7 @@ class QMLProperty {
 
     this.propertyId = ++propertyIds;
     this.evalTreeConnections = {};
-    this.parentEvalTreeConnections = 0;
+    this.childEvalTreeConnections = 0;
   }
 
   // Called by update and set to actually set this.val, performing any type
@@ -108,7 +108,9 @@ class QMLProperty {
 
       } finally {
         for (var i in this.obsoleteConnections) {
-          this.obsoleteConnections[i].disconnect();
+          con = this.obsoleteConnections[i];
+          con.disconnect();
+          con.parentProperty.childEvalTreeConnections--;
         }
         delete this.obsoleteConnections;
       }
@@ -135,7 +137,7 @@ class QMLProperty {
 
   updateLater() {
     if (this.binding) {
-      if (this.animation || (this.changed.connectedSlots.length>this.parentEvalTreeConnections)) {
+      if (this.animation || (this.changed.connectedSlots.length>this.childEvalTreeConnections)) {
         this.update();
       } else {
         this.needsUpdate = true;
@@ -191,7 +193,8 @@ class QMLProperty {
             QmlWeb.Signal.UniqueConnection
           );
           parent.evalTreeConnections[this.propertyId] = con;
-          this.parentEvalTreeConnections++;
+          con.parentProperty = this;
+          this.childEvalTreeConnections++;
         }
       });
 
