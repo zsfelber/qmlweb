@@ -37,27 +37,30 @@ class Signal {
         return;
       }
     }
+    var connection;
     if (args.length === 1) {
-      this.connectedSlots.push({ thisObj: global, slot: args[0], type });
+      connection = { thisObj: global, slot: args[0], type };
     } else if (typeof args[1] === "string" || args[1] instanceof String) {
       if (args[0].$tidyupList && args[0] !== this.obj) {
         args[0].$tidyupList.push(this.signal);
       }
       const slot = args[0][args[1]];
-      this.connectedSlots.push({ thisObj: args[0], slot, type });
+      connection = { thisObj: args[0], slot, type };
     } else {
       if (args[0].$tidyupList &&
         (!this.obj || args[0] !== this.obj && args[0] !== this.obj.$parent)
       ) {
         args[0].$tidyupList.push(this.signal);
       }
-      this.connectedSlots.push({ thisObj: args[0], slot: args[1], type });
+      connection = { thisObj: args[0], slot: args[1], type };
     }
+    this.connectedSlots.push(connection);
 
     // Notify object of connect
     if (this.options.obj && this.options.obj.$connectNotify) {
       this.options.obj.$connectNotify(this.options);
     }
+    return connection;
   }
   disconnect(...args) {
     // type meaning:

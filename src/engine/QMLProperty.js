@@ -1,3 +1,5 @@
+let propertyIds = 0;
+
 class QMLProperty {
   constructor(type, obj, name) {
     this.obj = obj;
@@ -15,6 +17,9 @@ class QMLProperty {
     // It is needed when deleting, as we need to tidy up all references to this
     // object.
     this.$tidyupList = [];
+
+    this.propertyId = ++propertyIds;
+    this.evalConnections = {};
   }
 
   // Called by update and set to actually set this.val, performing any type
@@ -118,14 +123,35 @@ class QMLProperty {
     // If this call to the getter is due to a property that is dependant on this
     // one, we need it to take track of changes
     if (QMLProperty.evaluatingProperty) {
-      // TODO disconnect !
+      var startingPoint = QMLProperty.evaluatingPropertyStack[0];
+
+      var connections = this.evalConnections[startingPoint.propertyId];
+      var old = {};
+      if (connections) {
+        for (var i in connections) {
+          old[i] = con;
+        }
+      } else {
+        this.evalConnections[startingPoint.propertyId] = connections = {};
+      }
+
       QMLProperty.evaluatingPropertyStack.forEach(function (ep){
-        this.changed.connect(
-          ep,
-          QMLProperty.prototype.updateLater,
-          QmlWeb.Signal.UniqueConnection
-        );
+        var con = connections[ep];
+        if (con) {
+          delete old[ep.propertyId];
+        } else {
+          var con = this.changed.connect(
+            ep,
+            QMLProperty.prototype.updateLater,
+            QmlWeb.Signal.UniqueConnection
+          );
+          connections[ep.propertyId] = con;
+        }
       });
+      for (var i in old) {
+        old[i].disconnect();
+      }
+
       //console.log(this,QMLProperty.evaluatingPropertyStack.slice(0),this.val);
       //this.changed.connect(
       //  QMLProperty.evaluatingProperty,
