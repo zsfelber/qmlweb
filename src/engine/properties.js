@@ -35,63 +35,60 @@ function createProperty(type, obj, propName, options = {}) {
       obj.$properties[propName].componentScope = componentScope;
       obj.$properties[propName].componentScopeBasePath = componentScope.$basePath;
     }
+    var path0 = options.path.slice(0);
+    var proplast = path0[path0.length-1];
+    path0.pop();
+
+    function _eval_parent() {
+      var cur = componentScope;
+      var proc = [];
+      for(var i in path0) {
+        var token = path0[i];
+        proc.push(token);
+        cur = cur[token];
+        if (!cur) {
+          console.error("Alias property evaluation error. "+proc.join(".")+" is undefined/null.  Invalid path : "+propName+" -> "+options.path.join("."));
+          break;
+        }
+      }
+      return cur;
+    }
 
     getter = function() {
-      const obj = this.componentScope[options.objectName];
-      const propertyName = options.propertyName;
-      return propertyName ? obj.$properties[propertyName].get() : obj;
+      const targetObj = _eval_parent();
+      const val = targetObj[proplast];
+      return val;
     };
     setter = function(newVal, reason, _objectScope,
                                        _componentScope) {
-      if (!options.propertyName) {
-        throw new Error("Cannot set alias property pointing to a QML object.");
+      const targetObj = _eval_parent();
+      const prop = targetObj.$properties[proplast];
+      if (!prop) {
+        throw new Error("Cannot set alias property pointing to non-property (so a QML object/element or similar) : "+propName+" -> "+options.path.join("."));
       }
-      const obj = this.componentScope[options.objectName];
-      const prop = obj.$properties[options.propertyName];
       prop.set(newVal, reason, _objectScope, _componentScope);
     };
-    if (options.propertyName) {
 
-      const con = function(prop) {
-        const obj = prop.componentScope[options.objectName];
-        if (!obj) {
-          console.error("qtcore: target object ", options.objectName,
-                        " not found for alias ", prop);
+    const con = function(prop) {
+      const targetObj = _eval_parent();
+      if (!targetObj) {
+        console.error("qtcore: target object [", path0.join("."),
+                      "] not found for alias  "+propName+" -> "+options.path.join("."));
+      } else {
+        const targetProp = targetObj.$properties[proplast];
+        if (!targetProp) {
+          console.error(
+            "qtcore: target property [", proplast, "] not found for alias "+propName+" -> "+options.path.join(".")
+          );
         } else {
-          const targetProp = obj.$properties[options.propertyName];
-          if (!targetProp) {
-            console.error(
-              "qtcore: target property [", options.objectName, "].",
-              options.propertyName, " not found for alias ", prop.name
-            );
-          } else {
-            // TODO remove when needed:
-            prop.changed = targetProp.changed;
-//            // targetProp.changed.connect( prop.changed );
-//            // it is not sufficient to connect to `changed` of source property
-//            // we have to propagate own changed to it too
-//            // seems the best way to do this is to make them identical?..
-//            // prop.changed = targetProp.changed;
-//            // obj[`${i}Changed`] = prop.changed;
-//            // no. because that object might be destroyed later.
-//            let loopWatchdog = false;
-//            targetProp.changed.connect(obj, (...args) => {
-//              if (loopWatchdog) return;
-//              loopWatchdog = true;
-//              prop.changed.apply(obj, args);
-//              loopWatchdog = false;
-//            });
-//            prop.changed.connect(obj, (...args) => {
-//              if (loopWatchdog) return;
-//              loopWatchdog = true;
-//              targetProp.changed.apply(obj, args);
-//              loopWatchdog = false;
-//            });
-          }
+          // TODO synchronize cleanup when one of the endpoints is destroyed :
+          // TODO re-evaluate alias path when necessary :
+          prop.changed = targetProp.changed;
         }
-      };
-      QmlWeb.engine.pendingOperations.push([con, obj.$properties[propName]]);
-    }
+      }
+    };
+    QmlWeb.engine.pendingOperations.push([con, obj.$properties[propName]]);
+
   } else {
     getter = () => obj.$properties[propName].get();
     if (options.readOnly) {
@@ -211,7 +208,7 @@ function applyProperty(item, i, value, objectScope, componentScope) {
   }
 
   if (value instanceof QmlWeb.QMLAliasDefinition) {
-    createProperty("alias", item, i, {propertyName:value.propertyName, objectName:value.objectName});
+    createProperty("alias", item, i, {path:value.path});
     item.$properties[i].objectScope = objectScope;
     item.$properties[i].componentScope = componentScope;
     item.$properties[i].componentScopeBasePath = componentScope.$basePath;

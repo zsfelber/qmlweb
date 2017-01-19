@@ -5,7 +5,7 @@ class QMLBinding {
  * @param {Array} tree Parser tree of the binding
  * @return {Object} Object representing the binding
  */
-  constructor(val, tree, isfunc) {
+  constructor(val, tree, isfunc, bidirectional) {
     // this.isFunction states whether the binding is a simple js statement or a
     // function containing a return statement. We decide this on whether it is a
     // code block or not. If it is, we require a return statement. If it is a
@@ -14,18 +14,19 @@ class QMLBinding {
     this.isFunction = isfunc || (tree && tree[0] === "block" &&
                       tree[1][0] && tree[1][0][0] !== "label");
     this.src = val;
+    this.bidirectional = bidirectional;
     this.compiled = false;
 
     this.serializedTypeId = "b";
   }
 
-  toJSON() {
+  /*toJSON() {
     return {
       src: this.src,
       deps: JSON.stringify(this.deps),
       tree: JSON.stringify(this.tree)
     };
-  }
+  }*/
 
   eval(object, context, basePath) {
     QmlWeb.executionContext = context;
@@ -33,7 +34,15 @@ class QMLBinding {
       QmlWeb.engine.$basePath = basePath;
     }
     // .call is needed for `this` support
-    return this.impl.call(object, object, context);
+    return this.implGet.call(object, object, context);
+  }
+  update(object, value, context, basePath) {
+    QmlWeb.executionContext = context;
+    if (basePath) {
+      QmlWeb.engine.$basePath = basePath;
+    }
+    // .call is needed for `this` support
+    return this.implSet.call(object, object, context, value);
   }
 
 /**
@@ -41,14 +50,29 @@ class QMLBinding {
  */
   compile() {
     this.src = this.src.trim();
-    this.impl = QMLBinding.bindSrc(this.src, this.isFunction);
+    this.implGet = QMLBinding.bindGet(this.src, this.isFunction);
+    if (this.bidirectional) {
+      this.implSet = QMLBinding.bindSet(this.src, this.isFunction);
+    }
     this.compiled = true;
   }
 
-  static bindSrc(src, isFunction) {
+  static bindGet(src, isFunction) {
     return new Function("__executionObject", "__executionContext", `
       with(QmlWeb) with(__executionContext) with(__executionObject) {
         ${isFunction ? "" : "return"} ${src}
+      }
+    `);
+  }
+
+  static bindSet(src, isFunction) {
+    if (isFunction) {
+      throw new Error("Invalid writable/bidirectional binding, it should not be a function : "+src);
+    }
+
+    return new Function("__executionObject", "__executionContext", "__value", `
+      with(QmlWeb) with(__executionContext) with(__executionObject) {
+        ${src} = __value;
       }
     `);
   }
