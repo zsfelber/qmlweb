@@ -9,8 +9,7 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
 
   const QMLProperty = QmlWeb.QMLProperty;
   const QMLBinding = QmlWeb.QMLBinding;
-  const prop = new QMLProperty(type, obj, propName);
-  prop.readOnly = options.readOnly;
+  const prop = new QMLProperty(type, obj, propName, options.readOnly);
   function _set_prop(propName, prop) {
     obj[`${propName}Changed`] = prop.changed;
     obj.$properties[propName] = prop;
@@ -64,19 +63,10 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
     _set_prop(propName, prop);
   }
 
-  getter = () => obj.$properties[propName].get();
-  if (options.readOnly) {
-    setter = function(newVal) {
-      if (!obj.$canEditReadOnlyProperties) {
-        throw new Error(`property '${propName}' has read only access`);
-      }
-      obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
-    };
-  } else {
-    setter = function(newVal) {
-      obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
-    };
-  }
+  getter = obj.$properties[propName].get;
+  setter = function(newVal) {
+    obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
+  };
 
   QmlWeb.setupGetterSetter(obj, propName, getter, setter);
   if (obj.$isComponentRoot) {

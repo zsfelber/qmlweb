@@ -1,9 +1,10 @@
 let propertyIds = 0;
 
 class QMLProperty {
-  constructor(type, obj, name) {
+  constructor(type, obj, name, readOnly) {
     this.obj = obj;
     this.name = name;
+    this.readOnly = readOnly;
     this.changed = QmlWeb.Signal.signal([], { obj });
     this.binding = null;
     this.objectScope = null;
@@ -208,6 +209,10 @@ class QMLProperty {
 
   // Define setter
   set(newVal, reason, objectScope, componentScope) {
+    if (this.readOnly && !this.obj.$canEditReadOnlyProperties) {
+      throw new Error(`property '${this.name}' has read only access`);
+    }
+
     const oldVal = this.val;
 
     let val = newVal;
