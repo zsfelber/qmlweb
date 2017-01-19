@@ -54,6 +54,10 @@ class Signal {
       }
       connection = { thisObj: args[0], slot: args[1], type };
     }
+    connection.disconnect = function() {
+      this.removeConnection(connection.index);
+    };
+    connection.index = this.connectedSlots.length;
     this.connectedSlots.push(connection);
 
     // Notify object of connect
@@ -62,6 +66,7 @@ class Signal {
     }
     return connection;
   }
+
   disconnect(...args) {
     // type meaning:
     //  1 = function, 2 = string
@@ -85,7 +90,7 @@ class Signal {
             thisObj.$tidyupList.splice(index, 1);
           }
         }
-        this.connectedSlots.splice(i, 1);
+        this.removeConnection(i);
         // We have removed an item from the list so the indexes shifted one
         // backwards
         i--;
@@ -111,6 +116,13 @@ class Signal {
     }
     return false;
   }
+  removeConnection(index) {
+    this.connectedSlots.splice(index, 1);
+    for (var i = index; i<this.connectedSlots.length; i++) {
+      this.connectedSlots[i].index--;
+    }
+  }
+
   static signal(...args) {
     return (new Signal(...args)).signal;
   }

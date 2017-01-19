@@ -19,7 +19,8 @@ class QMLProperty {
     this.$tidyupList = [];
 
     this.propertyId = ++propertyIds;
-    this.evalConnections = {};
+    this.evalAllConnections = {};
+    this.evalTreeTopConnections = {};
   }
 
   // Called by update and set to actually set this.val, performing any type
@@ -73,8 +74,9 @@ class QMLProperty {
 
     const oldVal = this.val;
 
+    var pushed;
     try {
-      QMLProperty.pushEvaluatingProperty(this);
+      pushed = QMLProperty.pushEvaluatingProperty(this);
       if (!this.binding.compiled) {
         this.binding.compile();
       }
@@ -86,7 +88,9 @@ class QMLProperty {
         Function.prototype.toString.call(this.binding.eval)
       );
     } finally {
-      QMLProperty.popEvaluatingProperty();
+      if (pushed) {
+        QMLProperty.popEvaluatingProperty();
+      }
     }
 
     if (this.animation) {
@@ -123,36 +127,42 @@ class QMLProperty {
     // If this call to the getter is due to a property that is dependant on this
     // one, we need it to take track of changes
     if (QMLProperty.evaluatingProperty) {
-      var startingPoint = QMLProperty.evaluatingPropertyStack[0];
+      var top = QMLProperty.evaluatingProperties.stack[0];
 
-      var connections = this.evalConnections[startingPoint.propertyId];
-      var old = {};
+      var connections = this.evalTreeTopConnections[top.propertyId];
       if (connections) {
         for (var i in connections) {
-          old[i] = con;
+          var con = connections[i];
+          var cs = --con.connections;
+          if (!QMLProperty.evaluatingProperties.map[i]) {
+            if (!cs) {
+              con.disconnect();
+              delete this.evalAllConnections[i];
+            }
+            delete connections[i];
+          }
         }
       } else {
-        this.evalConnections[startingPoint.propertyId] = connections = {};
+        this.evalTreeTopConnections[top.propertyId] = connections = {};
       }
-
-      QMLProperty.evaluatingPropertyStack.forEach(function (ep){
-        var con = connections[ep];
+      QMLProperty.evaluatingProperties.stack.forEach(function (ep){
+        var con = this.evalAllConnections[ep.propertyId];
         if (con) {
-          delete old[ep.propertyId];
+          con.connections++;
         } else {
-          var con = this.changed.connect(
+          con = this.changed.connect(
             ep,
             QMLProperty.prototype.updateLater,
             QmlWeb.Signal.UniqueConnection
           );
-          connections[ep.propertyId] = con;
+          con.connections = 1;
+          this.evalAllConnections[ep.propertyId] = con;
         }
+        connections[ep.propertyId] = con;
       });
-      for (var i in old) {
-        old[i].disconnect();
-      }
 
-      //console.log(this,QMLProperty.evaluatingPropertyStack.slice(0),this.val);
+
+      //console.log(this,QMLProperty.evaluatingProperties.slice(0),this.val);
       //this.changed.connect(
       //  QMLProperty.evaluatingProperty,
       //  QMLProperty.prototype.update,
@@ -236,19 +246,19 @@ class QMLProperty {
 
   static pushEvalStack() {
     QMLProperty.evaluatingPropertyStackOfStacks.push(
-      QMLProperty.evaluatingPropertyStack
+      QMLProperty.evaluatingProperties
     );
-    QMLProperty.evaluatingPropertyStack = [];
+    QMLProperty.evaluatingProperties = {stack:[], map:{}};
     QMLProperty.evaluatingProperty = undefined;
   //  console.log("evaluatingProperty=>undefined due to push stck ");
   }
 
   static popEvalStack() {
-    QMLProperty.evaluatingPropertyStack =
-      QMLProperty.evaluatingPropertyStackOfStacks.pop() || [];
+    QMLProperty.evaluatingProperties =
+      QMLProperty.evaluatingPropertyStackOfStacks.pop() || {stack:[], map:{}};
     QMLProperty.evaluatingProperty =
-      QMLProperty.evaluatingPropertyStack[
-        QMLProperty.evaluatingPropertyStack.length - 1
+      QMLProperty.evaluatingProperties.stack[
+        QMLProperty.evaluatingProperties.stack.length - 1
       ];
   }
 
@@ -256,21 +266,25 @@ class QMLProperty {
     // TODO say warnings if already on stack. This means binding loop.
     // BTW actually we do not loop because needsUpdate flag is reset before
     // entering update again.
-    if (QMLProperty.evaluatingPropertyStack.indexOf(prop) >= 0) {
+    if (QMLProperty.evaluatingProperties.map[prop.propertyId]) {
       console.error("Property binding loop detected for property",
         prop.name,
         [prop].slice(0)
       );
+      return false;
     }
     QMLProperty.evaluatingProperty = prop;
-    QMLProperty.evaluatingPropertyStack.push(prop); //keep stack of props
+    QMLProperty.evaluatingProperties.map[prop.propertyId] = prop;
+    QMLProperty.evaluatingProperties.stack.push(prop); //keep stack of props
+    return true;
   }
 
   static popEvaluatingProperty() {
-    QMLProperty.evaluatingPropertyStack.pop();
-    QMLProperty.evaluatingProperty = QMLProperty.evaluatingPropertyStack[
-      QMLProperty.evaluatingPropertyStack.length - 1
-    ];
+    delete QMLProperty.evaluatingProperties.map[QMLProperty.evaluatingProperty.propertyId];
+    QMLProperty.evaluatingProperty = QMLProperty.evaluatingProperties.stack.pop();
+    //QMLProperty.evaluatingProperty = QMLProperty.evaluatingProperties.stack[
+    //  QMLProperty.evaluatingProperties.length - 1
+    //];
   }
 }
 
@@ -279,7 +293,7 @@ class QMLProperty {
 // evaluation and is thus dependant on it.
 QMLProperty.evaluatingProperty = undefined;
 QMLProperty.evaluatingPropertyPaused = false;
-QMLProperty.evaluatingPropertyStack = [];
+QMLProperty.evaluatingProperties = {stack:[], map:{}};
 QMLProperty.evaluatingPropertyStackOfStacks = [];
 
 QMLProperty.typeInitialValues = {
