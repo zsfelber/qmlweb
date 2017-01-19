@@ -144,11 +144,10 @@ class QMLProperty {
       }
 
       // nothing to do with bidirectional binding here,
-      // because binding target is also notified from get() already
+      // because binding target is notified from get() already
       // target is in the evaluation stack, too :
 
       // [alias*]
-      //  |
       //  |
       //  V
       // [alias target] ->get-> [dependency1]
