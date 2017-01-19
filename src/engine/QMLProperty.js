@@ -118,12 +118,20 @@ class QMLProperty {
     // If this call to the getter is due to a property that is dependant on this
     // one, we need it to take track of changes
     if (QMLProperty.evaluatingProperty) {
+      // TODO disconnect !
+      QMLProperty.evaluatingPropertyStack.forEach(function (ep){
+        this.changed.connect(
+          ep,
+          QMLProperty.prototype.updateLater,
+          QmlWeb.Signal.UniqueConnection
+        );
+      });
       //console.log(this,QMLProperty.evaluatingPropertyStack.slice(0),this.val);
-      this.changed.connect(
-        QMLProperty.evaluatingProperty,
-        QMLProperty.prototype.updateLater,
-        QmlWeb.Signal.UniqueConnection
-      );
+      //this.changed.connect(
+      //  QMLProperty.evaluatingProperty,
+      //  QMLProperty.prototype.update,
+      //  QmlWeb.Signal.UniqueConnection
+      //);
     }
 
     if (this.val && this.val.$get) {
