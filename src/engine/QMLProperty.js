@@ -19,7 +19,6 @@ class QMLProperty {
     this.$tidyupList = [];
 
     this.propertyId = ++propertyIds;
-    this.evalAllConnections = {};
     this.evalTreeConnections = {};
   }
 
@@ -80,8 +79,20 @@ class QMLProperty {
       if (!this.binding.compiled) {
         this.binding.compile();
       }
+      var oldEvalTreeConnections = this.evalTreeConnections;
+      this.evalTreeConnections = {};
+
       this.$setVal(this.binding.eval(this.objectScope, this.componentScope,
         this.componentScopeBasePath), this.componentScope);
+
+      for (var i in oldEvalTreeConnections) {
+        if (!this.evalTreeConnections[i]) {
+          // obsolete
+          oldEvalTreeConnections[i].disconnect();
+        }
+      }
+
+
     } catch (e) {
       console.log("QMLProperty.update binding error:",
         e,
@@ -127,7 +138,25 @@ class QMLProperty {
     // If this call to the getter is due to a property that is dependant on this
     // one, we need it to take track of changes
     if (QMLProperty.evaluatingProperty) {
+      ////console.log(this,QMLProperty.evaluatingProperties.slice(0),this.val);
+      //this.changed.connect(
+      //  QMLProperty.evaluatingProperty,
+      //  QMLProperty.prototype.update,
+      //  QmlWeb.Signal.UniqueConnection
+      //);
+
       var parent = QMLProperty.evaluatingProperty;
+
+      var con = parent.evalTreeConnections[this.propertyId];
+      if (!con) {
+        con = this.changed.connect(
+          parent,
+          QMLProperty.prototype.updateLater,
+          QmlWeb.Signal.UniqueConnection
+        );
+        parent.evalTreeConnections[this.propertyId] = con;
+      }
+
 
       var connections = this.evalTreeConnections[parent.propertyId];
       if (connections) {
@@ -139,7 +168,7 @@ class QMLProperty {
               con.disconnect();
               delete this.evalAllConnections[i];
             }
-            delete connections[i];
+            delete connections[i];￼
           }
         }
       } else {
@@ -162,12 +191,6 @@ class QMLProperty {
       });
 
 
-      //console.log(this,QMLProperty.evaluatingProperties.slice(0),this.val);
-      //this.changed.connect(
-      //  QMLProperty.evaluatingProperty,
-      //  QMLProperty.prototype.update,
-      //  QmlWeb.Signal.UniqueConnection
-      //);
     }
 
     if (this.val && this.val.$get) {
