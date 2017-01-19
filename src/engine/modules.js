@@ -89,16 +89,7 @@ function registerQmlType(options, constructor) {
     registerGlobalQmlType(descriptor.name, descriptor.constructor);
   }
 
-  const moduleClassDescriptor = {
-    name: descriptor.name,
-    versions: descriptor.versions,
-    constructor: descriptor.constructor
-  };
-
-  if (typeof modules[descriptor.module] === "undefined") {
-    modules[descriptor.module] = [];
-  }
-  modules[descriptor.module].push(moduleClassDescriptor);
+  registerModuleClassDescriptor(descriptor);
 
   if (typeof descriptor.baseClass !== "undefined") {
     inherit(descriptor.constructor, descriptor.baseClass);
@@ -109,6 +100,29 @@ function registerQmlType(options, constructor) {
     dependants[id].forEach(opt => registerQmlType(opt));
     dependants[id].length = 0;
   }
+}
+
+function registerQmlImport(module, name, versions, constructor) {
+  const descriptor = {
+    module: module,
+    name: name,
+    versions: versions,
+    constructor: constructor
+  };
+  registerModuleClassDescriptor(descriptor);
+}
+
+function registerModuleClassDescriptor(descriptor) {
+  const moduleClassDescriptor = {
+    name: descriptor.name,
+    versions: descriptor.versions,
+    constructor: descriptor.constructor
+  };
+
+  if (typeof modules[descriptor.module] === "undefined") {
+    modules[descriptor.module] = [];
+  }
+  modules[descriptor.module].push(moduleClassDescriptor);
 }
 
 function getConstructor(moduleName, version, name) {
@@ -147,7 +161,11 @@ function loadImports(component, imports) {
   }
   for (let i = 0; i < imports.length; ++i) {
     const [, moduleName, moduleVersion, moduleAlias] = imports[i];
-    if (typeof moduleVersion === "undefined") continue;
+    if (typeof moduleVersion === "undefined") {
+      // TODO  means : all ? none ?
+      // none:
+      continue;
+    }
     const versionString = moduleVersion % 1 === 0 ?
                             moduleVersion.toFixed(1) :
                             moduleVersion.toString();
@@ -230,11 +248,11 @@ function construct(meta) {
   // 2) from importPathList
   // 3) from directories in imports statements and then
   // 4) from qmldir files
-  // Currently we use order: 3, 4, 1, 2
+  // Currently we use order: 3a, 4, 3b, 1, 2
   // TODO: engine.qmldirs is global for all loaded components.
   //       That's not qml's original behaviour.
 
-  // 3 (from Component.constructor -> QmlWeb.loadImports)
+  // 3)modules only: (from Component.constructor -> QmlWeb.loadImports)
   let constructors = perImportContextConstructors[meta.context.importContextId];
 
   const classComponents = meta.object.$class.split(".");
@@ -254,7 +272,7 @@ function construct(meta) {
   } else {
 
     // 4)
-    const qdirInfo = QmlWeb.engine.qmldirs[meta.object.$class];
+    const qdirInfo = QmlWeb.engine.ctxQmldirs[meta.context.importContextId][meta.object.$class];
     // Are we have info on that component in some imported qmldir files?
 
     /* This will also be set in applyProperties, but needs to be set here
@@ -273,7 +291,7 @@ function construct(meta) {
       filePath = `${classComponents[0]}.qml`;
     }
 
-    // 1) through engine.$resolvePath(name);
+    // 1) or 3)preloaded qrc-s  through engine.$resolvePath(name);
 
     const component = QmlWeb.Qt.createComponent(filePath);
 

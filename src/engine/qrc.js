@@ -27,4 +27,22 @@ stored within the resource system from outside of the resource system, a full
 More details here: http://doc.qt.io/qt-5/qml-url.html
 
 */
+QmlWeb.qrcModules = {};
 QmlWeb.qrc = {};
+
+QmlWeb.addQrc = function(module, name, impl) {
+  var murl = "qrc:/"+module;
+  var m = QmlWeb.qrcModules[murl];
+  if (!m) {
+    QmlWeb.qrcModules[murl] = m = {};
+  }
+  var match=/(.*)\.qml$/.exec(name);
+  var className;
+  if (match) {
+    className = match[1];
+  } else {
+    className = name;
+  }
+  m[className] = "qrc:/"+module+"/"+className;
+  QmlWeb.qrc[module+"/"+name] = impl;
+}

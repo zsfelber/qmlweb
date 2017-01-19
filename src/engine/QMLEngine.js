@@ -382,8 +382,8 @@ class QMLEngine {
       }
     }
 
-    if (!this.qmldirs) {
-      this.qmldirs = {}; // resulting components lookup table
+    if (!this.ctxQmldirs) {
+      this.ctxQmldirs = {}; // resulting components lookup table
     }
 
     if (!importsArray || importsArray.length === 0) {
@@ -427,6 +427,14 @@ class QMLEngine {
         // nameIsUrl => url do not need dirs
         // nameIsDir => already computed full path above
         content = QmlWeb.readQmlDir(name);
+
+        var qrcModule = QmlWeb.qrcModules[name];
+        if (qrcModule) {
+          if (!content) {
+            content = {};
+          }
+          content.qrcs = qrcModule;
+        }
       } else if (nameIsJs) {
         // 3. Js file, don't need qmldir
       } else {
@@ -442,6 +450,7 @@ class QMLEngine {
           }
         }
       }
+      // keep already loaded qmldir files
       this.qmldirsContents[name] = content;
     }
 
@@ -467,14 +476,24 @@ class QMLEngine {
       return;
     }
 
+    var qmldirs = this.ctxQmldirs[importContextId];
+    if (!qmldirs) {
+      this.ctxQmldirs[importContextId] = qmldirs = {};
+    }
+
     // copy found externals to global var
-    // TODO actually we have to copy it to current component
+    //// TODO actually we have to copy it to current component
     for (const attrname in content.externals) {
-      this.qmldirs[attrname] = content.externals[attrname];
+      qmldirs[attrname] = content.externals[attrname];
+    }
+    if (content.qrcs) {
+      for (const attrname in content.qrcs) {
+        qmldirs[attrname] = {url : content.qrcs[attrname]};
+      }
     }
 
     // keep already loaded qmldir files
-    this.qmldirsContents[name] = content;
+    //this.qmldirsContents[name] = content;
   }
 
   size() {
@@ -545,6 +564,7 @@ class QMLEngine {
 
     const uri = this.$parseURI(file);
     if (!uri) {
+      console.warn("QMLEngine.loadComponent: Empty url :", file);
       return undefined;
     }
 
@@ -552,6 +572,7 @@ class QMLEngine {
     if (uri.scheme === "qrc:/") {
       tree = QmlWeb.qrc[uri.path];
       if (!tree) {
+        console.warn("QMLEngine.loadComponent: Empty qrc entry :", uri.path);
         return undefined;
       }
 
@@ -573,6 +594,7 @@ class QMLEngine {
     }
 
     if (!tree) {
+      console.warn("QMLEngine.loadComponent: Empty file :", file);
       return undefined;
     }
 
@@ -584,6 +606,8 @@ class QMLEngine {
 
     tree.$file = file;
     this.components[file] = tree;
+
+
     return tree;
   }
 
