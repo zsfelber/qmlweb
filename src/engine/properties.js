@@ -12,11 +12,8 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
   function _set_prop(propName, prop) {
     obj[`${propName}Changed`] = prop.changed;
     obj.$properties[propName] = prop;
-    obj.$properties[propName].set(options.initialValue, QMLProperty.ReasonInit);
+    prop.set(options.initialValue, QMLProperty.ReasonInit);
   }
-
-  let getter;
-  let setter;
 
   if (type === "alias") {
 
@@ -59,20 +56,15 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
 
     var p = path0.join(".");
     var binding = new QmlWeb.QMLBinding(p, proplast, false, true);
-    obj.$properties[propName].set(binding, QMLProperty.ReasonInit, objectScope, componentScope);
+    prop.set(binding, QMLProperty.ReasonInit, objectScope, componentScope);
 
   } else {
     _set_prop(propName, prop);
   }
 
-  getter = obj.$properties[propName].get;
-  setter = function(newVal) {
-    obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
-  };
-
-  QmlWeb.setupGetterSetter(obj, propName, getter, setter);
+  QmlWeb.setupGetterSetter(obj, propName, prop.get, prop.set);
   if (obj.$isComponentRoot) {
-    QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter);
+    QmlWeb.setupGetterSetter(obj.$context, propName, prop.get, prop.set);
   }
 }
 

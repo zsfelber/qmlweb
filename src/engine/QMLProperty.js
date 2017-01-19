@@ -212,6 +212,9 @@ class QMLProperty {
     if (this.readOnly && !this.obj.$canEditReadOnlyProperties) {
       throw new Error(`property '${this.name}' has read only access`);
     }
+    if (reason === undefined) {
+      reason = QMLProperty.ReasonUser;
+    }
 
     const oldVal = this.val;
 
