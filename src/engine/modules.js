@@ -180,7 +180,11 @@ function callSuper(self, meta) {
   const info = meta.super.$qmlTypeInfo || {};
   meta.super = meta.super.prototype.constructor;
   meta.super.call(self, meta);
+  initializeConstr(self, meta, info);
+}
 
+function initializeConstr(self, meta, info) {
+  info = info || meta.super.$qmlTypeInfo || {};
   if (info.enums) {
     // TODO: not exported to the whole file scope yet
     Object.keys(info.enums).forEach(name => {
@@ -314,4 +318,5 @@ QmlWeb.registerQmlType = registerQmlType;
 QmlWeb.getConstructor = getConstructor;
 QmlWeb.loadImports = loadImports;
 QmlWeb.callSuper = callSuper;
+QmlWeb.initializeConstr = initializeConstr;
 QmlWeb.construct = construct;

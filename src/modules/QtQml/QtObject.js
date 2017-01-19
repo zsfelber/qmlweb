@@ -4,16 +4,15 @@ QmlWeb.registerQmlType({
   module: "QtQml",
   name: "QtObject",
   versions: /.*/,
-  baseClass: "QObject",
   properties : {
      container: "QtQuick.Item",
      index: "int",
      resourceIndex: "int",
   },
-}, class /*extends QmlWeb.QObject*/ {
+}, class extends QmlWeb.QObject {
   constructor(meta) {
-    //super(meta.parent);
-    QmlWeb.callSuper(this, meta);
+    super(meta.parent);
+    QmlWeb.initializeConstr(this, meta);
 
     this.$isComponentRoot = meta.isComponentRoot;
     this.$context = meta.context;
