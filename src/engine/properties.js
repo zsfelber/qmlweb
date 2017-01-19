@@ -4,7 +4,9 @@
  * @param {String} propName Property name
  * @param {Object} [options] Options that allow finetuning of the property
  */
-function createProperty(type, obj, propName, options = {}) {
+function createProperty(type, obj, propName, options, objectScope, componentScope) {
+  if (!options) options = {};
+
   const QMLProperty = QmlWeb.QMLProperty;
   const QMLBinding = QmlWeb.QMLBinding;
   const prop = new QMLProperty(type, obj, propName);
@@ -31,24 +33,22 @@ function createProperty(type, obj, propName, options = {}) {
     // item.$properties[propName].g/set =   ->    g/setter =
 
     var oldprop = obj.$properties[propName];
+
     // relink old property (see QML alias specification)
     // alias overrides a same name property but aliases still can refer to the redefined old properties
     // TODO also check alias->another [alias, eval to->same name property<-eval to] expressions
+
     if (oldprop) {
       _set_prop("__old_"+propName, oldprop);
     }
 
     _set_prop(propName, prop);
 
-
-    var objectScope = obj.$properties[propName].objectScope,
-        componentScope = obj.$properties[propName].componentScope;
     if (!componentScope) {
       objectScope = obj;
       componentScope = obj.$context;
-      obj.$properties[propName].componentScope = componentScope;
-      obj.$properties[propName].componentScopeBasePath = componentScope.$basePath;
     }
+
     var path0 = options.path.slice(0);
     var proplast = path0.pop();
 
@@ -57,7 +57,8 @@ function createProperty(type, obj, propName, options = {}) {
     }
 
     var p = path0.join(".");
-    obj.$properties[propName] = new QmlWeb.QMLBinding(p, proplast, false, true);
+    var binding = new QmlWeb.QMLBinding(p, proplast, false, true);
+    obj.$properties[propName].set(binding, QMLProperty.ReasonInit, objectScope, componentScope);
 
   } else {
     _set_prop(propName, prop);
@@ -180,11 +181,7 @@ function applyProperty(item, i, value, objectScope, componentScope) {
   }
 
   if (value instanceof QmlWeb.QMLAliasDefinition) {
-    createProperty("alias", item, i, {path:value.path, readOnly:value.readonly});
-    item.$properties[i].objectScope = objectScope;
-    item.$properties[i].componentScope = componentScope;
-    item.$properties[i].componentScopeBasePath = componentScope.$basePath;
-    item.$properties[i].val = value;
+    createProperty("alias", item, i, {path:value.path, readOnly:value.readonly}, objectScope, componentScope);
     // NOTE getter/setter/target moved to inside createProperty
 
     return true;
