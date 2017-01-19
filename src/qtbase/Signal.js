@@ -75,7 +75,8 @@ class Signal {
     const callType = args.length === 1
       ? args[0] instanceof Function ? 1 : 2
       : typeof args[1] === "string" || args[1] instanceof String ? 3 : 4;
-    for (let i = 0; i < this.connectedSlots.length; i++) {
+    let i = 0, j = 0;
+    for (; i < this.connectedSlots.length; i++, j++) {
       //const { slot, thisObj } = this.connectedSlots[i];
       const connection = this.connectedSlots[i];
       if (
@@ -85,12 +86,15 @@ class Signal {
         callType === 3 && connection.thisObj === args[0] && connection.slot === args[0][args[1]] ||
         connection.thisObj === args[0] && connection.slot === args[1]
       ) {
-        this.removeConnection(connection);
+        this.removeConnection(connection, true);
         // We have removed an item from the list so the indexes shifted one
         // backwards
-        i--;
+        j--;
+      } else if (i !== j) {
+        this.connectedSlots[j] = connection;
       }
     }
+    this.connectedSlots.length = j;
 
     // Notify object of disconnect
     if (this.options.obj && this.options.obj.$disconnectNotify) {
@@ -111,7 +115,7 @@ class Signal {
     }
     return false;
   }
-  removeConnection(connection) {
+  removeConnection(connection, preventautoshift) {
     if (connection.thisObj) {
       const index = connection.thisObj.$tidyupList.indexOf(this.signal);
       if (index >= 0) {
@@ -119,9 +123,11 @@ class Signal {
       }
     }
 
-    this.connectedSlots.splice(connection.index, 1);
-    for (var i = connection.index; i<this.connectedSlots.length; i++) {
-      this.connectedSlots[i].index--;
+    if (!preventautoshift) {
+      this.connectedSlots.splice(connection.index, 1);
+      for (var i = connection.index; i<this.connectedSlots.length; i++) {
+        this.connectedSlots[i].index--;
+      }
     }
   }
 

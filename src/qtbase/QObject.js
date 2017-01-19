@@ -8,7 +8,9 @@ class QObject {
     }
 
     // List of things to tidy up when deleting this object.
+    // TODO use hash !
     this.$tidyupList = [];
+
     this.$properties = [];
     this.$signals = [];
 
