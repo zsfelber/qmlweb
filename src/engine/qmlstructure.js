@@ -47,9 +47,8 @@ class QMLPropertyDefinition {
 }
 
 class QMLAliasDefinition {
-  constructor(objName, propName, readonly) {
-    this.objectName = objName;
-    this.propertyName = propName;
+  constructor(path, readonly) {
+    this.path = path;
     this.readonly = readonly;
     this.serializedTypeId = "a";
   }
@@ -350,10 +349,10 @@ convertToEngine.walkers = {
         tree ? convertToEngine.bindout(tree, src) : undefined,
         true
     ),
-  qmlaliasdef: (name, objName, propName) =>
-    new QMLAliasDefinition(objName, propName),
-  qmlaliasdefro: (name, objName, propName) =>
-    new QMLAliasDefinition(objName, propName, true),
+  qmlaliasdef: () =>
+    new QMLAliasDefinition(slice(arguments, 1)),
+  qmlaliasdefro: () =>
+    new QMLAliasDefinition(slice(arguments, 1), true),
   qmlsignaldef: (name, params) =>
     new QMLSignalDefinition(params),
   qmldefaultprop: tree => convertToEngine.walk(tree),
