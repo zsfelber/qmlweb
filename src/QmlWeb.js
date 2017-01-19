@@ -7,7 +7,10 @@ if (typeof window === 'undefined') {
   widow = window;
 }
 
-var UglifyJS = require ? require("uglify-js") : undefined;
+var UglifyJS;
+if (typeof require !== 'undefined') {
+  UglifyJS = require("uglify-js");
+}
 
 
 const QmlWeb = {};
