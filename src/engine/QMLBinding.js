@@ -1,3 +1,7 @@
+function _ubertrim(str) {
+    return str.replace(/(?:\s|[;,])*$/g, "");
+}
+
 class QMLBinding {
 /**
  * Create QML binding.
@@ -18,6 +22,7 @@ class QMLBinding {
     this.compiled = false;
 
     this.serializedTypeId = "b";
+    this.eval = this.get;
   }
 
   /*toJSON() {
@@ -28,7 +33,7 @@ class QMLBinding {
     };
   }*/
 
-  eval(object, context, basePath) {
+  get(object, context, basePath) {
     QmlWeb.executionContext = context;
     if (basePath) {
       QmlWeb.engine.$basePath = basePath;
@@ -36,17 +41,17 @@ class QMLBinding {
     // .call is needed for `this` support
     return this.implGet.call(object, object, context);
   }
-  update(object, value, context, basePath) {
+  set(object, value, context, basePath) {
     QmlWeb.executionContext = context;
     if (basePath) {
       QmlWeb.engine.$basePath = basePath;
     }
     // .call is needed for `this` support
-    return this.implSet.call(object, object, context, value);
+    this.implSet.call(object, object, context, value);
   }
 
 /**
- * Compile binding. Afterwards you may call binding.eval to evaluate.
+ * Compile binding. Afterwards you may call binding.eval/get/set to evaluate.
  */
   compile() {
     this.src = this.src.trim();
@@ -60,7 +65,7 @@ class QMLBinding {
   static bindGet(src, isFunction) {
     return new Function("__executionObject", "__executionContext", `
       with(QmlWeb) with(__executionContext) with(__executionObject) {
-        ${isFunction ? "" : "return"} ${src}
+        ${isFunction ? src : "return "+_ubertrim(src)+";"}
       }
     `);
   }
@@ -70,9 +75,10 @@ class QMLBinding {
       throw new Error("Invalid writable/bidirectional binding, it should not be a function : "+src);
     }
 
+    // NOTE it generates a compilation error (somewhere) if invalid
     return new Function("__executionObject", "__executionContext", "__value", `
       with(QmlWeb) with(__executionContext) with(__executionObject) {
-        ${src} = __value;
+        ${_ubertrim(src)} = __value;
       }
     `);
   }
