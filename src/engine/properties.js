@@ -20,6 +20,9 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
   let setter;
 
   if (type === "alias") {
+
+    prop.type = options.overrideType ? options.overrideType : "var";
+
     // TODO
     // 1. Alias must be able to point to prop or id of local object,
     //    eg: property alias q: t

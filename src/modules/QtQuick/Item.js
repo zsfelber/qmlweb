@@ -5,7 +5,7 @@ QmlWeb.registerQmlType({
   baseClass: "QtQml.QtObject",
   properties: {
     $opacity: { type: "real", initialValue: 1 },
-    parent: { type: "alias", objectName: "container" },
+    parent: { type: "alias", objectName: "container", overrideType: "Item" },
     state: "string",
     states: "list",
     transitions: "list",
@@ -34,14 +34,6 @@ QmlWeb.registerQmlType({
     clip: "bool",
     focus: "bool"
   },
-  signals: {
-     elementAdd: [
-       { type: "QObject", name: "element" }
-     ],
-     elementRemove: [
-       { type: "QObject", name: "element" }
-     ]
-  },
   defaultProperty: "data"
 }, class {
   constructor(meta) {
@@ -67,8 +59,6 @@ QmlWeb.registerQmlType({
       createProperty("var", this, "activeFocus");
     }
 
-    this.elementAdd.connect(this, this.$onElementAdd);
-    this.elementRemove.connect(this, this.$onElementRemove);
     this.parentChanged.connect(this, this.$onParentChanged_);
     this.dataChanged.connect(this, this.$onDataChanged);
     this.stateChanged.connect(this, this.$onStateChanged);
@@ -85,6 +75,9 @@ QmlWeb.registerQmlType({
     this.heightChanged.connect(this, this.$updateVGeometry);
     this.implicitWidthChanged.connect(this, this.$onImplicitWidthChanged);
     this.implicitHeightChanged.connect(this, this.$onImplicitHeightChanged);
+
+    this.elementAdd.connect(this, this.$onElementAdd);
+    this.elementRemove.connect(this, this.$onElementRemove);
 
     this.$isUsingImplicitWidth = true;
     this.$isUsingImplicitHeight = true;
