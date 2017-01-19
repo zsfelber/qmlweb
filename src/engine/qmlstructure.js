@@ -42,7 +42,7 @@ class QMLPropertyDefinition {
     this.type = type;
     this.value = value;
     this.readonly = readonly;
-        this.serializedTypeId = "p";
+    this.serializedTypeId = "p";
   }
 }
 

@@ -50,74 +50,27 @@ function createProperty(type, obj, propName, options = {}) {
     var path0 = options.path.slice(0);
     var proplast = path0.pop();
 
-    obj.$properties[propName] = new QMLWeb.QMLBinding(options.path.join("."), 0, false, true);
+    var p = options.path.join(".");
+    obj.$properties[propName] = new QMLWeb.QMLBinding(p, 0, false, true);
 
-    function _eval_parent() {
-      var cur = componentScope;
-      var proc = [];
-      for(var i in path0) {
-        var token = path0[i];
-        proc.push(token);
-        cur = cur[token];
-        if (!cur) {
-          console.error("Alias property evaluation error. "+proc.join(".")+" is undefined/null.  Invalid path : "+propName+" -> "+options.path.join("."));
-          break;
-        }
-      }
-      return cur;
-    }
-
-    getter = function() {
-      const targetObj = _eval_parent();
-      const val = targetObj[proplast];
-      return val;
-    };
-    setter = function(newVal, reason, _objectScope,
-                                       _componentScope) {
-      const targetObj = _eval_parent();
-      const prop = targetObj.$properties[proplast];
-      if (!prop) {
-        throw new Error("Cannot set alias property pointing to non-property (so a QML object/element or similar) : "+propName+" -> "+options.path.join("."));
-      }
-      prop.set(newVal, reason, _objectScope, _componentScope);
-    };
-
-    const con = function(prop) {
-      const targetObj = _eval_parent();
-      if (!targetObj) {
-        console.error("qtcore: target object [", path0.join("."),
-                      "] not found for alias  "+propName+" -> "+options.path.join("."));
-      } else {
-        const targetProp = targetObj.$properties[proplast];
-        if (!targetProp) {
-          console.error(
-            "qtcore: target property [", proplast, "] not found for alias "+propName+" -> "+options.path.join(".")
-          );
-        } else {
-          // TODO synchronize cleanup when one of the endpoints is destroyed :
-          // TODO re-evaluate alias path when necessary :
-          prop.changed = targetProp.changed;
-        }
-      }
-    };
-    QmlWeb.engine.pendingOperations.push([con, obj.$properties[propName]]);
+    options.readOnly
 
   } else {
     _set_prop(propName, prop);
+  }
 
-    getter = () => obj.$properties[propName].get();
-    if (options.readOnly) {
-      setter = function(newVal) {
-        if (!obj.$canEditReadOnlyProperties) {
-          throw new Error(`property '${propName}' has read only access`);
-        }
-        obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
-      };
-    } else {
-      setter = function(newVal) {
-        obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
-      };
-    }
+  getter = () => obj.$properties[propName].get();
+  if (options.readOnly) {
+    setter = function(newVal) {
+      if (!obj.$canEditReadOnlyProperties) {
+        throw new Error(`property '${propName}' has read only access`);
+      }
+      obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
+    };
+  } else {
+    setter = function(newVal) {
+      obj.$properties[propName].set(newVal, QMLProperty.ReasonUser);
+    };
   }
 
   QmlWeb.setupGetterSetter(obj, propName, getter, setter);
@@ -223,7 +176,7 @@ function applyProperty(item, i, value, objectScope, componentScope) {
   }
 
   if (value instanceof QmlWeb.QMLAliasDefinition) {
-    createProperty("alias", item, i, {path:value.path});
+    createProperty("alias", item, i, {path:value.path, readOnly:value.readonly});
     item.$properties[i].objectScope = objectScope;
     item.$properties[i].componentScope = componentScope;
     item.$properties[i].componentScopeBasePath = componentScope.$basePath;
@@ -234,7 +187,7 @@ function applyProperty(item, i, value, objectScope, componentScope) {
   }
 
   if (value instanceof QmlWeb.QMLPropertyDefinition) {
-    createProperty(value.type, item, i);
+    createProperty(value.type, item, i, {readOnly:value.readonly});
     item.$properties[i].set(value.value, QMLProperty.ReasonInit,
                             objectScope, componentScope);
     return true;

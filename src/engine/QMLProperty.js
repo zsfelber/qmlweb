@@ -20,6 +20,7 @@ class QMLProperty {
 
     this.propertyId = ++propertyIds;
     this.evalTreeConnections = {};
+    this.parentEvalTreeConnections = 0;
   }
 
   // Called by update and set to actually set this.val, performing any type
@@ -133,8 +134,29 @@ class QMLProperty {
   }
 
   updateLater() {
-    if (this.binding && (this.animation || this.changed.connectedSlots.length || this.binding.bidirectional)) {
-      this.update();
+    if (this.binding) {
+      if (this.animation || (this.changed.connectedSlots.length>this.parentEvalTreeConnections)) {
+        this.update();
+      } else {
+        this.needsUpdate = true;
+      }
+
+      // nothing to do with bidirectional binding here,
+      // because binding target is also notified from get() already
+      // target is in the evaluation stack, too :
+
+      // [alias*]
+      //  |
+      //  |
+      //  V
+      // [alias target] ->get-> [dependency1]
+      //                        [dependency2]
+      //                        [dependency3]
+
+      // } else if (this.binding.bidirectional) {
+      //   ...
+      // }
+
     } else  {
       this.needsUpdate = true;
     }
@@ -169,6 +191,7 @@ class QMLProperty {
             QmlWeb.Signal.UniqueConnection
           );
           parent.evalTreeConnections[this.propertyId] = con;
+          this.parentEvalTreeConnections++;
         }
       });
 
