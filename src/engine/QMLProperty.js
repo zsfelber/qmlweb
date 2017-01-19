@@ -20,7 +20,7 @@ class QMLProperty {
 
     this.propertyId = ++propertyIds;
     this.evalAllConnections = {};
-    this.evalTreeTopConnections = {};
+    this.evalTreeConnections = {};
   }
 
   // Called by update and set to actually set this.val, performing any type
@@ -127,9 +127,9 @@ class QMLProperty {
     // If this call to the getter is due to a property that is dependant on this
     // one, we need it to take track of changes
     if (QMLProperty.evaluatingProperty) {
-      var top = QMLProperty.evaluatingProperties.stack[0];
+      var parent = QMLProperty.evaluatingProperty;
 
-      var connections = this.evalTreeTopConnections[top.propertyId];
+      var connections = this.evalTreeConnections[parent.propertyId];
       if (connections) {
         for (var i in connections) {
           var con = connections[i];
@@ -143,7 +143,7 @@ class QMLProperty {
           }
         }
       } else {
-        this.evalTreeTopConnections[top.propertyId] = connections = {};
+        this.evalTreeConnections[parent.propertyId] = connections = {};
       }
       QMLProperty.evaluatingProperties.stack.forEach(function (ep){
         var con = this.evalAllConnections[ep.propertyId];
@@ -176,6 +176,25 @@ class QMLProperty {
 
     return this.val;
   }
+
+  cleanupEvalConnections(nextProp) {
+    if (nextProp !== this.currentNextProp) {
+      if (this.evalTreeConnections) {
+        for (var i in this.evalTreeConnections) {
+          var con = this.evalTreeConnections[i];
+          if (!--con.connections) {
+            con.disconnect();
+            delete this.evalAllConnections[i];
+          }
+          delete this.evalTreeConnections[i];
+        }
+      } else {
+        this.evalTreeConnections = {};
+      }
+      this.currentNextProp = nextProp;
+    }
+  }
+
   // Define setter
   set(newVal, reason, objectScope, componentScope) {
     const oldVal = this.val;
@@ -272,6 +291,9 @@ class QMLProperty {
         [prop].slice(0)
       );
       return false;
+    }
+    if (QMLProperty.evaluatingProperty) {
+      QMLProperty.evaluatingProperty.cleanupEvalConnections(prop);
     }
     QMLProperty.evaluatingProperty = prop;
     QMLProperty.evaluatingProperties.map[prop.propertyId] = prop;
