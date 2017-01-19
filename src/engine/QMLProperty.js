@@ -64,7 +64,7 @@ class QMLProperty {
 
   // Updater recalculates the value of a property if one of the dependencies
   // changed
-  update() {
+  update(preventimpltail) {
     this.needsUpdate = false;
 
     if (!this.binding) {
@@ -84,8 +84,10 @@ class QMLProperty {
         this.obsoleteConnections = this.evalTreeConnections.slice(0);
         this.evalTreeConnections = {};
 
-        this.$setVal(this.binding.eval(this.objectScope, this.componentScope,
-          this.componentScopeBasePath), this.componentScope);
+        var val = this.binding.eval(this.objectScope, this.componentScope,
+          this.componentScopeBasePath);
+
+        this.$setVal(val, this.componentScope);
 
       } finally {
         for (var i in this.obsoleteConnections) {
@@ -106,18 +108,20 @@ class QMLProperty {
       }
     }
 
-    if (this.animation) {
-      this.animation.$actions = [{
-        target: this.animation.target || this.obj,
-        property: this.animation.property || this.name,
-        from: this.animation.from || oldVal,
-        to: this.animation.to || this.val
-      }];
-      this.animation.restart();
-    }
+    if (!preventimpltail) {
+      if (this.animation) {
+        this.animation.$actions = [{
+          target: this.animation.target || this.obj,
+          property: this.animation.property || this.name,
+          from: this.animation.from || oldVal,
+          to: this.animation.to || this.val
+        }];
+        this.animation.restart();
+      }
 
-    if (this.val !== oldVal) {
-      this.changed(this.val, oldVal, this.name);
+      if (this.val !== oldVal) {
+        this.changed(this.val, oldVal, this.name);
+      }
     }
   }
 
@@ -185,17 +189,7 @@ class QMLProperty {
       this.componentScopeBasePath = componentScope.$basePath;
 
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
-        if (!val.compiled) {
-          val.compile();
-        }
-        try {
-          QMLProperty.pushEvaluatingProperty(this);
-          this.needsUpdate = false;
-          val = this.binding.eval(objectScope, componentScope,
-            this.componentScopeBasePath);
-        } finally {
-          QMLProperty.popEvaluatingProperty();
-        }
+        this.update(true);
       } else {
         QmlWeb.engine.boundProperties.push(this);
         return;
@@ -207,15 +201,15 @@ class QMLProperty {
       if (val instanceof Array) {
         val = val.slice(); // Copies the array
       }
-    }
 
-    if (reason === QMLProperty.ReasonInit && typeof val === "undefined") {
-      if (QMLProperty.typeInitialValues.hasOwnProperty(this.type)) {
-        val = QMLProperty.typeInitialValues[this.type];
+      if (reason === QMLProperty.ReasonInit && typeof val === "undefined") {
+        if (QMLProperty.typeInitialValues.hasOwnProperty(this.type)) {
+          val = QMLProperty.typeInitialValues[this.type];
+        }
       }
-    }
 
-    this.$setVal(val, componentScope);
+      this.$setVal(val, componentScope);
+    }
 
     if (this.val !== oldVal) {
       if (this.animation && reason === QMLProperty.ReasonUser) {
