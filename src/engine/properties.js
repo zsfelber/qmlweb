@@ -50,6 +50,7 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
     var path0 = options.path.slice(0);
     var proplast = path0.pop();
 
+    // TODO also check alias->another [alias, eval to->same name property<-eval to] expressions
     if (path0[0] === propName) {
       path0[0] = "__old_"+propName;
     }
