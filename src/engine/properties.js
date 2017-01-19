@@ -8,6 +8,7 @@ function createProperty(type, obj, propName, options = {}) {
   const QMLProperty = QmlWeb.QMLProperty;
   const QMLBinding = QmlWeb.QMLBinding;
   const prop = new QMLProperty(type, obj, propName);
+  prop.readOnly = options.readOnly;
   function _set_prop(propName, prop) {
     obj[`${propName}Changed`] = prop.changed;
     obj.$properties[propName] = prop;
@@ -31,7 +32,8 @@ function createProperty(type, obj, propName, options = {}) {
 
     var oldprop = obj.$properties[propName];
     // relink old property (see QML alias specification)
-    // alias overrides a same name property but itself still can refer to that
+    // alias overrides a same name property but aliases still can refer to the redefined old properties
+    // TODO also check alias->another [alias, eval to->same name property<-eval to] expressions
     if (oldprop) {
       _set_prop("__old_"+propName, oldprop);
     }
@@ -50,10 +52,12 @@ function createProperty(type, obj, propName, options = {}) {
     var path0 = options.path.slice(0);
     var proplast = path0.pop();
 
-    var p = options.path.join(".");
-    obj.$properties[propName] = new QMLWeb.QMLBinding(p, 0, false, true);
+    if (path0[0] === propName) {
+      path0[0] = "__old_"+propName;
+    }
 
-    options.readOnly
+    var p = path0.join(".");
+    obj.$properties[propName] = new QmlWeb.QMLBinding(p, proplast, false, true);
 
   } else {
     _set_prop(propName, prop);
