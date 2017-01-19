@@ -89,8 +89,9 @@ class QMLProperty {
 
       } finally {
         for (var i in this.obsoleteConnections) {
-          obsoleteConnections[i].disconnect();
+          this.obsoleteConnections[i].disconnect();
         }
+        delete this.obsoleteConnections;
       }
 
 
@@ -138,7 +139,7 @@ class QMLProperty {
 
     // If this call to the getter is due to a property that is dependant on this
     // one, we need it to take track of changes
-    if (QMLProperty.evaluatingProperty) {
+    // if (QMLProperty.evaluatingProperty) {
       ////console.log(this,QMLProperty.evaluatingProperties.slice(0),this.val);
       //this.changed.connect(
       //  QMLProperty.evaluatingProperty,
@@ -146,21 +147,21 @@ class QMLProperty {
       //  QmlWeb.Signal.UniqueConnection
       //);
 
-      var parent = QMLProperty.evaluatingProperty;
+      QMLProperty.evaluatingProperties.stack.forEach(function (parent) {
+        var con = parent.evalTreeConnections[this.propertyId];
+        if (con) {
+          delete parent.obsoleteConnections[this.propertyId];
+        } else {
+          con = this.changed.connect(
+            parent,
+            QMLProperty.prototype.updateLater,
+            QmlWeb.Signal.UniqueConnection
+          );
+          parent.evalTreeConnections[this.propertyId] = con;
+        }
+      });
 
-      var con = parent.evalTreeConnections[this.propertyId];
-      if (con) {
-        delete parent.obsoleteConnections[this.propertyId];
-      } else {
-        con = this.changed.connect(
-          parent,
-          QMLProperty.prototype.updateLater,
-          QmlWeb.Signal.UniqueConnection
-        );
-        parent.evalTreeConnections[this.propertyId] = con;
-      }
-
-    }
+    // }
 
     if (this.val && this.val.$get) {
       return this.val.$get();
