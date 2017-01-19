@@ -27,7 +27,12 @@ class QMLBinding {
     this.compiled = false;
 
     this.serializedTypeId = "b";
-    this.eval = this.get;
+    Object.defineProperty(this, "eval", {
+      value: this.get,
+      configurable: false,
+      enumerable: false,
+      writable: false
+    });
   }
 
   /*toJSON() {
@@ -46,6 +51,7 @@ class QMLBinding {
     // .call is needed for `this` support
     return this.implGet.createPropertycall(object, object, context);
   }
+
   set(object, context, basePath, value) {
     QmlWeb.executionContext = context;
     if (basePath) {

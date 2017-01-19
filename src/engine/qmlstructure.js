@@ -25,10 +25,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 class QMLMethod extends QmlWeb.QMLBinding {
-    constructor(src) {
-        super(src);
-        this.serializedTypeId = "m";
-    }
+  constructor(src) {
+    super(src);
+    this.serializedTypeId = "m";
+  }
 }
 
 /**
@@ -62,7 +62,7 @@ class QMLAliasDefinition {
 class QMLSignalDefinition {
   constructor(params) {
     this.parameters = params;
-        this.serializedTypeId = "s";
+    this.serializedTypeId = "s";
   }
 }
 
@@ -71,9 +71,9 @@ class QMLSignalDefinition {
  * @return {Object} Object representing the group
  */
 class QMLMetaPropertyGroup {
-    constructor() {
-        this.serializedTypeId = "g";
-    }
+  constructor() {
+    this.serializedTypeId = "g";
+  }
 
 }
 
@@ -88,143 +88,143 @@ class QMLMetaElement {
     this.$children = [];
     this.$on = onProp;
     this.readonly = false;
-        this.serializedTypeId = "e";
+    this.serializedTypeId = "e";
   }
 }
 
 function slice(a, start) {
-    return Array.prototype.slice.call(a, start || 0);
+  return Array.prototype.slice.call(a, start || 0);
 }
 
 function copy() {
-    var args = slice(arguments);
-    var result = args[0];
-    args.shift();
-    args.forEach(function(arg){
-        if (arg) {
-            for (var prop in arg) {
-                result[prop] = arg[prop];
-            }
-            if (result instanceof Array) {
-                if (!(arg instanceof Array)) {
-                    throw new Error("Copy from Object to Array");
-                }
-                if (arg.length > result.length) {
-                    result.length = arg.length;
-                }
-            }
+  var args = slice(arguments);
+  var result = args[0];
+  args.shift();
+  args.forEach(function(arg){
+    if (arg) {
+      for (var prop in arg) {
+        result[prop] = arg[prop];
+      }
+      if (result instanceof Array) {
+        if (!(arg instanceof Array)) {
+          throw new Error("Copy from Object to Array");
         }
-    });
-    return result;
+        if (arg.length > result.length) {
+          result.length = arg.length;
+        }
+      }
+    }
+  });
+  return result;
 }
 
 var s_objectIds = 0;
 
 function ssplice(str, startIndex, length, insertString){
-    return str.substring(0,startIndex) + insertString + str.substring(startIndex + length);
+  return str.substring(0,startIndex) + insertString + str.substring(startIndex + length);
 }
 
 function serializeObj(object, path, backrefs, dups, pos) {
-    var top = !path;
-    if (top) {
-      path = [];
-      backrefs = {};
-      dups = {};
-      pos = 0;
-    }
-    var pos0 = pos;
+  var top = !path;
+  if (top) {
+    path = [];
+    backrefs = {};
+    dups = {};
+    pos = 0;
+  }
+  var pos0 = pos;
 
-    if (!object) {
-      return undefined;
-    }
+  if (!object) {
+    return undefined;
+  }
 
-    var id = object.s_objectId;
-    if (!id) object.s_objectId = id = ++s_objectIds;
-    var ref = backrefs[id];
-    if (ref) {
-      dups[id] = ref;
-      return "__"+id;
-    } else {
-      backrefs[id] = ref = {pos:pos, length:0};
-    }
+  var id = object.s_objectId;
+  if (!id) object.s_objectId = id = ++s_objectIds;
+  var ref = backrefs[id];
+  if (ref) {
+    dups[id] = ref;
+    return "__"+id;
+  } else {
+    backrefs[id] = ref = {pos:pos, length:0};
+  }
 
-    var result;
-    if (object instanceof Object) {
-        result = "";
+  var result;
+  if (object instanceof Object) {
+    result = "";
 
-        if (object instanceof Array) {
-            result += "[";
-            var l0 = result.length;
+    if (object instanceof Array) {
+      result += "[";
+      var l0 = result.length;
 
-            var i = 0;
-            for (var propname in object) {
-                if (propname === "serializedTypeId" || propname === "s_objectId") continue;
-                var prop = object[propname];
-                path.push([i]);
-                result += serializeObj(prop, path, backrefs, dups, pos)+", ";
-                pos = pos0 + result.length;
-                path.pop();
-                ++i;
-            }
-            if (result.length>l0) {
-                result = result.substring(0, result.length-2);
-            }
-            result += "]";
-        } else {
-            if (object.serializedTypeId) {
-                result += object.serializedTypeId+"({";
-            } else {
-                result += "{";
-            }
-            var l0 = result.length;
-
-            for (var propname in object) {
-                if (propname === "serializedTypeId" || propname === "s_objectId") continue;
-                var prop = object[propname];
-                if ("$children"===propname && prop instanceof Array && !prop.length) continue;
-
-                path.push(propname);
-                var lab = JSON.stringify(propname)+" : ";
-                pos += lab.length;
-                var value = serializeObj(prop, path, backrefs, dups, pos);
-                if (value) {
-                    result += lab + value + ", ";
-                }
-                pos = pos0 + result.length;
-                path.pop();
-            }
-            if (result.length>l0) {
-                result = result.substring(0, result.length-2);
-            }
-
-            if (object.serializedTypeId) {
-                result += "})";
-            } else {
-                result += "}";
-            }
-        }
-
-    } else if (typeof object === "string") {
-        result = JSON.stringify(object);
-    } else if (object.toString){
-        result = object.toString();
-    } else {
-        result = "/*json:*/"+JSON.stringify(object);
-    }
-
-    ref.length = result.length;
-    if (top) {
-      var pref = "";
-      for (var objid in dups) {
-        var dup = dups[objid];
-        var def = result.substring(dup.pos, dup.pos+dup.length);
-        result = ssplice(result, dup.pos, dup.length, "__"+objid);
-        pref += "var __"+objid+" = "+def+";\n";
+      var i = 0;
+      for (var propname in object) {
+        if (propname === "serializedTypeId" || propname === "s_objectId") continue;
+        var prop = object[propname];
+        path.push([i]);
+        result += serializeObj(prop, path, backrefs, dups, pos)+", ";
+        pos = pos0 + result.length;
+        path.pop();
+        ++i;
       }
-      result = {body:result, decl:pref};
+      if (result.length>l0) {
+        result = result.substring(0, result.length-2);
+      }
+      result += "]";
+    } else {
+      if (object.serializedTypeId) {
+        result += object.serializedTypeId+"({";
+      } else {
+        result += "{";
+      }
+      var l0 = result.length;
+
+      for (var propname in object) {
+        if (propname === "serializedTypeId" || propname === "s_objectId") continue;
+        var prop = object[propname];
+        if ("$children"===propname && prop instanceof Array && !prop.length) continue;
+
+        path.push(propname);
+        var lab = JSON.stringify(propname)+" : ";
+        pos += lab.length;
+        var value = serializeObj(prop, path, backrefs, dups, pos);
+        if (value) {
+          result += lab + value + ", ";
+        }
+        pos = pos0 + result.length;
+        path.pop();
+      }
+      if (result.length>l0) {
+        result = result.substring(0, result.length-2);
+      }
+
+      if (object.serializedTypeId) {
+        result += "})";
+      } else {
+        result += "}";
+      }
     }
 
-    return result;
+  } else if (typeof object === "string") {
+    result = JSON.stringify(object);
+  } else if (object.toString){
+    result = object.toString();
+  } else {
+    result = "/*json:*/"+JSON.stringify(object);
+  }
+
+  ref.length = result.length;
+  if (top) {
+    var pref = "";
+    for (var objid in dups) {
+      var dup = dups[objid];
+      var def = result.substring(dup.pos, dup.pos+dup.length);
+      result = ssplice(result, dup.pos, dup.length, "__"+objid);
+      pref += "var __"+objid+" = "+def+";\n";
+    }
+    result = {body:result, decl:pref};
+  }
+
+  return result;
 }
 
 
@@ -277,35 +277,35 @@ convertToEngine.walkers = {
       var ro = 0;
       switch (statement[0]) {
         case "qmldefaultprop":
-          item.$defaultProperty = name;
-          item[name] = val;
-          break;
+        item.$defaultProperty = name;
+        item[name] = val;
+        break;
         case "qmlpropdefro":
         case "qmlaliasdefro":
-          val.readonly = true;
+        val.readonly = true;
         case "qmlprop":
         case "qmlpropdef":
         case "qmlaliasdef":
         case "qmlmethod":
         case "qmlsignaldef":
-          convertToEngine.applyProp(item, name, val, ro);
-          break;
+        convertToEngine.applyProp(item, name, val, ro);
+        break;
         case "qmlelem":
-          item.$children.push(val);
-          break;
+        item.$children.push(val);
+        break;
         case "qmlobjdef":
-          throw new Error(
-            "qmlobjdef support was removed, update qmlweb-parser to ^0.3.0."
+        throw new Error(
+          "qmlobjdef support was removed, update qmlweb-parser to ^0.3.0."
           );
         case "qmlobj":
-          // Create object to item
-          item[name] = item[name] || new QMLMetaPropertyGroup();
-          for (const j in val) {
-            item[name][j] = val[j];
-          }
-          break;
+        // Create object to item
+        item[name] = item[name] || new QMLMetaPropertyGroup();
+        for (const j in val) {
+          item[name][j] = val[j];
+        }
+        break;
         default:
-          console.log("Unknown statement", statement);
+        console.log("Unknown statement", statement);
       }
     }
     // Make $children be either a single item or an array, if it's more than one
@@ -323,7 +323,7 @@ convertToEngine.walkers = {
     return convertToEngine.bindout(tree, src);
   },
   qmlobjdef: (name, property, tree, src) =>
-    convertToEngine.bindout(tree, src),
+             convertToEngine.bindout(tree, src),
   qmlobj: (elem, statements) => {
     const item = {};
     for (const i in statements) {
@@ -337,24 +337,24 @@ convertToEngine.walkers = {
     return item;
   },
   qmlmethod: (name, tree, src) =>
-    new QMLMethod(src),
+             new QMLMethod(src),
   qmlpropdef: (name, type, tree, src) =>
-    new QMLPropertyDefinition(
-        type,
-        tree ? convertToEngine.bindout(tree, src) : undefined
-    ),
+              new QMLPropertyDefinition(
+                type,
+                tree ? convertToEngine.bindout(tree, src) : undefined
+                ),
   qmlpropdefro: (name, type, tree, src) =>
-    new QMLPropertyDefinition(
-        type,
-        tree ? convertToEngine.bindout(tree, src) : undefined,
-        true
-    ),
+                new QMLPropertyDefinition(
+                  type,
+                  tree ? convertToEngine.bindout(tree, src) : undefined,
+                         true
+                  ),
   qmlaliasdef: () =>
-    new QMLAliasDefinition(slice(arguments, 1)),
+               new QMLAliasDefinition(slice(arguments, 1)),
   qmlaliasdefro: () =>
-    new QMLAliasDefinition(slice(arguments, 1), true),
+                 new QMLAliasDefinition(slice(arguments, 1), true),
   qmlsignaldef: (name, params) =>
-    new QMLSignalDefinition(params),
+                new QMLSignalDefinition(params),
   qmldefaultprop: tree => convertToEngine.walk(tree),
   name: src => {
     if (src === "true" || src === "false") {
@@ -386,7 +386,7 @@ convertToEngine.walkers = {
       if (isList) {
         throw new TypeError(
           "An array may either contain bindings or Element definitions."
-        );
+          );
       }
       return new QmlWeb.QMLBinding(src, tree);
     }
@@ -434,57 +434,57 @@ function serialize(tree) {
 }
 
 function serializeParserFuncs() {
-    var result = "";
-    function b(init) {
-        var result = new QmlWeb.QMLBinding();
-        QmlWeb.copy(result, init);
-        return result;
-    }
-
-    function m(init) {
-        var result = new QmlWeb.QMLMethod();
-        QmlWeb.copy(result, init);
-        return result;
-    }
-
-    function p(init) {
-        var result = new QmlWeb.QMLPropertyDefinition();
-        QmlWeb.copy(result, init);
-        return result;
-    }
-
-    function a(init) {
-        var result = new QmlWeb.QMLAliasDefinition();
-        QmlWeb.copy(result, init);
-        return result;
-    }
-
-    function s(init) {
-        var result = new QmlWeb.QMLSignalDefinition();
-        QmlWeb.copy(result, init);
-        return result;
-    }
-
-    function g(init) {
-        var result = new QmlWeb.QMLMetaPropertyGroup();
-        QmlWeb.copy(result, init);
-        return result;
-    }
-
-    function e(init) {
-        var result = new QmlWeb.QMLMetaElement();
-        QmlWeb.copy(result, init);
-        return result;
-    }
-
-    result += b.toString();
-    result += m.toString();
-    result += p.toString();
-    result += a.toString();
-    result += s.toString();
-    result += g.toString();
-    result += e.toString();
+  var result = "";
+  function b(init) {
+    var result = new QmlWeb.QMLBinding();
+    QmlWeb.copy(result, init);
     return result;
+  }
+
+  function m(init) {
+    var result = new QmlWeb.QMLMethod();
+    QmlWeb.copy(result, init);
+    return result;
+  }
+
+  function p(init) {
+    var result = new QmlWeb.QMLPropertyDefinition();
+    QmlWeb.copy(result, init);
+    return result;
+  }
+
+  function a(init) {
+    var result = new QmlWeb.QMLAliasDefinition();
+    QmlWeb.copy(result, init);
+    return result;
+  }
+
+  function s(init) {
+    var result = new QmlWeb.QMLSignalDefinition();
+    QmlWeb.copy(result, init);
+    return result;
+  }
+
+  function g(init) {
+    var result = new QmlWeb.QMLMetaPropertyGroup();
+    QmlWeb.copy(result, init);
+    return result;
+  }
+
+  function e(init) {
+    var result = new QmlWeb.QMLMetaElement();
+    QmlWeb.copy(result, init);
+    return result;
+  }
+
+  result += b.toString();
+  result += m.toString();
+  result += p.toString();
+  result += a.toString();
+  result += s.toString();
+  result += g.toString();
+  result += e.toString();
+  return result;
 }
 
 
