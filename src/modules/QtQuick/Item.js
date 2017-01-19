@@ -94,7 +94,7 @@ QmlWeb.registerQmlType({
     createProperty("real", this.anchors, "margins");
     createProperty("real", this.anchors, "leftMargin");
     createProperty("real", this.anchors, "rightMargin");
-    createProperty("real", this.anchors, "topMargin");
+    createProperty("real", this.anchoreadOnlyrs, "topMargin");
     createProperty("real", this.anchors, "bottomMargin");
     this.anchors.leftChanged.connect(this, this.$updateHGeometry);
     this.anchors.rightChanged.connect(this, this.$updateHGeometry);
@@ -146,46 +146,44 @@ QmlWeb.registerQmlType({
       element.resourceIndex = this.resources.length;
       this.resources.push(element);
     }
+    //^^^if (this.children.indexOf(element) === -1) {
+      this.childrenChanged();
+    //}
+    this.dom.appendChild(element.dom);
   }
   $onElementRemove(element) {
-   const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
-   this.data.splice(element.index, 1);
-   for (var i = element.index; i < this.data.length; ++i) {
-     this.data[i].index=i;
-   }
-   if (element instanceof QMLItem) {
-     this.children.splice(element.childIndex, 1);
-     for (var i = element.childIndex; i < this.children.length; ++i) {
-       this.children[i].childIndex=i;
-     }
-   } else {
-     this.resources.splice(element.resourceIndex, 1);
-     for (var i = element.resourceIndex; i < this.resources.length; ++i) {
-       this.resources[i].resourceIndex=i;
-     }
-   }
+    const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
+    this.data.splice(element.index, 1);
+    for (var i = element.index; i < this.data.length; ++i) {
+      this.data[i].index=i;
+    }
+    if (element instanceof QMLItem) {
+      this.children.splice(element.childIndex, 1);
+      for (var i = element.childIndex; i < this.children.length; ++i) {
+        this.children[i].childIndex=i;
+      }
+    } else {
+      this.resources.splice(element.resourceIndex, 1);
+      for (var i = element.resourceIndex; i < this.resources.length; ++i) {
+        this.resources[i].resourceIndex=i;
+      }
+    }
+    this.childrenChanged();
+    this.dom.removeChild(element.dom);
   }
   $onParentChanged_(newParent, oldParent, propName) {
-    if (oldParent) {
-      oldParent.childrenChanged();
-      oldParent.dom.removeChild(this.dom);
-    }
-    if (newParent && newParent.children.indexOf(this) === -1) {
-      newParent.childrenChanged();
-    }
-    if (newParent) {
-      newParent.dom.appendChild(this.dom);
-    }
     this.$updateHGeometry(newParent, oldParent, propName);
     this.$updateVGeometry(newParent, oldParent, propName);
   }
   $onDataChanged(newData) {
-    const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
-    for (const i in newData) {
-      const child = newData[i];
-      if (child instanceof QMLItem) {
-        child.parent = this; // This will also add it to children.
-      }
+    if (this.$defaultProperty==="data") {
+       const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
+       for (const i in newData) {
+         const child = newData[i];
+         if (child instanceof QMLItem) {
+           child.parent = this; // This will also add it to children.
+         }
+       }
     }
   }
   $onStateChanged(newVal, oldVal) {
