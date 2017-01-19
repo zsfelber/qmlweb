@@ -156,20 +156,20 @@ QmlWeb.registerQmlType({
   }
   $onElementRemove(element) {
    const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
-   for (var i = element.index+1; i < this.data.length; ++i) {
-     this.data[i].index--;
-   }
    this.data.splice(element.index, 1);
+   for (var i = element.index; i < this.data.length; ++i) {
+     this.data[i].index=i;
+   }
    if (element instanceof QMLItem) {
-     for (var i = element.childIndex+1; i < this.children.length; ++i) {
-       this.children[i].childIndex--;
-     }
      this.children.splice(element.childIndex, 1);
-   } else {
-     for (var i = element.resourceIndex+1; i < this.resources.length; ++i) {
-       this.resources[i].resourceIndex--;
+     for (var i = element.childIndex; i < this.children.length; ++i) {
+       this.children[i].childIndex=i;
      }
+   } else {
      this.resources.splice(element.resourceIndex, 1);
+     for (var i = element.resourceIndex; i < this.resources.length; ++i) {
+       this.resources[i].resourceIndex=i;
+     }
    }
   }
   $onParentChanged_(newParent, oldParent, propName) {
