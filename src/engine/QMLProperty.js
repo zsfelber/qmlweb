@@ -60,8 +60,13 @@ class QMLProperty {
     } else {
       this.val = new constructors[this.type](val);
     }
+    if (this.binding && this.binding.bidirectional) {
+      this.binding.set(this.obj, this.objectScope, this.componentScope,
+                       this.componentScopeBasePath, this.val);
+    }
   }
 
+  // TODO move to Animation (binding it to a 'changed' slot)
   resetAnimation() {
     this.animation.running = false;
     this.animation.$actions = [{
@@ -128,7 +133,7 @@ class QMLProperty {
   }
 
   updateLater() {
-    if (this.animation || this.changed.connectedSlots.length) {
+    if (this.binding && (this.animation || this.changed.connectedSlots.length || this.binding.bidirectional)) {
       this.update();
     } else  {
       this.needsUpdate = true;

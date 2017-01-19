@@ -50,6 +50,8 @@ function createProperty(type, obj, propName, options = {}) {
     var path0 = options.path.slice(0);
     var proplast = path0.pop();
 
+    obj.$properties[propName] = new QMLWeb.QMLBinding(options.path.join("."), 0, false, true);
+
     function _eval_parent() {
       var cur = componentScope;
       var proc = [];

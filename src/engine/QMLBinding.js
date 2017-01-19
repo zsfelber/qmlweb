@@ -41,7 +41,7 @@ class QMLBinding {
     // .call is needed for `this` support
     return this.implGet.call(object, object, context);
   }
-  set(object, value, context, basePath) {
+  set(object, context, basePath, value) {
     QmlWeb.executionContext = context;
     if (basePath) {
       QmlWeb.engine.$basePath = basePath;
