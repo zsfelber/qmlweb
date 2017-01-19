@@ -49,7 +49,7 @@ class QMLBinding {
       QmlWeb.engine.$basePath = basePath;
     }
     // .call is needed for `this` support
-    return this.implGet.createPropertycall(object, object, context);
+    return this.implGet.call(object, object, context);
   }
 
   set(object, context, basePath, value) {

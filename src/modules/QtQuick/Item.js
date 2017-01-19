@@ -5,7 +5,7 @@ QmlWeb.registerQmlType({
   baseClass: "QtQml.QtObject",
   properties: {
     $opacity: { type: "real", initialValue: 1 },
-    parent: { type: "alias", objectName: "container", overrideType: "Item" },
+    parent: { type: "alias", path:["container"], overrideType: "Item" },
     state: "string",
     states: "list",
     transitions: "list",
@@ -94,7 +94,7 @@ QmlWeb.registerQmlType({
     createProperty("real", this.anchors, "margins");
     createProperty("real", this.anchors, "leftMargin");
     createProperty("real", this.anchors, "rightMargin");
-    createProperty("real", this.anchoreadOnlyrs, "topMargin");
+    createProperty("real", this.anchors, "topMargin");
     createProperty("real", this.anchors, "bottomMargin");
     this.anchors.leftChanged.connect(this, this.$updateHGeometry);
     this.anchors.rightChanged.connect(this, this.$updateHGeometry);

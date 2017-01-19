@@ -33,6 +33,7 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
     var oldprop = obj.$properties[propName];
 
     // relink old property (see QML alias specification)
+    // http://doc.qt.io/qt-4.8/propertybinding.html#property-aliases
     // alias overrides a same name property but aliases still can refer to the redefined old properties
     // TODO also check alias->another [alias, eval to->same name property<-eval to] expressions
 
@@ -63,9 +64,16 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
     _set_prop(propName, prop);
   }
 
-  QmlWeb.setupGetterSetter(obj, propName, prop.get, prop.set);
+  var getter = function () {
+    prop.get.call(prop);
+  };
+  var setter = function (value) {
+    prop.set.call(prop, value, QMLProperty.ReasonUser, objectScope, componentScope);
+  }
+
+  QmlWeb.setupGetterSetter(obj, propName, getter, setter);
   if (obj.$isComponentRoot) {
-    QmlWeb.setupGetterSetter(obj.$context, propName, prop.get, prop.set);
+    QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter);
   }
 }
 

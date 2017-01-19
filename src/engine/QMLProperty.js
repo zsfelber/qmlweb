@@ -212,7 +212,7 @@ class QMLProperty {
     if (this.readOnly && !this.obj.$canEditReadOnlyProperties) {
       throw new Error(`property '${this.name}' has read only access`);
     }
-    if (reason === undefined) {
+    if (!reason) {
       reason = QMLProperty.ReasonUser;
     }
 
@@ -331,8 +331,8 @@ QMLProperty.typeInitialValues = {
   url: ""
 };
 
-QMLProperty.ReasonUser = 0;
-QMLProperty.ReasonInit = 1;
-QMLProperty.ReasonAnimation = 2;
+QMLProperty.ReasonUser = 10;
+QMLProperty.ReasonInit = 11;
+QMLProperty.ReasonAnimation = 12;
 
 QmlWeb.QMLProperty = QMLProperty;
