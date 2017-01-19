@@ -55,7 +55,7 @@ class Signal {
       connection = { thisObj: args[0], slot: args[1], type };
     }
     connection.disconnect = function() {
-      this.removeConnection(connection.index);
+      this.removeConnection(connection);
     };
     connection.index = this.connectedSlots.length;
     this.connectedSlots.push(connection);
@@ -76,21 +76,16 @@ class Signal {
       ? args[0] instanceof Function ? 1 : 2
       : typeof args[1] === "string" || args[1] instanceof String ? 3 : 4;
     for (let i = 0; i < this.connectedSlots.length; i++) {
-      const { slot, thisObj } = this.connectedSlots[i];
+      //const { slot, thisObj } = this.connectedSlots[i];
+      const connection = this.connectedSlots[i];
       if (
         args.length === 0 ||
-        callType === 1 && slot === args[0] ||
-        callType === 2 && thisObj === args[0] ||
-        callType === 3 && thisObj === args[0] && slot === args[0][args[1]] ||
-        thisObj === args[0] && slot === args[1]
+        callType === 1 && connection.slot === args[0] ||
+        callType === 2 && connection.thisObj === args[0] ||
+        callType === 3 && connection.thisObj === args[0] && connection.slot === args[0][args[1]] ||
+        connection.thisObj === args[0] && connection.slot === args[1]
       ) {
-        if (thisObj) {
-          const index = thisObj.$tidyupList.indexOf(this.signal);
-          if (index >= 0) {
-            thisObj.$tidyupList.splice(index, 1);
-          }
-        }
-        this.removeConnection(i);
+        this.removeConnection(connection);
         // We have removed an item from the list so the indexes shifted one
         // backwards
         i--;
@@ -116,9 +111,16 @@ class Signal {
     }
     return false;
   }
-  removeConnection(index) {
-    this.connectedSlots.splice(index, 1);
-    for (var i = index; i<this.connectedSlots.length; i++) {
+  removeConnection(connection) {
+    if (connection.thisObj) {
+      const index = connection.thisObj.$tidyupList.indexOf(this.signal);
+      if (index >= 0) {
+        connection.thisObj.$tidyupList.splice(index, 1);
+      }
+    }
+
+    this.connectedSlots.splice(connection.index, 1);
+    for (var i = connection.index; i<this.connectedSlots.length; i++) {
       this.connectedSlots[i].index--;
     }
   }
