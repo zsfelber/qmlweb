@@ -149,61 +149,60 @@ function serializeObj(object, path, backrefs, dups, pos) {
   }
 
   var result;
-  if (object instanceof Object) {
-    result = "";
 
-    if (object instanceof Array) {
-      result += "[";
-      var l0 = result.length;
+  if (object instanceof Array) {
+    result = "[";
+    var l0 = result.length;
 
-      var i = 0;
-      for (var propname in object) {
-        if (propname === "serializedTypeId" || propname === "s_objectId") continue;
-        var prop = object[propname];
-        path.push([i]);
-        result += serializeObj(prop, path, backrefs, dups, pos)+", ";
-        pos = pos0 + result.length;
-        path.pop();
-        ++i;
-      }
-      if (result.length>l0) {
-        result = result.substring(0, result.length-2);
-      }
-      result += "]";
+    var i = 0;
+    for (var propname in object) {
+      if (propname === "serializedTypeId" || propname === "s_objectId") continue;
+      var prop = object[propname];
+      path.push([i]);
+      result += serializeObj(prop, path, backrefs, dups, pos)+", ";
+      pos = pos0 + result.length;
+      path.pop();
+      ++i;
+    }
+    if (result.length>l0) {
+      result = result.substring(0, result.length-2);
+    }
+    result += "]";
+  } else if (object instanceof Object) {
+    //if (object.toJSON) {
+    //  return object.toJSON();
+    //} else
+    if (object.serializedTypeId) {
+      result = object.serializedTypeId+"({";
     } else {
-      if (object.serializedTypeId) {
-        result += object.serializedTypeId+"({";
-      } else {
-        result += "{";
-      }
-      var l0 = result.length;
+      result = "{";
+    }
+    var l0 = result.length;
 
-      for (var propname in object) {
-        if (propname === "serializedTypeId" || propname === "s_objectId") continue;
-        var prop = object[propname];
-        if ("$children"===propname && prop instanceof Array && !prop.length) continue;
+    for (var propname in object) {
+      if (propname === "serializedTypeId" || propname === "s_objectId") continue;
+      var prop = object[propname];
+      if ("$children"===propname && prop instanceof Array && !prop.length) continue;
 
-        path.push(propname);
-        var lab = JSON.stringify(propname)+" : ";
-        pos += lab.length;
-        var value = serializeObj(prop, path, backrefs, dups, pos);
-        if (value) {
-          result += lab + value + ", ";
-        }
-        pos = pos0 + result.length;
-        path.pop();
+      path.push(propname);
+      var lab = JSON.stringify(propname)+" : ";
+      pos += lab.length;
+      var value = serializeObj(prop, path, backrefs, dups, pos);
+      if (value) {
+        result += lab + value + ", ";
       }
-      if (result.length>l0) {
-        result = result.substring(0, result.length-2);
-      }
-
-      if (object.serializedTypeId) {
-        result += "})";
-      } else {
-        result += "}";
-      }
+      pos = pos0 + result.length;
+      path.pop();
+    }
+    if (result.length>l0) {
+      result = result.substring(0, result.length-2);
     }
 
+    if (object.serializedTypeId) {
+      result += "})";
+    } else {
+      result += "}";
+    }
   } else if (typeof object === "string") {
     result = JSON.stringify(object);
   } else if (object.toString){
@@ -349,10 +348,8 @@ convertToEngine.walkers = {
                   tree ? convertToEngine.bindout(tree, src) : undefined,
                          true
                   ),
-  qmlaliasdef: () =>
-               new QMLAliasDefinition(slice(arguments, 1)),
-  qmlaliasdefro: () =>
-                 new QMLAliasDefinition(slice(arguments, 1), true),
+  qmlaliasdef: function() { return new QMLAliasDefinition(slice(arguments, 1)); },
+  qmlaliasdefro:function() { return new QMLAliasDefinition(slice(arguments, 1), true); },
   qmlsignaldef: (name, params) =>
                 new QMLSignalDefinition(params),
   qmldefaultprop: tree => convertToEngine.walk(tree),

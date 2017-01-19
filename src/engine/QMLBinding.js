@@ -22,7 +22,24 @@ class QMLBinding {
       this.isFunction = isfunc;
       this.rhs = rhs;
     }
-    this.src = val;
+    if (UglifyJS && val) {
+      try {
+        this.src = UglifyJS.minify(val, {fromString: true, parse:{bare_returns:true}});
+        if (this.src.code) this.src = this.src.code;
+      } catch (e) {
+        try {
+          this.src = UglifyJS.minify("_="+val, {fromString: true});
+          if (this.src.code) this.src = this.src.code;
+          this.src = this.src.substring(2);
+        } catch (e2) {
+          console.warn(e.message+":\n"+e2.message+":\n(_=) "+val);
+          this.src = val;
+        }
+      }
+    } else {
+      this.src = val;
+    }
+
     this.bidirectional = bidirectional;
     this.compiled = false;
 
@@ -36,11 +53,19 @@ class QMLBinding {
   }
 
   /*toJSON() {
-    return {
-      src: this.src,
-      deps: JSON.stringify(this.deps),
-      tree: JSON.stringify(this.tree)
-    };
+    var src
+    if (this.rhs) {
+      return `b({
+        "src": "${this.src}",
+        "isFunction": ${this.isFunction},
+        "rhs": "${this.rhs}"
+      })`;
+    } else {
+      return `b({
+        "src": "${this.src}",
+        "isFunction": ${this.isFunction}
+      })`;
+    }
   }*/
 
   get(object, context, basePath) {
