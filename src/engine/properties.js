@@ -48,8 +48,7 @@ function createProperty(type, obj, propName, options = {}) {
       obj.$properties[propName].componentScopeBasePath = componentScope.$basePath;
     }
     var path0 = options.path.slice(0);
-    var proplast = path0[path0.length-1];
-    path0.pop();
+    var proplast = path0.pop();
 
     function _eval_parent() {
       var cur = componentScope;

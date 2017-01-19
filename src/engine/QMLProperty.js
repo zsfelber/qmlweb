@@ -99,6 +99,14 @@ class QMLProperty {
     }
   }
 
+  updateLater() {
+    if (this.animation || this.changed.connectedSlots.length) {
+      update();
+    } else  {
+      this.needsUpdate = true;
+    }
+  }
+
   // Define getter
   get() {
     //if (this.needsUpdate && !QMLProperty.evaluatingPropertyPaused) {
@@ -113,7 +121,7 @@ class QMLProperty {
       //console.log(this,QMLProperty.evaluatingPropertyStack.slice(0),this.val);
       this.changed.connect(
         QMLProperty.evaluatingProperty,
-        QMLProperty.prototype.update,
+        QMLProperty.prototype.updateLater,
         QmlWeb.Signal.UniqueConnection
       );
     }

@@ -344,7 +344,7 @@ class QMLEngine {
     this.userAddedModulePaths[moduleName] = dirPath.replace(/\/$/, "");
   }
 
-  registerProperty(obj, propName) {
+  /*registerProperty(obj, propName) {
     const dependantProperties = [];
     let value = obj[propName];
 
@@ -365,7 +365,7 @@ class QMLEngine {
     };
 
     QmlWeb.setupGetterSetter(obj, propName, getter, setter);
-  }
+  }*/
 
   loadImports(importsArray, currentFileDir = this.$basePath,
       importContextId = -1) {
