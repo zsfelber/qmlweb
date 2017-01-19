@@ -80,14 +80,17 @@ class QMLProperty {
         this.binding.compile();
       }
 
-      this.obsoleteConnections = this.evalTreeConnections.slice(0);
-      this.evalTreeConnections = {};
+      try {
+        this.obsoleteConnections = this.evalTreeConnections.slice(0);
+        this.evalTreeConnections = {};
 
-      this.$setVal(this.binding.eval(this.objectScope, this.componentScope,
-        this.componentScopeBasePath), this.componentScope);
+        this.$setVal(this.binding.eval(this.objectScope, this.componentScope,
+          this.componentScopeBasePath), this.componentScope);
 
-      for (var i in this.obsoleteConnections) {
-        obsoleteConnections[i].disconnect();
+      } finally {
+        for (var i in this.obsoleteConnections) {
+          obsoleteConnections[i].disconnect();
+        }
       }
 
 
@@ -157,40 +160,6 @@ class QMLProperty {
         parent.evalTreeConnections[this.propertyId] = con;
       }
 
-
-      var connections = this.evalTreeConnections[parent.propertyId];
-      if (connections) {
-        for (var i in connections) {
-          var con = connections[i];
-          var cs = --con.connections;
-          if (!QMLProperty.evaluatingProperties.map[i]) {
-            if (!cs) {
-              con.disconnect();
-              delete this.evalAllConnections[i];
-            }
-            delete connections[i];￼
-          }
-        }
-      } else {
-        this.evalTreeConnections[parent.propertyId] = connections = {};
-      }
-      QMLProperty.evaluatingProperties.stack.forEach(function (ep){
-        var con = this.evalAllConnections[ep.propertyId];
-        if (con) {
-          con.connections++;
-        } else {
-          con = this.changed.connect(
-            ep,
-            QMLProperty.prototype.updateLater,
-            QmlWeb.Signal.UniqueConnection
-          );
-          con.connections = 1;
-          this.evalAllConnections[ep.propertyId] = con;
-        }
-        connections[ep.propertyId] = con;
-      });
-
-
     }
 
     if (this.val && this.val.$get) {
@@ -198,24 +167,6 @@ class QMLProperty {
     }
 
     return this.val;
-  }
-
-  cleanupEvalConnections(nextProp) {
-    if (nextProp !== this.currentNextProp) {
-      if (this.evalTreeConnections) {
-        for (var i in this.evalTreeConnections) {
-          var con = this.evalTreeConnections[i];
-          if (!--con.connections) {
-            con.disconnect();
-            delete this.evalAllConnections[i];
-          }
-          delete this.evalTreeConnections[i];
-        }
-      } else {
-        this.evalTreeConnections = {};
-      }
-      this.currentNextProp = nextProp;
-    }
   }
 
   // Define setter
@@ -314,9 +265,6 @@ class QMLProperty {
         [prop].slice(0)
       );
       return false;
-    }
-    if (QMLProperty.evaluatingProperty) {
-      QMLProperty.evaluatingProperty.cleanupEvalConnections(prop);
     }
     QMLProperty.evaluatingProperty = prop;
     QMLProperty.evaluatingProperties.map[prop.propertyId] = prop;
