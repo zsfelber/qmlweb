@@ -8,7 +8,6 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
   if (!options) options = {};
 
   const QMLProperty = QmlWeb.QMLProperty;
-  const QMLBinding = QmlWeb.QMLBinding;
   const prop = new QMLProperty(type, obj, propName, options.readOnly);
   function _set_prop(propName, prop) {
     obj[`${propName}Changed`] = prop.changed;
