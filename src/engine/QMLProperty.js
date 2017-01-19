@@ -110,7 +110,7 @@ class QMLProperty {
         for (var i in this.obsoleteConnections) {
           con = this.obsoleteConnections[i];
           con.disconnect();
-          con.parentProperty.childEvalTreeConnections--;
+          con.signalOwner.childEvalTreeConnections--;
         }
         delete this.obsoleteConnections;
       }
@@ -193,7 +193,7 @@ class QMLProperty {
             QmlWeb.Signal.UniqueConnection
           );
           parent.evalTreeConnections[this.propertyId] = con;
-          con.parentProperty = this;
+          con.signalOwner = this;
           this.childEvalTreeConnections++;
         }
       });
