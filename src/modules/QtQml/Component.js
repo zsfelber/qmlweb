@@ -13,6 +13,8 @@ class QMLComponent {
   constructor(meta) {
     if (QmlWeb.constructors[meta.object.$class] === QMLComponent) {
       this.$metaObject = meta.object.$children[0];
+      this.$metaObject.$name = meta.object.$name;
+      this.$metaObject.$id = meta.object.id;
     } else {
       this.$metaObject = meta.object;
     }
