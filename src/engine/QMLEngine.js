@@ -418,22 +418,25 @@ class QMLEngine {
     let content = this.qmldirsContents[name];
     // check if we have already loaded that qmldir file
     if (!content) {
-      var diredName = name;
+      var qrcName;
       if (nameIsQualifiedModuleName && this.userAddedModulePaths[name]) {
         // 1. we have qualified module and user had configured path for that
         // module with this.addModulePath
-        content = QmlWeb.readQmlDir(this.userAddedModulePaths[name]);
+        qrcName = this.userAddedModulePaths[name];
+        content = QmlWeb.readQmlDir(qrcName);
       } else if (nameIsUrl || nameIsDir) {
         // 2. direct load
         // nameIsUrl => url do not need dirs
         // nameIsDir => already computed full path above
+        qrcName = name;
         content = QmlWeb.readQmlDir(name);
       } else if (nameIsJs) {
         // 3. Js file, don't need qmldir
       } else {
         // 4. qt-style lookup for qualified module
         const probableDirs = [currentFileDir].concat(this.importPathList());
-        diredName = name.replace(/\./g, "/");
+        var diredName = name.replace(/\./g, "/");
+        qrcName = "qrc:/"+diredName;
 
         for (let k = 0; k < probableDirs.length; k++) {
           const file = probableDirs[k] + diredName;
@@ -444,7 +447,7 @@ class QMLEngine {
         }
       }
 
-      var qrcModule = QmlWeb.qrcModules[diredName];
+      var qrcModule = QmlWeb.qrcModules[qrcName];
       if (qrcModule) {
         if (!content) {
           content = {};
