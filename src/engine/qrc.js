@@ -45,4 +45,5 @@ QmlWeb.addQrc = function(module, name, impl) {
   }
   m[className] = "qrc:/"+module+"/"+name;
   QmlWeb.qrc[module+"/"+name] = impl;
+  impl.$name = name;
 }
