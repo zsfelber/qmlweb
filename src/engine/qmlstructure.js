@@ -27,7 +27,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 class QMLMethod extends QmlWeb.QMLBinding {
   constructor(src) {
     super(src);
-    this.serializedTypeId = "m";
+    Object.defineProperty(this, "serializedTypeId", {
+      value: "m",
+      configurable: false,
+      enumerable: false,
+      writable: false
+    });
   }
 }
 
@@ -42,7 +47,12 @@ class QMLPropertyDefinition {
     this.type = type;
     this.value = value;
     this.readonly = readonly;
-    this.serializedTypeId = "p";
+    Object.defineProperty(this, "serializedTypeId", {
+      value: "p",
+      configurable: false,
+      enumerable: false,
+      writable: false
+    });
   }
 }
 
@@ -50,7 +60,12 @@ class QMLAliasDefinition {
   constructor(path, readonly) {
     this.path = path;
     this.readonly = readonly;
-    this.serializedTypeId = "a";
+    Object.defineProperty(this, "serializedTypeId", {
+      value: "a",
+      configurable: false,
+      enumerable: false,
+      writable: false
+    });
   }
 }
 
@@ -62,7 +77,12 @@ class QMLAliasDefinition {
 class QMLSignalDefinition {
   constructor(params) {
     this.parameters = params;
-    this.serializedTypeId = "s";
+    Object.defineProperty(this, "serializedTypeId", {
+      value: "s",
+      configurable: false,
+      enumerable: false,
+      writable: false
+    });
   }
 }
 
@@ -72,7 +92,12 @@ class QMLSignalDefinition {
  */
 class QMLMetaPropertyGroup {
   constructor() {
-    this.serializedTypeId = "g";
+    Object.defineProperty(this, "serializedTypeId", {
+      value: "g",
+      configurable: false,
+      enumerable: false,
+      writable: false
+    });
   }
 
 }
@@ -87,8 +112,12 @@ class QMLMetaElement {
     this.$class = type;
     this.$children = [];
     this.$on = onProp;
-    this.readonly = false;
-    this.serializedTypeId = "e";
+    Object.defineProperty(this, "serializedTypeId", {
+      value: "e",
+      configurable: false,
+      enumerable: false,
+      writable: false
+    });
   }
 }
 

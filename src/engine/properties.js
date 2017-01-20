@@ -160,9 +160,7 @@ function applyProperty(item, i, value, objectScope, componentScope) {
       componentScope[i] = item[i];
     }
     return true;
-  }
-
-  if (value instanceof QmlWeb.QMLMethod) {
+  } else if (value instanceof QmlWeb.QMLMethod) {
     value.compile();
     item[i] = value.eval(objectScope, componentScope,
       componentScope.$basePath);
@@ -170,21 +168,15 @@ function applyProperty(item, i, value, objectScope, componentScope) {
       componentScope[i] = item[i];
     }
     return true;
-  }
-
-  if (value instanceof QmlWeb.QMLAliasDefinition) {
+  } else if (value instanceof QmlWeb.QMLAliasDefinition) {
     createProperty("alias", item, i, {path:value.path, readOnly:value.readonly}, objectScope, componentScope);
     // NOTE getter/setter/target moved to inside createProperty
 
     return true;
-  }
-
-  if (value instanceof QmlWeb.QMLPropertyDefinition) {
+  } else if (value instanceof QmlWeb.QMLPropertyDefinition) {
     createProperty(value.type, item, i, {readOnly:value.readonly, initialValue:value.value}, objectScope, componentScope);
     return true;
-  }
-
-  if (item[i] && value instanceof QmlWeb.QMLMetaPropertyGroup) {
+  } else if (item[i] && value instanceof QmlWeb.QMLMetaPropertyGroup) {
     // Apply properties one by one, otherwise apply at once
     applyProperties(value, item[i], objectScope, componentScope);
     return true;

@@ -43,7 +43,12 @@ class QMLBinding {
     this.bidirectional = bidirectional;
     this.compiled = false;
 
-    this.serializedTypeId = "b";
+    Object.defineProperty(this, "serializedTypeId", {
+      value: "b",
+      configurable: true,
+      enumerable: false,
+      writable: false
+    });
     Object.defineProperty(this, "eval", {
       value: this.get,
       configurable: false,
