@@ -164,7 +164,11 @@ function serializeObj(object, path, backrefs, dups, pos) {
   var pos0 = pos;
 
   if (!object) {
-    return undefined;
+    if (typeof object === "string") {
+      return '""';
+    } else {
+      return object;
+    }
   }
 
   var id = object.s_objectId;
@@ -188,7 +192,13 @@ function serializeObj(object, path, backrefs, dups, pos) {
       if (propname === "serializedTypeId" || propname === "s_objectId") continue;
       var prop = object[propname];
       path.push([i]);
-      result += serializeObj(prop, path, backrefs, dups, pos)+", ";
+      var value = serializeObj(prop, path, backrefs, dups, pos);
+      if (value !== undefined) {
+        result += value+", ";
+      } else {
+        result += "_, ";
+      }
+
       pos = pos0 + result.length;
       path.pop();
       ++i;
@@ -211,13 +221,13 @@ function serializeObj(object, path, backrefs, dups, pos) {
     for (var propname in object) {
       if (propname === "serializedTypeId" || propname === "s_objectId") continue;
       var prop = object[propname];
-      if ("$children"===propname && prop instanceof Array && !prop.length) continue;
+      if (object instanceof QMLMetaElement && "$children"===propname && !prop.length) continue;
 
       path.push(propname);
       var lab = JSON.stringify(propname)+" : ";
       pos += lab.length;
       var value = serializeObj(prop, path, backrefs, dups, pos);
-      if (value) {
+      if (value !== undefined) {
         result += lab + value + ", ";
       }
       pos = pos0 + result.length;
@@ -459,8 +469,7 @@ function serialize(tree) {
   return s;
 }
 
-function serializeParserFuncs() {
-  var result = "";
+function serializeParserInit() {
   function b(init) {
     var result = new QmlWeb.QMLBinding();
     QmlWeb.copy(result, init);
@@ -503,6 +512,8 @@ function serializeParserFuncs() {
     return result;
   }
 
+  var result = "";
+  result += "var _;\n";
   result += b.toString();
   result += m.toString();
   result += p.toString();
@@ -556,7 +567,7 @@ QmlWeb.QMLMetaPropertyGroup = QMLMetaPropertyGroup;
 QmlWeb.QMLMetaElement = QMLMetaElement;
 QmlWeb.copy = copy;
 QmlWeb.serialize = serialize;
-QmlWeb.serializeParserFuncs = serializeParserFuncs;
+QmlWeb.serializeParserInit = serializeParserInit;
 QmlWeb.convertToEngine = convertToEngine;
 QmlWeb.loadParser = loadParser;
 QmlWeb.parseQML = parseQML;

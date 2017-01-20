@@ -16,8 +16,11 @@ class QMLBinding {
     // code block it could though also be a object definition, so we need to
     // check that as well (it is, if the content is labels).
     if (isfunc === undefined) {
-      this.isFunction = rhs && rhs[0] === "block" &&
-                        rhs[1][0] && rhs[1][0][0] !== "label";
+      if (rhs && rhs[0] === "block" &&
+          rhs[1][0] && rhs[1][0][0] !== "label") {
+        this.isFunction = true;
+      }
+      // else Not serialized, but still means false
     } else {
       this.isFunction = isfunc;
       this.rhs = rhs;
@@ -41,7 +44,8 @@ class QMLBinding {
     }
 
     this.bidirectional = bidirectional;
-    this.compiled = false;
+    // Not serialized, but still means false:
+    //this.compiled = false;
 
     Object.defineProperty(this, "serializedTypeId", {
       value: "b",
