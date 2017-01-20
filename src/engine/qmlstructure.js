@@ -221,7 +221,7 @@ function serializeObj(object, path, backrefs, dups, pos) {
     for (var propname in object) {
       if (propname === "serializedTypeId" || propname === "s_objectId") continue;
       var prop = object[propname];
-      if (object instanceof QMLMetaElement && "$children"===propname && !prop.length) continue;
+      if (object instanceof QMLMetaElement && "$children"===propname && prop instanceof Array && !prop.length) continue;
 
       path.push(propname);
       var lab = JSON.stringify(propname)+" : ";
