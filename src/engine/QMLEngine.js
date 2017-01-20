@@ -418,6 +418,7 @@ class QMLEngine {
     let content = this.qmldirsContents[name];
     // check if we have already loaded that qmldir file
     if (!content) {
+      var diredName = name;
       if (nameIsQualifiedModuleName && this.userAddedModulePaths[name]) {
         // 1. we have qualified module and user had configured path for that
         // module with this.addModulePath
@@ -427,20 +428,12 @@ class QMLEngine {
         // nameIsUrl => url do not need dirs
         // nameIsDir => already computed full path above
         content = QmlWeb.readQmlDir(name);
-
-        var qrcModule = QmlWeb.qrcModules[name];
-        if (qrcModule) {
-          if (!content) {
-            content = {};
-          }
-          content.qrcs = qrcModule;
-        }
       } else if (nameIsJs) {
         // 3. Js file, don't need qmldir
       } else {
         // 4. qt-style lookup for qualified module
         const probableDirs = [currentFileDir].concat(this.importPathList());
-        const diredName = name.replace(/\./g, "/");
+        diredName = name.replace(/\./g, "/");
 
         for (let k = 0; k < probableDirs.length; k++) {
           const file = probableDirs[k] + diredName;
@@ -450,6 +443,15 @@ class QMLEngine {
           }
         }
       }
+
+      var qrcModule = QmlWeb.qrcModules[diredName];
+      if (qrcModule) {
+        if (!content) {
+          content = {};
+        }
+        content.qrcs = qrcModule;
+      }
+
       // keep already loaded qmldir files
       this.qmldirsContents[name] = content;
     }
