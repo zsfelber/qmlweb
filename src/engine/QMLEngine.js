@@ -760,11 +760,6 @@ class QMLEngine {
       path = `${path}${file}`;
     }
 
-    if () {
-      const qdirInfo = this.ctxQmldirs[QmlWeb.executionContext.importContextId][basePathURI.file];
-      QmlWeb.executionContext.importContextId
-    }
-
     // Remove duplicate slashes and dot segments in the path
     path = this.removeDotSegments(path.replace(/([^:]\/)\/+/g, "$1"));
 
