@@ -8,6 +8,7 @@ QmlWeb.registerQmlType({
      container: "QtObject",
      index: "int",
      resourceIndex: "int",
+     objectName: "string"
   },
   signals: {
      elementAdd: [
