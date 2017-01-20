@@ -117,7 +117,12 @@ class QMLBinding {
       if (!/^\w+$/.test(rhs)) {
         throw new Error("Invalid binding rhs property format :  "+rhs);
       }
-      src += "." + rhs;
+      if (src) src += ".";
+      src += rhs;
+    }
+
+    if (!src) {
+      throw new Error("Invalid binding path : "+src);
     }
 
     return new Function("__executionObject", "__executionContext", `
@@ -133,26 +138,59 @@ class QMLBinding {
     }
     src = _ubertrim(src);
 
-    // NOTE validate first
-    if (!/^\w+$/.test(rhs) || !/^(\w+\.)*\w+$/.test(src)) {
-      throw new Error("Invalid writable/bidirectional binding expression :  "+src+" . "+rhs);
+    if (src) {
+
+      // NOTE validate first
+      if (!/^\w+$/.test(rhs) || !/^(\w+\.)*\w+$/.test(src)) {
+        throw new Error("Invalid writable/bidirectional binding expression :  "+src+" . "+rhs);
+      }
+
+      return new Function("__executionObject", "__executionContext", "__value", `
+        with(QmlWeb) with(__executionContext) with(__executionObject) {
+          var obj = ${src};
+          if (!obj) {
+            console.error("Writable/Bidirectional binding target property '${src}' is null. Cannot set '${rhs}' on null.");
+            return;
+          }
+          var prop = obj.$properties["${rhs}"];
+          if (prop) {
+            if (prop.readOnly) {
+              throw new Error("Writable/Bidirectional binding target property '${src}' . '${rhs}' is read-only.");
+            } else {
+              prop.set(__value, QMLProperty.ReasonUser);
+            }
+          } else {
+            throw new Error("Writable/Bidirectional binding target property '${src}' . '${rhs}' not found, it is not writable.");
+          }
+        }
+      `);
+    } else {
+
+      // NOTE validate first
+      if (!/^\w+$/.test(rhs)) {
+        throw new Error("Invalid writable/bidirectional binding expression : "+rhs);
+      }
+
+      return new Function("__executionObject", "__executionContext", "__value", `
+        with(QmlWeb) with(__executionContext) with(__executionObject) {
+          var prop = this.$properties["${rhs}"];
+          if (!prop) {
+             prop = __executionContext.$properties["${rhs}"];
+          }
+
+          if (prop) {
+            if (prop.readOnly) {
+              throw new Error("Writable/Bidirectional binding target property '${src}' . '${rhs}' is read-only.");
+            } else {
+              prop.set(__value, QMLProperty.ReasonUser);
+            }
+          } else {
+            throw new Error("Writable/Bidirectional binding target property '${src}' . '${rhs}' not found, it is not writable.");
+          }
+        }
+      `);
     }
 
-    return new Function("__executionObject", "__executionContext", "__value", `
-      with(QmlWeb) with(__executionContext) with(__executionObject) {
-        var obj = ${src};
-        var prop = obj.$properties[${rhs}];
-        if (prop) {
-          if (prop.readOnly) {
-            throw new Error("Writable/Bidirectional binding target property '${src}' . '${rhs}' is read-only.");
-          } else {
-            prop.set(__value, QMLProperty.ReasonUser);
-          }
-        } else {
-          throw new Error("Writable/Bidirectional binding target property '${src}' . '${rhs}' not found, it is not writable.");
-        }
-      }
-    `);
   }
 
 }

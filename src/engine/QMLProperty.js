@@ -63,7 +63,7 @@ class QMLProperty {
       this.val = new constructors[this.type](val);
     }
     if (this.binding && this.binding.bidirectional) {
-      this.binding.set(this.obj, this.objectScope, this.componentScope,
+      this.binding.set(this.objectScope, this.componentScope,
                        this.componentScopeBasePath, this.val);
     }
   }
@@ -99,7 +99,7 @@ class QMLProperty {
       }
 
       try {
-        this.obsoleteConnections = this.evalTreeConnections.slice(0);
+        this.obsoleteConnections = QmlWeb.helpers.mergeObjects(this.evalTreeConnections);
         this.evalTreeConnections = {};
 
         var val = this.binding.eval(this.objectScope, this.componentScope,
@@ -196,7 +196,7 @@ class QMLProperty {
           con.signalOwner = this;
           this.childEvalTreeConnections++;
         }
-      });
+      }, this);
 
     // }
 
