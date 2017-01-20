@@ -55,11 +55,9 @@ QmlWeb.registerQmlType({
   $onColorGroupChanged(newVal) {
     const name = ["active", "disabled", "inactive"][newVal];
     const pallete = systemPalettes[this.$platform][name];
-    this.$canEditReadOnlyProperties = true;
     Object.keys(pallete).forEach(key => {
-      this[key] = pallete[key];
+      this[key].set(pallete[key], QMLProperty.SuperUser);
     });
-    delete this.$canEditReadOnlyProperties;
   }
 });
 

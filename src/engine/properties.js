@@ -12,7 +12,7 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
   function _set_prop(propName, prop) {
     obj[`${propName}Changed`] = prop.changed;
     obj.$properties[propName] = prop;
-    prop.set(options.initialValue, QMLProperty.ReasonInit);
+    prop.set(options.initialValue, QMLProperty.ReasonInit|QMLProperty.SuperUser);
   }
 
   if (type === "alias") {
@@ -67,8 +67,8 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
   var getter = function () {
     prop.get.call(prop);
   };
-  var setter = function (value) {
-    prop.set.call(prop, value, QMLProperty.ReasonUser, objectScope, componentScope);
+  var setter = function (value, reason) {
+    prop.set.call(prop, value, reason, objectScope, componentScope);
   }
 
   QmlWeb.setupGetterSetter(obj, propName, getter, setter);

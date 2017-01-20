@@ -209,11 +209,9 @@ class QMLProperty {
 
   // Define setter
   set(newVal, reason, objectScope, componentScope) {
-    if (this.readOnly && !this.obj.$canEditReadOnlyProperties) {
+    reason = reason || QMLProperty.ReasonUser;
+    if (this.readOnly && !(reason&QMLProperty.SuperUser)) {
       throw new Error(`property '${this.name}' has read only access`);
-    }
-    if (!reason) {
-      reason = QMLProperty.ReasonUser;
     }
 
     const oldVal = this.val;
@@ -331,8 +329,9 @@ QMLProperty.typeInitialValues = {
   url: ""
 };
 
-QMLProperty.ReasonUser = 10;
-QMLProperty.ReasonInit = 11;
-QMLProperty.ReasonAnimation = 12;
+QMLProperty.ReasonUser = 0;
+QMLProperty.ReasonInit = 1;
+QMLProperty.ReasonAnimation = 2;
+QMLProperty.SuperUser = 4;
 
 QmlWeb.QMLProperty = QMLProperty;

@@ -5,7 +5,8 @@ QmlWeb.registerQmlType({
   baseClass: "QtObject",
   properties: {
     interval: { type: "int", initialValue: 1000 },
-    parent: { type: "QtObject", readOnly: true },
+    //parent: { type: "QtObject", readOnly: true },
+    parent: { type: "alias", path:["container"], overrideType: "QtObject", readOnly: true },
     repeat: "bool",
     running: "bool",
     triggeredOnStart: "bool"
@@ -17,7 +18,7 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
-    this.$properties.parent.set(this.$parent, QmlWeb.QMLProperty.ReasonInit);
+    this.$properties.container.set(this.$parent, QmlWeb.QMLProperty.ReasonInit);
 
     /* This ensures that if the user toggles the "running" property manually,
      * the timer will trigger. */

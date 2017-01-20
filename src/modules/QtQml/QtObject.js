@@ -5,16 +5,16 @@ QmlWeb.registerQmlType({
   name: "QtObject",
   versions: /.*/,
   properties : {
-     container: "QtQml.QtObject",
+     container: "QtObject",
      index: "int",
      resourceIndex: "int",
   },
   signals: {
      elementAdd: [
-       { type: "QtQml.QtObject", name: "element" }
+       { type: "QtObject", name: "element" }
      ],
      elementRemove: [
-       { type: "QtQml.QtObject", name: "element" }
+       { type: "QtObject", name: "element" }
      ]
   },
 }, class extends QmlWeb.QObject {

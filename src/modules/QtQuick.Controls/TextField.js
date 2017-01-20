@@ -106,9 +106,7 @@ QmlWeb.registerQmlType({
   }
   $updateValue() {
     if (this.text !== this.impl.value) {
-      this.$canEditReadOnlyProperties = true;
-      this.text = this.impl.value;
-      this.$canEditReadOnlyProperties = false;
+      this.text.set(this.impl.value, QMLProperty.SuperUser);
     }
   }
 });
