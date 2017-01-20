@@ -97,7 +97,7 @@ QmlWeb.registerQmlType({
         const roleData = model.data(index, roleName);
         item.$properties[roleName].set(
           roleData,
-          QmlWeb.QMLProperty.ReasonInit,
+          QmlWeb.QMLProperty.ReasonInitSuperUser,
           item,
           this.model.$context
         );
@@ -105,7 +105,7 @@ QmlWeb.registerQmlType({
       }
       item.$properties.model.set(
         modelData,
-        QmlWeb.QMLProperty.ReasonInit,
+        QmlWeb.QMLProperty.ReasonInitSuperUser,
         item,
         this.model.$context
       );
@@ -161,8 +161,8 @@ QmlWeb.registerQmlType({
         const value = model instanceof Array ?
                       model[index] :
                       typeof model === "number" ? index : "undefined";
-        newItem.$properties.modelData.set(value, QmlWeb.QMLProperty.ReasonInit,
-          newItem, model.$context);
+        newItem.$properties.modelData.set(value, QmlWeb.QMLProperty.ReasonInitSuperUser,
+                                          newItem, model.$context);
       } else {
         // QML exposes a "model" property in the scope that contains all role
         // data.
@@ -175,7 +175,7 @@ QmlWeb.registerQmlType({
           const roleData = model.data(index, roleName);
           modelData[roleName] = roleData;
           newItem.$properties[roleName].set(
-            roleData, QmlWeb.QMLProperty.ReasonInit,
+            roleData, QmlWeb.QMLProperty.ReasonInitSuperUser,
             newItem, this.model.$context
           );
         }
@@ -183,7 +183,7 @@ QmlWeb.registerQmlType({
           createProperty("variant", newItem, "model");
         }
         newItem.$properties.model.set(
-          modelData, QmlWeb.QMLProperty.ReasonInit,
+          modelData, QmlWeb.QMLProperty.ReasonInitSuperUser,
           newItem, this.model.$context
         );
       }

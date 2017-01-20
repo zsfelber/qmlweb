@@ -7,12 +7,17 @@
 function createProperty(type, obj, propName, options, objectScope, componentScope) {
   if (!options) options = {};
 
+  if (!componentScope) {
+    objectScope = obj;
+    componentScope = obj.$context;
+  }
+
   const QMLProperty = QmlWeb.QMLProperty;
   const prop = new QMLProperty(type, obj, propName, options.readOnly);
   function _set_prop(propName, prop) {
     obj[`${propName}Changed`] = prop.changed;
     obj.$properties[propName] = prop;
-    prop.set(options.initialValue, QMLProperty.ReasonInit|QMLProperty.SuperUser);
+    prop.set(options.initialValue, QMLProperty.ReasonInitSuperUser, objectScope, componentScope);
   }
 
   if (type === "alias") {
@@ -43,11 +48,6 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
 
     _set_prop(propName, prop);
 
-    if (!componentScope) {
-      objectScope = obj;
-      componentScope = obj.$context;
-    }
-
     var path0 = options.path.slice(0);
     var proplast = path0.pop();
 
@@ -58,7 +58,7 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
 
     var p = path0.join(".");
     var binding = new QmlWeb.QMLBinding(p, proplast, false, true);
-    prop.set(binding, QMLProperty.ReasonInit, objectScope, componentScope);
+    prop.set(binding, QMLProperty.ReasonInitSuperUser, objectScope, componentScope);
 
   } else {
     _set_prop(propName, prop);
@@ -93,7 +93,7 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
   if (metaObject.$children && metaObject.$children.length !== 0) {
     if (item.$defaultProperty) {
       item.$properties[item.$defaultProperty].set(
-        metaObject.$children, QMLProperty.ReasonInit,
+        metaObject.$children, QMLProperty.ReasonInitSuperUser,
         objectScope, componentScope
       );
     } else {
@@ -138,8 +138,7 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
     }
 
     if (item.$properties && i in item.$properties) {
-      item.$properties[i].set(value, QMLProperty.ReasonInit, objectScope,
-                                                             componentScope);
+      item.$properties[i].set(value, QMLProperty.ReasonInitSuperUser, objectScope, componentScope);
     } else if (i in item) {
       item[i] = value;
     } else if (item.$setCustomData) {
@@ -181,9 +180,7 @@ function applyProperty(item, i, value, objectScope, componentScope) {
   }
 
   if (value instanceof QmlWeb.QMLPropertyDefinition) {
-    createProperty(value.type, item, i, {readOnly:value.readonly});
-    item.$properties[i].set(value.value, QMLProperty.ReasonInit,
-                            objectScope, componentScope);
+    createProperty(value.type, item, i, {readOnly:value.readonly, initialValue:value.value}, objectScope, componentScope);
     return true;
   }
 

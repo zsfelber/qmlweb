@@ -240,7 +240,7 @@ class QMLProperty {
         val = val.slice(); // Copies the array
       }
 
-      if (reason === QMLProperty.ReasonInit && typeof val === "undefined") {
+      if ((reason&QMLProperty.ReasonInit) && typeof val === "undefined") {
         if (QMLProperty.typeInitialValues.hasOwnProperty(this.type)) {
           val = QMLProperty.typeInitialValues[this.type];
         }
@@ -333,5 +333,6 @@ QMLProperty.ReasonUser = 0;
 QMLProperty.ReasonInit = 1;
 QMLProperty.ReasonAnimation = 2;
 QMLProperty.SuperUser = 4;
+QMLProperty.ReasonInitSuperUser = QMLProperty.ReasonInit | QMLProperty.SuperUser;
 
 QmlWeb.QMLProperty = QMLProperty;
