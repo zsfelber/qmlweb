@@ -704,7 +704,7 @@ class QMLEngine {
 
   // This parses the full URL into scheme and path
   $parseURI(uri) {
-    const match = uri.match(/^([^/]*?:\/)(.*?)$/);
+    const match = uri.match(/^([^/]*?:\/)(.*)$/);
     if (match) {
       return {
         scheme: match[1],
@@ -717,12 +717,24 @@ class QMLEngine {
 
   // This parses the full URL into scheme, authority and path
   $parseURIwAuth(uri) {
-    const match = uri.match(/^([^/]*?:\/)(.*?)(\/.*)$/);
+    const match = uri.match(/^([^/]*?:\/)(.*?)\/(.*)$/);
     if (match) {
       return {
         scheme: match[1],
         authority: match[2],
         path: match[3]
+      };
+    }
+    return undefined;
+  }
+
+  $parseURIlong(uri) {
+    const match = uri.match(/^([^/]*?:\/)(.*)\/(.*?)$/);
+    if (match) {
+      return {
+        scheme: match[1],
+        path: match[2],
+        file: match[3]
       };
     }
     return undefined;
@@ -742,10 +754,15 @@ class QMLEngine {
     }
 
     let path = basePathURI.path;
-    if (file.indexOf("/") === 0) {
+    if (file && file.charAt(0) === "/") {
       path = file;
     } else {
       path = `${path}${file}`;
+    }
+
+    if () {
+      const qdirInfo = this.ctxQmldirs[QmlWeb.executionContext.importContextId][basePathURI.file];
+      QmlWeb.executionContext.importContextId
     }
 
     // Remove duplicate slashes and dot segments in the path

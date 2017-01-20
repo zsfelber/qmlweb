@@ -248,7 +248,7 @@ function construct(meta) {
   // 2) from importPathList
   // 3) from directories in imports statements and then
   // 4) from qmldir files
-  // Currently we use order: 3a, 4, 3b, 1, 2
+  // Currently we use order: 3a, 3b, 4, 1, 2
   // TODO: engine.qmldirs is global for all loaded components.
   //       That's not qml's original behaviour.
 
@@ -271,7 +271,7 @@ function construct(meta) {
     meta.super = undefined;
   } else {
 
-    // 4)
+    // 3)preloaded qrc-s  4)
     const qdirInfo = QmlWeb.engine.ctxQmldirs[meta.context.importContextId][meta.object.$class];
     // Are we have info on that component in some imported qmldir files?
 
@@ -291,7 +291,7 @@ function construct(meta) {
       filePath = `${classComponents[0]}.qml`;
     }
 
-    // 1) or 3)preloaded qrc-s  through engine.$resolvePath(name);
+    // 1) through engine.$resolvePath(name);
 
     const component = QmlWeb.Qt.createComponent(filePath);
 
