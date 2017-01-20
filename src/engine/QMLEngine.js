@@ -570,6 +570,7 @@ class QMLEngine {
 
     let tree;
     if (uri.scheme === "qrc:/") {
+      let t0 = tree;
       tree = QmlWeb.qrc[uri.path];
       if (!tree) {
         console.warn("QMLEngine.loadComponent: Empty qrc entry :", uri.path);
@@ -581,6 +582,7 @@ class QMLEngine {
       if (!tree.$class) {
          console.warn("Using legacy semi-pre-parsed qrc is deprecated : "+src);
          tree = QmlWeb.convertToEngine(tree);
+         tree.$name = t0.$name;
       }
     } else {
       const src = QmlWeb.getUrlContents(file, true);

@@ -48,7 +48,9 @@ const Qt = {
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const component = new QMLComponent({
       object: tree,
-      context: QmlWeb.executionContext
+      context: QmlWeb.executionContext,
+      $name: tree.$name,
+      $id: tree.id
     });
     component.$basePath = engine.extractBasePath(file);
     component.$imports = tree.$imports;
