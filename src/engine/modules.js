@@ -296,7 +296,7 @@ function construct(meta) {
     const component = QmlWeb.Qt.createComponent(filePath);
 
     if (!component) {
-      throw new Error(`${meta.object.$name}  No constructor found for ${meta.object.$class}`.trim());
+      throw new Error(`${meta.object.$name?"Toplevel:"+meta.object.$name:meta.object.id?"Element:"+meta.object.id:""}. No constructor found for ${meta.object.$class}`);
     }
 
     item = component.$createObject(meta.parent);
