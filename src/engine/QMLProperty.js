@@ -211,7 +211,6 @@ class QMLProperty {
       QmlWeb.engine.pendingOperations.push({
          property:this,
          info:"Pending property get/binding initialization.",
-         flags:flags,
          });
       throw new PendingEvaluation(`Binding not yet initialized.`, this);
     }

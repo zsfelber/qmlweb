@@ -156,6 +156,7 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
         throw err;
       }
     }
+  }
 }
 
 function applyProperty(item, i, value, objectScope, componentScope) {

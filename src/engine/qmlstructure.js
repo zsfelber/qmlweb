@@ -238,7 +238,13 @@ function serializeObj(object, path, backrefs, dups, pos) {
       //}
 
       path.push(propname);
-      var lab = JSON.stringify(propname)+" : ";
+      var lab;
+      if (/^\w+$/.test(propname)) {
+        lab = propname+" : ";
+      } else {
+        lab = JSON.stringify(propname)+" : ";
+      }
+
       pos += lab.length;
       var value = serializeObj(prop, path, backrefs, dups, pos);
       if (value !== undefined) {
