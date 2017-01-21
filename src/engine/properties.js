@@ -17,7 +17,7 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
   function _set_prop(propName, prop) {
     obj[`${propName}Changed`] = prop.changed;
     obj.$properties[propName] = prop;
-    prop.set(options.initialValue, QMLProperty.ReasonInitSuperUser, objectScope, componentScope);
+    prop.set(options.initialValue, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
   }
 
   if (type === "alias") {
@@ -58,7 +58,7 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
 
     var p = path0.join(".");
     var binding = new QmlWeb.QMLBinding(p, proplast, false, true);
-    prop.set(binding, QMLProperty.ReasonInitSuperUser, objectScope, componentScope);
+    prop.set(binding, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
 
   } else {
     _set_prop(propName, prop);
@@ -93,7 +93,7 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
   if (metaObject.$children && metaObject.$children.length !== 0) {
     if (item.$defaultProperty) {
       item.$properties[item.$defaultProperty].set(
-        metaObject.$children, QMLProperty.ReasonInitSuperUser,
+        metaObject.$children, QMLProperty.ReasonInitPrivileged,
         objectScope, componentScope
       );
     } else {
@@ -138,7 +138,7 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
     }
 
     if (item.$properties && i in item.$properties) {
-      item.$properties[i].set(value, QMLProperty.ReasonInitSuperUser, objectScope, componentScope);
+      item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
     } else if (i in item) {
       item[i] = value;
     } else if (item.$setCustomData) {

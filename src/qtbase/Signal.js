@@ -63,6 +63,7 @@ class Signal {
       this.removeConnection(connection);
     };
     connection.index = this.connectedSlots.length;
+    connection.signal = this;
     this.connectedSlots.push(connection);
 
     // Notify object of connect
@@ -152,7 +153,7 @@ class Signal {
     try {
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
-      console.error("Signal :" + this.$name + "  thisObj:" + desc.thisObj+"  slot error:", err.message, err,
+      console.error("Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  slot error:", err.message, err,
         Function.prototype.toString.call(desc.slot)
       );
     }

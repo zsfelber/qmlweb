@@ -206,7 +206,7 @@ class QMLProperty {
   // Define setter
   set(newVal, flags, objectScope, componentScope) {
     flags = flags || QMLProperty.ReasonUser;
-    if (this.readOnly && !(flags & QMLProperty.SuperUser)) {
+    if (this.readOnly && !(flags & QMLProperty.Privileged)) {
       throw new Error(`property '${this.name}' has read only access`);
     }
 
@@ -339,8 +339,8 @@ QMLProperty.typeInitialValues = {
 QMLProperty.ReasonUser = 0;
 QMLProperty.ReasonInit = 1;
 QMLProperty.ReasonAnimation = 2;
-QMLProperty.SuperUser = 4;
+QMLProperty.Privileged = 4;
 QMLProperty.RemoveBidirectionalBinding = 8;
-QMLProperty.ReasonInitSuperUser = QMLProperty.ReasonInit | QMLProperty.SuperUser;
+QMLProperty.ReasonInitPrivileged = QMLProperty.ReasonInit | QMLProperty.Privileged;
 
 QmlWeb.QMLProperty = QMLProperty;
