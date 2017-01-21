@@ -26,7 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 class QMLMethod extends QmlWeb.QMLBinding {
   constructor(src) {
-    super(src, undefined, QMLBinding.ImplBlock);
+    super(src, undefined, QMLBinding.ImplFunction);
     Object.defineProperty(this, "serializedTypeId", {
       value: "m",
       configurable: false,
@@ -223,7 +223,10 @@ function serializeObj(object, path, backrefs, dups, pos) {
       var prop = object[propname];
       if (object instanceof QMLMetaElement && "$children"===propname && prop instanceof Array && !prop.length) continue;
       if (object instanceof QMLSignalDefinition && "parameters"===propname && prop instanceof Array && !prop.length) continue;
-      if (object instanceof QMLBinding && "implementMode"===propname && !prop) continue;
+      if ("implementMode"===propname) {
+        if (object instanceof QMLMethod) continue;
+        else if (object instanceof QMLBinding && !prop) continue;
+      }
 
       //if ((object instanceof QMLMethod) ||
       //  (object instanceof QMLPropertyDefinition) ||
