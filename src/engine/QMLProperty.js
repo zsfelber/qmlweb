@@ -234,6 +234,9 @@ class QMLProperty {
         if (flags & QMLProperty.RemoveBidirectionalBinding) {
           this.binding = null;
         } else {
+          if (!this.binding.compiled) {
+            this.binding.compile();
+          }
           this.binding.set(this.objectScope, this.componentScope,
                            this.componentScopeBasePath, newVal);
           updateVal = 0;
