@@ -1,5 +1,12 @@
 let propertyIds = 0;
 
+class PendingEvaluation extends Error {
+  constructor(txt, prop) {
+    super(txt);
+    this.property = prop;
+  }
+}
+
 class QMLProperty {
   constructor(type, obj, name, readOnly) {
     this.obj = obj;
@@ -200,6 +207,15 @@ class QMLProperty {
       return this.val.$get();
     }
 
+    if (this.needsUpdate && this.binding) {
+      QmlWeb.engine.pendingOperations.push({
+         property:this,
+         info:"Pending property get/binding initialization.",
+         flags:flags,
+         });
+      throw new PendingEvaluation(`Binding not yet initialized.`, this);
+    }
+
     return this.val;
   }
 
@@ -225,7 +241,11 @@ class QMLProperty {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         this.update(true);
       } else {
-        QmlWeb.engine.boundProperties.push(this);
+        QmlWeb.engine.pendingOperations.push({
+           property:this,
+           info:"Pending property set/binding initialization.",
+           flags:flags,
+           });
         return;
       }
     } else {
@@ -347,3 +367,4 @@ QMLProperty.RemoveBidirectionalBinding = 8;
 QMLProperty.ReasonInitPrivileged = QMLProperty.ReasonInit | QMLProperty.Privileged;
 
 QmlWeb.QMLProperty = QMLProperty;
+QmlWeb.PendingEvaluation = PendingEvaluation;

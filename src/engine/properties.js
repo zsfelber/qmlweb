@@ -108,47 +108,54 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
   }
 
   for (const i in metaObject) {
-    const value = metaObject[i];
-    if (i === "id" || i === "$class") { // keep them
-      item[i] = value;
-      continue;
-    }
-
-    // skip global id's and internal values
-    if (i === "id" || i[0] === "$") { // TODO: what? See above.
-      continue;
-    }
-
-    // slots
-    if (i.indexOf("on") === 0 && i.length > 2 && /[A-Z]/.test(i[2])) {
-      const signalName = i[2].toLowerCase() + i.slice(3);
-      if (connectSignal(item, signalName, value, objectScope, componentScope)) {
+    try {
+      const value = metaObject[i];
+      if (i === "id" || i === "$class") { // keep them
+        item[i] = value;
         continue;
       }
-      if (item.$setCustomSlot) {
-        item.$setCustomSlot(signalName, value, objectScope, componentScope);
+  
+      // skip global id's and internal values
+      if (i === "id" || i[0] === "$") { // TODO: what? See above.
         continue;
       }
-    }
-
-    if (value instanceof Object) {
-      if (applyProperty(item, i, value, objectScope, componentScope)) {
-        continue;
+  
+      // slots
+      if (i.indexOf("on") === 0 && i.length > 2 && /[A-Z]/.test(i[2])) {
+        const signalName = i[2].toLowerCase() + i.slice(3);
+        if (connectSignal(item, signalName, value, objectScope, componentScope)) {
+          continue;
+        }
+        if (item.$setCustomSlot) {
+          item.$setCustomSlot(signalName, value, objectScope, componentScope);
+          continue;
+        }
+      }
+  
+      if (value instanceof Object) {
+        if (applyProperty(item, i, value, objectScope, componentScope)) {
+          continue;
+        }
+      }
+  
+      if (item.$properties && i in item.$properties) {
+        item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
+      } else if (i in item) {
+        item[i] = value;
+      } else if (item.$setCustomData) {
+        item.$setCustomData(i, value);
+      } else {
+        console.warn(
+          `Cannot assign to non-existent property "${i}". Ignoring assignment.`
+        );
+      }
+    } catch (err) {
+      if (err instanceof QmlWeb.PendingEvaluation) {
+        console.warn("PendingEvaluation : Property apply still pending :" + i + "  item:" + item);
+      } else {
+        throw err;
       }
     }
-
-    if (item.$properties && i in item.$properties) {
-      item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
-    } else if (i in item) {
-      item[i] = value;
-    } else if (item.$setCustomData) {
-      item.$setCustomData(i, value);
-    } else {
-      console.warn(
-        `Cannot assign to non-existent property "${i}". Ignoring assignment.`
-      );
-    }
-  }
 }
 
 function applyProperty(item, i, value, objectScope, componentScope) {

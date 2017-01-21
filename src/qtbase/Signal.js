@@ -153,9 +153,22 @@ class Signal {
     try {
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
-      console.error("Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  slot error:", err.message, err,
-        Function.prototype.toString.call(desc.slot)
-      );
+      if (err instanceof QmlWeb.PendingEvaluation) {
+        console.warn("PendingEvaluation : Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  pending operation:", err.message);
+        QmlWeb.engine.pendingOperations.push({
+          fun:desc.slot,
+          thisObj:desc.thisObj,
+          args:args,
+          info:"Pending signal (waiting to initialization).",
+          connection:desc,
+          reason:err
+        });
+        throw err;
+      } else {
+        console.error("Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  slot error:", err.message, err,
+          Function.prototype.toString.call(desc.slot)
+        );
+      }
     }
   }
 

@@ -37,8 +37,7 @@ class QMLEngine {
     this.operationState = 1;
 
     // List of properties whose values are bindings. For internal use only.
-    this.boundProperties = [];
-
+    // +
     // List of operations to perform later after init. For internal use only.
     this.pendingOperations = [];
 
@@ -251,7 +250,7 @@ class QMLEngine {
     if (this.rootObject.dom) {
       this.domTarget.appendChild(this.rootObject.dom);
     }
-    this.$initializePropertyBindings();
+    this.$initializePendingOps();
 
     this.start();
 
@@ -675,38 +674,53 @@ class QMLEngine {
     }
   }
 
-  $initializePropertyBindings() {
+  $initializePendingOps() {
     // Initialize property bindings
-    // we use `while`, because $initializePropertyBindings may be called
+    // we use `while`, because $initializePendingOps may be called
     // recursive (because of Loader and/or createQmlObject )
-    while (this.boundProperties.length > 0) {
-      const property = this.boundProperties.shift();
+    // +
+    // Perform pending operations. Now we use it only to fire signals to slots
+    // again, if pending evaluation error occured during an init-time event invocation.
+    //
+    // TODO Important! We are using 1 single queue for all the pending bound properties
+    // and pending signals and register every event immediately when it's just occured.
+    // So we keep the order as was when they initially occurred and now we're evaluating it
+    // sequentially. We hope, this evaluation algorithm can reproduce the same evaluation
+    // graph exactly, but I think, this logic have complex consequences.
+    // Not very easy intellectual task to check that throroughly, for a later time...
+    while (this.pendingOperations.length > 0) {
+      const op = this.pendingOperations.shift();
 
-      if (!property.binding) {
-        // Probably, the binding was overwritten by an explicit value. Ignore.
-        continue;
-      }
+      const property = op.property;
 
-      if (property.needsUpdate) {
-        property.update();
-      } else if (geometryProperties.indexOf(property.name) >= 0) {
-        // It is possible that bindings with these names was already evaluated
-        // during eval of other bindings but in that case $updateHGeometry and
-        // $updateVGeometry could be blocked during their eval.
-        // So we call them explicitly, just in case.
-        const { obj, changed } = property;
-        if (obj.$updateHGeometry &&
-            changed.isConnected(obj, obj.$updateHGeometry)) {
-          obj.$updateHGeometry(property.val, property.val, property.name);
+      if (property) {
+        if (!property.binding) {
+          // Probably, the binding was overwritten by an explicit value. Ignore.
+          continue;
         }
-        if (obj.$updateVGeometry &&
-            changed.isConnected(obj, obj.$updateVGeometry)) {
-          obj.$updateVGeometry(property.val, property.val, property.name);
+
+        if (property.needsUpdate) {
+          property.update();
+        } else if (geometryProperties.indexOf(property.name) >= 0) {
+          // It is possible that bindings with these names was already evaluated
+          // during eval of other bindings but in that case $updateHGeometry and
+          // $updateVGeometry could be blocked during their eval.
+          // So we call them explicitly, just in case.
+          const { obj, changed } = property;
+          if (obj.$updateHGeometry &&
+              changed.isConnected(obj, obj.$updateHGeometry)) {
+            obj.$updateHGeometry(property.val, property.val, property.name);
+          }
+          if (obj.$updateVGeometry &&
+              changed.isConnected(obj, obj.$updateVGeometry)) {
+            obj.$updateVGeometry(property.val, property.val, property.name);
+          }
         }
+      } else {
+        op.fun.apply(op.thisObj, op.args);
       }
     }
-
-    this.$initializeAliasSignals();
+    this.pendingOperations = [];
   }
 
   // This parses the full URL into scheme and path
@@ -786,16 +800,6 @@ class QMLEngine {
 
     // Something we can't parse, just pass it through
     return fileURL;
-  }
-
-  $initializeAliasSignals() {
-    // Perform pending operations. Now we use it only to init alias's "changed"
-    // handlers, that's why we have such strange function name.
-    while (this.pendingOperations.length > 0) {
-      const op = this.pendingOperations.shift();
-      op[0](op[1], op[2], op[3]);
-    }
-    this.pendingOperations = [];
   }
 
   callCompletedSignals() {
