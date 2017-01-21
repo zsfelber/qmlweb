@@ -9,7 +9,7 @@ class QMLBinding {
  * @param {Array} tree Parser tree of the binding
  * @return {Object} Object representing the binding
  */
-  constructor(val, rhs, isfunc, bidirectional) {
+  constructor(val, rhs, isfunc, bidirectional, info) {
     // this.isFunction states whether the binding is a simple js statement or a
     // function containing a return statement. We decide this on whether it is a
     // code block or not. If it is, we require a return statement. If it is a
@@ -25,22 +25,39 @@ class QMLBinding {
       this.isFunction = isfunc;
       this.rhs = rhs;
     }
-    if (UglifyJS && val) {
-      try {
-        this.src = UglifyJS.minify(val, {fromString: true, parse:{bare_returns:true}});
-        if (this.src.code) this.src = this.src.code;
-      } catch (e) {
+    if (val) {
+      if (UglifyJS) {
         try {
           this.src = UglifyJS.minify("_="+val, {fromString: true});
-          if (this.src.code) this.src = this.src.code;
+          while (this.src.code) this.src = this.src.code;
           this.src = this.src.substring(2);
-        } catch (e2) {
-          console.warn(e.message+":\n"+e2.message+":\n(_=) "+val);
-          this.src = val;
+        } catch (e) {
+          try {
+            this.src = UglifyJS.minify(val, {fromString: true, parse:{bare_returns:true}});
+            while (this.src.code) this.src = this.src.code;
+          } catch (e2) {
+            console.warn(e.message+":\n"+e2.message+":\n(_=) "+val);
+            this.src = val;
+          }
         }
+      } else {
+        this.src = val.trim();
       }
     } else {
       this.src = val;
+    }
+
+    var match = /^function\s*(\w|\d|\$)*\(/.exec(this.src);
+    if (match) {
+      if (!this.isFunction) {
+        throw new Error("Binding is effectively a function but not declared so : "+this.src);
+      }
+      this.src = this.src.substring(match.lastIndex-1);
+    } else {
+      if (this.isFunction) {
+        //console.warn("Binding is effectively not a function but declared so : "+(info?info:this.src));
+        this.src = "(){"+this.src+"}";
+      }
     }
 
     this.bidirectional = bidirectional;
@@ -127,7 +144,7 @@ class QMLBinding {
 
     return new Function("__executionObject", "__executionContext", `
       with(QmlWeb) with(__executionContext) with(__executionObject) {
-        ${isFunction ? src : "return "+src+";"}
+        ${isFunction ? "function"+src : "return "+src+";"}
       }
     `);
   }

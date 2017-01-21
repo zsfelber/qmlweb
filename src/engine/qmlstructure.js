@@ -26,7 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 class QMLMethod extends QmlWeb.QMLBinding {
   constructor(src) {
-    super(src);
+    super(src, undefined, true);
     Object.defineProperty(this, "serializedTypeId", {
       value: "m",
       configurable: false,
@@ -222,6 +222,8 @@ function serializeObj(object, path, backrefs, dups, pos) {
       if (propname === "serializedTypeId" || propname === "s_objectId") continue;
       var prop = object[propname];
       if (object instanceof QMLMetaElement && "$children"===propname && prop instanceof Array && !prop.length) continue;
+      if (object instanceof QMLSignalDefinition && "parameters"===propname && prop instanceof Array && !prop.length) continue;
+      if (object instanceof QMLMethod && "isFunction"===propname) continue;
 
       //if ((object instanceof QMLMethod) ||
       //  (object instanceof QMLPropertyDefinition) ||
@@ -367,10 +369,10 @@ convertToEngine.walkers = {
       // id property
       return tree[1][1];
     }
-    return convertToEngine.bindout(tree, src);
+    return convertToEngine.bindout(tree, src, name);
   },
   qmlobjdef: (name, property, tree, src) =>
-             convertToEngine.bindout(tree, src),
+             convertToEngine.bindout(tree, src, name+"."+property),
   qmlobj: (elem, statements) => {
     const item = {};
     for (const i in statements) {
@@ -388,12 +390,12 @@ convertToEngine.walkers = {
   qmlpropdef: (name, type, tree, src) =>
               new QMLPropertyDefinition(
                 type,
-                tree ? convertToEngine.bindout(tree, src) : undefined
+                tree ? convertToEngine.bindout(tree, src, type+" "+name) : undefined
                 ),
   qmlpropdefro: (name, type, tree, src) =>
                 new QMLPropertyDefinition(
                   type,
-                  tree ? convertToEngine.bindout(tree, src) : undefined,
+                  tree ? convertToEngine.bindout(tree, src, type+" "+name) : undefined,
                          true
                   ),
   qmlaliasdef: function() { return new QMLAliasDefinition(slice(arguments, 1)); },
@@ -451,7 +453,7 @@ convertToEngine.walk = function(tree) {
 };
 
 // Try to bind out tree and return static variable instead of binding
-convertToEngine.bindout = function(statement, binding) {
+convertToEngine.bindout = function(statement, binding, info) {
   // We want to process the content of the statement
   // (but still handle the case, we get the content directly)
   const tree = statement[0] === "stat" ? statement[1] : statement;
@@ -461,7 +463,7 @@ convertToEngine.bindout = function(statement, binding) {
   if (walker) {
     return walker.apply(type, tree.slice(1));
   }
-  return new QmlWeb.QMLBinding(binding, tree);
+  return new QmlWeb.QMLBinding(binding, tree, undefined, undefined, info);
 };
 
 // Help logger
