@@ -199,16 +199,15 @@ function connectSignal(item, signalName, value, objectScope, componentScope) {
     for (const j in item[signalName].parameters) {
       params.push(item[signalName].parameters[j].name);
     }
-    if (value.implementMode!==QMLBinding.ImplBlock) {
-      throw new Error("Invalid slot binding, it should be a block : "+value.src);
+    if (value.implementMode===QMLBinding.ImplFunction) {
+      throw new Error("Invalid slot binding, it should not be a function : "+value.src);
     }
     // Wrap value.src in IIFE in case it includes a "return"
     // NOTE removed because it kills "this" :
     // (function() {
     //   ${value.src}
     // })();
-    value.src = `(
-      function(${params.join(", ")}) {
+    value.src = `(${params.join(", ")}) {
         QmlWeb.executionContext = __executionContext;
         QmlWeb.engine.$oldBasePath = QmlWeb.engine.$basePath;
         QmlWeb.engine.$basePath = "${componentScope.$basePath}";
@@ -217,9 +216,8 @@ function connectSignal(item, signalName, value, objectScope, componentScope) {
         } finally {
           QmlWeb.engine.$basePath = QmlWeb.engine.$oldBasePath;
         }
-      }
-    )`;
-    value.isFunction = false;
+      }`;
+    value.implementMode = QMLBinding.ImplFunction;
     value.compile();
   }
   // Don't pass in __basePath argument, as QMLEngine.$basePath is set in the
