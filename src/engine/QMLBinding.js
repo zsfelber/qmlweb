@@ -9,22 +9,24 @@ class QMLBinding {
  * @param {Array} tree Parser tree of the binding
  * @return {Object} Object representing the binding
  */
-  constructor(val, rhs, isfunc, bidirectional, info) {
-    // this.isFunction states whether the binding is a simple js statement or a
+  constructor(val, rhs, implementMode, bidirectional, info) {
+    // this.implementMode states whether the binding is a simple js statement or a
     // function containing a return statement. We decide this on whether it is a
     // code block or not. If it is, we require a return statement. If it is a
     // code block it could though also be a object definition, so we need to
     // check that as well (it is, if the content is labels).
-    if (isfunc === undefined) {
+    if (implementMode === undefined) {
       if (rhs && rhs[0] === "block" &&
           rhs[1][0] && rhs[1][0][0] !== "label") {
-        this.isFunction = true;
+        this.implementMode = QMLBinding.ImplBlock;
       }
       // else Not serialized, but still means false
     } else {
-      this.isFunction = isfunc;
+      this.implementMode = implementMode;
       this.rhs = rhs;
     }
+    this.implementMode |= QMLBinding.ImplExpression;
+
     if (val) {
       if (UglifyJS) {
         try {
@@ -49,14 +51,14 @@ class QMLBinding {
 
     var match = /^function\s*(\w|\d|\$)*\(/.exec(this.src);
     if (match) {
-      if (!this.isFunction) {
-        throw new Error("Binding is effectively a function but not declared so : "+this.src);
+      if (!this.implementMode) {
+        throw new Error("Binding is effectively a function but declared to expression : "+(info?info:this.src));
       }
       this.src = this.src.substring(match[0].length-1);
+      this.implementMode = QMLBinding.ImplFunction;
     } else {
-      if (this.isFunction) {
-        //console.warn("Binding is effectively not a function but declared so : "+(info?info:this.src));
-        this.src = "(){"+this.src+"}";
+      if (this.implementMode === QMLBinding.ImplFunction) {
+        throw new Error("Binding is effectively not a function but declared so : "+(info?info:this.src));
       }
     }
 
@@ -83,13 +85,13 @@ class QMLBinding {
     if (this.rhs) {
       return `b({
         "src": "${this.src}",
-        "isFunction": ${this.isFunction},
+        "implementMode": ${this.implementMode},
         "rhs": "${this.rhs}"
       })`;
     } else {
       return `b({
         "src": "${this.src}",
-        "isFunction": ${this.isFunction}
+        "implementMode": ${this.implementMode}
       })`;
     }
   }*/
@@ -117,41 +119,47 @@ class QMLBinding {
  */
   compile() {
     this.src = this.src.trim();
-    this.implGet = QMLBinding.bindGet(this.src, this.rhs, this.isFunction);
+    this.implGet = QMLBinding.bindGet(this.src, this.rhs, this.implementMode);
     if (this.bidirectional) {
-      this.implSet = QMLBinding.bindSet(this.src, this.rhs, this.isFunction);
+      this.implSet = QMLBinding.bindSet(this.src, this.rhs, this.implementMode);
     }
     this.compiled = true;
   }
 
-  static bindGet(src, rhs, isFunction) {
-    src = _ubertrim(src);
+  static bindGet(src, rhs, implementMode) {
+    if (implementMode===QMLBinding.ImplFunction) {
+      //console.warn
+      throw new Error("Invalid binding, it should be an expression/block : "+src);
+      //return undefined;
+    } else {
+      src = _ubertrim(src);
 
-    if (rhs) {
-      if (isFunction) {
-        throw new Error("Invalid binding rhs, passed along with a function : "+rhs);
+      if (rhs) {
+        if (implementMode) {
+          throw new Error("Invalid binding rhs, passed along with a function/block : "+rhs);
+        }
+        if (!/^\w+$/.test(rhs)) {
+          throw new Error("Invalid binding rhs property format :  "+rhs);
+        }
+        if (src) src += ".";
+        src += rhs;
       }
-      if (!/^\w+$/.test(rhs)) {
-        throw new Error("Invalid binding rhs property format :  "+rhs);
+
+      if (!src) {
+        throw new Error("Invalid binding path : "+src);
       }
-      if (src) src += ".";
-      src += rhs;
+
+      return new Function("__executionObject", "__executionContext", `
+        with(QmlWeb) with(__executionContext) with(__executionObject) {
+          ${ implementMode===2 ? "(function"+src+").call(this);" : implementMode===1 ? src : "return "+src+";"}
+        }
+      `);
     }
-
-    if (!src) {
-      throw new Error("Invalid binding path : "+src);
-    }
-
-    return new Function("__executionObject", "__executionContext", `
-      with(QmlWeb) with(__executionContext) with(__executionObject) {
-        ${isFunction ? "function"+src : "return "+src+";"}
-      }
-    `);
   }
 
-  static bindSet(src, rhs, isFunction) {
-    if (isFunction) {
-      throw new Error("Invalid writable/bidirectional binding, it should not be a function : "+src);
+  static bindSet(src, rhs, implementMode) {
+    if (implementMode) {
+      throw new Error("Invalid writable/bidirectional binding, it should be an expression : "+src);
     }
     src = _ubertrim(src);
 
@@ -211,5 +219,8 @@ class QMLBinding {
   }
 
 }
+QMLBinding.ImplExpression = 0;
+QMLBinding.ImplBlock = 1;
+QMLBinding.ImplFunction = 2;
 
 QmlWeb.QMLBinding = QMLBinding;

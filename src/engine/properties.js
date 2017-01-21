@@ -199,6 +199,9 @@ function connectSignal(item, signalName, value, objectScope, componentScope) {
     for (const j in item[signalName].parameters) {
       params.push(item[signalName].parameters[j].name);
     }
+    if (value.implementMode!==QMLBinding.ImplBlock) {
+      throw new Error("Invalid slot binding, it should be a block : "+value.src);
+    }
     // Wrap value.src in IIFE in case it includes a "return"
     // NOTE removed because it kills "this" :
     // (function() {
