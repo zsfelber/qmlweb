@@ -223,6 +223,15 @@ function serializeObj(object, path, backrefs, dups, pos) {
       var prop = object[propname];
       if (object instanceof QMLMetaElement && "$children"===propname && prop instanceof Array && !prop.length) continue;
 
+      //if ((object instanceof QMLMethod) ||
+      //  (object instanceof QMLPropertyDefinition) ||
+      //  (object instanceof QMLAliasDefinition) ||
+      //  (object instanceof QMLSignalDefinition) ||
+      //  (object instanceof QMLMetaPropertyGroup) ||
+      //  (object instanceof QMLMetaElement)) {
+      //
+      //}
+
       path.push(propname);
       var lab = JSON.stringify(propname)+" : ";
       pos += lab.length;

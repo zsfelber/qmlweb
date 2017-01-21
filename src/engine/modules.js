@@ -223,7 +223,7 @@ function initializeConstr(self, meta, info) {
   if (info.signals) {
     Object.keys(info.signals).forEach(name => {
       const params = info.signals[name];
-      self[name] = QmlWeb.Signal.signal(params);
+      self[name] = QmlWeb.Signal.signal(name, params);
     });
   }
   if (info.defaultProperty) {

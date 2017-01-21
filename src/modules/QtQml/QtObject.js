@@ -48,7 +48,7 @@ QmlWeb.registerQmlType({
     this.Keys.cancelPressed = Signal.signal("cancelPressed");
     this.Keys.deletePressed = Signal.signal("deletePressed");
     for (let i = 0; i < 10; ++i) {
-      this.Keys[`digit${i}Pressed`] = Signal.signal();
+      this.Keys[`digit${i}Pressed`] = Signal.signal(`digit${i}Pressed`);
     }
     this.Keys.escapePressed = Signal.signal("escapePressed");
     this.Keys.flipPressed = Signal.signal("flipPressed");

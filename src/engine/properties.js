@@ -155,7 +155,7 @@ function applyProperty(item, i, value, objectScope, componentScope) {
   const QMLProperty = QmlWeb.QMLProperty;
 
   if (value instanceof QmlWeb.QMLSignalDefinition) {
-    item[i] = QmlWeb.Signal.signal(value.parameters);
+    item[i] = QmlWeb.Signal.signal(i, value.parameters);
     if (item.$isComponentRoot) {
       componentScope[i] = item[i];
     }
