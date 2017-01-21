@@ -150,7 +150,7 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
         );
       }
     } catch (err) {
-      if (err instanceof QmlWeb.PendingEvaluation) {
+      if (err.ctType === "PendingEvaluation") {
         console.warn("PendingEvaluation : Property apply still pending :" + i + "  item:" + item);
       } else {
         throw err;

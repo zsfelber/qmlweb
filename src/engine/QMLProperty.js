@@ -4,6 +4,7 @@ class PendingEvaluation extends Error {
   constructor(txt, prop) {
     super(txt);
     this.property = prop;
+    this.ctType = "PendingEvaluation";
   }
 }
 
@@ -212,7 +213,7 @@ class QMLProperty {
          property:this,
          info:"Pending property get/binding initialization.",
          });
-      throw new PendingEvaluation(`Binding not yet initialized.`, this);
+      throw new QmlWeb.PendingEvaluation(`Binding not yet initialized.`, this);
     }
 
     return this.val;
