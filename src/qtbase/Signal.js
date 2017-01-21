@@ -152,7 +152,7 @@ class Signal {
     try {
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
-      console.error("Signal slot error:", err.message, err,
+      console.error("Signal :" + this.$name + "  thisObj:" + desc.thisObj+"  slot error:", err.message, err,
         Function.prototype.toString.call(desc.slot)
       );
     }
