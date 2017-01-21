@@ -62,6 +62,10 @@ class QObject {
   destroy() {
     this.$delete();
   }
+
+  toString() {
+    return this.constructor.name+":"+this.id+":"+this.objectId;
+  }
 }
 
 QmlWeb.QObject = QObject;

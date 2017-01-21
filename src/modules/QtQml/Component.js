@@ -113,10 +113,10 @@ class QMLComponent {
     // see QMLEngine.js for explanation how it is used.
     if (!this.$Component) {
       this.$Component = new QmlWeb.QObject(this);
-      this.$Component.completed = QmlWeb.Signal.signal([]);
+      this.$Component.completed = QmlWeb.Signal.signal("completed", []);
       QmlWeb.engine.completedSignals.push(this.$Component.completed);
 
-      this.$Component.destruction = QmlWeb.Signal.signal([]);
+      this.$Component.destruction = QmlWeb.Signal.signal("destruction", []);
     }
     return this.$Component;
   }

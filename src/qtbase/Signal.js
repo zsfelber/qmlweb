@@ -1,5 +1,6 @@
 class Signal {
-  constructor(params = [], options = {}) {
+  constructor(name, params = [], options = {}) {
+    this.$name = name;
     this.connectedSlots = [];
     this.obj = options.obj;
     this.options = options;
@@ -54,6 +55,10 @@ class Signal {
       }
       connection = { thisObj: args[0], slot: args[1], type };
     }
+    if (!connection.slot) {
+      throw new Error("Missing slot for signal:"+this.$name+"  connection   thisObj:"+connection.thisObj);
+    }
+
     connection.disconnect = function() {
       this.removeConnection(connection);
     };
@@ -86,7 +91,7 @@ class Signal {
         callType === 3 && connection.thisObj === args[0] && connection.slot === args[0][args[1]] ||
         connection.thisObj === args[0] && connection.slot === args[1]
       ) {
-        this.removeConnection(connection, true);
+        this.tidyupConnection(connection);
         // We have removed an item from the list so the indexes shifted one
         // backwards
         j--;
@@ -115,19 +120,27 @@ class Signal {
     }
     return false;
   }
-  removeConnection(connection, preventautoshift) {
+
+  tidyupConnection(connection) {
     if (connection.thisObj) {
       const index = connection.thisObj.$tidyupList.indexOf(this.signal);
       if (index >= 0) {
         connection.thisObj.$tidyupList.splice(index, 1);
       }
     }
+  }
 
-    if (!preventautoshift) {
-      this.connectedSlots.splice(connection.index, 1);
-      for (var i = connection.index; i<this.connectedSlots.length; i++) {
-        this.connectedSlots[i].index--;
-      }
+  removeConnection(connection) {
+    tidyupConnection(connection);
+
+    this.connectedSlots.splice(connection.index, 1);
+    for (var i = connection.index; i<this.connectedSlots.length; i++) {
+      this.connectedSlots[i].index--;
+    }
+
+    // Notify object of disconnect
+    if (this.options.obj && this.options.obj.$disconnectNotify) {
+      this.options.obj.$disconnectNotify(this.options);
     }
   }
 

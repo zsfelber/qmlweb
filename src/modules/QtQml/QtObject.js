@@ -41,32 +41,32 @@ QmlWeb.registerQmlType({
     const Signal = QmlWeb.Signal;
 
     this.Keys = new QmlWeb.QObject(this);
-    this.Keys.asteriskPresed = Signal.signal();
-    this.Keys.backPressed = Signal.signal();
-    this.Keys.backtabPressed = Signal.signal();
-    this.Keys.callPressed = Signal.signal();
-    this.Keys.cancelPressed = Signal.signal();
-    this.Keys.deletePressed = Signal.signal();
+    this.Keys.asteriskPresed = Signal.signal("asteriskPresed");
+    this.Keys.backPressed = Signal.signal("backPressed");
+    this.Keys.backtabPressed = Signal.signal("backtabPressed");
+    this.Keys.callPressed = Signal.signal("callPressed");
+    this.Keys.cancelPressed = Signal.signal("cancelPressed");
+    this.Keys.deletePressed = Signal.signal("deletePressed");
     for (let i = 0; i < 10; ++i) {
       this.Keys[`digit${i}Pressed`] = Signal.signal();
     }
-    this.Keys.escapePressed = Signal.signal();
-    this.Keys.flipPressed = Signal.signal();
-    this.Keys.hangupPressed = Signal.signal();
-    this.Keys.leftPressed = Signal.signal();
-    this.Keys.menuPressed = Signal.signal();
-    this.Keys.noPressed = Signal.signal();
-    this.Keys.pressed = Signal.signal();
-    this.Keys.released = Signal.signal();
-    this.Keys.returnPressed = Signal.signal();
-    this.Keys.rightPressed = Signal.signal();
-    this.Keys.selectPressed = Signal.signal();
-    this.Keys.spacePressed = Signal.signal();
-    this.Keys.tabPressed = Signal.signal();
-    this.Keys.upPressed = Signal.signal();
-    this.Keys.volumeDownPressed = Signal.signal();
-    this.Keys.volumeUpPressed = Signal.signal();
-    this.Keys.yesPressed = Signal.signal();
+    this.Keys.escapePressed = Signal.signal("escapePressed");
+    this.Keys.flipPressed = Signal.signal("flipPressed");
+    this.Keys.hangupPressed = Signal.signal("hangupPressed");
+    this.Keys.leftPressed = Signal.signal("leftPressed");
+    this.Keys.menuPressed = Signal.signal("menuPressed");
+    this.Keys.noPressed = Signal.signal("noPressed");
+    this.Keys.pressed = Signal.signal("pressed");
+    this.Keys.released = Signal.signal("released");
+    this.Keys.returnPressed = Signal.signal("returnPressed");
+    this.Keys.rightPressed = Signal.signal("rightPressed");
+    this.Keys.selectPressed = Signal.signal("selectPressed");
+    this.Keys.spacePressed = Signal.signal("spacePressed");
+    this.Keys.tabPressed = Signal.signal("tabPressed");
+    this.Keys.upPressed = Signal.signal("upPressed");
+    this.Keys.volumeDownPressed = Signal.signal("volumeDownPressed");
+    this.Keys.volumeUpPressed = Signal.signal("volumeUpPressed");
+    this.Keys.yesPressed = Signal.signal("yesPressed");
 
     this.containerChanged.connect(this, this.$onContainerChanged_);
   }

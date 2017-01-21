@@ -5,7 +5,7 @@ class QMLProperty {
     this.obj = obj;
     this.name = name;
     this.readOnly = readOnly;
-    this.changed = QmlWeb.Signal.signal([], { obj });
+    this.changed = QmlWeb.Signal.signal("changed", [], { obj });
     this.binding = null;
     this.objectScope = null;
     this.componentScope = null;
