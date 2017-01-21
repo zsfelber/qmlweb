@@ -65,7 +65,7 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
   }
 
   var getter = function () {
-    prop.get.call(prop);
+    return prop.get.call(prop);
   };
   var setter = function (value, flags) {
     prop.set.call(prop, value, flags, objectScope, componentScope);
