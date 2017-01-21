@@ -52,7 +52,7 @@ class QMLBinding {
       if (!this.isFunction) {
         throw new Error("Binding is effectively a function but not declared so : "+this.src);
       }
-      this.src = this.src.substring(match.lastIndex-1);
+      this.src = this.src.substring(match[0].length-1);
     } else {
       if (this.isFunction) {
         //console.warn("Binding is effectively not a function but declared so : "+(info?info:this.src));
