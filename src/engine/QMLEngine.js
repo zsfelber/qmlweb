@@ -447,6 +447,7 @@ class QMLEngine {
         }
       }
 
+      // NOTE Making precompiled qrc entries available in imports :
       var qrcModule = QmlWeb.qrcModules[qrcName];
       if (qrcModule) {
         if (!content) {
@@ -481,23 +482,22 @@ class QMLEngine {
       return;
     }
 
+    // NOTE we copy it to current component namespace (import context):
     var qmldirs = this.ctxQmldirs[importContextId];
     if (!qmldirs) {
       this.ctxQmldirs[importContextId] = qmldirs = {};
     }
 
-    // copy found externals to global var
-    //// TODO actually we have to copy it to current component
-    for (const attrname in content.externals) {
-      qmldirs[attrname] = content.externals[attrname];
-    }
     if (content.qrcs) {
       for (const attrname in content.qrcs) {
         qmldirs[attrname] = {url : content.qrcs[attrname]};
       }
     }
+    for (const attrname in content.externals) {
+      qmldirs[attrname] = content.externals[attrname];
+    }
 
-    // keep already loaded qmldir files
+    // keep already loaded qmldir files (done, see above)
     //this.qmldirsContents[name] = content;
   }
 

@@ -161,9 +161,7 @@ function loadImports(component, imports) {
   }
   for (let i = 0; i < imports.length; ++i) {
     const [, moduleName, moduleVersion, moduleAlias] = imports[i];
-    if (typeof moduleVersion === "undefined") {
-      // TODO  means : all ? none ?
-      // none:
+    if (!moduleVersion) {
       continue;
     }
     const versionString = moduleVersion % 1 === 0 ?
@@ -171,7 +169,7 @@ function loadImports(component, imports) {
                             moduleVersion.toString();
     const moduleConstructors = getModuleConstructors(moduleName, versionString);
 
-    if (moduleAlias /*!== ""  it was undefined*/) {
+    if (moduleAlias) {
       constructors[moduleAlias] = mergeObjects(
         constructors[moduleAlias],
         moduleConstructors
@@ -248,11 +246,11 @@ function construct(meta) {
   // 2) from importPathList
   // 3) from directories in imports statements and then
   // 4) from qmldir files
-  // Currently we use order: 3a, 3b, 4, 1, 2
+  // Currently we use order: 3a, 2, 3b, 4, 1
   // TODO: engine.qmldirs is global for all loaded components.
   //       That's not qml's original behaviour.
 
-  // 3)modules only: (from Component.constructor -> QmlWeb.loadImports)
+  // 3)regular (versioned) modules only: (from Component.constructor -> QmlWeb.loadImports)
   let constructors = perImportContextConstructors[meta.context.importContextId];
 
   const classComponents = meta.object.$class.split(".");
@@ -271,7 +269,7 @@ function construct(meta) {
     meta.super = undefined;
   } else {
 
-    // 3)preloaded qrc-s  4)
+    // 2) 3)preloaded qrc-s  4)
     const qdirInfo = QmlWeb.engine.ctxQmldirs[meta.context.importContextId][meta.object.$class];
     // Are we have info on that component in some imported qmldir files?
 

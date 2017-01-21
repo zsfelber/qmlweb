@@ -62,10 +62,6 @@ class QMLProperty {
     } else {
       this.val = new constructors[this.type](val);
     }
-    if (this.binding && this.binding.bidirectional) {
-      this.binding.set(this.objectScope, this.componentScope,
-                       this.componentScopeBasePath, this.val);
-    }
   }
 
   // TODO move to Animation (binding it to a 'changed' slot)
@@ -208,9 +204,9 @@ class QMLProperty {
   }
 
   // Define setter
-  set(newVal, reason, objectScope, componentScope) {
-    reason = reason || QMLProperty.ReasonUser;
-    if (this.readOnly && !(reason&QMLProperty.SuperUser)) {
+  set(newVal, flags, objectScope, componentScope) {
+    flags = flags || QMLProperty.ReasonUser;
+    if (this.readOnly && !(flags & QMLProperty.SuperUser)) {
       throw new Error(`property '${this.name}' has read only access`);
     }
 
@@ -233,24 +229,35 @@ class QMLProperty {
         return;
       }
     } else {
-      if (reason !== QMLProperty.ReasonAnimation) {
+      var updateVal = 1;
+      if (this.binding && this.binding.bidirectional) {
+        if (flags & QMLProperty.RemoveBidirectionalBinding) {
+          this.binding = null;
+        } else {
+          this.binding.set(this.objectScope, this.componentScope,
+                           this.componentScopeBasePath, newVal);
+          updateVal = 0;
+        }
+      } else if (!(flags & QMLProperty.ReasonAnimation)) {
         this.binding = null;
       }
       if (val instanceof Array) {
         val = val.slice(); // Copies the array
       }
 
-      if ((reason&QMLProperty.ReasonInit) && typeof val === "undefined") {
+      if ((flags & QMLProperty.ReasonInit) && typeof val === "undefined") {
         if (QMLProperty.typeInitialValues.hasOwnProperty(this.type)) {
           val = QMLProperty.typeInitialValues[this.type];
         }
       }
 
-      this.$setVal(val, componentScope);
+      if (updateVal) {
+        this.$setVal(val, componentScope);
+      }
     }
 
     if (this.val !== oldVal) {
-      if (reason === QMLProperty.ReasonUser) {
+      if (flags === QMLProperty.ReasonUser) {
         if (this.animation) {
           this.resetAnimation();
         }
@@ -333,6 +340,7 @@ QMLProperty.ReasonUser = 0;
 QMLProperty.ReasonInit = 1;
 QMLProperty.ReasonAnimation = 2;
 QMLProperty.SuperUser = 4;
+QMLProperty.RemoveBidirectionalBinding = 8;
 QMLProperty.ReasonInitSuperUser = QMLProperty.ReasonInit | QMLProperty.SuperUser;
 
 QmlWeb.QMLProperty = QMLProperty;

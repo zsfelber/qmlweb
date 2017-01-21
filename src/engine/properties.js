@@ -67,8 +67,8 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
   var getter = function () {
     prop.get.call(prop);
   };
-  var setter = function (value, reason) {
-    prop.set.call(prop, value, reason, objectScope, componentScope);
+  var setter = function (value, flags) {
+    prop.set.call(prop, value, flags, objectScope, componentScope);
   }
 
   QmlWeb.setupGetterSetter(obj, propName, getter, setter);
