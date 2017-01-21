@@ -200,15 +200,17 @@ function connectSignal(item, signalName, value, objectScope, componentScope) {
       params.push(item[signalName].parameters[j].name);
     }
     // Wrap value.src in IIFE in case it includes a "return"
+    // NOTE removed because it kills "this" :
+    // (function() {
+    //   ${value.src}
+    // })();
     value.src = `(
       function(${params.join(", ")}) {
         QmlWeb.executionContext = __executionContext;
         QmlWeb.engine.$oldBasePath = QmlWeb.engine.$basePath;
         QmlWeb.engine.$basePath = "${componentScope.$basePath}";
         try {
-          (function() {
-            ${value.src}
-          })();
+          ${value.src}
         } finally {
           QmlWeb.engine.$basePath = QmlWeb.engine.$oldBasePath;
         }
