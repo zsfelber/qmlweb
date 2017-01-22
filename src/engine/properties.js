@@ -92,14 +92,32 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
 
   if (metaObject.$children && metaObject.$children.length !== 0) {
     if (item.$defaultProperty) {
-      item.$properties[item.$defaultProperty].set(
-        metaObject.$children, QMLProperty.ReasonInitPrivileged,
-        objectScope, componentScope
-      );
+      let _task0;
+      try {
+        _task0 = item.$properties[item.$defaultProperty].set(
+          metaObject.$children, QMLProperty.ReasonInitPrivileged,
+          objectScope, componentScope
+        );
+        _task0();
+      } catch (err) {
+        if (err.ctType === "PendingEvaluation") {
+          console.warn("PendingEvaluation : Default property apply still pending :" + item.$defaultProperty + "  item:" + item);
+          QmlWeb.engine.pendingOperations.push({
+            fun:_task0,
+            thisObj:this,
+            args:[],
+            info:"Pending property/apply  (waiting to initialization).",
+            reason:err
+          });
+        } else {
+          throw err;
+        }
+      }
     } else {
       throw new Error("Cannot assign to unexistant default property");
     }
   }
+
   // We purposefully set the default property AFTER using it, in order to only
   // have it applied for instantiations of this component, but not for its
   // internal children
@@ -108,50 +126,63 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
   }
 
   for (const i in metaObject) {
+    let _task;
+    const value = metaObject[i];
     try {
-      const value = metaObject[i];
-      if (i === "id" || i === "$class") { // keep them
-        item[i] = value;
-        continue;
-      }
-  
-      // skip global id's and internal values
-      if (i === "id" || i[0] === "$") { // TODO: what? See above.
-        continue;
-      }
-  
-      // slots
-      if (i.indexOf("on") === 0 && i.length > 2 && /[A-Z]/.test(i[2])) {
-        const signalName = i[2].toLowerCase() + i.slice(3);
-        if (connectSignal(item, signalName, value, objectScope, componentScope)) {
+      _task=function(i, value) {
+        if (i === "id" || i === "$class") { // keep them
+          item[i] = value;
           continue;
         }
-        if (item.$setCustomSlot) {
-          item.$setCustomSlot(signalName, value, objectScope, componentScope);
+
+        // skip global id's and internal values
+        if (i === "id" || i[0] === "$") { // TODO: what? See above.
           continue;
         }
-      }
-  
-      if (value instanceof Object) {
-        if (applyProperty(item, i, value, objectScope, componentScope)) {
-          continue;
+
+        // slots
+        if (i.indexOf("on") === 0 && i.length > 2 && /[A-Z]/.test(i[2])) {
+          const signalName = i[2].toLowerCase() + i.slice(3);
+          if (connectSignal(item, signalName, value, objectScope, componentScope)) {
+            continue;
+          }
+          if (item.$setCustomSlot) {
+            item.$setCustomSlot(signalName, value, objectScope, componentScope);
+            continue;
+          }
         }
-      }
-  
-      if (item.$properties && i in item.$properties) {
-        item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
-      } else if (i in item) {
-        item[i] = value;
-      } else if (item.$setCustomData) {
-        item.$setCustomData(i, value);
-      } else {
-        console.warn(
-          `Cannot assign to non-existent property "${i}". Ignoring assignment.`
-        );
-      }
+
+        if (value instanceof Object) {
+          if (applyProperty(item, i, value, objectScope, componentScope)) {
+            continue;
+          }
+        }
+
+        if (item.$properties && i in item.$properties) {
+          item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
+        } else if (i in item) {
+          item[i] = value;
+        } else if (item.$setCustomData) {
+          item.$setCustomData(i, value);
+        } else {
+          console.warn(
+            `Cannot assign to non-existent property "${i}". Ignoring assignment.`
+          );
+        }
+      };
+
+      _task(i, value);
+
     } catch (err) {
       if (err.ctType === "PendingEvaluation") {
         console.warn("PendingEvaluation : Property apply still pending :" + i + "  item:" + item);
+        QmlWeb.engine.pendingOperations.push({
+          fun:_task,
+          thisObj:this,
+          args:[i, value],
+          info:"Pending property/apply  (waiting to initialization).",
+          reason:err
+        });
       } else {
         throw err;
       }

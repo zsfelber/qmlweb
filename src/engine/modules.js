@@ -298,6 +298,7 @@ function construct(meta) {
     }
 
     item = component.$createObject(meta.parent);
+    item.$meta = meta;
     if (typeof item.dom !== "undefined") {
       item.dom.className += ` ${classComponents[classComponents.length - 1]}`;
       if (meta.object.id) {
