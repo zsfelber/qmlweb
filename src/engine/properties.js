@@ -17,7 +17,15 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
   function _set_prop(propName, prop) {
     obj[`${propName}Changed`] = prop.changed;
     obj.$properties[propName] = prop;
-    prop.set(options.initialValue, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
+    try {
+      prop.set(options.initialValue, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
+    } catch (err) {
+      if (err.ctType === "PendingEvaluation") {
+        console.warn("PendingEvaluation : createProperty still pending :" + propName + "  obj:" + obj);
+      } else {
+        throw err;
+      }
+    }
   }
 
   if (type === "alias") {
@@ -205,7 +213,7 @@ function applyProperty(item, i, value, objectScope, componentScope) {
       componentScope.$basePath);
     if (item.$isComponentRoot) {
       componentScope[i] = item[i];
-    }
+    }ihf
     return true;
   } else if (value instanceof QmlWeb.QMLAliasDefinition) {
     createProperty("alias", item, i, {path:value.path, readOnly:value.readonly}, objectScope, componentScope);

@@ -298,7 +298,11 @@ function construct(meta) {
     }
 
     item = component.$createObject(meta.parent);
-    item.$meta = meta;
+
+    // TODO gz
+    item.$component = component;
+    item.$metaObject = meta.object;
+
     if (typeof item.dom !== "undefined") {
       item.dom.className += ` ${classComponents[classComponents.length - 1]}`;
       if (meta.object.id) {
