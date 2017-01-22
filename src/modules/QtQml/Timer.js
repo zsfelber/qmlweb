@@ -24,9 +24,6 @@ QmlWeb.registerQmlType({
      * the timer will trigger. */
     this.runningChanged.connect(this, this.$onRunningChanged);
 
-    this.tick = $ticker;
-    QmlWeb.engine.$addTicker(this);
-
     QmlWeb.engine.$registerStart(() => {
       if (this.running) {
         this.restart();
@@ -47,16 +44,21 @@ QmlWeb.registerQmlType({
   }
   $ticker() { //(now)
     if (!this.running) return;
-    //if (now - this.$prevTrigger >= this.interval) {
-    //this.$prevTrigger = now;
-      this.$trigger();
-    //}
+    this.$trigger();
   }
   $onRunningChanged() {
     if (this.running) {
-      //this.$prevTrigger = Date.now();
       if (this.triggeredOnStart) {
         this.$trigger();
+      }
+      if (this.repeat)
+        this.$intervalId = setInterval(this.$trigger, this.interval);
+      else
+        setTimeout(this.$trigger, this.interval);
+    } else {
+      if (this.$intervalId) {
+        clearInterval(this.$intervalId);
+        delete this.$intervalId;
       }
     }
   }

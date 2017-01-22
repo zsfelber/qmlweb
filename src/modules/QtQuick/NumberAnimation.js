@@ -4,7 +4,7 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   baseClass: "PropertyAnimation",
   properties: {
-    interval: {type:"alias", path:["duration"], overrideType:"int" }
+    interval: {type:"int", initialValue:20}
   }
 }, class {
   constructor(meta) {
@@ -16,7 +16,6 @@ QmlWeb.registerQmlType({
     this.$loop = 0;
 
     this.tick = $ticker;
-    QmlWeb.engine.$addTicker(this);
     this.runningChanged.connect(this, this.$onRunningChanged);
   }
   $startLoop() {
@@ -26,13 +25,15 @@ QmlWeb.registerQmlType({
                       action.from :
                       action.target[action.property];
     }
+    this.$elapsed = 0;
+    this.$startTime = Date.now();
     this.$at = 0;
   }
   $ticker() {
     if (!this.running && this.$loop !== -1 || this.paused) {
       // $loop === -1 is a marker to just finish this run
       return;
-    }_lastTick
+    }
     if (this.$at === 0 && this.$loop === 0 && !this.$actions.length) {
       this.$redoActions();
     }
@@ -53,16 +54,15 @@ QmlWeb.registerQmlType({
   }
   $onRunningChanged(newVal) {
     if (newVal) {
-      this.$elapsed = 0;
-      this.$startTime = Date.now();
-      this.$at = 0;
       this.$startLoop();
       this.paused = false;
+      QmlWeb.engine.$addTicker(this);
     } else if (this.alwaysRunToEnd && this.$at < 1) {
       this.$loop = -1; // -1 is used as a marker to stop
     } else {
       this.$loop = 0;
       this.$actions = [];
+      QmlWeb.engine.$removeTicker(this);
     }
   }
   complete() {
@@ -79,5 +79,6 @@ QmlWeb.registerQmlType({
     } else {
       this.$startLoop(this);
     }
+    QmlWeb.engine.$removeTicker(this);
   }
 });
