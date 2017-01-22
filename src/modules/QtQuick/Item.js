@@ -13,7 +13,7 @@ QmlWeb.registerQmlType({
     children: "list",
     resources: "list",
     transform: "list",
-    childIndex: "int",
+    $childIndex: "int",
     x: "real",
     y: "real",
     z: "real",
@@ -137,13 +137,13 @@ QmlWeb.registerQmlType({
   }
   $onElementAdd(element) {
     const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
-    element.index = this.data.length;
+    element.$index = this.data.length;
     this.data.push(element);
     if (element instanceof QMLItem) {
-      element.childIndex = this.children.length;
+      element.$childIndex = this.children.length;
       this.children.push(element);
     } else {
-      element.resourceIndex = this.resources.length;
+      element.$resourceIndex = this.resources.length;
       this.resources.push(element);
     }
     //^^^if (this.children.indexOf(element) === -1) {
@@ -153,19 +153,19 @@ QmlWeb.registerQmlType({
   }
   $onElementRemove(element) {
     const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
-    this.data.splice(element.index, 1);
-    for (var i = element.index; i < this.data.length; ++i) {
-      this.data[i].index=i;
+    this.data.splice(element.$index, 1);
+    for (var i = element.$index; i < this.data.length; ++i) {
+      this.data[i].$index=i;
     }
     if (element instanceof QMLItem) {
-      this.children.splice(element.childIndex, 1);
-      for (var i = element.childIndex; i < this.children.length; ++i) {
-        this.children[i].childIndex=i;
+      this.children.splice(element.$childIndex, 1);
+      for (var i = element.$childIndex; i < this.children.length; ++i) {
+        this.children[i].$childIndex=i;
       }
     } else {
-      this.resources.splice(element.resourceIndex, 1);
-      for (var i = element.resourceIndex; i < this.resources.length; ++i) {
-        this.resources[i].resourceIndex=i;
+      this.resources.splice(element.$resourceIndex, 1);
+      for (var i = element.$resourceIndex; i < this.resources.length; ++i) {
+        this.resources[i].$resourceIndex=i;
       }
     }
     this.childrenChanged();

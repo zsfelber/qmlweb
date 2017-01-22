@@ -6,8 +6,8 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   properties : {
      container: "QtObject",
-     index: "int",
-     resourceIndex: "int",
+     $index: "int",
+     $resourceIndex: "int",
      objectName: "string"
   },
   signals: {
