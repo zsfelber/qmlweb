@@ -17,15 +17,7 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
   function _set_prop(propName, prop) {
     obj[`${propName}Changed`] = prop.changed;
     obj.$properties[propName] = prop;
-    try {
-      prop.set(options.initialValue, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
-    } catch (err) {
-      if (err.ctType === "PendingEvaluation") {
-        console.warn("PendingEvaluation : createProperty still pending :" + propName + "  obj:" + obj);
-      } else {
-        throw err;
-      }
-    }
+    prop.set(options.initialValue, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
   }
 
   if (type === "alias") {
@@ -100,27 +92,10 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
 
   if (metaObject.$children && metaObject.$children.length !== 0) {
     if (item.$defaultProperty) {
-      let _task0;
-      try {
-        _task0 = item.$properties[item.$defaultProperty].set(
+      item.$properties[item.$defaultProperty].set(
           metaObject.$children, QMLProperty.ReasonInitPrivileged,
           objectScope, componentScope
         );
-        _task0();
-      } catch (err) {
-        if (err.ctType === "PendingEvaluation") {
-          console.warn("PendingEvaluation : Default property apply still pending :" + item.$defaultProperty + "  item:" + item);
-          QmlWeb.engine.pendingOperations.push({
-            fun:_task0,
-            thisObj:this,
-            args:[],
-            info:"Pending property/apply  (waiting to initialization).",
-            reason:err
-          });
-        } else {
-          throw err;
-        }
-      }
     } else {
       throw new Error("Cannot assign to unexistant default property");
     }
@@ -184,13 +159,6 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
     } catch (err) {
       if (err.ctType === "PendingEvaluation") {
         console.warn("PendingEvaluation : Property apply still pending :" + i + "  item:" + item);
-        QmlWeb.engine.pendingOperations.push({
-          fun:_task,
-          thisObj:this,
-          args:[i, value],
-          info:"Pending property/apply  (waiting to initialization).",
-          reason:err
-        });
       } else {
         throw err;
       }

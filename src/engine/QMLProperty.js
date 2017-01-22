@@ -303,6 +303,7 @@ class QMLProperty {
         if (this.animation) {
           this.resetAnimation();
         }
+        // TODO gz   $syncPropertyToRemote !!!!!!!!!!!!
         if (this.obj.$syncPropertyToRemote instanceof Function) {
           // is a remote object from e.g. a QWebChannel
           this.obj.$syncPropertyToRemote(this.name, val);
