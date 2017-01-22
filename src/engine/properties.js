@@ -14,10 +14,12 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
 
   const QMLProperty = QmlWeb.QMLProperty;
   const prop = new QMLProperty(type, obj, propName, options.readOnly);
-  function _set_prop(propName, prop) {
+  function _set_prop(propName, prop, flags) {
     obj[`${propName}Changed`] = prop.changed;
     obj.$properties[propName] = prop;
-    prop.set(options.initialValue, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
+    if (options.hasOwnProperty("initialValue")) {
+      prop.set(options.initialValue, flags, objectScope, componentScope);
+    }
   }
 
   if (type === "alias") {
@@ -43,10 +45,8 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
     // TODO also check alias->another [alias, eval to->same name property<-eval to] expressions
 
     if (oldprop) {
-      _set_prop("__old_"+propName, oldprop);
+      _set_prop("__old_"+propName, oldprop, QMLProperty.ReasonInitPrivileged);
     }
-
-    _set_prop(propName, prop);
 
     var path0 = options.path.slice(0);
     var proplast = path0.pop();
@@ -60,8 +60,10 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
     var binding = new QmlWeb.QMLBinding(p, proplast, false, true);
     prop.set(binding, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
 
+    _set_prop(propName, prop, QMLProperty.ReasonInit);
+
   } else {
-    _set_prop(propName, prop);
+    _set_prop(propName, prop, QMLProperty.ReasonInitPrivileged);
   }
 
   var getter = function () {
