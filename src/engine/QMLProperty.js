@@ -266,20 +266,8 @@ class QMLProperty {
           if (!this.binding.compiled) {
             this.binding.compile();
           }
-          function _set_in_binding() {
-            this.binding.set(this.objectScope, this.componentScope,
-                             this.componentScopeBasePath, newVal);
-          }
-          if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
-            _set_in_binding();
-          } else {
-            QmlWeb.engine.pendingOperations.push({
-              fun:_set_in_binding,
-              thisObj:this,
-              args:[],
-              info:"Pending property set/set_in_binding (waiting to initialization).",
-            });
-          }
+          this.binding.set(this.objectScope, this.componentScope,
+                           this.componentScopeBasePath, newVal, flags);
         }
       } else if (!(flags & QMLProperty.ReasonAnimation)) {
         this.binding = null;
@@ -290,15 +278,19 @@ class QMLProperty {
 
     if (this.val !== oldVal) {
       if (flags & QMLProperty.ReasonInit) {
-        function _changed_init() {
+        if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
           this.changed(this.val, oldVal, this.name);
+        } else {
+          function _changed_init() {
+            this.changed(this.val, oldVal, this.name);
+          }
+          QmlWeb.engine.pendingOperations.push({
+            fun:_changed_init,
+            thisObj:this,
+            args:[],
+            info:"Pending property set/changed_init (waiting to initialization).",
+          });
         }
-        QmlWeb.engine.pendingOperations.push({
-          fun:_changed_init,
-          thisObj:this,
-          args:[],
-          info:"Pending property set/changed_init (waiting to initialization).",
-        });
       } else {
         if (this.animation) {
           this.resetAnimation();

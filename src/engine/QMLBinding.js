@@ -104,13 +104,13 @@ class QMLBinding {
     return this.implGet.call(object, object, context);
   }
 
-  set(object, context, basePath, value) {
+  set(object, context, basePath, value, flags) {
     QmlWeb.executionContext = context;
     if (basePath) {
       QmlWeb.engine.$basePath = basePath;
     }
     // .call is needed for `this` support
-    this.implSet.call(object, object, context, value);
+    this.implSet.call(object, object, context, value, flags);
   }
 
 /**
@@ -163,7 +163,7 @@ class QMLBinding {
         throw new Error("Invalid writable/bidirectional binding expression :  "+src+" . "+property);
       }
 
-      return new Function("__executionObject", "__executionContext", "__value", `
+      return new Function("__executionObject", "__executionContext", "__value", "__flags", `
         with(QmlWeb) with(__executionContext) with(__executionObject) {
           var obj = ${src};
           if (!obj) {
@@ -175,7 +175,7 @@ class QMLBinding {
             if (prop.readOnly) {
               throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' is read-only.");
             } else {
-              prop.set(__value, QMLProperty.ReasonUser);
+              prop.set(__value, __flags);
             }
           } else {
             throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' not found, it is not writable.");
@@ -189,7 +189,7 @@ class QMLBinding {
         throw new Error("Invalid writable/bidirectional binding expression : "+property);
       }
 
-      return new Function("__executionObject", "__executionContext", "__value", `
+      return new Function("__executionObject", "__executionContext", "__value", "__flags", `
         with(QmlWeb) with(__executionContext) with(__executionObject) {
           var prop = this.$properties["${property}"];
           if (!prop) {
@@ -200,7 +200,7 @@ class QMLBinding {
             if (prop.readOnly) {
               throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' is read-only.");
             } else {
-              prop.set(__value, QMLProperty.ReasonUser);
+              prop.set(__value, __flags);
             }
           } else {
             throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' not found, it is not writable.");
