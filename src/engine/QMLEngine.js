@@ -26,6 +26,7 @@ class QMLEngine {
 
     // Cached component trees (post-QmlWeb.convertToEngine)
     this.components = {};
+    this.classes = {};
 
     // Cached parsed JS files (post-QmlWeb.jsparse)
     this.js = {};
@@ -220,7 +221,7 @@ class QMLEngine {
     this.$basePathA.href = this.extractBasePath(file);
     this.$basePath = this.$basePathA.href;
     const fileName = this.extractFileName(file);
-    const tree = this.loadComponent(this.$resolvePath(fileName));
+    const tree = this.loadClass(this.$resolvePath(fileName));
     return this.loadQMLTree(tree, parentComponent, file);
   }
 
@@ -398,7 +399,7 @@ class QMLEngine {
     let name = entry[1];
 
     // is it url to remote resource
-    const nameIsUrl = name.indexOf("//") === 0 || name.indexOf(":/") >= 0;
+    const nameIsUrl = name.charAt(0)==="//" || name.indexOf(":/") >= 0;
     // is it a module name, e.g. QtQuick, QtQuick.Controls, etc
     const nameIsQualifiedModuleName = entry[4];
     // is it a js file
@@ -560,15 +561,15 @@ class QMLEngine {
     this._tickers.forEach(ticker => ticker(now, elapsed));
   }
 
-  // Load resolved file, parse and construct as Component (.qml)
-  loadComponent(file) {
-    if (file in this.components) {
-      return this.components[file];
+  // Load resolved file, parse and construct as Component class (.qml)
+  loadClass(file) {
+    if (file in this.classes) {
+      return this.classes[file];
     }
 
     const uri = this.$parseURI(file);
     if (!uri) {
-      console.warn("QMLEngine.loadComponent: Empty url :", file);
+      console.warn("QMLEngine.loadClass: Empty url :", file);
       return undefined;
     }
 
@@ -577,7 +578,7 @@ class QMLEngine {
       let t0 = tree;
       tree = QmlWeb.qrc[uri.path];
       if (!tree) {
-        console.warn("QMLEngine.loadComponent: Empty qrc entry :", uri.path);
+        console.warn("QMLEngine.loadClass: Empty qrc entry :", uri.path);
         return undefined;
       }
 
@@ -591,27 +592,27 @@ class QMLEngine {
     } else {
       const src = QmlWeb.getUrlContents(file, true);
       if (!src) {
-        console.error("QMLEngine.loadComponent: Failed to load:", file);
+        console.error("QMLEngine.loadClass: Failed to load:", file);
         return undefined;
       }
 
-      console.log("QMLEngine.loadComponent: Loading file:", file);
+      console.log("QMLEngine.loadClass: Loading file:", file);
       tree = QmlWeb.parseQML(src, file);
     }
 
     if (!tree) {
-      console.warn("QMLEngine.loadComponent: Empty file :", file);
+      console.warn("QMLEngine.loadClass: Empty file :", file);
       return undefined;
     }
 
     if (tree.$children.length !== 1) {
-      console.error("QMLEngine.loadComponent: Failed to load:", file,
+      console.error("QMLEngine.loadClass: Failed to load:", file,
         ": A QML component must only contain one root element!");
       return undefined;
     }
 
     tree.$file = file;
-    this.components[file] = tree;
+    this.classes[file] = tree;
 
 
     return tree;

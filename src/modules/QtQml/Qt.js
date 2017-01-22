@@ -21,10 +21,19 @@ const Qt = {
 
     let file = engine.$resolvePath(name);
 
-    // If "name" was a full URL, "file" will be equivalent to name and this
-    // will try and load the Component from the full URL, otherwise, this
-    // doubles as checking for the file in the current directory.
-    let tree = engine.loadComponent(file);
+    let component = engine.components[file];
+    let tree;
+    // TODO gz
+    if (component) {
+      tree = component.object;
+    }
+
+    if (!tree) {
+      // If "name" was a full URL, "file" will be equivalent to name and this
+      // will try and load the Component from the full URL, otherwise, this
+      // doubles as checking for the file in the current directory.
+      tree = engine.loadClass(file);
+    }
 
     // If the Component is not found, and it is not a URL, look for "name" in
     // this context's importSearchPaths
@@ -35,7 +44,7 @@ const Qt = {
           QmlWeb.executionContext.importContextId);
         for (let i = 0; i < moreDirs.length; i++) {
           file = `${moreDirs[i]}${name}`;
-          tree = engine.loadComponent(file);
+          tree = engine.loadClass(file);
           if (tree) break;
         }
       }
@@ -46,7 +55,7 @@ const Qt = {
     }
 
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-    const component = new QMLComponent({
+    component = new QMLComponent({
       object: tree,
       context: QmlWeb.executionContext,
       $name: tree.$name,
@@ -59,7 +68,8 @@ const Qt = {
     engine.loadImports(tree.$imports, component.$basePath,
       component.importContextId);
 
-    engine.components[name] = component;
+    // TODO gz name->file
+    engine.components[file] = component;
     return component;
   },
 

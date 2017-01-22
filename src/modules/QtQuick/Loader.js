@@ -49,8 +49,22 @@ QmlWeb.registerQmlType({
       this.$sourceUrl = fileName;
       return;
     }
+    const nameIsUrl = fileName.charAt(0)==="//" || name.indexOf(":/") >= 0;
+    if (!nameIsUrl) {
+      console.warn("Loader.$onSourceChanged  Not an absolute resource id:"+fileName);
+    }
 
-    const tree = QmlWeb.engine.loadComponent(fileName);
+    let component = engine.components[fileName];
+    let tree;
+    // TODO gz
+    if (component) {
+      tree = component.object;
+    }
+
+    if (!tree) {
+      tree = QmlWeb.engine.loadClass(fileName);
+    }
+
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const meta = { object: tree, context: this, parent: this };
     const qmlComponent = new QMLComponent(meta);
