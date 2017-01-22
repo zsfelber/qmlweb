@@ -277,31 +277,31 @@ class QMLProperty {
     }
 
     if (this.val !== oldVal) {
-      if (flags & QMLProperty.ReasonInit) {
-        if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
+      function _changed_init() {
+        if (flags & QMLProperty.ReasonInit) {
           this.changed(this.val, oldVal, this.name);
         } else {
-          function _changed_init() {
+          if (this.animation) {
+            this.resetAnimation();
+          }
+          // TODO gz   $syncPropertyToRemote !!!!!!!!!!!!
+          if (this.obj.$syncPropertyToRemote instanceof Function) {
+            // is a remote object from e.g. a QWebChannel
+            this.obj.$syncPropertyToRemote(this.name, val);
+          } else {
             this.changed(this.val, oldVal, this.name);
           }
-          QmlWeb.engine.pendingOperations.push({
-            fun:_changed_init,
-            thisObj:this,
-            args:[],
-            info:"Pending property set/changed_init (waiting to initialization).",
-          });
         }
+      }
+      if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
+        _changed_init();
       } else {
-        if (this.animation) {
-          this.resetAnimation();
-        }
-        // TODO gz   $syncPropertyToRemote !!!!!!!!!!!!
-        if (this.obj.$syncPropertyToRemote instanceof Function) {
-          // is a remote object from e.g. a QWebChannel
-          this.obj.$syncPropertyToRemote(this.name, val);
-        } else {
-          this.changed(this.val, oldVal, this.name);
-        }
+        QmlWeb.engine.pendingOperations.push({
+          fun:_changed_init,
+          thisObj:this,
+          args:[],
+          info:"Pending property set/changed_init (waiting to initialization).",
+        });
       }
     }
   }
