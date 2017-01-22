@@ -176,7 +176,7 @@ function applyProperty(item, i, value, objectScope, componentScope) {
       componentScope.$basePath);
     if (item.$isComponentRoot) {
       componentScope[i] = item[i];
-    }ihf
+    }
     return true;
   } else if (value instanceof QmlWeb.QMLAliasDefinition) {
     createProperty("alias", item, i, {path:value.path, readOnly:value.readonly}, objectScope, componentScope);
