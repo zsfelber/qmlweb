@@ -15,7 +15,7 @@ QmlWeb.registerQmlType({
     this.$at = 0;
     this.$loop = 0;
 
-    this.tick = $ticker;
+    this.tick = this.$ticker;
     this.runningChanged.connect(this, this.$onRunningChanged);
   }
   $startLoop() {
