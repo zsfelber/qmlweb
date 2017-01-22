@@ -2,15 +2,21 @@ QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "NumberAnimation",
   versions: /.*/,
-  baseClass: "PropertyAnimation"
+  baseClass: "PropertyAnimation",
+  properties: {
+    interval: {type:"alias", path:["duration"], overrideType:"int" }
+  }
 }, class {
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
+    this.$elapsed = 0;
+    this.$startTime = 0;
     this.$at = 0;
     this.$loop = 0;
 
-    QmlWeb.engine.$addTicker((...args) => this.$ticker(...args));
+    this.tick = $ticker;
+    QmlWeb.engine.$addTicker(this);
     this.runningChanged.connect(this, this.$onRunningChanged);
   }
   $startLoop() {
@@ -22,15 +28,17 @@ QmlWeb.registerQmlType({
     }
     this.$at = 0;
   }
-  $ticker(now, elapsed) {
+  $ticker() {
     if (!this.running && this.$loop !== -1 || this.paused) {
       // $loop === -1 is a marker to just finish this run
       return;
-    }
+    }_lastTick
     if (this.$at === 0 && this.$loop === 0 && !this.$actions.length) {
       this.$redoActions();
     }
-    this.$at += elapsed / this.duration;
+
+    this.$elapsed = Date.now() - this.$startTime;
+    this.$at = this.$elapsed / this.duration;
     if (this.$at >= 1) {
       this.complete();
       return;
@@ -45,6 +53,9 @@ QmlWeb.registerQmlType({
   }
   $onRunningChanged(newVal) {
     if (newVal) {
+      this.$elapsed = 0;
+      this.$startTime = Date.now();
+      this.$at = 0;
       this.$startLoop();
       this.paused = false;
     } else if (this.alwaysRunToEnd && this.$at < 1) {

@@ -13,9 +13,9 @@ class QMLEngine {
   constructor(element) {
     //----------Public Members----------
 
-    this.fps = 60;
+    //this.fps = 60;
     // Math.floor, causes bugs to timing?
-    this.$interval = Math.floor(1000 / this.fps);
+    //this.$interval = Math.floor(1000 / this.fps);
     this.dom = element || document.body;
 
     // Target for the DOM children
@@ -58,7 +58,7 @@ class QMLEngine {
 
     // Ticker resource id and ticker callbacks
     this._tickers = [];
-    this._lastTick = Date.now();
+    //this._lastTick = Date.now();
 
     // Callbacks for stopping or starting the engine
     this._whenStop = [];
@@ -148,8 +148,10 @@ class QMLEngine {
     const QMLOperationState = QmlWeb.QMLOperationState;
     if (this.operationState !== QMLOperationState.Running) {
       this.operationState = QMLOperationState.Running;
-      this._tickerId = setInterval(this._tick.bind(this), this.$interval);
+      //this._tickerId = setInterval(this._tick.bind(this), this.$interval);
+      //this._tickers.forEach(ticker => ticker(now, elapsed));
       this._whenStart.forEach(callback => callback());
+      this._tickers.forEach(ticker => $startTicker(ticker));
     }
   }
 
@@ -157,7 +159,8 @@ class QMLEngine {
   stop() {
     const QMLOperationState = QmlWeb.QMLOperationState;
     if (this.operationState === QMLOperationState.Running) {
-      clearInterval(this._tickerId);
+      //clearInterval(this._tickerId);
+      this._tickers.forEach(ticker => $stopTicker(ticker));
       this.operationState = QMLOperationState.Idle;
       this._whenStop.forEach(callback => callback());
     }
@@ -554,12 +557,12 @@ class QMLEngine {
     };
   }
 
-  _tick() {
+  /*_tick() {
     const now = Date.now();
     const elapsed = now - this._lastTick;
     this._lastTick = now;
     this._tickers.forEach(ticker => ticker(now, elapsed));
-  }
+  }*/
 
   // Load resolved file, parse and construct as Component class (.qml)
   loadClass(file) {
@@ -666,12 +669,32 @@ class QMLEngine {
 
   $addTicker(t) {
     this._tickers.push(t);
+
+    if (this.operationState === QMLOperationState.Running) {
+      $startTicker(t);
+    }
   }
 
   $removeTicker(t) {
     const index = this._tickers.indexOf(t);
     if (index !== -1) {
       this._tickers.splice(index, 1);
+    }
+    if (this.operationState === QMLOperationState.Running) {
+      $stopTicker(t);
+    }
+  }
+
+  $startTicker(t) {
+    if (!t.tickerId) {
+      t.tickerId = setInterval(t.tick, t.interval);
+    }
+  }
+
+  $stopTicker(t) {
+    if (t.tickerId) {
+      clearInterval(t.tickerId);
+      delete t.tickerId;
     }
   }
 
