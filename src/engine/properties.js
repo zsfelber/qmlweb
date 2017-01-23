@@ -21,6 +21,11 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     obj.$properties[propName] = prop;
     if (options.hasOwnProperty("initialValue")) {
       prop.set(options.initialValue, flags, namespaceObject);
+    } else if (QMLProperty.typeInitialValues.hasOwnProperty(type)) {
+      val = QMLProperty.typeInitialValues[type];
+      if (val !== undefined) {
+        prop.set(val, flags, namespaceObject);
+      }
     }
   }
 

@@ -10,6 +10,10 @@ class PendingEvaluation extends Error {
 
 class QMLProperty {
   constructor(type, obj, name, options) {
+    if (!obj) {
+      throw new Error("Invalid QMLProperty:"+name+" of null, type:"+type+" options:"+JSON.stringify(options));
+    }
+
     this.obj = obj;
     this.name = name;
     this.readOnly = options.readOnly;
@@ -252,12 +256,6 @@ class QMLProperty {
         val = val.slice(); // Copies the array
       }
 
-      if ((flags & QMLProperty.ReasonInit) && typeof val === "undefined") {
-        if (QMLProperty.typeInitialValues.hasOwnProperty(this.type)) {
-          val = QMLProperty.typeInitialValues[this.type];
-        }
-      }
-
       if (this.binding && this.binding.bidirectional) {
         if (flags & QMLProperty.RemoveBidirectionalBinding) {
           this.binding = null;
@@ -293,7 +291,7 @@ class QMLProperty {
         }
       }
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
-        _changed_init();
+        _changed_init.call(this);
       } else {
         QmlWeb.engine.pendingOperations.push({
           fun:_changed_init,
