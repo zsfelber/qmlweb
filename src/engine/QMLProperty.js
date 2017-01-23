@@ -243,6 +243,7 @@ class QMLProperty {
            info:"Pending property set/binding initialization.",
            flags:flags,
            });
+        console.warn("PendingEvaluation : Pending property set/binding :" + this.name + "  obj:" + this.obj);
         return;
       }
     } else {
@@ -299,6 +300,7 @@ class QMLProperty {
           args:[],
           info:"Pending property set/changed_init (waiting to initialization).",
         });
+        console.warn("PendingEvaluation : Pending property set/changed init :" + this.name + "  obj:" + this.obj);
       }
     }
   }

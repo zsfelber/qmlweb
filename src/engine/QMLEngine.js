@@ -687,7 +687,13 @@ class QMLEngine {
 
   $startTicker(t) {
     if (!t.tickerId) {
-      t.tickerId = setInterval(t.tick, t.interval);
+      var interval = t.interval;
+      if (!interval) {
+        // Math.floor, causes bugs to timing?
+        interval = Math.floor(1000/t.fps);
+      }
+
+      t.tickerId = setInterval(t.tick, interval);
     }
   }
 

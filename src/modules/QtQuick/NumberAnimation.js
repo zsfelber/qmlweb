@@ -4,7 +4,7 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   baseClass: "PropertyAnimation",
   properties: {
-    interval: {type:"int", initialValue:20}
+    fps: {type:"int", initialValue:60}
   }
 }, class {
   constructor(meta) {
