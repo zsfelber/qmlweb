@@ -33,7 +33,7 @@ QmlWeb.registerQmlType({
     window: { type: "color", readOnly: true },
     windowText: { type: "color", readOnly: true },
 
-    colorGroup: "enum"
+    colorGroup: {type:"enum", initialValue:0}
   }
 }, class {
   constructor(meta) {
@@ -56,7 +56,7 @@ QmlWeb.registerQmlType({
     const name = ["active", "disabled", "inactive"][newVal];
     const pallete = systemPalettes[this.$platform][name];
     Object.keys(pallete).forEach(key => {
-      this[key].set(pallete[key], QMLProperty.Privileged);
+      this.$properties[key].set(pallete[key], QMLProperty.Privileged);
     });
   }
 });
@@ -69,7 +69,7 @@ systemPalettes.OSX = {
     buttonText: "#000000",
     dark: "#bfbfbf",
     highlight: "#fbed73",
-    highlightText: "#000000",
+    highlightedText: "#000000",
     light: "#ffffff",
     mid: "#a9a9a9",
     midlight: "#f6f6f6",
@@ -85,7 +85,7 @@ systemPalettes.OSX = {
     buttonText: "#000000",
     dark: "#bfbfbf",
     highlight: "#d0d0d0",
-    highlightText: "#000000",
+    highlightedText: "#000000",
     light: "#ffffff",
     mid: "#a9a9a9",
     midlight: "#f6f6f6",
@@ -101,7 +101,7 @@ systemPalettes.OSX = {
     buttonText: "#949494",
     dark: "#bfbfbf",
     highlight: "#d0d0d0",
-    highlightText: "#7f7f7f",
+    highlightedText: "#7f7f7f",
     light: "#ffffff",
     mid: "#a9a9a9",
     midlight: "#f6f6f6",

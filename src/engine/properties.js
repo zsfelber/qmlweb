@@ -92,7 +92,8 @@ function applyProperties(metaObject, item, objectScopeIn, componentScope) {
   const objectScope = objectScopeIn || item;
   QmlWeb.executionContext = componentScope;
 
-  if (metaObject.$children && metaObject.$children.length !== 0) {
+  const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
+  if (metaObject.$children && metaObject.$children.length !== 0 && !(item instanceof QMLComponent)) {
     if (item.$defaultProperty) {
       item.$properties[item.$defaultProperty].set(
           metaObject.$children, QMLProperty.ReasonInitPrivileged,

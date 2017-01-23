@@ -175,7 +175,7 @@ class QMLBinding {
             if (prop.readOnly) {
               throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' is read-only.");
             } else {
-              prop.set(__value, __flags);
+              prop.set(__value, __flags, __executionObject, __executionContext);
             }
           } else {
             throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' not found, it is not writable.");
@@ -200,7 +200,7 @@ class QMLBinding {
             if (prop.readOnly) {
               throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' is read-only.");
             } else {
-              prop.set(__value, __flags);
+              prop.set(__value, __flags, __executionObject, __executionContext);
             }
           } else {
             throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' not found, it is not writable.");
