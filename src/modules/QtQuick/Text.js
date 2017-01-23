@@ -19,7 +19,8 @@ QmlWeb.registerQmlType({
     wrapMode: { type: "enum", initialValue: 0 }, // Text.NoWrap
     horizontalAlignment: { type: "enum", initialValue: 1 }, // Text.AlignLeft
     style: "enum",
-    styleColor: "color"
+    styleColor: "color",
+    maximumLineCount: "int" //TODO dummy
   }
 }, class {
   constructor(meta) {
