@@ -87,9 +87,9 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
  * @param {Object} componentScope Component scope in which properties should be
  *                 evaluated
  */
-function applyProperties(metaObject, item, objectScopeIn, componentScope) {
+function applyProperties(metaObject, item, objectScope, componentScope) {
   const QMLProperty = QmlWeb.QMLProperty;
-  const objectScope = objectScopeIn || item;
+  objectScope = objectScope || item;
   QmlWeb.executionContext = componentScope;
 
   const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
