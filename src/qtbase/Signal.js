@@ -34,8 +34,11 @@ class Signal {
       type = args.pop();
     }
     if (type & Signal.UniqueConnection) {
-      if (this.isConnected(...args)) {
-        return;
+      const con = this.isConnected(...args);
+      if (con) {
+        if (!con.uses) con.uses = 1;
+        else con.uses++;
+        return con;
       }
     }
     var connection;
@@ -59,8 +62,8 @@ class Signal {
       throw new Error("Missing slot for signal:"+this.$name+"  connection   thisObj:"+connection.thisObj);
     }
 
-    connection.disconnect = function() {
-      this.disconnectConnection(connection);
+    connection.disconnect = function(all) {
+      connection.signal.disconnectConnection(connection, all);
     };
     connection.index = this.connectedSlots.length;
     connection.signal = this;
@@ -111,15 +114,15 @@ class Signal {
     const callType = args.length === 1 ? 1
       : typeof args[1] === "string" || args[1] instanceof String ? 2 : 3;
     for (const i in this.connectedSlots) {
-      const { slot, thisObj } = this.connectedSlots[i];
-      if (callType === 1 && slot === args[0] ||
-          callType === 2 && thisObj === args[0] && slot === args[0][args[1]] ||
-          thisObj === args[0] && slot === args[1]
+      const con = this.connectedSlots[i];
+      if (callType === 1 && con.slot === args[0] ||
+          callType === 2 && con.thisObj === args[0] && con.slot === args[0][args[1]] ||
+          con.thisObj === args[0] && con.slot === args[1]
       ) {
-        return true;
+        return con;
       }
     }
-    return false;
+    return null;
   }
 
   tidyupConnection(connection) {
@@ -131,17 +134,24 @@ class Signal {
     }
   }
 
-  disconnectConnection(connection) {
-    tidyupConnection(connection);
+  disconnectConnection(connection, all) {
+    var remove;
+    if (all) remove = true;
+    else if (con.uses) remove=!--con.uses;
+    else remove = true;
 
-    this.connectedSlots.splice(connection.index, 1);
-    for (var i = connection.index; i<this.connectedSlots.length; i++) {
-      this.connectedSlots[i].index--;
-    }
+    if (remove) {
+      this.tidyupConnection(connection);
 
-    // Notify object of disconnect
-    if (this.options.obj && this.options.obj.$disconnectNotify) {
-      this.options.obj.$disconnectNotify(this.options);
+      this.connectedSlots.splice(connection.index, 1);
+      for (var i = connection.index; i<this.connectedSlots.length; i++) {
+        this.connectedSlots[i].index--;
+      }
+
+      // Notify object of disconnect
+      if (this.options.obj && this.options.obj.$disconnectNotify) {
+        this.options.obj.$disconnectNotify(this.options);
+      }
     }
   }
 
