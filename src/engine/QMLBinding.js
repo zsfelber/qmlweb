@@ -38,7 +38,7 @@ class QMLBinding {
       src = _ubertrim(src);
       if (UglifyJS) {
         try {
-          src = UglifyJS.minify("_="+src, {fromString: true});
+          src = UglifyJS.minify("_=("+src+")", {fromString: true});
           while (src.code!==undefined) src = src.code;
           src = src.substring(2);
         } catch (e) {
