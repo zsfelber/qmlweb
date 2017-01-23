@@ -9,13 +9,13 @@ class PendingEvaluation extends Error {
 }
 
 class QMLProperty {
-  constructor(type, obj, name, readOnly, namespaceObject) {
+  constructor(type, obj, name, readOnly) {
     this.obj = obj;
     this.name = name;
     this.readOnly = readOnly;
     this.changed = QmlWeb.Signal.signal("changed", [], { obj });
     this.binding = null;
-    this.namespaceObject = namespaceObject;
+    this.namespaceObject = null;
     this.value = undefined;
     this.type = type;
     this.animation = null;
@@ -191,7 +191,7 @@ class QMLProperty {
           delete parent.obsoleteConnections[this.propertyId];
         } else {
           con = this.changed.connect(
-            parent,namespaceObject,
+            parent,
             QMLProperty.prototype.updateLater,
             QmlWeb.Signal.UniqueConnection
           );

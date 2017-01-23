@@ -328,7 +328,7 @@ function construct(meta) {
   item.$context.importContextId = meta.context.importContextId;
 
   // Apply properties (Bindings won't get evaluated, yet)
-  QmlWeb.applyProperties(meta.object, item, item, item.$context);
+  QmlWeb.applyProperties(meta.object, item, item/*, item.$context*/);
 
   return item;
 }

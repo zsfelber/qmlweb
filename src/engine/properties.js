@@ -14,7 +14,7 @@ function createProperty(type, obj, propName, options, namespaceObject) {
   }
 
   const QMLProperty = QmlWeb.QMLProperty;
-  const prop = new QMLProperty(type, obj, propName, options.readOnly, namespaceObject);
+  const prop = new QMLProperty(type, obj, propName, options.readOnly);
   function _set_prop(propName, prop, flags) {
     obj[`${propName}Changed`] = prop.changed;
     obj.$properties[propName] = prop;
