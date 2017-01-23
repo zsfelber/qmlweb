@@ -43,6 +43,10 @@ class QColor {
 
       const argb = val.toString(16).substr(-8);
       this.$value = `#${argb}`;
+    } else if (val instanceof Array) {
+      from4(val);
+    } else {
+      throw new Error("Unsupported color value : "+val);
     }
   }
   toString() {
@@ -82,10 +86,21 @@ class QColor {
     var result = [a&0xff000000,a&0x00ff0000,a&0x0000ff00,a&0x000000ff];
     return result;
   }
-  $diff(b) {
-    var a = this.$to4();
-    b = b.$to4();
+  $from4(a) {
+    this.$value = (a[0]<<6) + (a[1]<<4) + (a[2]<<2) + (a[3]);
+  }
+
+  static $add(a,b) {
+    var a = a.$to4();
+    var b = b.$to4();
+    result = [a[0]+b[0], a[1]+b[1], a[2]+b[2], a[3]+b[3]];
+    return new QColor(result);
+  }
+  static $subtract(a,b) {
+    var a = a.$to4();
+    var b = b.$to4();
     result = [a[0]-b[0], a[1]-b[1], a[2]-b[2], a[3]-b[3]];
+    return new QColor(result);
   }
 }
 QColor.$colors = {};

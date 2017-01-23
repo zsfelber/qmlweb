@@ -11,14 +11,8 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
-    this.easing.$add = function(a,b) {
-      return a+b;
-    };
-    this.easing.$subtract = function(a,b) {
-      return a-b;
-    };
-    this.easing.$multiply = function(a,b) {
-      return a*b;
-    };
+    this.easing.$add = QmlWeb.QColor.$add;
+    this.easing.$subtract = QmlWeb.QColor.$subtract;
+    this.easing.$multiply = QmlWeb.QColor.$multiply;
   }
 });
