@@ -4,12 +4,13 @@
  * @param {String} propName Property name
  * @param {Object} [options] Options that allow finetuning of the property
  */
-function createProperty(type, obj, propName, options, objectScope, componentScope) {
+function createProperty(type, obj, propName, options, namespaceObject) {
   if (!options) options = {};
 
-  if (!componentScope) {
-    objectScope = obj;
-    componentScope = obj.$context;
+  if (!namespaceObject) {
+    throw new Error("properties.createProperty : missing namespaceObject argument.");
+    //objectScope = obj;
+    //componentScope = obj.$context;
   }
 
   const QMLProperty = QmlWeb.QMLProperty;
@@ -18,7 +19,7 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
     obj[`${propName}Changed`] = prop.changed;
     obj.$properties[propName] = prop;
     if (options.hasOwnProperty("initialValue")) {
-      prop.set(options.initialValue, flags, objectScope, componentScope);
+      prop.set(options.initialValue, flags, namespaceObject);
     }
   }
 
@@ -58,7 +59,7 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
 
     var p = path0.join(".");
     var binding = new QmlWeb.QMLBinding(p, proplast, false, true);
-    prop.set(binding, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
+    prop.set(binding, QMLProperty.ReasonInitPrivileged, namespaceObject);
 
     _set_prop(propName, prop, QMLProperty.ReasonInit);
 
@@ -70,7 +71,7 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
     return prop.get.call(prop);
   };
   var setter = function (value, flags) {
-    prop.set.call(prop, value, flags, objectScope, componentScope);
+    prop.set.call(prop, value, flags, namespaceObject);
   }
 
   QmlWeb.setupGetterSetter(obj, propName, getter, setter);
@@ -87,7 +88,7 @@ function createProperty(type, obj, propName, options, objectScope, componentScop
  * @param {Object} componentScope Component scope in which properties should be
  *                 evaluated
  */
-function applyProperties(metaObject, item, objectScope, componentScope) {
+function applyProperties(metaObject, item, namespaceObject) {
   const QMLProperty = QmlWeb.QMLProperty;
   objectScope = objectScope || item;
   QmlWeb.executionContext = componentScope;
@@ -97,7 +98,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
     if (item.$defaultProperty) {
       item.$properties[item.$defaultProperty].set(
           metaObject.$children, QMLProperty.ReasonInitPrivileged,
-          objectScope, componentScope
+          namespaceObject
         );
     } else {
       throw new Error("Cannot assign to unexistant default property");
@@ -127,24 +128,25 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
 
       // slots
       if (i.indexOf("on") === 0 && i.length > 2 && /[A-Z]/.test(i[2])) {
+        // TODO binding when whithin group ??
         const signalName = i[2].toLowerCase() + i.slice(3);
-        if (connectSignal(item, signalName, value, objectScope, componentScope)) {
+        if (connectSignal(item, signalName, value, namespaceObject)) {
           continue;
         }
         if (item.$setCustomSlot) {
-          item.$setCustomSlot(signalName, value, objectScope, componentScope);
+          item.$setCustomSlot(signalName, value, namespaceObject);
           continue;
         }
       }
 
       if (value instanceof Object) {
-        if (applyProperty(item, i, value, objectScope, componentScope)) {
+        if (applyProperty(item, i, value, namespaceObject)) {
           continue;
         }
       }
 
       if (item.$properties && i in item.$properties) {
-        item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged, objectScope, componentScope);
+        item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged, namespaceObject);
       } else if (i in item) {
         item[i] = value;
       } else if (item.$setCustomData) {
@@ -164,7 +166,7 @@ function applyProperties(metaObject, item, objectScope, componentScope) {
   }
 }
 
-function applyProperty(item, i, value, objectScope, componentScope) {
+function applyProperty(item, i, value, namespaceObject) {
   const QMLProperty = QmlWeb.QMLProperty;
 
   if (value instanceof QmlWeb.QMLSignalDefinition) {
@@ -175,30 +177,30 @@ function applyProperty(item, i, value, objectScope, componentScope) {
     return true;
   } else if (value instanceof QmlWeb.QMLMethod) {
     value.compile();
-    item[i] = value.eval(objectScope, componentScope,
+    item[i] = value.eval(namespaceObject,
       componentScope.$basePath);
     if (item.$isComponentRoot) {
       componentScope[i] = item[i];
     }
     return true;
   } else if (value instanceof QmlWeb.QMLAliasDefinition) {
-    createProperty("alias", item, i, {path:value.path, readOnly:value.readonly}, objectScope, componentScope);
+    createProperty("alias", item, i, {path:value.path, readOnly:value.readonly}, namespaceObject);
     // NOTE getter/setter/target moved to inside createProperty
 
     return true;
   } else if (value instanceof QmlWeb.QMLPropertyDefinition) {
-    createProperty(value.type, item, i, {readOnly:value.readonly, initialValue:value.value}, objectScope, componentScope);
+    createProperty(value.type, item, i, {readOnly:value.readonly, initialValue:value.value}, namespaceObject);
     return true;
   } else if (item[i] && value instanceof QmlWeb.QMLMetaPropertyGroup) {
     // Apply properties one by one, otherwise apply at once
-    applyProperties(value, item[i], objectScope, componentScope);
+    applyProperties(value, item[i], namespaceObject);
     return true;
   }
 
   return false;
 }
 
-function connectSignal(item, signalName, value, objectScope, componentScope) {
+function connectSignal(item, signalName, value, namespaceObject) {
   if (!item[signalName]) {
     console.warn(`No signal called ${signalName} found!`);
     return undefined;
@@ -235,9 +237,9 @@ function connectSignal(item, signalName, value, objectScope, componentScope) {
   }
   // Don't pass in __basePath argument, as QMLEngine.$basePath is set in the
   // value.src, as we need it set at the time the slot is called.
-  const slot = value.eval(objectScope, componentScope);
-  item[signalName].connect(item, slot);
-  return slot;
+  const slot = value.eval(namespaceObject);
+  var connection = item[signalName].connect(item, slot);
+  return connection;
 }
 
 QmlWeb.createProperty = createProperty;

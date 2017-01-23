@@ -220,7 +220,7 @@ class QMLProperty {
   }
 
   // Define setter
-  set(newVal, flags, objectScope, componentScope) {
+  set(newVal, flags, namespaceObject) {
     flags = flags || QMLProperty.ReasonUser;
     if (this.readOnly && !(flags & QMLProperty.Privileged)) {
       throw new Error(`property '${this.name}' has read only access`);

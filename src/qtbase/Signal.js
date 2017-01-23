@@ -60,7 +60,7 @@ class Signal {
     }
 
     connection.disconnect = function() {
-      this.removeConnection(connection);
+      this.disconnectConnection(connection);
     };
     connection.index = this.connectedSlots.length;
     connection.signal = this;
@@ -131,7 +131,7 @@ class Signal {
     }
   }
 
-  removeConnection(connection) {
+  disconnectConnection(connection) {
     tidyupConnection(connection);
 
     this.connectedSlots.splice(connection.index, 1);
