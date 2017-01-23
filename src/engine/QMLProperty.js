@@ -9,10 +9,11 @@ class PendingEvaluation extends Error {
 }
 
 class QMLProperty {
-  constructor(type, obj, name, readOnly) {
+  constructor(type, obj, name, options) {
     this.obj = obj;
     this.name = name;
-    this.readOnly = readOnly;
+    this.readOnly = options.readOnly;
+    this.bound = options.bound;
     this.changed = QmlWeb.Signal.signal("changed", [], { obj });
     this.binding = null;
     this.namespaceObject = null;
@@ -207,7 +208,7 @@ class QMLProperty {
       return this.val.$get();
     }
 
-    if (this.needsUpdate && this.binding) {
+    if (this.needsUpdate && (this.bound || this.binding)) {
       QmlWeb.engine.pendingOperations.push({
          property:this,
          info:"Pending property get/binding initialization.",
