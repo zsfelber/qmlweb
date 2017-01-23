@@ -217,7 +217,7 @@ function initializeConstr(self, meta, info) {
       if (typeof desc === "string") {
         desc = { type: desc };
       }
-      QmlWeb.createProperty(desc.type, self, name, desc);
+      QmlWeb.createProperty(desc.type, self, name, desc, self);
     });
   }
   if (info.signals) {
