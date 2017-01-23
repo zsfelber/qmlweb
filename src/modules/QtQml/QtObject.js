@@ -23,9 +23,6 @@ QmlWeb.registerQmlType({
     super(meta.parent);
     QmlWeb.initializeConstr(this, meta);
 
-    this.$isComponentRoot = meta.isComponentRoot;
-    this.$context = meta.context;
-
     // Component get own properties
     this.$attributes = [];
     for (const key in meta.object) {

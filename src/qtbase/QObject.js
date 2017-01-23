@@ -3,6 +3,7 @@ let objectIds = 0;
 class QObject {
   constructor(parent) {
     this.$parent = parent;
+    this.$context = parent ? parent.$context : null;
     if (parent && parent.$tidyupList) {
       parent.$tidyupList.push(this);
     }

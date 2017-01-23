@@ -8,9 +8,10 @@ function createProperty(type, obj, propName, options, namespaceObject) {
   if (!options) options = {};
 
   if (!namespaceObject) {
-    throw new Error("properties.createProperty : missing namespaceObject argument.");
-    //objectScope = obj;
-    //componentScope = obj.$context;
+    if (!obj.$context) {
+      throw new Error("properties.createProperty : missing namespaceObject argument.");
+    }
+    namespaceObject = obj;
   }
 
   const QMLProperty = QmlWeb.QMLProperty;

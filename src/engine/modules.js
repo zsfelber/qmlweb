@@ -200,6 +200,9 @@ function callSuper(self, meta) {
 }
 
 function initializeConstr(self, meta, info) {
+  self.$isComponentRoot = meta.isComponentRoot;
+  self.$context = meta.context;
+
   info = info || meta.super.$qmlTypeInfo || {};
   if (info.enums) {
     // TODO: not exported to the whole file scope yet
@@ -217,7 +220,7 @@ function initializeConstr(self, meta, info) {
       if (typeof desc === "string") {
         desc = { type: desc };
       }
-      QmlWeb.createProperty(desc.type, self, name, desc, self);
+      QmlWeb.createProperty(desc.type, self, name, desc);
     });
   }
   if (info.signals) {
