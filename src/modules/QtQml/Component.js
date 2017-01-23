@@ -96,9 +96,9 @@ class QMLComponent {
 
     this.finalizeImports(item.$context);
 
-    Object.keys(properties).forEach(propname => {
-      item[propname] = properties.propname;
-    });
+    for (var propname in properties) {
+      item[propname] = properties[propname];
+    }
 
     // change base path back
     // TODO looks a bit hacky

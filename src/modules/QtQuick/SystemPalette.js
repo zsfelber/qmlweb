@@ -54,10 +54,10 @@ QmlWeb.registerQmlType({
   }
   $onColorGroupChanged(newVal) {
     const name = ["active", "disabled", "inactive"][newVal];
-    const pallete = systemPalettes[this.$platform][name];
-    Object.keys(pallete).forEach(key => {
-      this.$properties[key].set(pallete[key], QMLProperty.Privileged);
-    });
+    const palette = systemPalettes[this.$platform][name];
+    for (var key in palette) {
+      this.$properties[key].set(palette[key], QMLProperty.Privileged);
+    }
   }
 });
 

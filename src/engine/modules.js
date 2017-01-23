@@ -206,28 +206,28 @@ function initializeConstr(self, meta, info) {
   info = info || meta.super.$qmlTypeInfo || {};
   if (info.enums) {
     // TODO: not exported to the whole file scope yet
-    Object.keys(info.enums).forEach(name => {
+    for (var name in info.enums) {
       self[name] = info.enums[name];
 
       if (!global[name]) {
         global[name] = self[name]; // HACK
       }
-    });
+    }
   }
   if (info.properties) {
-    Object.keys(info.properties).forEach(name => {
+    for (var name in info.properties) {
       let desc = info.properties[name];
       if (typeof desc === "string") {
         desc = { type: desc };
       }
       QmlWeb.createProperty(desc.type, self, name, desc);
-    });
+    }
   }
   if (info.signals) {
-    Object.keys(info.signals).forEach(name => {
+    for (var name in info.signals) {
       const params = info.signals[name];
       self[name] = QmlWeb.Signal.signal(name, params);
-    });
+    }
   }
   if (info.defaultProperty) {
     self.$defaultProperty = info.defaultProperty;
