@@ -38,6 +38,9 @@ QmlWeb.registerQmlType({
     this.easing.$multiply = function(a,b) {
       return a*b;
     };
+    this.easing.$construct = function(a) {
+      return a;
+    }
 
     this.$props = [];
     this.$targets = [];

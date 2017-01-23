@@ -94,13 +94,23 @@ class QColor {
     var a = a.$to4();
     var b = b.$to4();
     result = [a[0]+b[0], a[1]+b[1], a[2]+b[2], a[3]+b[3]];
-    return new QColor(result);
+    return result;
   }
   static $subtract(a,b) {
     var a = a.$to4();
     var b = b.$to4();
     result = [a[0]-b[0], a[1]-b[1], a[2]-b[2], a[3]-b[3]];
-    return new QColor(result);
+    return result;
+  }
+  static $multiply(a,b) {
+    if (a.$to4) {
+      a = a.$to4();
+      result = [a[0]*b, a[1]*b, a[2]*b, a[3]*b];
+    } else {
+      b = b.$to4();
+      result = [b[0]*a, b[1]*a, b[2]*a, b[3]*a];
+    }
+    return result;
   }
 }
 QColor.$colors = {};

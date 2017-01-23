@@ -47,8 +47,9 @@ QmlWeb.registerQmlType({
     for (const i in this.$actions) {
       const action = this.$actions[i];
       const value = this.easing.$add( action.from ,
-                                      this.easing.$multiply(  this.easing.$subtract(action.to, action.from),
-                                                              this.easing.$valueForProgress(this.$at)   )  );
+                                      this.easing.$construct(
+                                        this.easing.$multiply(  this.easing.$subtract(action.to, action.from),
+                                                                this.easing.$valueForProgress(this.$at)   )   )  );
       const property = action.target.$properties[action.property];
       property.set(value, QmlWeb.QMLProperty.ReasonAnimation);
     }

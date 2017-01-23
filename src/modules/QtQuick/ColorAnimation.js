@@ -14,5 +14,6 @@ QmlWeb.registerQmlType({
     this.easing.$add = QmlWeb.QColor.$add;
     this.easing.$subtract = QmlWeb.QColor.$subtract;
     this.easing.$multiply = QmlWeb.QColor.$multiply;
+    this.easing.$construct = QmlWeb.QColor.$construct;
   }
 });
