@@ -29,6 +29,15 @@ QmlWeb.registerQmlType({
         this.type, this.period, this.amplitude, this.overshoot, t
       );
     };
+    this.easing.$add = function(a,b) {
+      return a+b;
+    };
+    this.easing.$subtract = function(a,b) {
+      return a-b;
+    };
+    this.easing.$multiply = function(a,b) {
+      return a*b;
+    };
 
     this.$props = [];
     this.$targets = [];
