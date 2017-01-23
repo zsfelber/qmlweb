@@ -9,14 +9,13 @@ class PendingEvaluation extends Error {
 }
 
 class QMLProperty {
-  constructor(type, obj, name, readOnly) {
+  constructor(type, obj, name, readOnly, namespaceObject) {
     this.obj = obj;
     this.name = name;
     this.readOnly = readOnly;
     this.changed = QmlWeb.Signal.signal("changed", [], { obj });
     this.binding = null;
-    this.objectScope = null;
-    this.componentScope = null;
+    this.namespaceObject = namespaceObject;
     this.value = undefined;
     this.type = type;
     this.animation = null;
@@ -34,13 +33,13 @@ class QMLProperty {
 
   // Called by update and set to actually set this.val, performing any type
   // conversion required.
-  $setVal(val, componentScope) {
+  $setVal(val, namespaceObject) {
     const constructors = QmlWeb.constructors;
     if (constructors[this.type] === QmlWeb.qmlList) {
       this.val = QmlWeb.qmlList({
         object: val,
         parent: this.obj,
-        context: componentScope
+        context: namespaceObject.$context
       });
     } else if (val instanceof QmlWeb.QMLMetaElement) {
       const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
@@ -49,18 +48,18 @@ class QMLProperty {
         this.val = new QMLComponent({
           object: val,
           parent: this.obj,
-          context: componentScope
+          context: namespaceObject.$context
         });
         /* $basePath must be set here so that Components that are assigned to
          * properties (e.g. Repeater delegates) can properly resolve child
          * Components that live in the same directory in
          * Component.createObject. */
-        this.val.$basePath = componentScope.$basePath;
+        this.val.$basePath = namespaceObject.$context.$basePath;
       } else {
         this.val = QmlWeb.construct({
           object: val,
           parent: this.obj,
-          context: componentScope
+          context: namespaceObject.$context
         });
       }
     } else if (val instanceof Object || val === undefined || val === null) {
@@ -106,10 +105,10 @@ class QMLProperty {
         this.obsoleteConnections = QmlWeb.helpers.mergeObjects(this.evalTreeConnections);
         this.evalTreeConnections = {};
 
-        var val = this.binding.eval(this.objectScope, this.componentScope,
-          this.componentScopeBasePath);
+        var val = this.binding.eval(this.namespaceObject,
+          this.namespaceObject.$context.$basePath);
 
-        this.$setVal(val, this.componentScope);
+        this.$setVal(val, this.namespaceObject);
 
       } finally {
         for (var i in this.obsoleteConnections) {
@@ -192,7 +191,7 @@ class QMLProperty {
           delete parent.obsoleteConnections[this.propertyId];
         } else {
           con = this.changed.connect(
-            parent,
+            parent,namespaceObject,
             QMLProperty.prototype.updateLater,
             QmlWeb.Signal.UniqueConnection
           );
@@ -230,13 +229,11 @@ class QMLProperty {
 
     let val = newVal;
     if (val instanceof QmlWeb.QMLBinding) {
-      if (!objectScope || !componentScope) {
+      if (!namespaceObject) {
         throw new Error("Internal error: binding assigned without scope");
       }
       this.binding = val;
-      this.objectScope = objectScope;
-      this.componentScope = componentScope;
-      this.componentScopeBasePath = componentScope.$basePath;
+      this.namespaceObject = namespaceObject;
 
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         this.update(true);
@@ -266,14 +263,14 @@ class QMLProperty {
           if (!this.binding.compiled) {
             this.binding.compile();
           }
-          this.binding.set(this.objectScope, this.componentScope,
-                           this.componentScopeBasePath, newVal, flags);
+          this.binding.set(this.namespaceObject,
+                           this.namespaceObject.$context.$basePath, newVal, flags);
         }
       } else if (!(flags & QMLProperty.ReasonAnimation)) {
         this.binding = null;
       }
 
-      this.$setVal(val, componentScope);
+      this.$setVal(val, namespaceObject);
     }
 
     if (this.val !== oldVal) {

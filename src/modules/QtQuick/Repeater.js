@@ -92,22 +92,24 @@ QmlWeb.registerQmlType({
     for (let index = startIndex; index <= endIndex; index++) {
       const item = this.$items[index];
       const modelData = item.$properties.model;
+      const scope = {
+        $object:item,
+        $context: this.model.$context
+      };
       for (const i in roleNames) {
         const roleName = roleNames[i];
         const roleData = model.data(index, roleName);
         item.$properties[roleName].set(
           roleData,
           QmlWeb.QMLProperty.ReasonInitPrivileged,
-          item,
-          this.model.$context
+          scope
         );
         modelData[roleName] = roleData;
       }
       item.$properties.model.set(
         modelData,
         QmlWeb.QMLProperty.ReasonInitPrivileged,
-        item,
-        this.model.$context
+        scope
       );
     }
   }
@@ -153,6 +155,10 @@ QmlWeb.registerQmlType({
     for (index = startIndex; index < endIndex; index++) {
       const newItem = this.delegate.$createObject(this.parent);
       createProperty("int", newItem, "index", { initialValue: index });
+      const scope = {
+        $object:newItem,
+        $context: this.model.$context
+      };
 
       if (typeof model === "number" || model instanceof Array) {
         if (typeof newItem.$properties.modelData === "undefined") {
@@ -162,7 +168,7 @@ QmlWeb.registerQmlType({
                       model[index] :
                       typeof model === "number" ? index : "undefined";
         newItem.$properties.modelData.set(value, QmlWeb.QMLProperty.ReasonInitPrivileged,
-                                          newItem, model.$context);
+                                          scope);
       } else {
         // QML exposes a "model" property in the scope that contains all role
         // data.
@@ -176,7 +182,7 @@ QmlWeb.registerQmlType({
           modelData[roleName] = roleData;
           newItem.$properties[roleName].set(
             roleData, QmlWeb.QMLProperty.ReasonInitPrivileged,
-            newItem, this.model.$context
+            scope
           );
         }
         if (typeof newItem.$properties.model === "undefined") {
@@ -184,7 +190,7 @@ QmlWeb.registerQmlType({
         }
         newItem.$properties.model.set(
           modelData, QmlWeb.QMLProperty.ReasonInitPrivileged,
-          newItem, this.model.$context
+          scope
         );
       }
 

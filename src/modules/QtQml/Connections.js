@@ -30,7 +30,7 @@ QmlWeb.registerQmlType({
       }
       if (this.target) {
         c._currentConnection = QmlWeb.connectSignal(this.target, i, c.value,
-          c.objectScope, c.componentScope);
+          c.namespaceObject);
       }
     }
   }

@@ -95,7 +95,9 @@ class QMLBinding {
     }
   }*/
 
-  get(object, context, basePath) {
+  get(namespaceObject, basePath) {
+    var object = namespaceObject.$object ? namespaceObject.$object : namespaceObject;
+    var context = namespaceObject.$context;
     QmlWeb.executionContext = context;
     if (basePath) {
       QmlWeb.engine.$basePath = basePath;
@@ -104,13 +106,15 @@ class QMLBinding {
     return this.implGet.call(object, object, context);
   }
 
-  set(object, context, basePath, value, flags) {
+  set(namespaceObject, basePath, value, flags) {
+    var object = namespaceObject.$object ? namespaceObject.$object : namespaceObject;
+    var context = namespaceObject.$context;
     QmlWeb.executionContext = context;
     if (basePath) {
       QmlWeb.engine.$basePath = basePath;
     }
     // .call is needed for `this` support
-    this.implSet.call(object, object, context, value, flags);
+    this.implSet.call(object, namespaceObject, object, context, value, flags);
   }
 
 /**
@@ -163,7 +167,7 @@ class QMLBinding {
         throw new Error("Invalid writable/bidirectional binding expression :  "+src+" . "+property);
       }
 
-      return new Function("__executionObject", "__executionContext", "__value", "__flags", `
+      return new Function("__ns", "__executionObject", "__executionContext", "__value", "__flags", `
         with(QmlWeb) with(__executionContext) with(__executionObject) {
           var obj = ${src};
           if (!obj) {
@@ -175,7 +179,7 @@ class QMLBinding {
             if (prop.readOnly) {
               throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' is read-only.");
             } else {
-              prop.set(__value, __flags, prop.obj, __executionContext);
+              prop.set(__value, __flags, __ns);
             }
           } else {
             throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' not found, it is not writable.");
@@ -189,7 +193,7 @@ class QMLBinding {
         throw new Error("Invalid writable/bidirectional binding expression : "+property);
       }
 
-      return new Function("__executionObject", "__executionContext", "__value", "__flags", `
+      return new Function("__ns", "__executionObject", "__executionContext", "__value", "__flags", `
         with(QmlWeb) with(__executionContext) with(__executionObject) {
           var prop = this.$properties["${property}"];
           if (!prop) {
@@ -200,7 +204,7 @@ class QMLBinding {
             if (prop.readOnly) {
               throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' is read-only.");
             } else {
-              prop.set(__value, __flags, prop.obj, __executionContext);
+              prop.set(__value, __flags, __ns);
             }
           } else {
             throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' not found, it is not writable.");

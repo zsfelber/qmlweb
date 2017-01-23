@@ -221,9 +221,13 @@ QmlWeb.registerQmlType({
     // before we fetch the values because properties can be interdependent.
     for (const i in actions) {
       const action = actions[i];
+      const scope = {
+        action:action,
+        $object:action.target,
+        $context: (newState ? newState.$context : action.target.$context)
+      };
       action.target.$properties[action.property].set(
-        action.value, QmlWeb.QMLProperty.ReasonUser, action.target,
-        newState ? newState.$context : action.target.$context
+        action.value, QmlWeb.QMLProperty.ReasonUser, scope
       );
     }
     for (const i in actions) {

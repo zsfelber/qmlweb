@@ -14,7 +14,7 @@ function createProperty(type, obj, propName, options, namespaceObject) {
   }
 
   const QMLProperty = QmlWeb.QMLProperty;
-  const prop = new QMLProperty(type, obj, propName, options.readOnly);
+  const prop = new QMLProperty(type, obj, propName, options.readOnly, namespaceObject);
   function _set_prop(propName, prop, flags) {
     obj[`${propName}Changed`] = prop.changed;
     obj.$properties[propName] = prop;
@@ -84,14 +84,16 @@ function createProperty(type, obj, propName, options, namespaceObject) {
  * Apply properties from metaObject to item.
  * @param {Object} metaObject Source of properties
  * @param {Object} item Target of property apply
- * @param {Object} objectScope Scope in which properties should be evaluated
- * @param {Object} componentScope Component scope in which properties should be
+ * @param {Object} namespaceObject Scope in which properties should be evaluated
+ * @param {Object} namespaceObject.$context Component scope in which properties should be
  *                 evaluated
  */
 function applyProperties(metaObject, item, namespaceObject) {
+  if (!namespaceObject) {
+    throw new Error("properties.applyProperties : missing namespaceObject argument.");
+  }
   const QMLProperty = QmlWeb.QMLProperty;
-  objectScope = objectScope || item;
-  QmlWeb.executionContext = componentScope;
+  QmlWeb.executionContext = namespaceObject.$context;
 
   const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
   if (metaObject.$children && metaObject.$children.length !== 0 && !(item instanceof QMLComponent)) {
@@ -172,15 +174,15 @@ function applyProperty(item, i, value, namespaceObject) {
   if (value instanceof QmlWeb.QMLSignalDefinition) {
     item[i] = QmlWeb.Signal.signal(i, value.parameters);
     if (item.$isComponentRoot) {
-      componentScope[i] = item[i];
+      namespaceObject.$context[i] = item[i];
     }
     return true;
   } else if (value instanceof QmlWeb.QMLMethod) {
     value.compile();
     item[i] = value.eval(namespaceObject,
-      componentScope.$basePath);
+      namespaceObject.$context.$basePath);
     if (item.$isComponentRoot) {
-      componentScope[i] = item[i];
+      namespaceObject.$context[i] = item[i];
     }
     return true;
   } else if (value instanceof QmlWeb.QMLAliasDefinition) {
@@ -225,7 +227,7 @@ function connectSignal(item, signalName, value, namespaceObject) {
     value.src = `(${params.join(", ")}) {
         QmlWeb.executionContext = __executionContext;
         QmlWeb.engine.$oldBasePath = QmlWeb.engine.$basePath;
-        QmlWeb.engine.$basePath = "${componentScope.$basePath}";
+        QmlWeb.engine.$basePath = "${namespaceObject.$context.$basePath}";
         try {
           ${value.src}
         } finally {
