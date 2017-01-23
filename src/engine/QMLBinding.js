@@ -1,5 +1,12 @@
 function _ubertrim(str) {
-    return str.replace(/(?:\s|[;,])*$/g, "");
+  if (str.replace) {
+    str = str.replace(/^(?:\s|[;,])*/g, "");
+    str = str.replace(/(?:\s|[;,])*$/g, "");
+  } else {
+    console.warn("_ubertrim not possible : what's this?!:"+str+" "+(typeof str)+" "+JSON.stringify(str));
+  }
+
+  return str;
 }
 
 class QMLBinding {
@@ -28,39 +35,40 @@ class QMLBinding {
     this.bidirectional = bidirectional;
 
     if (src) {
+      src = _ubertrim(src);
       if (UglifyJS) {
         try {
-          this.src = UglifyJS.minify("_="+src, {fromString: true});
-          while (this.src.code) this.src = this.src.code;
-          this.src = this.src.substring(2);
+          src = UglifyJS.minify("_="+src, {fromString: true});
+          while (src.code!==undefined) src = src.code;
+          src = src.substring(2);
         } catch (e) {
           try {
-            this.src = UglifyJS.minify(src, {fromString: true, parse:{bare_returns:true}});
-            while (this.src.code) this.src = this.src.code;
+            src = UglifyJS.minify(src, {fromString: true, parse:{bare_returns:true}});
+            while (src.code!==undefined) src = src.code;
           } catch (e2) {
             console.warn(e.message+":\n"+e2.message+":\n(_=) "+src);
-            this.src = src;
           }
         }
-      } else {
-        this.src = src.trim();
+        if (src) {
+          src = _ubertrim(src);
+        }
       }
 
-      var match = /^function\s*(\w|\d|\$)*\(/.exec(this.src);
+      var match = /^function\s*(\w|\d|\$)*\(/.exec(src);
       if (match) {
         if (!this.implementMode) {
-          throw new Error("Binding is effectively a function but declared to expression : "+(info?info:this.src));
+          throw new Error("Binding is effectively a function but declared to expression : "+(info?info:src));
         }
-        this.src = this.src.substring(match[0].length-1);
+        src = src.substring(match[0].length-1);
         this.implementMode = QMLBinding.ImplFunction;
       } else {
         if (this.implementMode === QMLBinding.ImplFunction) {
-          throw new Error("Binding is effectively not a function but declared so : "+(info?info:this.src));
+          throw new Error("Binding is effectively not a function but declared so : "+(info?info:src));
         }
       }
-    } else {
-      this.src = src;
     }
+
+    this.src = src;
 
     // Not serialized, but still means false:
     //this.compiled = false;
@@ -121,7 +129,7 @@ class QMLBinding {
  * Compile binding. Afterwards you may call binding.eval/get/set to evaluate.
  */
   compile() {
-    this.src = this.src.trim();
+    this.src = _ubertrim(this.src);
     this.implGet = QMLBinding.bindGet(this.src, this.property, this.implementMode);
     if (this.bidirectional) {
       this.implSet = QMLBinding.bindSet(this.src, this.property, this.implementMode);
@@ -130,7 +138,6 @@ class QMLBinding {
   }
 
   static bindGet(src, property, implementMode) {
-    src = _ubertrim(src);
 
     if (property) {
       if (implementMode) {
@@ -158,7 +165,6 @@ class QMLBinding {
     if (implementMode) {
       throw new Error("Invalid writable/bidirectional binding, it should be an expression : "+src);
     }
-    src = _ubertrim(src);
 
     if (src) {
 
