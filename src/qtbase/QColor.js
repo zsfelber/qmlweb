@@ -44,7 +44,7 @@ class QColor {
       const argb = val.toString(16).substr(-8);
       this.$value = `#${argb}`;
     } else if (val instanceof Array) {
-      from4(val);
+      this.$from4(val);
     } else {
       throw new Error("Unsupported color value : "+val);
     }
@@ -87,23 +87,25 @@ class QColor {
     return result;
   }
   $from4(a) {
-    this.$value = (a[0]<<6) + (a[1]<<4) + (a[2]<<2) + (a[3]);
+    this.$value = ((Math.max(0,a[0])&0xff000000)<<6) + ((Math.max(0,a[1])&0x00ff0000)<<4) + ((Math.max(0,a[2])&0x0000ff00)<<2) + (Math.max(0,a[3])&0x000000ff);
   }
 
   static $add(a,b) {
-    var a = a.$to4();
-    var b = b.$to4();
+    a = a.$to4 ? a.$to4() : a;
+    b = b.$to4 ? b.$to4() : b;
     result = [a[0]+b[0], a[1]+b[1], a[2]+b[2], a[3]+b[3]];
     return result;
   }
   static $subtract(a,b) {
-    var a = a.$to4();
-    var b = b.$to4();
+    a = a.$to4 ? a.$to4() : a;
+    b = b.$to4 ? b.$to4() : b;
     result = [a[0]-b[0], a[1]-b[1], a[2]-b[2], a[3]-b[3]];
     return result;
   }
   static $multiply(a,b) {
-    if (a.$to4) {
+    a = a.$to4 ? a.$to4() : a;
+    b = b.$to4 ? b.$to4() : b;
+    if (a instanceof Array) {
       a = a.$to4();
       result = [a[0]*b, a[1]*b, a[2]*b, a[3]*b];
     } else {
