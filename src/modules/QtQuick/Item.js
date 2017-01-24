@@ -226,7 +226,7 @@ QmlWeb.registerQmlType({
         $object:action.target,
         $context: (newState ? newState.$context : action.target.$context)
       };
-      action.target.$properties[action.property].set(
+      action.target.$properties_aliases[action.property].set(
         action.value, QmlWeb.QMLProperty.ReasonUser, scope
       );
     }
@@ -282,8 +282,8 @@ QmlWeb.registerQmlType({
       const action = {
         target: change.target,
         property: item.property,
-        origValue: change.target.$properties[item.property].binding ||
-                    change.target.$properties[item.property].val,
+        origValue: change.target.$properties_aliases[item.property].binding ||
+                    change.target.$properties_aliases[item.property].val,
         value: item.value,
         from: change.target[item.property],
         to: undefined,
@@ -312,8 +312,8 @@ QmlWeb.registerQmlType({
         this.$revertActions.push({
           target: change.target,
           property: item.property,
-          value: change.target.$properties[item.property].binding ||
-                  change.target.$properties[item.property].val,
+          value: change.target.$properties_aliases[item.property].binding ||
+                  change.target.$properties_aliases[item.property].val,
           from: undefined,
           to: change.target[item.property]
         });
@@ -455,7 +455,7 @@ QmlWeb.registerQmlType({
 
     if (anchors.fill !== undefined) {
       const fill = anchors.fill;
-      const props = fill.$properties;
+      const props = fill.$properties_aliases;
       props.left.changed.connect(this, this.$updateHGeometry, flags);
       props.right.changed.connect(this, this.$updateHGeometry, flags);
       props.width.changed.connect(this, this.$updateHGeometry, flags);
@@ -467,7 +467,7 @@ QmlWeb.registerQmlType({
       u.right = fill.right - rM;
       u.horizontalCenter = (u.left + u.right) / 2;
     } else if (anchors.centerIn !== undefined) {
-      const horizontalCenter = anchors.centerIn.$properties.horizontalCenter;
+      const horizontalCenter = anchors.centerIn.$properties_aliases.horizontalCenter;
       horizontalCenter.changed.connect(this, this.$updateHGeometry, flags);
 
       u.horizontalCenter = anchors.centerIn.horizontalCenter;
@@ -513,7 +513,7 @@ QmlWeb.registerQmlType({
       u.right = u.horizontalCenter + w / 2;
     } else {
       if (this.parent) {
-        const leftProp = this.parent.$properties.left;
+        const leftProp = this.parent.$properties_aliases.left;
         leftProp.changed.connect(this, this.$updateHGeometry, flags);
       }
 
@@ -554,7 +554,7 @@ QmlWeb.registerQmlType({
 
     if (anchors.fill !== undefined) {
       const fill = anchors.fill;
-      const props = fill.$properties;
+      const props = fill.$properties_aliases;
       props.top.changed.connect(this, this.$updateVGeometry, flags);
       props.bottom.changed.connect(this, this.$updateVGeometry, flags);
       props.height.changed.connect(this, this.$updateVGeometry, flags);
@@ -566,7 +566,7 @@ QmlWeb.registerQmlType({
       u.bottom = fill.bottom - bM;
       u.verticalCenter = (u.top + u.bottom) / 2;
     } else if (anchors.centerIn !== undefined) {
-      const verticalCenter = anchors.centerIn.$properties.verticalCenter;
+      const verticalCenter = anchors.centerIn.$properties_aliases.verticalCenter;
       verticalCenter.changed.connect(this, this.$updateVGeometry, flags);
 
       u.verticalCenter = anchors.centerIn.verticalCenter;
@@ -610,7 +610,7 @@ QmlWeb.registerQmlType({
       u.bottom = u.verticalCenter + h / 2;
     } else {
       if (this.parent) {
-        const topProp = this.parent.$properties.top;
+        const topProp = this.parent.$properties_aliases.top;
         topProp.changed.connect(this, this.$updateVGeometry, flags);
       }
 

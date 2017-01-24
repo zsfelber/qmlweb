@@ -25,7 +25,7 @@ QmlWeb.registerQmlType({
   }
   $loadProperties() {
     this.$attributes.forEach(attrName => {
-      if (!this.$properties[attrName]) return;
+      if (!this.$properties_aliases[attrName]) return;
 
       const key = this.$getKey(attrName);
       this[attrName] = localStorage.getItem(key);
@@ -37,11 +37,12 @@ QmlWeb.registerQmlType({
       let emitter = this;
       let signalName = `${attrName}Changed`;
 
-      const a = this.$aliases[attrName];
+      // NOTE aliases are now regular properties (so Changed works)
+      /*const a = this.$aliases[attrName];
       if (a) {
         emitter = this.$context[a.val.objectName];
         signalName = `${a.val.propertyName}Changed`;
-      } else if (!this.$properties[attrName]) {
+      } else */if (!this.$properties_aliases[attrName]) {
         return;
       }
 

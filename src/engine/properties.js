@@ -16,9 +16,8 @@ function createProperty(type, obj, propName, options, namespaceObject) {
 
   const QMLProperty = QmlWeb.QMLProperty;
   const prop = new QMLProperty(type, obj, propName, options);
-  function _set_prop(props, propName, prop, flags) {
+  function _set_prop(propName, prop, flags) {
     obj[`${propName}Changed`] = prop.changed;
-    obj[props][propName] = prop;
     if (options.hasOwnProperty("initialValue")) {
       prop.set(options.initialValue, flags, namespaceObject);
     } else if (QMLProperty.typeInitialValues.hasOwnProperty(type)) {
@@ -55,12 +54,14 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     var binding = new QMLBinding(p, proplast, QMLBinding.ImplExpression|QMLBinding.Alias);
     prop.set(binding, QMLProperty.ReasonInitPrivileged, namespaceObject);
 
-    _set_prop("$aliases", propName, prop, QMLProperty.ReasonInit);
-    _set_prop("$properties_aliases", propName, prop, QMLProperty.ReasonInit);
+    _set_prop(propName, prop, QMLProperty.ReasonInit);
+    obj.$aliases[propName] = prop;
+    obj.$properties_aliases[propName] = prop;
 
   } else {
-    _set_prop("$properties", propName, prop, QMLProperty.ReasonInitPrivileged);
-    _set_prop("$properties_aliases", propName, prop, QMLProperty.ReasonInitPrivileged);
+    _set_prop(propName, prop, QMLProperty.ReasonInitPrivileged);
+    obj.$properties[propName] = prop;
+    obj.$properties_aliases[propName] = prop;
   }
 
   var getter = function () {
@@ -94,7 +95,7 @@ function applyProperties(metaObject, item, namespaceObject) {
   const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
   if (metaObject.$children && metaObject.$children.length !== 0 && !(item instanceof QMLComponent)) {
     if (item.$defaultProperty) {
-      item.$properties[item.$defaultProperty].set(
+      item.$aliases[item.$defaultProperty].set(
           metaObject.$children, QMLProperty.ReasonInitPrivileged,
           namespaceObject
         );
@@ -143,8 +144,8 @@ function applyProperties(metaObject, item, namespaceObject) {
         }
       }
 
-      if (item.$properties && i in item.$properties) {
-        item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged, namespaceObject);
+      if (item.$properties_aliases && i in item.$properties_aliases) {
+        item.$properties_aliases[i].set(value, QMLProperty.ReasonInitPrivileged, namespaceObject);
       } else if (i in item) {
         item[i] = value;
       } else if (item.$setCustomData) {

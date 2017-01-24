@@ -18,13 +18,23 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.callSuper(this, meta);
 
-    this.$properties.container.set(this.$parent, QmlWeb.QMLProperty.ReasonInit);
+    this.$properties_aliases.container.set(this.$parent, QmlWeb.QMLProperty.ReasonInit);
 
     /* This ensures that if the user toggles the "running" property manually,
      * the timer will trigger. */
     this.runningChanged.connect(this, this.$onRunningChanged);
 
-    QmlWeb.engine.$registerStart(() => {
+    QmlWeb.engine.$registerStart(() => {erties[pname];
+                                   if (!prop) return;
+                                   switch (prop.type) {
+                                     case "bool":
+                                       this.qml[pname] = typeof newValue === "string";
+                                       break;
+                                     default:
+                                       this.qml[pname] = newValue;
+                                   }
+                                 }
+
       if (this.running) {
         this.restart();
       }
@@ -66,7 +76,7 @@ QmlWeb.registerQmlType({
     if (!this.repeat) {
       // We set the value directly in order to be able to emit the
       // runningChanged signal after triggered, like Qt does it.
-      this.$properties.running.val = false;
+      this.$properties_aliases.running.val = false;
     }
 
     // Trigger this.

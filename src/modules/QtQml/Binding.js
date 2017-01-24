@@ -28,7 +28,7 @@ QmlWeb.registerQmlType({
       this.$property = undefined;
       return;
     }
-    this.$property = this.target.$properties[this.property];
+    this.$property = this.target.$properties_aliases[this.property];
     this.$onValueChanged(this.value); // trigger value update
   }
 

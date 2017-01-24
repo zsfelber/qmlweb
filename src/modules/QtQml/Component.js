@@ -112,7 +112,7 @@ class QMLComponent {
     const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
 
     if (item instanceof QMLItem) {
-      item.$properties.parent.set(parent, QmlWeb.QMLProperty.ReasonInitPrivileged);
+      item.$properties_aliases.parent.set(parent, QmlWeb.QMLProperty.ReasonInitPrivileged);
     }
 
     return item;

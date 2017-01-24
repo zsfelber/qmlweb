@@ -14,7 +14,7 @@ function getProperties(file) {
   engine.loadFile(file);
 
   const qml = engine.rootObject;
-  const properties = Object.keys(qml.$properties).filter(name => {
+  const properties = Object.keys(qml.$properties_aliases).filter(name => {
     // Invalid names
     if (!name.match(/^[a-z]+$/i) || name === "is") return false;
 
@@ -24,7 +24,7 @@ function getProperties(file) {
     // These properties are not supported in a good way on top-level items
     if (ignoreProps.indexOf(name) !== -1) return false;
 
-    const type = qml.$properties[name].type;
+    const type = qml.$properties_aliases[name].type;
     return ["real", "color", "int", "bool", "string"].indexOf(type) !== -1;
   });
 
@@ -90,16 +90,16 @@ function registerElement(name, file) {
             }
           }
         );
-        qml.$properties[pname].changed.connect(() => this.applyAttribute(attr));
+        qml.$properties_aliases[pname].changed.connect(() => this.applyAttribute(attr));
       });
 
       // Set and update wrapper width/height
       this.style.width = `${qml.width}px`;
       this.style.height = `${qml.height}px`;
-      qml.$properties.width.changed.connect(width => {
+      qml.$properties_aliases.width.changed.connect(width => {
         this.style.width = `${width}px`;
       });
-      qml.$properties.height.changed.connect(height => {
+      qml.$properties_aliases.height.changed.connect(height => {
         this.style.height = `${height}px`;
       });
     }
@@ -111,7 +111,7 @@ function registerElement(name, file) {
     attributeChangedCallback(attr, oldValue, newValue) {
       if (!this.qml) return;
       const pname = attr2prop[attr] || attr;
-      const prop = this.qml.$properties[pname];
+      const prop = this.qml.$properties_aliases[pname];
       if (!prop) return;
       switch (prop.type) {
         case "bool":
@@ -124,7 +124,7 @@ function registerElement(name, file) {
 
     applyAttribute(attr) {
       const pname = attr2prop[attr] || attr;
-      const prop = this.qml.$properties[pname];
+      const prop = this.qml.$properties_aliases[pname];
       if (!prop) {
         this.deleteAttribute(attr);
         return;

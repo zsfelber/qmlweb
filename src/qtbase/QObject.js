@@ -12,7 +12,9 @@ class QObject {
     // TODO use hash !
     this.$tidyupList = [];
 
-    this.$properties = [];
+    this.$properties = {};
+    this.$aliases = {};
+    this.$properties_aliases = {};
     this.$signals = [];
 
     this.objectId = objectIds++;
@@ -34,8 +36,8 @@ class QObject {
       }
     }
 
-    for (const i in this.$properties) {
-      const prop = this.$properties[i];
+    for (const i in this.$properties_aliases) {
+      const prop = this.$properties_aliases[i];
       while (prop.$tidyupList.length > 0) {
         prop.$tidyupList[0].disconnect(prop);
       }

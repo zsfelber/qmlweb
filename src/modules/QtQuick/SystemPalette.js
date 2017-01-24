@@ -56,7 +56,7 @@ QmlWeb.registerQmlType({
     const name = ["active", "disabled", "inactive"][newVal];
     const palette = systemPalettes[this.$platform][name];
     for (var key in palette) {
-      this.$properties[key].set(palette[key], QMLProperty.Privileged);
+      this.$properties_aliases[key].set(palette[key], QMLProperty.Privileged);
     }
   }
 });

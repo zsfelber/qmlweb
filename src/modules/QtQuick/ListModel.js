@@ -28,7 +28,7 @@ QmlWeb.registerQmlType({
       const roleNames = [];
       let dict = newVal[0];
       if (dict instanceof QMLListElement) {
-        dict = dict.$properties;
+        dict = dict.$properties_aliases;
       }
       for (const i in dict) {
         if (i !== "index") {
