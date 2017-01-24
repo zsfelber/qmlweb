@@ -115,7 +115,14 @@ class QMLBinding {
       QmlWeb.engine.$basePath = basePath;
     }
     // .call is needed for `this` support
-    return this.implGet.call(object, namespaceObject);
+    try {
+      return this.implGet.call(object, namespaceObject);
+    } catch (err) {
+      if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
+        console.warn("Binding eval : "+e.message+"  impl:"+this.implGet.toString());
+      }
+      throw err;
+    }
   }
 
   set(namespaceObject, basePath, value, flags) {
@@ -126,7 +133,14 @@ class QMLBinding {
       QmlWeb.engine.$basePath = basePath;
     }
     // .call is needed for `this` support
-    this.implSet.call(object, value, flags, namespaceObject);
+    try {
+      this.implSet.call(object, value, flags, namespaceObject);
+    } catch (err) {
+      if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
+        console.warn("Binding eval : "+e.message+"  impl:"+this.implGet.toString());
+      }
+      throw err;
+    }
   }
 
 /**
