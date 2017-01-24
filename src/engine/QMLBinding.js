@@ -119,7 +119,7 @@ class QMLBinding {
       return this.implGet.call(object, namespaceObject);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
-        console.warn("Binding eval : "+e.message+"  impl:"+this.implGet.toString());
+        console.warn("Binding/get error : "+err.message+"  impl:\n"+this.implGet.toString());
       }
       throw err;
     }
@@ -137,7 +137,7 @@ class QMLBinding {
       this.implSet.call(object, value, flags, namespaceObject);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
-        console.warn("Binding eval : "+e.message+"  impl:"+this.implGet.toString());
+        console.warn("Binding/set error : "+err.message+"  impl:\n"+this.implSet.toString());
       }
       throw err;
     }
@@ -148,11 +148,11 @@ class QMLBinding {
  */
   compile() {
     this.src = _ubertrim(this.src);
+    this.compiled = true;
     this.implGet = QMLBinding.bindGet(this.src, this.property, this.flags);
     if (this.flags & QMLBinding.Bidirectional) {
       this.implSet = QMLBinding.bindSet(this.src, this.property, this.flags);
     }
-    this.compiled = true;
   }
 
   static bindGet(src, property, flags) {

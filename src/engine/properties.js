@@ -140,11 +140,10 @@ function applyProperties(metaObject, item, namespaceObject) {
       if (i.indexOf("on") === 0 && i.length > 2 && /[A-Z]/.test(i[2])) {
         // TODO binding when whithin group ??
         const signalName = i[2].toLowerCase() + i.slice(3);
-        if (connectSignal(item, signalName, value, namespaceObject)) {
-          continue;
-        }
         if (item.$setCustomSlot) {
           item.$setCustomSlot(signalName, value, namespaceObject);
+          continue;
+        } else if (connectSignal(item, signalName, value, namespaceObject)) {
           continue;
         }
       }
@@ -221,24 +220,41 @@ function connectSignal(item, signalName, value, namespaceObject) {
   }
 
   if (!value.compiled) {
-    const params = [];
-    for (const j in item[signalName].parameters) {
-      params.push(item[signalName].parameters[j].name);
-    }
+    value.src0 = value.src;
+
     if (value.flags&QMLBinding.ImplFunction) {
       throw new Error("Invalid slot binding, it should not be a function : "+value.src);
     }
+  }
+
+  const params = [];
+  for (const j in item[signalName].parameters) {
+    params.push(item[signalName].parameters[j].name);
+  }
+  params.push("connection");
+  var ps = params.join(", ");
+  if (ps!==value.ps) {
+    value.ps = ps;
+
     // Wrap value.src in IIFE in case it includes a "return"
     // NOTE removed because it kills "this" :
     // (function() {
     //   ${value.src}
     // })();
-    value.src = `(${params.join(", ")}) {
+    value.src = `(${ps}) {
         QmlWeb.engine.$oldBasePath = QmlWeb.engine.$basePath;
         QmlWeb.executionContext = __ns.$context;
         QmlWeb.engine.$basePath = __ns.$context.$basePath;
         try {
-          ${value.src}
+          ${value.src0}
+        } catch (err) {
+          if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
+            console.warn("connectSignal/slot error : "+
+                         this+" . signal:${signalName} : "+err.message+
+                         (connection && connection.binding && connection.binding.implGet?
+                                        eval('"  impl:\n"+connection.binding.implGet.toString()'):"" ) );
+          }
+          throw err;
         } finally {
           QmlWeb.engine.$basePath = QmlWeb.engine.$oldBasePath;
         }
@@ -251,6 +267,7 @@ function connectSignal(item, signalName, value, namespaceObject) {
   // value.src, as we need it set at the time the slot is called.
   const slot = value.eval(namespaceObject);
   var connection = item[signalName].connect(item, slot);
+  connection.binding = value;
   return connection;
 }
 

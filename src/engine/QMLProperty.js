@@ -126,10 +126,11 @@ class QMLProperty {
 
 
     } catch (e) {
-      console.log("QMLProperty.update binding error #"+this.propertyId,
-        e,
-        Function.prototype.toString.call(this.binding.implGet)
-      );
+      if (QmlWeb.engine.operationState === QmlWeb.QMLOperationState.Init) {
+        console.log("QMLProperty.update binding error #"+this.propertyId, e, Function.prototype.toString.call(this.binding.implGet));
+      } else {
+        console.log("QMLProperty.update binding error #"+this.propertyId, e);
+      }
       throw e;
     } finally {
       if (pushed) {
@@ -298,7 +299,7 @@ class QMLProperty {
           fun:_changed_init,
           thisObj:this,
           args:[],
-          info:"Pending property set/changed_init (waiting to initialization).",
+          info:"Pending property set/changed_init.",
         });
         //console.warn("PendingEvaluation : Pending property set/changed init :" + this.name + "  obj:" + this.obj);
       }

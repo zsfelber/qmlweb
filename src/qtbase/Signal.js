@@ -161,6 +161,8 @@ class Signal {
 
   static $execute(desc, args) {
     try {
+      if (args) args.push(desc);
+      else args = [desc];
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
       if (err.ctType === "PendingEvaluation") {
