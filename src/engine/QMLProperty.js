@@ -126,10 +126,11 @@ class QMLProperty {
 
 
     } catch (e) {
-      console.log("QMLProperty.update binding error:",
+      console.log("QMLProperty.update binding error #"+this.propertyId,
         e,
         Function.prototype.toString.call(this.binding.implGet)
       );
+      throw e;
     } finally {
       if (pushed) {
         QMLProperty.popEvaluatingProperty();
@@ -215,7 +216,7 @@ class QMLProperty {
     if (this.needsUpdate && (this.bound || this.binding)) {
       QmlWeb.engine.pendingOperations.push({
          property:this,
-         info:"Pending property get/binding initialization.",
+         info:"Pending property get/binding initialization. #"+this.propertyId,
          });
       throw new QmlWeb.PendingEvaluation(`Binding not yet initialized.`, this);
     }

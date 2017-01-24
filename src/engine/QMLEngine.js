@@ -254,6 +254,9 @@ class QMLEngine {
     if (this.rootObject.dom) {
       this.domTarget.appendChild(this.rootObject.dom);
     }
+
+    this.operationState = QmlWeb.QMLOperationState.Idle;
+
     this.$initializePendingOps();
 
     this.start();
@@ -761,7 +764,7 @@ class QMLEngine {
         }
       } catch (err) {
         e++;
-        console.warn("pendingOperation #"+i+":"+err);
+        console.warn("pendingOperation #"+i+":"+op.info+"  "+err);
       }
 
       i++;

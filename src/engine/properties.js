@@ -158,7 +158,8 @@ function applyProperties(metaObject, item, namespaceObject) {
     } catch (err) {
       if (err.ctType === "PendingEvaluation") {
         console.warn("PendingEvaluation : Property apply still pending :" + i + "  item:" + item);
-      } else {
+      }
+      if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         throw err;
       }
     }

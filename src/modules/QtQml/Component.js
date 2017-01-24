@@ -81,30 +81,35 @@ class QMLComponent {
     const bp = engine.$basePath;
     engine.$basePath = this.$basePath ? this.$basePath : engine.$basePath;
 
-    const newContext = context ? Object.create(context) : new QMLContext();
+    let item;
+    try {
 
-    if (this.importContextId !== undefined) {
-      newContext.importContextId = this.importContextId;
+      const newContext = context ? Object.create(context) : new QMLContext();
+
+      if (this.importContextId !== undefined) {
+        newContext.importContextId = this.importContextId;
+      }
+
+      item = QmlWeb.construct({
+        object: this.$metaObject,
+        parent,
+        context: newContext,
+        isComponentRoot: true
+      });
+
+      this.finalizeImports(item.$context);
+
+      for (var propname in properties) {
+        item[propname] = properties[propname];
+      }
+
+    } finally {
+      // change base path back
+      // TODO looks a bit hacky
+      engine.$basePath = bp;
+
+      engine.operationState = oldState;
     }
-
-    const item = QmlWeb.construct({
-      object: this.$metaObject,
-      parent,
-      context: newContext,
-      isComponentRoot: true
-    });
-
-    this.finalizeImports(item.$context);
-
-    for (var propname in properties) {
-      item[propname] = properties[propname];
-    }
-
-    // change base path back
-    // TODO looks a bit hacky
-    engine.$basePath = bp;
-
-    engine.operationState = oldState;
     return item;
   }
   createObject(parent, properties = {}) {

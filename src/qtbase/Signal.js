@@ -173,12 +173,12 @@ class Signal {
           connection:desc,
           reason:err
         });
-        throw err;
       } else {
         console.error("Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  slot error:", err.message, err,
           Function.prototype.toString.call(desc.slot)
         );
       }
+      throw err;
     }
   }
 
