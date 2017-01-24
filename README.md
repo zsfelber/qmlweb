@@ -143,7 +143,8 @@ Understand my gulp-qmlweb extensions
 
 Extended Binding : understands impl/block, impl/function, impl/expression, bidirectional, alias flags
 
-Changed alias implementations to use QMLBinding in a special bidirectional mode, extended to understand "<arbitrary property expression>".property
+Changed alias implementation to use QMLBinding in a special bidirectional mode, extended to understand &lt;arbitrary property path>.property
+Resolving aliases as specified by qml standard (as expected, it doesn't see same object aliases, resolves property/property and property/element overload cases)
 
 Changed init time load strategy: for a single property (in engine.applyProperties), it aborts when a binding has not yet initialized,
 signal evaluation reached uninitilized expression, or so. Then it places them to 1 single engine.pendingOperations queue, then attempts
