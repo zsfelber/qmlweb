@@ -24,17 +24,7 @@ QmlWeb.registerQmlType({
      * the timer will trigger. */
     this.runningChanged.connect(this, this.$onRunningChanged);
 
-    QmlWeb.engine.$registerStart(() => {erties[pname];
-                                   if (!prop) return;
-                                   switch (prop.type) {
-                                     case "bool":
-                                       this.qml[pname] = typeof newValue === "string";
-                                       break;
-                                     default:
-                                       this.qml[pname] = newValue;
-                                   }
-                                 }
-
+    QmlWeb.engine.$registerStart(() => {
       if (this.running) {
         this.restart();
       }

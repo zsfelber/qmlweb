@@ -95,7 +95,7 @@ function applyProperties(metaObject, item, namespaceObject) {
   const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
   if (metaObject.$children && metaObject.$children.length !== 0 && !(item instanceof QMLComponent)) {
     if (item.$defaultProperty) {
-      item.$aliases[item.$defaultProperty].set(
+      item.$properties_aliases[item.$defaultProperty].set(
           metaObject.$children, QMLProperty.ReasonInitPrivileged,
           namespaceObject
         );

@@ -144,7 +144,7 @@ class QMLBinding {
   static bindGet(src, property, flags) {
 
     if (property) {
-      if (flags) {
+      if (flags&(QMLBiding.ImplFunction|QMLBiding.ImplBlock)) {
         throw new Error("Invalid binding property, passed along with a function/block : "+property);
       }
       if (!/^\w+$/.test(property)) {
@@ -163,13 +163,13 @@ class QMLBinding {
 
     return new Function(`
       ${vvith} {
-        ${ flags===2 ? "return function"+src+";" : flags===1 ? src : "return "+src+";"}
+        ${ (flags&QMLBiding.ImplFunction) ? "return function"+src+";" : (flags&QMLBiding.ImplBlock) ? src : "return "+src+";"}
       }
     `);
   }
 
   static bindSet(src, property, flags) {
-    if (flags) {
+    if (flags&(QMLBiding.ImplFunction|QMLBiding.ImplBlock)) {
       throw new Error("Invalid writable/bidirectional binding, it should be an expression : "+src);
     }
 
