@@ -9,7 +9,7 @@ function createProperty(type, obj, propName, options, namespaceObject) {
 
   if (!namespaceObject) {
     if (!obj.$context) {
-      throw new Error("properties.createProperty : missing namespaceObject argument.");
+      console.warn("properties.createProperty : missing namespaceObject . $context : "+obj);
     }
     namespaceObject = obj;
   }
@@ -222,9 +222,9 @@ function connectSignal(item, signalName, value, namespaceObject) {
     //   ${value.src}
     // })();
     value.src = `(${params.join(", ")}) {
-        QmlWeb.executionContext = __executionContext;
         QmlWeb.engine.$oldBasePath = QmlWeb.engine.$basePath;
-        QmlWeb.engine.$basePath = "${namespaceObject.$context.$basePath}";
+        QmlWeb.executionContext = __ns.$context;
+        QmlWeb.engine.$basePath = __ns.$context.$basePath;
         try {
           ${value.src}
         } finally {

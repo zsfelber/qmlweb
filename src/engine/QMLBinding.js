@@ -115,7 +115,7 @@ class QMLBinding {
       QmlWeb.engine.$basePath = basePath;
     }
     // .call is needed for `this` support
-    return this.implGet.call(object);
+    return this.implGet.call(object, namespaceObject);
   }
 
   set(namespaceObject, basePath, value, flags) {
@@ -161,7 +161,7 @@ class QMLBinding {
     var vvith = (flags & QMLBinding.Alias) ? "with(QmlWeb) with(QmlWeb.executionContext) with(this.$properties) with(this)"
                                            : "with(QmlWeb) with(QmlWeb.executionContext) with(this)"
 
-    return new Function(`
+    return new Function("__ns", `
       ${vvith} {
         ${ (flags&QMLBinding.ImplFunction) ? "return function"+src+";" : (flags&QMLBinding.ImplBlock) ? src : "return "+src+";"}
       }
