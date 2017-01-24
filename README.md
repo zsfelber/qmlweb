@@ -141,6 +141,8 @@ Understand my qmlweb-parser extensions:
 
 Understand my gulp-qmlweb extensions
 
+Fixed import strategy to resolve preloaded qrc-s
+
 Extended Binding : understands impl/block, impl/function, impl/expression, bidirectional, alias flags
 
 Changed alias implementation to use QMLBinding in a special bidirectional mode, extended to understand &lt;arbitrary property path>.property
