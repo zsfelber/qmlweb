@@ -134,3 +134,22 @@ See [Extending](docs/Extending.md).
 ## This Fork/Branch
 
 Intended to fix parse errors (like that of readonly property) and maybe another simple bugs which prevent my actual qml model to be compiled and used..
+
+Added:
+Understand my qmlweb-parser extensions:
+[readonly]  [list<xxx> templates]   [var xxx = {"aaa:" : <expression>}  json like var property syntax ]
+
+Understand my gulp-qmlweb extensions
+
+Extended Binding : understands impl/block, impl/function, impl/expression, bidirectional, alias flags
+
+Changed alias implementations to use QMLBinding in a special bidirectional mode, extended to understand "<arbitrary property expression>".property
+
+Changed init time load strategy: for a single property (in engine.applyProperties), it aborts when a binding has not yet initialized,
+signal evaluation reached uninitilized expression, or so. Then it places them to 1 single engine.pendingOperations queue, then attempts
+to resolve them again at startup finish. It became more flexible and intelligent.
+
+Changed coding style to more advanced (also to support better ways), eg:
+- using 1 flag variable in QMLBinding(ImplFunction/ImplBlock/.../Bidrection/Alias), QMLProperty(reasons,priviligezed/break readonly, break bidirectional binding at set)
+instead of several global boolean properties
+- using 1 interface and 1 queue for engine.pendingOperations (instead of 'engine.bindedProperties' + engine.pendingOperations and 2 queues at startup finish)
