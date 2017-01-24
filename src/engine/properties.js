@@ -50,7 +50,7 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     // http://doc.qt.io/qt-4.8/propertybinding.html#property-aliases)
 
     var p = path0.join(".");
-    var QMLBiding = QmlWeb.QMLBinding;
+    var QMLBinding = QmlWeb.QMLBinding;
     var binding = new QMLBinding(p, proplast, QMLBinding.ImplExpression|QMLBinding.Alias);
     prop.set(binding, QMLProperty.ReasonInitPrivileged, namespaceObject);
 
@@ -213,7 +213,7 @@ function connectSignal(item, signalName, value, namespaceObject) {
     for (const j in item[signalName].parameters) {
       params.push(item[signalName].parameters[j].name);
     }
-    if (value.implementMode===QMLBinding.ImplFunction) {
+    if (value.flags&QMLBinding.ImplFunction) {
       throw new Error("Invalid slot binding, it should not be a function : "+value.src);
     }
     // Wrap value.src in IIFE in case it includes a "return"
@@ -231,7 +231,8 @@ function connectSignal(item, signalName, value, namespaceObject) {
           QmlWeb.engine.$basePath = QmlWeb.engine.$oldBasePath;
         }
       }`;
-    value.implementMode = QMLBinding.ImplFunction;
+    value.flags &= ~QMLBinding.ImplBlock;
+    value.flags |= QMLBinding.ImplFunction;
     value.compile();
   }
   // Don't pass in __basePath argument, as QMLEngine.$basePath is set in the

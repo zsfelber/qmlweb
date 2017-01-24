@@ -223,7 +223,7 @@ function serializeObj(object, path, backrefs, dups, pos) {
       var prop = object[propname];
       if (object instanceof QMLMetaElement && "$children"===propname && prop instanceof Array && !prop.length) continue;
       if (object instanceof QMLSignalDefinition && "parameters"===propname && prop instanceof Array && !prop.length) continue;
-      if ("implementMode"===propname) {
+      if ("flags"===propname) {
         if (object instanceof QMLMethod) continue;
         else if (object instanceof QMLBinding && !prop) continue;
       }
