@@ -61,7 +61,7 @@ QmlWeb.registerQmlType({
   $generateBodyForPostQuery() {
     const object = {};
     for (let i = 0; i < this.attributes.length; ++i) {
-      object[this.attributes[i]] = this.$properties_aliases[this.attributes[i]].get();
+      object[this.attributes[i]] = this.$properties[this.attributes[i]].get();
     }
     console.log(object);
     switch (this.queryMimeType) {
@@ -134,11 +134,11 @@ QmlWeb.registerQmlType({
     const QMLProperty = QmlWeb.QMLProperty;
     for (const key in responseObject) {
       if (responseObject.hasOwnProperty(key) && this.$hasProperty(key)) {
-        this.$properties_aliases[key].set(responseObject[key], QMLProperty.ReasonUser);
+        this.$properties[key].set(responseObject[key], QMLProperty.ReasonUser);
       }
     }
   }
   $hasProperty(name) {
-    return typeof this.$properties_aliases[name] !== "undefined";
+    return typeof this.$properties[name] !== "undefined";
   }
 });

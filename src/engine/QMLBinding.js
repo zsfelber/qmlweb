@@ -158,12 +158,20 @@ class QMLBinding {
       throw new Error("Invalid binding path : "+src);
     }
 
-    var vvith = (flags & QMLBinding.Alias) ? "with(QmlWeb) with(QmlWeb.executionContext) with(this) with(this.$properties)"
-                                           : "with(QmlWeb) with(QmlWeb.executionContext) with(this)"
+    var vvith, gobs;
+    if (flags & QMLBinding.Alias) {
+      vvith = "with(QmlWeb) with(this) with(QmlWeb.executionContext) with(this.$properties)";
+      gobj = "if (obj instanceof QmlWeb.QMLProperty) obj = obj.get();";
+    } else {
+      vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(this)";
+      gobj = "";
+    }
 
     return new Function("__ns", `
       ${vvith} {
-        ${ (flags&QMLBinding.ImplFunction) ? "return function"+src+";" : (flags&QMLBinding.ImplBlock) ? src : "return "+src+";"}
+        var obj = ${src};
+        ${gobj}
+        ${ (flags&QMLBinding.ImplFunction) ? "return function"+src+";" : (flags&QMLBinding.ImplBlock) ? "obj" : "return obj;"}
       }
     `);
   }
@@ -173,9 +181,16 @@ class QMLBinding {
       throw new Error("Invalid writable/bidirectional binding, it should be an expression : "+src);
     }
 
-    var props = (flags & QMLBinding.Alias) ? "$properties" : "$properties_aliases";
-    var vvith = (flags & QMLBinding.Alias) ? "with(QmlWeb) with(QmlWeb.executionContext) with(this) with(this.$properties)"
-                                           : "with(QmlWeb) with(QmlWeb.executionContext) with(this)"
+    var props, vvith, gobs;
+    if (flags & QMLBinding.Alias) {
+      props = "$properties";
+      vvith = "with(QmlWeb) with(this) with(QmlWeb.executionContext) with(this.$properties)";
+      gobj = "if (obj instanceof QmlWeb.QMLProperty) obj = obj.get();";
+    } else {
+      props = "$properties";
+      vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(this)";
+      gobj = "";
+    }
 
     if (src) {
 
@@ -187,6 +202,7 @@ class QMLBinding {
       return new Function("__value", "__flags", "__ns", `
         ${vvith} {
           var obj = ${src};
+          ${gobj}
           if (!obj) {
             console.error("Writable/Bidirectional binding target property '${src}' is null. Cannot set '${property}' on null.");
             return;
@@ -195,7 +211,7 @@ class QMLBinding {
           if (obj === this)
             prop = obj.${props}["${property}"];
           else
-            prop = obj.$properties_aliases["${property}"];
+            prop = obj.$properties["${property}"];
 
           if (prop) {
             if (prop.readOnly) {

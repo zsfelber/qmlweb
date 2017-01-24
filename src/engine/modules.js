@@ -317,11 +317,15 @@ function construct(meta) {
 
   // id
   if (meta.object.id) {
+    if (meta.context.hasOwnProperty(meta.object.id)) {
+      console.warn("Context entry overriden by Element : "+meta.object.id+" object:"+item);
+    }
     QmlWeb.setupGetterSetter(
       meta.context, meta.object.id,
       () => item,
       () => {}
     );
+    meta.context.$elements[meta.object.id] = item;
   }
 
   // keep path in item for probale use it later in Qt.resolvedUrl

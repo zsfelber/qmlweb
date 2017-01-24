@@ -19,10 +19,10 @@ QmlWeb.registerQmlType({
   $onAnimationChanged(newVal) {
     newVal.target = this.$parent;
     newVal.property = this.$on;
-    this.$parent.$properties_aliases[this.$on].animation = newVal;
+    this.$parent.$properties[this.$on].animation = newVal;
   }
   $onEnabledChanged(newVal) {
-    this.$parent.$properties_aliases[this.$on].animation = newVal
+    this.$parent.$properties[this.$on].animation = newVal
       ? this.animation
       : null;
   }

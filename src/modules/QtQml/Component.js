@@ -1,4 +1,8 @@
 class QMLContext {
+  constructor() {
+    this.$elementoverloads = {};
+  }
+
   nameForObject(obj) {
     for (const name in this) {
       if (this[name] === obj) {
@@ -117,7 +121,7 @@ class QMLComponent {
     const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
 
     if (item instanceof QMLItem) {
-      item.$properties_aliases.parent.set(parent, QmlWeb.QMLProperty.ReasonInitPrivileged);
+      item.$properties.parent.set(parent, QmlWeb.QMLProperty.ReasonInitPrivileged);
     }
 
     return item;

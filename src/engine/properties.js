@@ -43,7 +43,7 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     var path0 = options.path.slice(0);
     var proplast = path0.pop();
 
-    // we now use separete containers for $aliases and $properties
+    // we now use separete containers for $noalias
     // alias overrides a same name property but aliases still can refer to the redefined old properties
     // however aliases can't access aliases (directly in same object)
     // (see QML alias specification:
@@ -55,13 +55,11 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     prop.set(binding, QMLProperty.ReasonInitPrivileged, namespaceObject);
 
     _set_prop(propName, prop, QMLProperty.ReasonInit);
-    obj.$aliases[propName] = prop;
-    obj.$properties_aliases[propName] = prop;
+    obj.$properties[propName] = prop;
 
   } else {
     _set_prop(propName, prop, QMLProperty.ReasonInitPrivileged);
     obj.$properties[propName] = prop;
-    obj.$properties_aliases[propName] = prop;
   }
 
   var getter = function () {
@@ -72,8 +70,18 @@ function createProperty(type, obj, propName, options, namespaceObject) {
   }
 
   QmlWeb.setupGetterSetter(obj, propName, getter, setter);
+  if (type !== "alias") {
+    QmlWeb.setupGetterSetter(obj.$noalias, propName, getter, setter);
+  }
+
   if (obj.$isComponentRoot) {
-    QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter);
+    var item = obj.$context.$elements[propName];
+    if (obj.$context.hasOwnProperty(propName)) {
+      console.warn("Context entry Element overriden by root property : "+type+(prop.type===type?"":" ("+(prop.type)+")")+propName+" in obj:"+obj);
+      QmlWeb.setupGetterSetter(obj.$context.$elementoverloads, propName, getter, setter);
+    } else {
+      QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter);
+    }
   }
 }
 
@@ -95,7 +103,7 @@ function applyProperties(metaObject, item, namespaceObject) {
   const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
   if (metaObject.$children && metaObject.$children.length !== 0 && !(item instanceof QMLComponent)) {
     if (item.$defaultProperty) {
-      item.$properties_aliases[item.$defaultProperty].set(
+      item.$properties[item.$defaultProperty].set(
           metaObject.$children, QMLProperty.ReasonInitPrivileged,
           namespaceObject
         );
@@ -144,8 +152,8 @@ function applyProperties(metaObject, item, namespaceObject) {
         }
       }
 
-      if (item.$properties_aliases && i in item.$properties_aliases) {
-        item.$properties_aliases[i].set(value, QMLProperty.ReasonInitPrivileged, namespaceObject);
+      if (item.$properties && i in item.$properties) {
+        item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged, namespaceObject);
       } else if (i in item) {
         item[i] = value;
       } else if (item.$setCustomData) {

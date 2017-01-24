@@ -91,22 +91,22 @@ QmlWeb.registerQmlType({
     const roleNames = roles || model.roleNames;
     for (let index = startIndex; index <= endIndex; index++) {
       const item = this.$items[index];
-      const modelData = item.$properties_aliases.model;
+      const modelData = item.$properties.model;
       const scope = {
-        $object:item,
+        $object: item,
         $context: this.model.$context
       };
       for (const i in roleNames) {
         const roleName = roleNames[i];
         const roleData = model.data(index, roleName);
-        item.$properties_aliases[roleName].set(
+        item.$properties[roleName].set(
           roleData,
           QmlWeb.QMLProperty.ReasonInitPrivileged,
           scope
         );
         modelData[roleName] = roleData;
       }
-      item.$properties_aliases.model.set(
+      item.$properties.model.set(
         modelData,
         QmlWeb.QMLProperty.ReasonInitPrivileged,
         scope
@@ -156,18 +156,18 @@ QmlWeb.registerQmlType({
       const newItem = this.delegate.$createObject(this.parent);
       createProperty("int", newItem, "index", { initialValue: index });
       const scope = {
-        $object:newItem,
+        $object: newItem,
         $context: this.model.$context
       };
 
       if (typeof model === "number" || model instanceof Array) {
-        if (typeof newItem.$properties_aliases.modelData === "undefined") {
+        if (typeof newItem.$properties.modelData === "undefined") {
           createProperty("variant", newItem, "modelData");
         }
         const value = model instanceof Array ?
                       model[index] :
                       typeof model === "number" ? index : "undefined";
-        newItem.$properties_aliases.modelData.set(value, QmlWeb.QMLProperty.ReasonInitPrivileged,
+        newItem.$properties.modelData.set(value, QmlWeb.QMLProperty.ReasonInitPrivileged,
                                           scope);
       } else {
         // QML exposes a "model" property in the scope that contains all role
@@ -175,20 +175,20 @@ QmlWeb.registerQmlType({
         const modelData = {};
         for (let i = 0; i < model.roleNames.length; i++) {
           const roleName = model.roleNames[i];
-          if (typeof newItem.$properties_aliases[roleName] === "undefined") {
+          if (typeof newItem.$properties[roleName] === "undefined") {
             createProperty("variant", newItem, roleName);
           }
           const roleData = model.data(index, roleName);
           modelData[roleName] = roleData;
-          newItem.$properties_aliases[roleName].set(
+          newItem.$properties[roleName].set(
             roleData, QmlWeb.QMLProperty.ReasonInitPrivileged,
             scope
           );
         }
-        if (typeof newItem.$properties_aliases.model === "undefined") {
+        if (typeof newItem.$properties.model === "undefined") {
           createProperty("variant", newItem, "model");
         }
-        newItem.$properties_aliases.model.set(
+        newItem.$properties.model.set(
           modelData, QmlWeb.QMLProperty.ReasonInitPrivileged,
           scope
         );
