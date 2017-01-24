@@ -56,11 +56,11 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     prop.set(binding, QMLProperty.ReasonInitPrivileged, namespaceObject);
 
     _set_prop("$aliases", propName, prop, QMLProperty.ReasonInit);
-    _set_prop("$propsboth", propName, prop, QMLProperty.ReasonInit);
+    _set_prop("$properties_aliases", propName, prop, QMLProperty.ReasonInit);
 
   } else {
     _set_prop("$properties", propName, prop, QMLProperty.ReasonInitPrivileged);
-    _set_prop("$propsboth", propName, prop, QMLProperty.ReasonInitPrivileged);
+    _set_prop("$properties_aliases", propName, prop, QMLProperty.ReasonInitPrivileged);
   }
 
   var getter = function () {

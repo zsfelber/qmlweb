@@ -158,8 +158,11 @@ class QMLBinding {
       throw new Error("Invalid binding path : "+src);
     }
 
+    var vvith = (flags & QMLBinding.Alias) ? "with(QmlWeb) with(QmlWeb.executionContext) with(this.$properties) with(this)"
+                                           : "with(QmlWeb) with(QmlWeb.executionContext) with(this)"
+
     return new Function(`
-      with(QmlWeb) with(QmlWeb.executionContext) with(this) {
+      ${vvith} {
         ${ flags===2 ? "return function"+src+";" : flags===1 ? src : "return "+src+";"}
       }
     `);
@@ -170,7 +173,9 @@ class QMLBinding {
       throw new Error("Invalid writable/bidirectional binding, it should be an expression : "+src);
     }
 
-    var props = (flags & QMLBinding.Alias) ? "$properties" : "$propsboth";
+    var props = (flags & QMLBinding.Alias) ? "$properties" : "$properties_aliases";
+    var vvith = (flags & QMLBinding.Alias) ? "with(QmlWeb) with(QmlWeb.executionContext) with(this.$properties) with(this)"
+                                           : "with(QmlWeb) with(QmlWeb.executionContext) with(this)"
 
     if (src) {
 
@@ -180,13 +185,18 @@ class QMLBinding {
       }
 
       return new Function("__value", "__flags", "__ns", `
-        with(QmlWeb) with(QmlWeb.executionContext) with(this) {
+        ${vvith} {
           var obj = ${src};
           if (!obj) {
             console.error("Writable/Bidirectional binding target property '${src}' is null. Cannot set '${property}' on null.");
             return;
           }
-          var prop = obj.${props}["${property}"];
+          var prop;
+          if (obj === this)
+            prop = obj.${props}["${property}"];
+          else
+            prop = obj.$properties_aliases["${property}"];
+
           if (prop) {
             if (prop.readOnly) {
               throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' is read-only.");
@@ -206,7 +216,7 @@ class QMLBinding {
       }
 
       return new Function("__value", "__flags", "__ns", `
-        with(QmlWeb) with(QmlWeb.executionContext) with(this) {
+        ${vvith} {
           var prop = this.${props}["${property}"];
 
           if (prop) {
