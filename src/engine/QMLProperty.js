@@ -128,7 +128,7 @@ class QMLProperty {
     } catch (e) {
       console.log("QMLProperty.update binding error:",
         e,
-        Function.prototype.toString.call(this.binding.eval)
+        Function.prototype.toString.call(this.binding.implGet)
       );
     } finally {
       if (pushed) {
@@ -163,7 +163,7 @@ class QMLProperty {
       //                        [dependency2]
       //                        [dependency3]
 
-      // } else if (this.binding.bidirectional) {
+      // } else if ((this.binding & QmlWeb.QMLBinding.Bidirectional)) {
       //   ...
       // }
 
@@ -256,7 +256,7 @@ class QMLProperty {
         val = val.slice(); // Copies the array
       }
 
-      if (this.binding && this.binding.bidirectional) {
+      if (this.binding && (this.binding & QmlWeb.QMLBinding.Bidirectional)) {
         if (flags & QMLProperty.RemoveBidirectionalBinding) {
           this.binding = null;
         } else {

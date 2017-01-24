@@ -158,7 +158,7 @@ class QMLBinding {
       throw new Error("Invalid binding path : "+src);
     }
 
-    var vvith = (flags & QMLBinding.Alias) ? "with(QmlWeb) with(QmlWeb.executionContext) with(this.$properties) with(this)"
+    var vvith = (flags & QMLBinding.Alias) ? "with(QmlWeb) with(QmlWeb.executionContext) with(this) with(this.$properties)"
                                            : "with(QmlWeb) with(QmlWeb.executionContext) with(this)"
 
     return new Function("__ns", `
@@ -174,7 +174,7 @@ class QMLBinding {
     }
 
     var props = (flags & QMLBinding.Alias) ? "$properties" : "$properties_aliases";
-    var vvith = (flags & QMLBinding.Alias) ? "with(QmlWeb) with(QmlWeb.executionContext) with(this.$properties) with(this)"
+    var vvith = (flags & QMLBinding.Alias) ? "with(QmlWeb) with(QmlWeb.executionContext) with(this) with(this.$properties)"
                                            : "with(QmlWeb) with(QmlWeb.executionContext) with(this)"
 
     if (src) {

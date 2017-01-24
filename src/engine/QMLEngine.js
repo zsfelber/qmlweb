@@ -721,47 +721,53 @@ class QMLEngine {
 
     console.log("$initializePendingOps : "+this.pendingOperations.length);
 
-    var i=0,a=0,a1=0,a2=0,a3=0,b=0;
+    var i=0,a=0,a1=0,a2=0,a3=0,b=0,e=0;
     while (this.pendingOperations.length > 0) {
       const op = this.pendingOperations.shift();
 
       const property = op.property;
 
-      if (property) {
-        if (!property.binding) {
-          // Probably, the binding was overwritten by an explicit value. Ignore.
-          a1++;
-          continue;
-        }
+      try {
+        if (property) {
+          if (!property.binding) {
+            // Probably, the binding was overwritten by an explicit value. Ignore.
+            a1++;
+            continue;
+          }
 
-        if (property.needsUpdate) {
-          a2++;
-          property.update();
-        } else if (geometryProperties.indexOf(property.name) >= 0) {
-          a3++;
-          // It is possible that bindings with these names was already evaluated
-          // during eval of other bindings but in that case $updateHGeometry and
-          // $updateVGeometry could be blocked during their eval.
-          // So we call them explicitly, just in case.
-          const { obj, changed } = property;
-          if (obj.$updateHGeometry &&
-              changed.isConnected(obj, obj.$updateHGeometry)) {
-            obj.$updateHGeometry(property.val, property.val, property.name);
+          if (property.needsUpdate) {
+            a2++;
+            property.update();
+          } else if (geometryProperties.indexOf(property.name) >= 0) {
+            a3++;
+            // It is possible that bindings with these names was already evaluated
+            // during eval of other bindings but in that case $updateHGeometry and
+            // $updateVGeometry could be blocked during their eval.
+            // So we call them explicitly, just in case.
+            const { obj, changed } = property;
+            if (obj.$updateHGeometry &&
+                changed.isConnected(obj, obj.$updateHGeometry)) {
+              obj.$updateHGeometry(property.val, property.val, property.name);
+            }
+            if (obj.$updateVGeometry &&
+                changed.isConnected(obj, obj.$updateVGeometry)) {
+              obj.$updateVGeometry(property.val, property.val, property.name);
+            }
           }
-          if (obj.$updateVGeometry &&
-              changed.isConnected(obj, obj.$updateVGeometry)) {
-            obj.$updateVGeometry(property.val, property.val, property.name);
-          }
+          a++;
+        } else {
+          op.fun.apply(op.thisObj, op.args);
+          b++;
         }
-        a++;
-      } else {
-        op.fun.apply(op.thisObj, op.args);
-        b++;
+      } catch (err) {
+        e++;
+        console.warn("pendingOperation #"+i+":"+err);
       }
+
       i++;
     }
 
-    console.log("$initializePendingOps : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+a3)+") functions:"+b);
+    console.log("$initializePendingOps : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+a3)+") functions:"+b+" errors:"+e);
   }
 
   // This parses the full URL into scheme and path
