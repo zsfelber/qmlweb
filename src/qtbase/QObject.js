@@ -13,6 +13,7 @@ class QObject {
     this.$tidyupList = [];
 
     this.$properties = {};
+    this.$properties_noalias = {};
     this.$noalias = {};
     this.$signals = [];
 

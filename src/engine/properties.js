@@ -28,6 +28,13 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     }
   }
 
+  const getter = function () {
+    return prop.get.call(prop);
+  };
+  const setter = function (value, flags) {
+    prop.set.call(prop, value, flags, namespaceObject);
+  }
+
   if (type === "alias") {
 
     prop.type = options.overrideType ? options.overrideType : "var";
@@ -55,29 +62,25 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     prop.set(binding, QMLProperty.ReasonInitPrivileged, namespaceObject);
 
     _set_prop(propName, prop, QMLProperty.ReasonInit);
+
     obj.$properties[propName] = prop;
+
+    QmlWeb.setupGetterSetter(obj, propName, getter, setter);
 
   } else {
     _set_prop(propName, prop, QMLProperty.ReasonInitPrivileged);
+
     obj.$properties[propName] = prop;
-  }
+    obj.$properties_noalias[propName] = prop;
 
-  var getter = function () {
-    return prop.get.call(prop);
-  };
-  var setter = function (value, flags) {
-    prop.set.call(prop, value, flags, namespaceObject);
-  }
-
-  QmlWeb.setupGetterSetter(obj, propName, getter, setter);
-  if (type !== "alias") {
+    QmlWeb.setupGetterSetter(obj, propName, getter, setter);
     QmlWeb.setupGetterSetter(obj.$noalias, propName, getter, setter);
   }
 
   if (obj.$isComponentRoot) {
     var item = obj.$context.$elements[propName];
-    if (obj.$context.hasOwnProperty(propName)) {
-      console.warn("Context entry Element overriden by root property : "+type+(prop.type===type?"":" ("+(prop.type)+")")+propName+" in obj:"+obj);
+    if (item) {
+      console.warn("Context entry Element overriden by root property : "+type+(prop.type===type?" ":" ("+(prop.type)+") ")+propName+" in obj:"+obj);
       QmlWeb.setupGetterSetter(obj.$context.$elementoverloads, propName, getter, setter);
     } else {
       QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter);
