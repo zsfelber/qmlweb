@@ -1,19 +1,3 @@
-class QMLContext {
-  constructor() {
-    this.$elements = {};
-    this.$elementoverloads = {};
-  }
-
-  nameForObject(obj) {
-    for (const name in this) {
-      if (this[name] === obj) {
-        return name;
-      }
-    }
-    return undefined;
-  }
-}
-
 class QMLComponent {
   constructor(meta) {
     if (QmlWeb.constructors[meta.object.$class] === QMLComponent) {
@@ -88,8 +72,12 @@ class QMLComponent {
 
     let item;
     try {
+      if (!context) {
+        throw new Error("No context passed to $createObject");
+      }
 
-      const newContext = context ? Object.create(context) : new QMLContext();
+      //const newContext = context ? Object.create(context) : new QMLContext();
+      const newContext = Object.create(context);
 
       if (this.importContextId !== undefined) {
         newContext.importContextId = this.importContextId;

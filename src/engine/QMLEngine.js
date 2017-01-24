@@ -8,6 +8,23 @@ const geometryProperties = [
   "width", "height", "fill", "x", "y", "left", "right", "top", "bottom"
 ];
 
+class QMLContext {
+  constructor() {
+    this.$elements = {};
+    this.$elementoverloads = {};
+  }
+
+  nameForObject(obj) {
+    for (const name in this) {
+      if (this[name] === obj) {
+        return name;
+      }
+    }
+    return undefined;
+  }
+}
+
+
 // QML engine. EXPORTED.
 class QMLEngine {
   constructor(element) {
@@ -44,6 +61,7 @@ class QMLEngine {
 
     // Root object of the engine
     this.rootObject = null;
+    this.rootContext = new QMLContext();
 
     // Base path of qml engine (used for resource loading)
     this.$basePath = "";
@@ -242,7 +260,8 @@ class QMLEngine {
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const component = new QMLComponent({
       object: tree,
-      parent: parentComponent
+      parent: parentComponent,
+      context: this.rootContext
     });
 
     this.loadImports(tree.$imports, undefined, component.importContextId);
@@ -266,10 +285,6 @@ class QMLEngine {
     this.callCompletedSignals();
 
     return component;
-  }
-
-  rootContext() {
-    return this.rootObject.$context;
   }
 
   // next 3 methods used in Qt.createComponent for qml files lookup
@@ -515,7 +530,7 @@ class QMLEngine {
   }
 
   focusedElement() {
-    return this.rootContext().activeFocus;
+    return this.rootContext.activeFocus;
   }
 
   //---------- Private Methods ----------
@@ -764,7 +779,7 @@ class QMLEngine {
         }
       } catch (err) {
         e++;
-        console.warn("pendingOperation #"+i+":"+op.info+"  "+err);
+        console.warn("pendingOperation #"+i+":"+op.info+"  err:"+err);
       }
 
       i++;
