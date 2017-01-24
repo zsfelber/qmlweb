@@ -111,7 +111,7 @@ class QMLBinding {
       QmlWeb.engine.$basePath = basePath;
     }
     // .call is needed for `this` support
-    return this.implGet.call(object, object, context);
+    return this.implGet.call(object);
   }
 
   set(namespaceObject, basePath, value, flags) {
@@ -122,7 +122,7 @@ class QMLBinding {
       QmlWeb.engine.$basePath = basePath;
     }
     // .call is needed for `this` support
-    this.implSet.call(object, namespaceObject, object, context, value, flags);
+    this.implSet.call(object, value, flags, namespaceObject);
   }
 
 /**
@@ -154,8 +154,8 @@ class QMLBinding {
       throw new Error("Invalid binding path : "+src);
     }
 
-    return new Function("__executionObject", "__executionContext", `
-      with(QmlWeb) with(__executionContext) with(__executionObject) {
+    return new Function(`
+      with(QmlWeb) with(QmlWeb.executionContext) with(this) {
         ${ implementMode===2 ? "return function"+src+";" : implementMode===1 ? src : "return "+src+";"}
       }
     `);
@@ -173,8 +173,8 @@ class QMLBinding {
         throw new Error("Invalid writable/bidirectional binding expression :  "+src+" . "+property);
       }
 
-      return new Function("__ns", "__executionObject", "__executionContext", "__value", "__flags", `
-        with(QmlWeb) with(__executionContext) with(__executionObject) {
+      return new Function("__value", "__flags", "__ns", `
+        with(QmlWeb) with(QmlWeb.executionContext) with(this) {
           var obj = ${src};
           if (!obj) {
             console.error("Writable/Bidirectional binding target property '${src}' is null. Cannot set '${property}' on null.");
@@ -199,12 +199,9 @@ class QMLBinding {
         throw new Error("Invalid writable/bidirectional binding expression : "+property);
       }
 
-      return new Function("__ns", "__executionObject", "__executionContext", "__value", "__flags", `
-        with(QmlWeb) with(__executionContext) with(__executionObject) {
+      return new Function("__value", "__flags", "__ns", `
+        with(QmlWeb) with(QmlWeb.executionContext) with(this) {
           var prop = this.$properties["${property}"];
-          if (!prop) {
-             prop = __executionContext.$properties["${property}"];
-          }
 
           if (prop) {
             if (prop.readOnly) {
