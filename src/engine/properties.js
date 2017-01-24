@@ -167,8 +167,11 @@ function applyProperties(metaObject, item, namespaceObject) {
       }
     } catch (err) {
       if (err.ctType === "PendingEvaluation") {
-        console.warn("PendingEvaluation : Property apply still pending :" + i + "  item:" + item);
+        console.warn("PendingEvaluation : Cannot apply property bindings (reevaluating at startup) :" + i + "  item:" + item);
+      } else {
+        console.warn("Cannot apply property bindings  :" + i + "  item:" + item+"  "+err);
       }
+
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         throw err;
       }
@@ -233,7 +236,7 @@ function connectSignal(item, signalName, value, namespaceObject) {
   }
   params.push("connection");
   var ps = params.join(", ");
-  if (ps!==value.ps) {
+  if (!value.ps || ps!==value.ps) {
     value.ps = ps;
 
     // Wrap value.src in IIFE in case it includes a "return"
@@ -252,7 +255,7 @@ function connectSignal(item, signalName, value, namespaceObject) {
             console.warn("connectSignal/slot error : "+
                          this+" . signal:${signalName} : "+err.message+
                          (connection && connection.binding && connection.binding.implGet?
-                                        eval('"  impl:\n"+connection.binding.implGet.toString()'):"" ) );
+                                        "  impl:\\n"+connection.binding.implGet.toString():"" ) );
           }
           throw err;
         } finally {
