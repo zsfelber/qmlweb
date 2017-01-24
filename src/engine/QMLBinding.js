@@ -16,23 +16,26 @@ class QMLBinding {
  * @param {Array} tree Parser tree of the binding
  * @return {Object} Object representing the binding
  */
-  constructor(src, property, implementMode, bidirectional, info) {
-    // this.implementMode states whether the binding is a simple js statement or a
-    // function containing a return statement. We decide this on whether it is a
-    // code block or not. If it is, we require a return statement. If it is a
-    // code block it could though also be a object definition, so we need to
+  constructor(src, property, flags, info) {
+    // this.flags states whether the binding is a simple js statement, a
+    // function containing a return statement, or a block of statements.
+    // it may also fine tune other aspects, like bidirectionality of binding or
+    // whether it is an alias
+
+    // If flags is not passed, we decide it here.
+    // If it is a block, we require a return statement. If it is a
+    // formal code block it could though also be a object definition, so we need to
     // check that as well (it is, if the content is labels).
-    if (implementMode === undefined) {
+    if (flags === undefined) {
       if (property && property[0] === "block" &&
           property[1][0] && property[1][0][0] !== "label") {
-        this.implementMode = QMLBinding.ImplBlock;
+        this.flags = QMLBinding.ImplBlock;
       }
     } else {
-      this.implementMode = implementMode;
+      this.flags = flags;
       this.property = property;
     }
-    this.implementMode |= QMLBinding.ImplExpression;
-    this.bidirectional = bidirectional;
+    this.flags |= QMLBinding.ImplExpression;
 
     if (src) {
       src = _ubertrim(src);
@@ -56,13 +59,14 @@ class QMLBinding {
 
       var match = /^function\s*(\w|\d|\$)*\(/.exec(src);
       if (match) {
-        if (!this.implementMode) {
+        if (!this.flags) {
           throw new Error("Binding is effectively a function but declared to expression : "+(info?info:src));
         }
         src = src.substring(match[0].length-1);
-        this.implementMode = QMLBinding.ImplFunction;
+        this.flags &= ~QMLBinding.ImplBlock;
+        this.flags |= QMLBinding.ImplFunction;
       } else {
-        if (this.implementMode === QMLBinding.ImplFunction) {
+        if (this.flags & QMLBinding.ImplFunction) {
           throw new Error("Binding is effectively not a function but declared so : "+(info?info:src));
         }
       }
@@ -92,13 +96,13 @@ class QMLBinding {
     if (this.property) {
       return `b({
         "src": "${this.src}",
-        "implementMode": ${this.implementMode},
+        "flags": ${this.flags},
         "property": "${this.property}"
       })`;
     } else {
       return `b({
         "src": "${this.src}",
-        "implementMode": ${this.implementMode}
+        "flags": ${this.flags}
       })`;
     }
   }*/
@@ -130,17 +134,17 @@ class QMLBinding {
  */
   compile() {
     this.src = _ubertrim(this.src);
-    this.implGet = QMLBinding.bindGet(this.src, this.property, this.implementMode);
-    if (this.bidirectional) {
-      this.implSet = QMLBinding.bindSet(this.src, this.property, this.implementMode);
+    this.implGet = QMLBinding.bindGet(this.src, this.property, this.flags);
+    if (this.flags & QMLBinding.Bidirectional) {
+      this.implSet = QMLBinding.bindSet(this.src, this.property, this.flags);
     }
     this.compiled = true;
   }
 
-  static bindGet(src, property, implementMode) {
+  static bindGet(src, property, flags) {
 
     if (property) {
-      if (implementMode) {
+      if (flags) {
         throw new Error("Invalid binding property, passed along with a function/block : "+property);
       }
       if (!/^\w+$/.test(property)) {
@@ -156,15 +160,17 @@ class QMLBinding {
 
     return new Function(`
       with(QmlWeb) with(QmlWeb.executionContext) with(this) {
-        ${ implementMode===2 ? "return function"+src+";" : implementMode===1 ? src : "return "+src+";"}
+        ${ flags===2 ? "return function"+src+";" : flags===1 ? src : "return "+src+";"}
       }
     `);
   }
 
-  static bindSet(src, property, implementMode) {
-    if (implementMode) {
+  static bindSet(src, property, flags) {
+    if (flags) {
       throw new Error("Invalid writable/bidirectional binding, it should be an expression : "+src);
     }
+
+    var props = (flags & QMLBinding.Alias) ? "$properties" : "$propsboth";
 
     if (src) {
 
@@ -180,7 +186,7 @@ class QMLBinding {
             console.error("Writable/Bidirectional binding target property '${src}' is null. Cannot set '${property}' on null.");
             return;
           }
-          var prop = obj.$properties["${property}"];
+          var prop = obj.${props}["${property}"];
           if (prop) {
             if (prop.readOnly) {
               throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' is read-only.");
@@ -201,7 +207,7 @@ class QMLBinding {
 
       return new Function("__value", "__flags", "__ns", `
         with(QmlWeb) with(QmlWeb.executionContext) with(this) {
-          var prop = this.$properties["${property}"];
+          var prop = this.${props}["${property}"];
 
           if (prop) {
             if (prop.readOnly) {
@@ -222,5 +228,7 @@ class QMLBinding {
 QMLBinding.ImplExpression = 0;
 QMLBinding.ImplBlock = 1;
 QMLBinding.ImplFunction = 2;
+QMLBinding.Bidirectional = 4;
+QMLBinding.Alias = 12; // always bidirectional
 
 QmlWeb.QMLBinding = QMLBinding;

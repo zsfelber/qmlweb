@@ -16,9 +16,9 @@ function createProperty(type, obj, propName, options, namespaceObject) {
 
   const QMLProperty = QmlWeb.QMLProperty;
   const prop = new QMLProperty(type, obj, propName, options);
-  function _set_prop(propName, prop, flags) {
+  function _set_prop(props, propName, prop, flags) {
     obj[`${propName}Changed`] = prop.changed;
-    obj.$properties[propName] = prop;
+    obj[props][propName] = prop;
     if (options.hasOwnProperty("initialValue")) {
       prop.set(options.initialValue, flags, namespaceObject);
     } else if (QMLProperty.typeInitialValues.hasOwnProperty(type)) {
@@ -41,36 +41,26 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     // 3. Alias proxy (or property proxy) to proxy prop access to selected
     //    incapsulated object. (think twice).
 
-    // TODO verify,  code moved from outside parse, see "alias"
-    // item.$properties[propName].g/set =   ->    g/setter =
-
-    var oldprop = obj.$properties[propName];
-
-    // relink old property (see QML alias specification)
-    // http://doc.qt.io/qt-4.8/propertybinding.html#property-aliases
-    // alias overrides a same name property but aliases still can refer to the redefined old properties
-    // TODO also check alias->another [alias, eval to->same name property<-eval to] expressions
-
-    if (oldprop) {
-      _set_prop("__old_"+propName, oldprop, QMLProperty.ReasonInitPrivileged);
-    }
-
     var path0 = options.path.slice(0);
     var proplast = path0.pop();
 
-    // TODO also check alias->another [alias, eval to->same name property<-eval to] expressions
-    if (path0[0] === propName) {
-      path0[0] = "__old_"+propName;
-    }
+    // we now use separete containers for $aliases and $properties
+    // alias overrides a same name property but aliases still can refer to the redefined old properties
+    // however aliases can't access aliases (directly in same object)
+    // (see QML alias specification:
+    // http://doc.qt.io/qt-4.8/propertybinding.html#property-aliases)
 
     var p = path0.join(".");
-    var binding = new QmlWeb.QMLBinding(p, proplast, false, true);
+    var QMLBiding = QmlWeb.QMLBinding;
+    var binding = new QMLBinding(p, proplast, QMLBinding.ImplExpression|QMLBinding.Alias);
     prop.set(binding, QMLProperty.ReasonInitPrivileged, namespaceObject);
 
-    _set_prop(propName, prop, QMLProperty.ReasonInit);
+    _set_prop("$aliases", propName, prop, QMLProperty.ReasonInit);
+    _set_prop("$propsboth", propName, prop, QMLProperty.ReasonInit);
 
   } else {
-    _set_prop(propName, prop, QMLProperty.ReasonInitPrivileged);
+    _set_prop("$properties", propName, prop, QMLProperty.ReasonInitPrivileged);
+    _set_prop("$propsboth", propName, prop, QMLProperty.ReasonInitPrivileged);
   }
 
   var getter = function () {

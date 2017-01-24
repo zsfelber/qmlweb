@@ -33,15 +33,18 @@ QmlWeb.registerQmlType({
   }
   $initializeProperties() {
     this.$attributes.forEach(attrName => {
-      if (!this.$properties[attrName]) return;
 
       let emitter = this;
       let signalName = `${attrName}Changed`;
 
-      if (this.$properties[attrName].type === "alias") {
-        emitter = this.$context[this.$properties[attrName].val.objectName];
-        signalName = `${this.$properties[attrName].val.propertyName}Changed`;
+      const a = this.$aliases[attrName];
+      if (a) {
+        emitter = this.$context[a.val.objectName];
+        signalName = `${a.val.propertyName}Changed`;
+      } else if (!this.$properties[attrName]) {
+        return;
       }
+
 
       emitter[signalName].connect(this, () => {
         localStorage.setItem(this.$getKey(attrName), this[attrName]);
