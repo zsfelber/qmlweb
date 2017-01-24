@@ -1,3 +1,5 @@
+let bindingIds = 0;
+
 function _ubertrim(str) {
   if (str.replace) {
     str = str.replace(/^(?:\s|[;,])*/g, "");
@@ -116,6 +118,10 @@ class QMLBinding {
     }
     // .call is needed for `this` support
     try {
+      if (!this.implGet) {
+        console.warn("Binding/get error  compiled:"+this.compiled+"  no compiled getter  src:\n"+this.src);
+        return;
+      }
       return this.implGet.call(object, namespaceObject);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
@@ -134,6 +140,10 @@ class QMLBinding {
     }
     // .call is needed for `this` support
     try {
+      if (!this.implSet) {
+        console.warn("Binding/set error  compiled:"+this.compiled+"  no compiled setter  src:\n"+this.src);
+        return;
+      }
       this.implSet.call(object, value, flags, namespaceObject);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
@@ -147,6 +157,9 @@ class QMLBinding {
  * Compile binding. Afterwards you may call binding.eval/get/set to evaluate.
  */
   compile() {
+    if (!this.bindingId) {
+      this.bindingId = ++bindingIds;
+    }
     this.src = _ubertrim(this.src);
     this.compiled = true;
     this.implGet = QMLBinding.bindGet(this.src, this.property, this.flags);
