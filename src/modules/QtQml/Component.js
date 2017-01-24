@@ -1,5 +1,6 @@
 class QMLContext {
   constructor() {
+    this.$elements = {};
     this.$elementoverloads = {};
   }
 
