@@ -153,7 +153,9 @@ class QMLBinding {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         console.warn("Binding/get error : "+err.message+"  impl:\n"+this.implGet.toString());
       }
-      throw err;
+      if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
+        throw err;
+      }
     }
   }
 
@@ -175,7 +177,9 @@ class QMLBinding {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         console.warn("Binding/set error : "+err.message+"  impl:\n"+this.implSet.toString());
       }
-      throw err;
+      if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
+        throw err;
+      }
     }
   }
 

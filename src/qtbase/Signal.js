@@ -180,7 +180,9 @@ class Signal {
           Function.prototype.toString.call(desc.slot)
         );
       }
-      throw err;
+      if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
+        throw err;
+      }
     }
   }
 

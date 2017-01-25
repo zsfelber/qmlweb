@@ -1,4 +1,5 @@
 QmlWeb.executionContext = null;
+const notfound = {};
 
 const modules = {
   Main: {
@@ -140,7 +141,11 @@ function getConstructor(moduleName, version, name) {
 function getModuleConstructors(moduleName, version) {
   const constructors = {};
   if (typeof modules[moduleName] === "undefined") {
-    console.warn(`module "${moduleName}" not found`);
+    if (!notfound[moduleName]) {
+      console.warn(`module "${moduleName}" not found`);
+      notfound[moduleName] = 1;
+    }
+
     return constructors;
   }
   for (let i = 0; i < modules[moduleName].length; ++i) {

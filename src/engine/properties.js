@@ -1,3 +1,5 @@
+const trivialProperties = {context:1};
+
 function formatPath(path, path0, first) {
   var p = "";
 
@@ -109,7 +111,7 @@ function createProperty(type, obj, propName, options, namespaceObject) {
   if (obj.$isComponentRoot) {
     var item = obj.$context.$elements[propName];
     if (item) {
-      console.warn("Context entry Element overriden by root property : "+type+(prop.type===type?" ":" ("+(prop.type)+") ")+propName+" in obj:"+obj);
+      //console.warn("Context entry Element overriden by root property : "+type+(prop.type===type?" ":" ("+(prop.type)+") ")+propName+" in obj:"+obj);
       QmlWeb.setupGetterSetter(obj.$context.$elementoverloads, propName, getter, setter);
     } else {
       QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter);
@@ -189,7 +191,7 @@ function applyProperties(metaObject, item, namespaceObject) {
         item[i] = value;
       } else if (item.$setCustomData) {
         item.$setCustomData(i, value);
-      } else {
+      } else if (!trivialProperties[i]) {
         console.warn(
           `Cannot assign to non-existent property "${i}". Ignoring assignment.`
         );
@@ -201,7 +203,7 @@ function applyProperties(metaObject, item, namespaceObject) {
         console.warn("Cannot apply property bindings  :" + i + "  item:" + item+"  "+err);
       }
 
-      if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
+      if (QmlWeb.engine.operationState === QmlWeb.QMLOperationState.Idle) {
         throw err;
       }
     }
@@ -286,7 +288,9 @@ function connectSignal(item, signalName, value, namespaceObject) {
                          (connection && connection.binding && connection.binding.implGet?
                                         "  impl:\\n"+connection.binding.implGet.toString():"" ) );
           }
-          throw err;
+          if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
+            throw err;
+          }
         } finally {
           QmlWeb.engine.$basePath = QmlWeb.engine.$oldBasePath;
         }
