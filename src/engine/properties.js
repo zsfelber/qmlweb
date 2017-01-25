@@ -1,3 +1,21 @@
+function formatPath(path) {
+    var p = "";
+    path.forEach(function(token) {
+        if (typeof token === "string") {
+            if (/^(\w|\$)+$/.test(token))
+                p += "."+token;
+            else
+                p += '["'+token+'"]';
+        } else if (token instanceof Array) {
+            p += "[" + formatPath(token) + "]";
+        } else {
+            throw new Error("Invalid path : ..."+JSON.stringify(path));
+        }
+    });
+    if (p.charAt(0)==='.') p = p.substring(1);
+    return p;
+}
+
 /**
  * Create property getters and setters for object.
  * @param {Object} obj Object for which gsetters will be set
@@ -56,7 +74,7 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     // (see QML alias specification:
     // http://doc.qt.io/qt-4.8/propertybinding.html#property-aliases)
 
-    var p = path0.join(".");
+    var p = formatPath(path0);
     var QMLBinding = QmlWeb.QMLBinding;
     var binding = new QMLBinding(p, proplast, QMLBinding.ImplExpression|QMLBinding.Alias);
     prop.set(binding, QMLProperty.ReasonInitPrivileged, namespaceObject);
@@ -274,6 +292,7 @@ function connectSignal(item, signalName, value, namespaceObject) {
   return connection;
 }
 
+QmlWeb.formatPath = formatPath;
 QmlWeb.createProperty = createProperty;
 QmlWeb.applyProperties = applyProperties;
 QmlWeb.connectSignal = connectSignal;

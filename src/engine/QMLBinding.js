@@ -171,14 +171,17 @@ class QMLBinding {
   static bindGet(src, property, flags) {
 
     if (property) {
+      var fp = QmlWeb.formatPath(property);
       if (flags&(QMLBinding.ImplFunction|QMLBinding.ImplBlock)) {
-        throw new Error("Invalid binding property, passed along with a function/block : "+property);
+        throw new Error("Invalid binding property, passed along with a function/block : "+fp);
       }
-      if (!/^\w+$/.test(property)) {
-        throw new Error("Invalid binding property property format :  "+property);
+      if (src) {
+        src = QmlWeb.formatPath([src, property]);
+      } else {
+        src = fp;
       }
-      if (src) src += ".";
-      src += property;
+    } else {
+      src = QmlWeb.formatPath(src);
     }
 
     if (!src) {
@@ -213,56 +216,60 @@ class QMLBinding {
       vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(QmlWeb.executionContext.$elementoverloads) with(this)";
     }
 
+    // NOTE validate first
+    var fp = (property instanceof Array ? "" : ".") + QmlWeb.formatPath(property);
+
     if (src) {
 
       // NOTE validate first
-      if (!/^\w+$/.test(property) || !/^(\w+\.)*\w+$/.test(src)) {
-        throw new Error("Invalid writable/bidirectional binding expression :  "+src+" . "+property);
-      }
+      src = QmlWeb.formatPath(src);
 
       return new Function("__value", "__flags", "__ns", `
         ${vvith} {
           var obj = ${src};
           if (!obj) {
-            console.error("Writable/Bidirectional binding target property '${src}' is null. Cannot set '${property}' on null.");
+            console.error("Writable/Bidirectional binding write error : target property '${src}' is null. Cannot set '${property}' on null.");
             return;
           }
           var prop;
           if (obj === this)
-            prop = obj.${props}["${property}"];
+            prop = obj.${props}${fp};
           else
-            prop = obj.$properties["${property}"];
+            prop = obj.$properties${fp};
 
           if (prop) {
             if (prop.readOnly) {
-              throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' is read-only.");
+              throw new Error("Writable/Bidirectional binding write error : target property '${src} ${fp}' is read-only.");
             } else {
               prop.set(__value, __flags, __ns);
             }
           } else {
-            throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' not found, it is not writable.");
+            if (obj.$context.$elements${fp}) {
+              throw new Error("Writable/Bidirectional binding write error : target property '${src} ${fp}' is an element, considered readonly.");
+            } else {
+              throw new Error("Writable/Bidirectional binding write error : target property '${src} ${fp}' not found, cannot write to null.");
+            }
           }
         }
       `);
     } else {
 
-      // NOTE validate first
-      if (!/^\w+$/.test(property)) {
-        throw new Error("Invalid writable/bidirectional binding expression : "+property);
-      }
-
       return new Function("__value", "__flags", "__ns", `
         ${vvith} {
-          var prop = this.${props}["${property}"];
+          var prop = this.${props}${fp};
 
           if (prop) {
             if (prop.readOnly) {
-              throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' is read-only.");
+              throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is read-only.");
             } else {
               prop.set(__value, __flags, __ns);
             }
           } else {
-            throw new Error("Writable/Bidirectional binding target property '${src}' . '${property}' not found, it is not writable.");
+            if (this.$context.$elements${fp}) {
+              throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is an element, considered readonly.");
+            } else {
+              throw new Error("Writable/Bidirectional binding write error : target property '${fp}' not found, cannot write to null.");
+            }
           }
         }
       `);
