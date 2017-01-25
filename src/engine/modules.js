@@ -243,58 +243,18 @@ function initializeConstr(self, meta, info) {
 function construct(meta) {
   let item;
 
-  // Load component from file. Please look at import.js for main notes.
-  // Actually, we have to use that order:
-  // 1) try to load component from current basePath
-  // 2) from importPathList
-  // 3) from directories in imports statements and then
-  // 4) from qmldir files
-  // Currently we use order: 3a, 2, 3b, 4, 1
-  // TODO: engine.qmldirs is global for all loaded components.
-  //       That's not qml's original behaviour.
+  var clinfo = QmlWeb.engine.findClass(meta.object.$class, meta.context);
 
-  // 3)regular (versioned) modules only: (from Component.constructor -> QmlWeb.loadImports)
-  let constructors = perImportContextConstructors[meta.context.importContextId];
-
-  const classComponents = meta.object.$class.split(".");
-  for (let ci = 0; ci < classComponents.length; ++ci) {
-    const c = classComponents[ci];
-    constructors = constructors[c];
-    if (constructors === undefined) {
-      break;
-    }
-  }
-
-  if (constructors !== undefined) {
-    const constructor = constructors;
-    meta.super = constructor;
-    item = new constructor(meta);
+  if (clinfo && clinfo.constructor) {
+    meta.super = clinfo.constructor;
+    item = new clinfo.constructor(meta);
     meta.super = undefined;
+
+    // TODO gz
+    item.$metaObject = meta.object;
   } else {
 
-    // 2) 3)preloaded qrc-s  4)
-    const qdirInfo = QmlWeb.engine.ctxQmldirs[meta.context.importContextId][meta.object.$class];
-    // Are we have info on that component in some imported qmldir files?
-
-    /* This will also be set in applyProperties, but needs to be set here
-     * for Qt.createComponent to have the correct context. */
-    QmlWeb.executionContext = meta.context;
-
-    let filePath;
-    if (qdirInfo) {
-      filePath = qdirInfo.url;
-    } else if (classComponents.length === 2) {
-      const qualified = QmlWeb.engine.qualifiedImportPath(
-        meta.context.importContextId, classComponents[0]
-      );
-      filePath = `${qualified}${classComponents[1]}.qml`;
-    } else {
-      filePath = `${classComponents[0]}.qml`;
-    }
-
-    // 1) through engine.$resolvePath(name);
-
-    const component = QmlWeb.Qt.createComponent(filePath);
+    const component = QmlWeb.Qt.createImpComponent(clinfo);
 
     if (!component) {
       throw new Error(`${meta.object.$name?"Toplevel:"+meta.object.$name:meta.object.id?"Element:"+meta.object.id:""}. No constructor found for ${meta.object.$class}`);
@@ -348,3 +308,4 @@ QmlWeb.loadImports = loadImports;
 QmlWeb.callSuper = callSuper;
 QmlWeb.initializeConstr = initializeConstr;
 QmlWeb.construct = construct;
+QmlWeb.perImportContextConstructors = perImportContextConstructors;

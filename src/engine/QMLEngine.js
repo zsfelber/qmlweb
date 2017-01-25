@@ -242,8 +242,8 @@ class QMLEngine {
     this.$basePathA.href = this.extractBasePath(file);
     this.$basePath = this.$basePathA.href;
     const fileName = this.extractFileName(file);
-    const tree = this.loadClass(this.$resolvePath(fileName));
-    return this.loadQMLTree(tree, parentComponent, file);
+    const clazz = this.loadClass(this.$resolvePath(fileName));
+    return this.loadQMLTree(clazz, parentComponent, file);
   }
 
   // parse and construct qml
@@ -253,20 +253,20 @@ class QMLEngine {
     return this.loadQMLTree(QmlWeb.parseQML(src, file), parentComponent, file);
   }
 
-  loadQMLTree(tree, parentComponent = null, file = undefined) {
+  loadQMLTree(clazz, parentComponent = null, file = undefined) {
     QmlWeb.engine = this;
 
     // Create and initialize objects
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const component = new QMLComponent({
-      object: tree,
+      object: clazz,
       parent: parentComponent,
       context: this.rootContext
     });
 
-    this.loadImports(tree.$imports, undefined, component.importContextId);
+    this.loadImports(clazz.$imports, undefined, component.importContextId);
     component.$basePath = this.$basePath;
-    component.$imports = tree.$imports; // for later use
+    component.$imports = clazz.$imports; // for later use
     component.$file = file; // just for debugging
 
     this.rootObject = component.$createObject(parentComponent);
@@ -522,6 +522,101 @@ class QMLEngine {
     //this.qmldirsContents[name] = content;
   }
 
+  resolveImport(name) {
+
+    let file = this.$resolvePath(name);
+
+    let component = this.components[file];
+    let clazz;
+    // TODO gz
+    if (component) {
+      clazz = component.object;
+    }
+
+    if (!clazz) {
+      // If "name" was a full URL, "file" will be equivalent to name and this
+      // will try and load the Component from the full URL, otherwise, this
+      // doubles as checking for the file in the current directory.
+      clazz = this.loadClass(file);
+    }
+
+    // If the Component is not found, and it is not a URL, look for "name" in
+    // this context's importSearchPaths
+    if (!clazz) {
+      const nameIsUrl = this.$parseURI(name) !== undefined;
+      if (!nameIsUrl) {
+        const moreDirs = this.importSearchPaths(
+          QmlWeb.executionContext.importContextId);
+        for (let i = 0; i < moreDirs.length; i++) {
+          file = `${moreDirs[i]}${name}`;
+          clazz = this.loadClass(file);
+          if (clazz) break;
+        }
+      }
+    }
+
+    return {clazz, file};
+  }
+
+  findClass(name, context) {
+    // Load component from file. Please look at import.js for main notes.
+    // Actually, we have to use that order:
+    // 1) try to load component from current basePath
+    // 2) from importPathList
+    // 3) from directories in imports statements and then
+    // 4) from qmldir files
+    // Currently we use order: 3a, 2, 3b, 4, 1
+    // TODO: engine.qmldirs is global for all loaded components.
+    //       That's not qml's original behaviour.
+
+    // 3)regular (versioned) modules only: (from Component.constructor -> QmlWeb.loadImports)
+    let constructors = QmlWeb.perImportContextConstructors[context.importContextId];
+
+    const classComponents = name.split(".");
+    for (let ci = 0; ci < classComponents.length; ++ci) {
+      const c = classComponents[ci];
+      constructors = constructors[c];
+      if (constructors === undefined) {
+        break;
+      }
+    }
+
+    if (constructors !== undefined) {
+      return {constructor:constructor};
+    } else {
+
+      // 2) 3)preloaded qrc-s  4)
+      const qdirInfo = this.ctxQmldirs[context.importContextId][name];
+      // Are we have info on that component in some imported qmldir files?
+
+      /* This will also be set in applyProperties, but needs to be set here
+       * for Qt.createComponent to have the correct context. */
+      QmlWeb.executionContext = context;
+
+      let filePath;
+      if (qdirInfo) {
+        filePath = qdirInfo.url;
+      } else if (classComponents.length === 2) {
+        const qualified = this.qualifiedImportPath(
+          context.importContextId, classComponents[0]
+        );
+        filePath = `${qualified}${classComponents[1]}.qml`;
+      } else {
+        filePath = `${classComponents[0]}.qml`;
+      }
+
+      // 1) through engine.$resolvePath(name);
+      let imp = this.resolveImport(filePath);
+
+      if (!imp.clazz) {
+        return undefined;
+      }
+
+      return imp;
+    }
+  }
+
+
   size() {
     return {
       width: this.rootObject.getWidth(),
@@ -594,21 +689,21 @@ class QMLEngine {
       return undefined;
     }
 
-    let tree;
+    let clazz;
     if (uri.scheme === "qrc:/") {
-      let t0 = tree;
-      tree = QmlWeb.qrc[uri.path];
-      if (!tree) {
+      let t0 = clazz;
+      clazz = QmlWeb.qrc[uri.path];
+      if (!clazz) {
         console.warn("QMLEngine.loadClass: Empty qrc entry :", uri.path);
         return undefined;
       }
 
       // QmlWeb.qrc contains pre-parsed Component objects, but they still need
       // convertToEngine called on them.
-      if (!tree.$class) {
+      if (!clazz.$class) {
          console.warn("Using legacy semi-pre-parsed qrc is deprecated : "+src);
-         tree = QmlWeb.convertToEngine(tree);
-         tree.$name = t0.$name;
+         clazz = QmlWeb.convertToEngine(clazz);
+         clazz.$name = t0.$name;
       }
     } else {
       const src = QmlWeb.getUrlContents(file, true);
@@ -618,25 +713,25 @@ class QMLEngine {
       }
 
       console.log("QMLEngine.loadClass: Loading file:", file);
-      tree = QmlWeb.parseQML(src, file);
+      clazz = QmlWeb.parseQML(src, file);
     }
 
-    if (!tree) {
+    if (!clazz) {
       console.warn("QMLEngine.loadClass: Empty file :", file);
       return undefined;
     }
 
-    if (tree.$children.length !== 1) {
+    if (clazz.$children.length !== 1) {
       console.error("QMLEngine.loadClass: Failed to load:", file,
         ": A QML component must only contain one root element!");
       return undefined;
     }
 
-    tree.$file = file;
-    this.classes[file] = tree;
+    clazz.$file = file;
+    this.classes[file] = clazz;
 
 
-    return tree;
+    return clazz;
   }
 
   // Load resolved file and parse as JavaScript

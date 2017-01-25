@@ -55,23 +55,23 @@ QmlWeb.registerQmlType({
     }
 
     let component = engine.components[fileName];
-    let tree;
+    let clazz;
     // TODO gz
     if (component) {
-      tree = component.object;
+      clazz = component.object;
     }
 
-    if (!tree) {
-      tree = QmlWeb.engine.loadClass(fileName);
+    if (!clazz) {
+      clazz = QmlWeb.engine.loadClass(fileName);
     }
 
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-    const meta = { object: tree, context: this, parent: this };
+    const meta = { object: clazz, context: this, parent: this };
     const qmlComponent = new QMLComponent(meta);
-    qmlComponent.$basePath = QmlWeb.engine.extractBasePath(tree.$file);
-    qmlComponent.$imports = tree.$imports;
-    qmlComponent.$file = tree.$file;
-    QmlWeb.engine.loadImports(tree.$imports, qmlComponent.$basePath,
+    qmlComponent.$basePath = QmlWeb.engine.extractBasePath(clazz.$file);
+    qmlComponent.$imports = clazz.$imports;
+    qmlComponent.$file = clazz.$file;
+    QmlWeb.engine.loadImports(clazz.$imports, qmlComponent.$basePath,
       qmlComponent.importContextId);
     const loadedComponent = this.$createComponentObject(qmlComponent, this);
     this.sourceComponent = loadedComponent;

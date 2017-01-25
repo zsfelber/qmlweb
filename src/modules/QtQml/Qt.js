@@ -19,78 +19,53 @@ const Qt = {
   createComponent: name => {
     const engine = QmlWeb.engine;
 
-    let file = engine.$resolvePath(name);
+    let imp = engine.resolveImport(name);
 
-    let component = engine.components[file];
-    let tree;
-    // TODO gz
-    if (component) {
-      tree = component.object;
-    }
+    return this.createImpComponent(imp);
+  },
 
-    if (!tree) {
-      // If "name" was a full URL, "file" will be equivalent to name and this
-      // will try and load the Component from the full URL, otherwise, this
-      // doubles as checking for the file in the current directory.
-      tree = engine.loadClass(file);
-    }
-
-    // If the Component is not found, and it is not a URL, look for "name" in
-    // this context's importSearchPaths
-    if (!tree) {
-      const nameIsUrl = engine.$parseURI(name) !== undefined;
-      if (!nameIsUrl) {
-        const moreDirs = engine.importSearchPaths(
-          QmlWeb.executionContext.importContextId);
-        for (let i = 0; i < moreDirs.length; i++) {
-          file = `${moreDirs[i]}${name}`;
-          tree = engine.loadClass(file);
-          if (tree) break;
-        }
-      }
-    }
-
-    if (!tree) {
+  createImpComponent: imp => {
+    if (!imp.clazz) {
       return undefined;
     }
 
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     component = new QMLComponent({
-      object: tree,
+      object: clazz,
       context: QmlWeb.executionContext,
-      $name: tree.$name,
-      $id: tree.id
+      $name: clazz.$name,
+      $id: clazz.id
     });
-    component.$basePath = engine.extractBasePath(file);
-    component.$imports = tree.$imports;
-    component.$file = file; // just for debugging
+    component.$basePath = engine.extractBasePath(imp.file);
+    component.$imports = clazz.$imports;
+    component.$file = imp.file; // just for debugging
 
-    engine.loadImports(tree.$imports, component.$basePath,
+    engine.loadImports(clazz.$imports, component.$basePath,
       component.importContextId);
 
     // TODO gz name->file
-    engine.components[file] = component;
+    engine.components[imp.file] = component;
     return component;
   },
 
   createQmlObject: (src, parent, file) => {
-    const tree = QmlWeb.parseQML(src, file);
+    const clazz = QmlWeb.parseQML(src, file);
 
     // Create and initialize objects
 
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const component = new QMLComponent({
-      object: tree,
+      object: clazz,
       parent,
       context: QmlWeb.executionContext
     });
 
     const engine = QmlWeb.engine;
-    engine.loadImports(tree.$imports, undefined, component.importContextId);
+    engine.loadImports(clazz.$imports, undefined, component.importContextId);
 
     const resolvedFile = file || Qt.resolvedUrl("createQmlObject_function");
     component.$basePath = engine.extractBasePath(resolvedFile);
-    component.$imports = tree.$imports; // for later use
+    component.$imports = clazz.$imports; // for later use
     // not just for debugging, but for basepath too, see above
     component.$file = resolvedFile;
 
