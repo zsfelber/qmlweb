@@ -85,7 +85,7 @@ We keep all component names from all qmldir files in global variable
 In construct() function, we use `engine.qmldir` for component url lookup.
 
 Reference import info: http://doc.qt.io/qt-5/qtqml-syntax-imports.html
-Also please look at notes and TODO's in qtcore.js::loadImports() and
+Also please look at notes and TODO's in preloadImports()/loadImports() and
 qtcore.js::construct() methods.
 */
 

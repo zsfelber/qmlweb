@@ -21,18 +21,18 @@ class QMLComponent {
 
     if (meta.object.$imports instanceof Array) {
       const moduleImports = [];
-      const loadImport = importDesc => {
+      function _add_imp(importDesc) {
         if (/\.js$/.test(importDesc[1])) {
           this.$jsImports.push(importDesc);
         } else {
           moduleImports.push(importDesc);
         }
-      };
+      }
 
       for (let i = 0; i < meta.object.$imports.length; ++i) {
-        loadImport(meta.object.$imports[i]);
+        _add_imp(meta.object.$imports[i]);
       }
-      QmlWeb.loadImports(this, moduleImports);
+      QmlWeb.preloadImports(this, moduleImports);
     }
 
     /* If this Component does not have any imports, it is likely one that was

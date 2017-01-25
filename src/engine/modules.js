@@ -152,7 +152,11 @@ function getModuleConstructors(moduleName, version) {
   return constructors;
 }
 
-function loadImports(component, imports) {
+function preloadImports(component, imports) {
+  if (component.importContextId) {
+    throw new Error("Component imports already loaded. "+this.$context.$basePath+" "+component.$file+"  importContextId:"+component.importContextId);
+  }
+
   const mergeObjects = QmlWeb.helpers.mergeObjects;
   let constructors = mergeObjects(modules.Main);
   if (imports.filter(row => row[1] === "QtQml").length === 0 &&
@@ -291,7 +295,7 @@ function construct(meta) {
   // keep path in item for probale use it later in Qt.resolvedUrl
   item.$context.$basePath = QmlWeb.engine.$basePath; //gut
 
-  // We want to use the item's scope, but this Component's imports
+  // We don't want to use the item's scope, but this Component's imports
   item.$context.importContextId = meta.context.importContextId;
 
   // Apply properties (Bindings won't get evaluated, yet)
@@ -304,7 +308,7 @@ QmlWeb.modules = modules;
 QmlWeb.registerGlobalQmlType = registerGlobalQmlType;
 QmlWeb.registerQmlType = registerQmlType;
 QmlWeb.getConstructor = getConstructor;
-QmlWeb.loadImports = loadImports;
+QmlWeb.preloadImports = preloadImports;
 QmlWeb.callSuper = callSuper;
 QmlWeb.initializeConstr = initializeConstr;
 QmlWeb.construct = construct;
