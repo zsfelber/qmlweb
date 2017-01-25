@@ -182,7 +182,7 @@ function preloadImports(component, imports) {
       constructors = mergeObjects(constructors, moduleConstructors);
     }
   }
-  component.importContextId = importContextIds++;
+  component.importContextId = ++importContextIds;
   perImportContextConstructors[component.importContextId] = constructors;
   QmlWeb.constructors = constructors; // TODO: why do we need this?
 }

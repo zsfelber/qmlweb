@@ -68,7 +68,7 @@ class QMLComponent {
     engine.operationState = QmlWeb.QMLOperationState.Init;
     // change base path to current component base path
     const bp = engine.$basePath;
-    engine.$basePath = this.$basePath ? this.$basePath : engine.$basePath;
+    if (this.$basePath) engine.$basePath = this.$basePath;
 
     let item;
     try {

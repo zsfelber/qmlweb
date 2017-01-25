@@ -391,7 +391,7 @@ class QMLEngine {
   }*/
 
   loadImports(importsArray, currentFileDir = this.$basePath,
-      importContextId = -1) {
+      importContextId) {
     if (!this.qmldirsContents) {
       this.qmldirsContents = {}; // cache
 
@@ -407,6 +407,10 @@ class QMLEngine {
 
     if (!this.ctxQmldirs) {
       this.ctxQmldirs = {}; // resulting components lookup table
+    }
+
+    if (!importContextId) {
+      throw new Error("loadImports   currentFileDir:"+currentFileDir+"  No importContextId:"+importContextId);
     }
 
     if (!importsArray || importsArray.length === 0) {
