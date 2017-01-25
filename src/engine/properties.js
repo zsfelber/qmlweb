@@ -1,6 +1,5 @@
 function formatPath(path, path0, first) {
   var p = "";
-  if (!path0) path0 = path;
 
   if (typeof path === "string") {
     if (!first && path0) {
@@ -13,9 +12,10 @@ function formatPath(path, path0, first) {
     }
   } else if (path instanceof Array) {
     if (path.length) {
-      p = formatPath(path[0], path0, true);
+      var p0 = path0 ? path0 : path;
+      p = formatPath(path[0], p0, true);
       path.slice(1).forEach(function(token) {
-          p += formatPath(token, path0);
+          p += formatPath(token, p0);
       });
       if (path0) {
         p = "[" + p + "]";
