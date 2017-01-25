@@ -1,19 +1,21 @@
-function formatPath(path) {
-    var p = "";
+function formatPath(path, path0) {
+  var p = "";
+
+  if (typeof path === "string") {
+    if (/^(\w|\$)+$/.test(path))
+        p += path0?"."+path:path;
+    else
+        p += '["'+path+'"]';
+  } else if (path instanceof Array) {
+    p += "[";
     path.forEach(function(token) {
-        if (typeof token === "string") {
-            if (/^(\w|\$)+$/.test(token))
-                p += "."+token;
-            else
-                p += '["'+token+'"]';
-        } else if (token instanceof Array) {
-            p += "[" + formatPath(token) + "]";
-        } else {
-            throw new Error("Invalid path : ..."+JSON.stringify(path));
-        }
+        p += formatPath(token, path0?path0:path);
     });
-    if (p.charAt(0)==='.') p = p.substring(1);
-    return p;
+    p += "]";
+  } else {
+      throw new Error("Invalid path : "+JSON.stringify(path0)+"  at:"+JSON.stringify(path));
+  }
+  return p;
 }
 
 /**
