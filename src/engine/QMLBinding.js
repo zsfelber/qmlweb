@@ -181,7 +181,9 @@ class QMLBinding {
         src = fp;
       }
     } else {
-      src = QmlWeb.formatPath(src);
+      if (!(flags&(QMLBinding.ImplFunction|QMLBinding.ImplBlock)) && src instanceof Array) {
+        src = QmlWeb.formatPath(src);
+      }
     }
 
     if (!src) {
