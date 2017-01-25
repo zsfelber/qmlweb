@@ -176,13 +176,9 @@ class QMLBinding {
         throw new Error("Invalid binding property, passed along with a function/block : "+fp);
       }
       if (src) {
-        src = QmlWeb.formatPath([src, property]);
+        src = src + QmlWeb.formatPath(property, property);
       } else {
         src = fp;
-      }
-    } else {
-      if (!(flags&(QMLBinding.ImplFunction|QMLBinding.ImplBlock)) && src instanceof Array) {
-        src = QmlWeb.formatPath(src);
       }
     }
 
@@ -219,12 +215,9 @@ class QMLBinding {
     }
 
     // NOTE validate first
-    var fp = (property instanceof Array ? "" : ".") + QmlWeb.formatPath(property);
+    var fp = QmlWeb.formatPath(property, property);
 
     if (src) {
-
-      // NOTE validate first
-      src = QmlWeb.formatPath(src);
 
       return new Function("__value", "__flags", "__ns", `
         ${vvith} {

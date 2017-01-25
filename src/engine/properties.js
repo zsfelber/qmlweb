@@ -1,17 +1,26 @@
-function formatPath(path, path0) {
+function formatPath(path, path0, first) {
   var p = "";
+  if (!path0) path0 = path;
 
   if (typeof path === "string") {
-    if (/^(\w|\$)+$/.test(path))
-        p += path0?"."+path:path;
-    else
-        p += '["'+path+'"]';
+    if (!first && path0) {
+      if (/^(\w|\$)+$/.test(path))
+          p += "."+path;
+      else
+          p += '["'+path+'"]';
+    } else {
+      p = path;
+    }
   } else if (path instanceof Array) {
-    p += "[";
-    path.forEach(function(token) {
-        p += formatPath(token, path0?path0:path);
-    });
-    p += "]";
+    if (path.length) {
+      p = formatPath(path[0], path0, true);
+      path.slice(1).forEach(function(token) {
+          p += formatPath(token, path0);
+      });
+      if (path0) {
+        p = "[" + p + "]";
+      }
+    }
   } else {
       throw new Error("Invalid path : "+JSON.stringify(path0)+"  at:"+JSON.stringify(path));
   }
