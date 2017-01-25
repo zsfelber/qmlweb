@@ -243,7 +243,9 @@ class QMLEngine {
     this.$basePath = this.$basePathA.href;
     const fileName = this.extractFileName(file);
     const clazz = this.loadClass(this.$resolvePath(fileName));
-    return this.loadQMLTree(clazz, parentComponent, file);
+    const component = this.loadQMLTree(clazz, parentComponent, file);
+    console.log("loadFile success. LOADED : "+file);
+    return component;
   }
 
   // parse and construct qml
