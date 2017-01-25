@@ -41,22 +41,48 @@ class QMLBinding {
 
     if (src) {
       src = _ubertrim(src);
+      var src0 = src;
       if (UglifyJS) {
+        var e1,e2;
         try {
-          src = UglifyJS.minify("_=("+src+")", {fromString: true});
-          while (src.code!==undefined) src = src.code;
+          src = UglifyJS.minify("_="+src0, {fromString: true});
+          if (src.hasOwnProperty("code")) {
+            src = src.code;
+          } else {
+            console.warn(JSON.stringify(src));
+          }
+
           src = src.substring(2);
+          if (src) {
+            src = _ubertrim(src);
+          }
+          if (!src) {
+            e1 = {message:"no result"};
+          }
         } catch (e) {
+          e1 = e;
+        }
+        if (e1) {
           try {
-            src = UglifyJS.minify(src, {fromString: true, parse:{bare_returns:true}});
-            while (src.code!==undefined) src = src.code;
-          } catch (e2) {
-            console.warn(e.message+":\n"+e2.message+":\n(_=) "+src);
+            src = UglifyJS.minify(src0, {fromString: true, parse:{bare_returns:true}});
+            if (src.hasOwnProperty("code")) {
+              src = src.code;
+            } else {
+              console.warn(JSON.stringify(src));
+            }
+            if (src) {
+              src = _ubertrim(src);
+            }
+            if (!src) {
+              e2 = {message:"no result"};
+            }
+          } catch (e) {
+            e2 = e;
           }
         }
-        if (src) {
-          src = _ubertrim(src);
-        }
+      }
+      if (e2) {
+        console.warn(e1.message+":\n"+e2.message+":\n"+info+":\n(_=) "+src0+"\n ->\n"+src);
       }
 
       var match = /^function\s*(\w|\d|\$)*\(/.exec(src);
