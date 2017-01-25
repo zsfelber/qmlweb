@@ -592,7 +592,9 @@ class QMLEngine {
     } else {
 
       // 2) 3)preloaded qrc-s  4)
-      const qdirInfo = this.ctxQmldirs[context.importContextId][name];
+      const qmldirs = this.ctxQmldirs[context.importContextId];
+
+      const qdirInfo = qmldirs ? qmldirs[name] : null;
       // Are we have info on that component in some imported qmldir files?
 
       /* This will also be set in applyProperties, but needs to be set here
