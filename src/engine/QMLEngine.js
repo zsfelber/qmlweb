@@ -582,7 +582,7 @@ class QMLEngine {
     }
 
     if (constructors !== undefined) {
-      return {constructor:constructor};
+      return {clazzConstructor:constructors, classComponents:classComponents};
     } else {
 
       // 2) 3)preloaded qrc-s  4)
@@ -608,9 +608,7 @@ class QMLEngine {
       // 1) through engine.$resolvePath(name);
       let imp = this.resolveImport(filePath);
 
-      if (!imp.clazz) {
-        return undefined;
-      }
+      imp.classComponents=classComponents;
 
       return imp;
     }

@@ -28,19 +28,20 @@ const Qt = {
     if (!imp.clazz) {
       return undefined;
     }
+    const engine = QmlWeb.engine;
 
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     component = new QMLComponent({
-      object: clazz,
+      object: imp.clazz,
       context: QmlWeb.executionContext,
-      $name: clazz.$name,
-      $id: clazz.id
+      $name: imp.clazz.$name,
+      $id: imp.clazz.id
     });
     component.$basePath = engine.extractBasePath(imp.file);
-    component.$imports = clazz.$imports;
+    component.$imports = imp.clazz.$imports;
     component.$file = imp.file; // just for debugging
 
-    engine.loadImports(clazz.$imports, component.$basePath,
+    engine.loadImports(imp.clazz.$imports, component.$basePath,
       component.importContextId);
 
     // TODO gz name->file

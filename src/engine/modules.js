@@ -245,9 +245,9 @@ function construct(meta) {
 
   var clinfo = QmlWeb.engine.findClass(meta.object.$class, meta.context);
 
-  if (clinfo && clinfo.constructor) {
-    meta.super = clinfo.constructor;
-    item = new clinfo.constructor(meta);
+  if (clinfo.clazzConstructor) {
+    meta.super = clinfo.clazzConstructor;
+    item = new clinfo.clazzConstructor(meta);
     meta.super = undefined;
 
     // TODO gz
@@ -267,7 +267,7 @@ function construct(meta) {
     item.$metaObject = meta.object;
 
     if (typeof item.dom !== "undefined") {
-      item.dom.className += ` ${classComponents[classComponents.length - 1]}`;
+      item.dom.className += ` ${clinfo.classComponents[clinfo.classComponents.length - 1]}`;
       if (meta.object.id) {
         item.dom.className += `  ${meta.object.id}`;
       }
