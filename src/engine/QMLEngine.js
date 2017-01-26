@@ -274,7 +274,10 @@ class QMLEngine {
 
     this.rootObject = component.$createObject(parentComponent);
     if (this.rootObject.dom) {
+      console.log(clazz.$name+" : DOM element FOUND ! Added to engine screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
       this.domTarget.appendChild(this.rootObject.dom);
+    } else {
+      console.warn(clazz.$name+" : No DOM, it's a pure model object. Not added to screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
     }
 
     this.operationState = QmlWeb.QMLOperationState.Idle;

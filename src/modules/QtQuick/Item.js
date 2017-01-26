@@ -2,18 +2,13 @@ QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Item",
   versions: /.*/,
-  baseClass: "QtQml.QtObject",
+  baseClass: "ItemBase",
   properties: {
     $opacity: { type: "real", initialValue: 1 },
-    parent: { type: "alias", path:["container"], overrideType: "Item" },
     state: "string",
     states: "list",
     transitions: "list",
-    data: { type: "list", bound:true },
-    children: { type: "list", bound:true },
-    resources: { type: "list", bound:true },
     transform: "list",
-    $childIndex: { type: "int", bound:true },
     x: "real",
     y: "real",
     z: "real",
@@ -60,7 +55,6 @@ QmlWeb.registerQmlType({
     }
 
     this.parentChanged.connect(this, this.$onParentChanged_);
-    this.dataChanged.connect(this, this.$onDataChanged);
     this.stateChanged.connect(this, this.$onStateChanged);
     this.visibleChanged.connect(this, this.$onVisibleChanged_);
     this.clipChanged.connect(this, this.$onClipChanged);
@@ -75,9 +69,6 @@ QmlWeb.registerQmlType({
     this.heightChanged.connect(this, this.$updateVGeometry);
     this.implicitWidthChanged.connect(this, this.$onImplicitWidthChanged);
     this.implicitHeightChanged.connect(this, this.$onImplicitHeightChanged);
-
-    this.elementAdd.connect(this, this.$onElementAdd);
-    this.elementRemove.connect(this, this.$onElementRemove);
 
     this.$isUsingImplicitWidth = true;
     this.$isUsingImplicitHeight = true;
@@ -135,56 +126,9 @@ QmlWeb.registerQmlType({
     this.css.left = `${this.x}px`;
     this.css.top = `${this.y}px`;
   }
-  $onElementAdd(element) {
-    const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
-    element.$index = this.data.length;
-    this.data.push(element);
-    if (element instanceof QMLItem) {
-      element.$childIndex = this.children.length;
-      this.children.push(element);
-    } else {
-      element.$resourceIndex = this.resources.length;
-      this.resources.push(element);
-    }
-    //^^^if (this.children.indexOf(element) === -1) {
-      this.childrenChanged();
-    //}
-    this.dom.appendChild(element.dom);
-  }
-  $onElementRemove(element) {
-    const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
-    this.data.splice(element.$index, 1);
-    for (var i = element.$index; i < this.data.length; ++i) {
-      this.data[i].$index=i;
-    }
-    if (element instanceof QMLItem) {
-      this.children.splice(element.$childIndex, 1);
-      for (var i = element.$childIndex; i < this.children.length; ++i) {
-        this.children[i].$childIndex=i;
-      }
-    } else {
-      this.resources.splice(element.$resourceIndex, 1);
-      for (var i = element.$resourceIndex; i < this.resources.length; ++i) {
-        this.resources[i].$resourceIndex=i;
-      }
-    }
-    this.childrenChanged();
-    this.dom.removeChild(element.dom);
-  }
   $onParentChanged_(newParent, oldParent, propName) {
     this.$updateHGeometry(newParent, oldParent, propName);
     this.$updateVGeometry(newParent, oldParent, propName);
-  }
-  $onDataChanged(newData) {
-    if (this.$defaultProperty==="data") {
-       const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
-       for (const i in newData) {
-         const child = newData[i];
-         if (child instanceof QMLItem) {
-           child.parent = this; // This will also add it to children.
-         }
-       }
-    }
   }
   $onStateChanged(newVal, oldVal) {
     // let oldState; // TODO: do we need oldState?
