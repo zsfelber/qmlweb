@@ -179,7 +179,7 @@ class Signal {
         if (desc.binding) {
           console.warn("Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  slot(autobound) error:", err.message, err, desc.binding.toString());
         } else {
-          console.warn("Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  slot(user function) error:", err.message, err, desc.slot);
+          console.warn("Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  slot(user function) error:", err.message, err, desc.slot.toString());
         }
       }
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {

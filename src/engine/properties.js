@@ -291,7 +291,9 @@ function connectSignal(item, signalName, value, namespaceObject) {
         } catch (err) {
           if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
             console.warn("connectSignal/slot error : "+this+" . signal:${signalName} : "+err.message+
-                         (connection && connection.binding ? "  "+connection.binding.toString():"" ) );
+                         (connection && (connection.binding ? "  "+connection.binding.toString():
+                                         "  "+connection.slot.toString())
+                          :""  ) );
           }
           if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
             throw err;
