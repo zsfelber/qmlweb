@@ -161,7 +161,7 @@ class QMLProperty {
       //                        [dependency2]
       //                        [dependency3]
 
-      // } else if ((this.binding & QmlWeb.QMLBinding.Bidirectional)) {
+      // } else if ((this.binding.flags & QmlWeb.QMLBinding.Bidirectional)) {
       //   ...
       // }
 
@@ -254,7 +254,7 @@ class QMLProperty {
         val = val.slice(); // Copies the array
       }
 
-      if (this.binding && (this.binding & QmlWeb.QMLBinding.Bidirectional)) {
+      if (this.binding && (this.binding.flags & QmlWeb.QMLBinding.Bidirectional)) {
         if (flags & QMLProperty.RemoveBidirectionalBinding) {
           this.binding = null;
         } else {
