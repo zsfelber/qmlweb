@@ -112,6 +112,10 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     QmlWeb.setupGetterSetter(obj.$noalias, propName, getter, setter, prop);
   }
 
+  if (obj.$context === QmlWeb.engine.rootContext) {
+    throw new Error("Root context at property init : "+this);
+  }
+
   if (obj.$isComponentRoot) {
     var item = obj.$context.$elements[propName];
     if (item) {

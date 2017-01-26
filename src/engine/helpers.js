@@ -24,6 +24,28 @@ class QmlWebHelpers {
     }
     return merged;
   }
+
+  static copy() {
+    var args = slice(arguments);
+    var result = args[0];
+    args.shift();
+    args.forEach(function(arg){
+      if (arg) {
+        for (var prop in arg) {
+          result[prop] = arg[prop];
+        }
+        if (result instanceof Array) {
+          if (!(arg instanceof Array)) {
+            throw new Error("Copy from Object to Array");
+          }
+          if (arg.length > result.length) {
+            result.length = arg.length;
+          }
+        }
+      }
+    });
+    return result;
+  }
 }
 
 QmlWeb.helpers = QmlWebHelpers;

@@ -76,8 +76,8 @@ class QMLComponent {
         throw new Error("No context passed to $createObject");
       }
 
-      //const newContext = context ? Object.create(context) : new QMLContext();
       const newContext = Object.create(context);
+      newContext.contextId = ++contextIds;
 
       if (this.importContextId !== undefined) {
         newContext.importContextId = this.importContextId;

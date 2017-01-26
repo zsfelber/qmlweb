@@ -125,28 +125,6 @@ function slice(a, start) {
   return Array.prototype.slice.call(a, start || 0);
 }
 
-function copy() {
-  var args = slice(arguments);
-  var result = args[0];
-  args.shift();
-  args.forEach(function(arg){
-    if (arg) {
-      for (var prop in arg) {
-        result[prop] = arg[prop];
-      }
-      if (result instanceof Array) {
-        if (!(arg instanceof Array)) {
-          throw new Error("Copy from Object to Array");
-        }
-        if (arg.length > result.length) {
-          result.length = arg.length;
-        }
-      }
-    }
-  });
-  return result;
-}
-
 var s_objectIds = 0;
 
 function ssplice(str, startIndex, length, insertString){
@@ -492,43 +470,43 @@ function serialize(tree) {
 function serializeParserInit() {
   function b(init) {
     var result = new QmlWeb.QMLBinding();
-    QmlWeb.copy(result, init);
+    QmlWeb.helpers.copy(result, init);
     return result;
   }
 
   function m(init) {
     var result = new QmlWeb.QMLMethod();
-    QmlWeb.copy(result, init);
+    QmlWeb.helpers.copy(result, init);
     return result;
   }
 
   function p(init) {
     var result = new QmlWeb.QMLPropertyDefinition();
-    QmlWeb.copy(result, init);
+    QmlWeb.helpers.copy(result, init);
     return result;
   }
 
   function a(init) {
     var result = new QmlWeb.QMLAliasDefinition();
-    QmlWeb.copy(result, init);
+    QmlWeb.helpers.copy(result, init);
     return result;
   }
 
   function s(init) {
     var result = new QmlWeb.QMLSignalDefinition();
-    QmlWeb.copy(result, init);
+    QmlWeb.helpers.copy(result, init);
     return result;
   }
 
   function g(init) {
     var result = new QmlWeb.QMLMetaPropertyGroup();
-    QmlWeb.copy(result, init);
+    QmlWeb.helpers.copy(result, init);
     return result;
   }
 
   function e(init) {
     var result = new QmlWeb.QMLMetaElement();
-    QmlWeb.copy(result, init);
+    QmlWeb.helpers.copy(result, init);
     return result;
   }
 
@@ -585,7 +563,6 @@ QmlWeb.QMLAliasDefinition = QMLAliasDefinition;
 QmlWeb.QMLSignalDefinition = QMLSignalDefinition;
 QmlWeb.QMLMetaPropertyGroup = QMLMetaPropertyGroup;
 QmlWeb.QMLMetaElement = QMLMetaElement;
-QmlWeb.copy = copy;
 QmlWeb.serialize = serialize;
 QmlWeb.serializeParserInit = serializeParserInit;
 QmlWeb.convertToEngine = convertToEngine;

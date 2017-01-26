@@ -11,9 +11,6 @@ const geometryProperties = [
 
 class QMLContext {
   constructor() {
-    this.$elements = {};
-    this.$elementoverloads = {};
-    this.$elementoverloadsnoalias = {};
     this.contextId = ++contextIds;
   }
 
@@ -261,12 +258,18 @@ class QMLEngine {
   loadQMLTree(clazz, parentComponent = null, file = undefined) {
     QmlWeb.engine = this;
 
+    const newContext = Object.create(this.rootContext);
+    newContext.contextId = ++contextIds;
+    newContext.$elements = {};
+    newContext.$elementoverloads = {};
+    newContext.$elementoverloadsnoalias = {};
+
     // Create and initialize objects
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const component = new QMLComponent({
       object: clazz,
       parent: parentComponent,
-      context: this.rootContext
+      context: newContext
     });
 
     this.loadImports(clazz.$imports, undefined, component.importContextId);
