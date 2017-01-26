@@ -85,19 +85,7 @@ class QMLBinding {
         console.warn(e1.message+":\n"+e2.message+":\n"+info+":\n(_=) "+src0+"\n ->\n"+src);
       }
 
-      var match = /^function\s*(\w|\d|\$)*\(/.exec(src);
-      if (match) {
-        if (!this.flags) {
-          throw new Error("Binding is effectively a function but declared to expression : "+(info?info:src));
-        }
-        src = src.substring(match[0].length-1);
-        this.flags &= ~QMLBinding.ImplBlock;
-        this.flags |= QMLBinding.ImplFunction;
-      } else {
-        if (this.flags & QMLBinding.ImplFunction) {
-          throw new Error("Binding is effectively not a function but declared so : "+(info?info:src));
-        }
-      }
+      src = stripFunction(src);
     }
 
     this.src = src;
@@ -117,6 +105,23 @@ class QMLBinding {
       enumerable: false,
       writable: false
     });
+  }
+
+  stripFunction(src) {
+    var match = /^function\s*(\w|\d|\$)*\(/.exec(src);
+    if (match) {
+      if (!this.flags) {
+        throw new Error("Binding is effectively a function but declared to expression : "+(info?info:src));
+      }
+      src = src.substring(match[0].length-1);
+      this.flags &= ~QMLBinding.ImplBlock;
+      this.flags |= QMLBinding.ImplFunction;
+    } else {
+      if (this.flags & QMLBinding.ImplFunction) {
+        throw new Error("Binding is effectively not a function but declared so : "+(info?info:src));
+      }
+    }
+    return src;
   }
 
   /*toJSON() {
@@ -227,11 +232,20 @@ class QMLBinding {
       vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(QmlWeb.executionContext.$elementoverloads) with(this)";
     }
 
-    return new Function("__ns", `
-      ${vvith} {
-        ${ (flags&QMLBinding.ImplFunction) ? "return function"+src+";" : (flags&QMLBinding.ImplBlock) ? src : "return "+src+";"}
-      }
-    `);
+    if (flags & QMLBinding.User) {
+      src = stripFunction(src);
+      return new Function("__ns", `
+        ${vvith} {
+          ${ (flags&QMLBinding.ImplFunction) ? "return function"+src+";" : (flags&QMLBinding.ImplBlock) ? src : "return "+src+";"}
+        }
+      `);
+    } else {
+      return new Function("__ns", `
+        ${vvith} {
+          ${ (flags&QMLBinding.ImplFunction) ? "return function"+src+";" : (flags&QMLBinding.ImplBlock) ? src : "return "+src+";"}
+        }
+      `);
+    }
   }
 
   static bindSet(src, property, flags) {
@@ -311,6 +325,8 @@ QMLBinding.ImplExpression = 0;
 QMLBinding.ImplBlock = 1;
 QMLBinding.ImplFunction = 2;
 QMLBinding.Bidirectional = 4;
+QMLBinding._Alias = 8;
 QMLBinding.Alias = 12; // always bidirectional
+QMLBinding.User = 16;
 
 QmlWeb.QMLBinding = QMLBinding;

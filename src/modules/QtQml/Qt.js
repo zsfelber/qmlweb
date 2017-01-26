@@ -119,6 +119,34 @@ const Qt = {
     QmlWeb.importJavascriptInContext(js, QmlWeb.executionContext);
   },
 
+  // Qt.binding
+  binding(getterFunction, setterFunction, flags) {
+    var QMLBinding = QmlWeb.QMLBinding;
+    flags |= QMLBinding.ImplFunction | QMLBinding.User;
+
+    if (!(getterFunction instanceof Function)) {
+      throw new Error("Qt.binding() argument 1 should be a getter (evaluator) function. Bad:", getterFunction);
+    }
+    if (setterFunction && !(setterFunction instanceof Function)) {
+      throw new Error("Qt.binding() argument 2 should be a setter (updater) function. Bad:", setterFunction);
+    }
+    if (flags & (QMLBinding.ImplBlock | QMLBinding._Alias)) {
+      throw new Error("Qt.binding() Invalid flags:", flags," Valid flags:ImplFunction,Bidirectional");
+    }
+    if (flags & QMLBinding.Bidirectional) {
+      if (!setterFunction) {
+        throw new Error("Qt.binding() argument 2 should be a setter (updater) function with  flags & Bidirectional");
+      }
+    }
+
+    var b = new QMLBinding();
+    b.flags = flags;
+    b.getterFunc = getterFunction;
+    b.setterFunc = setterFunction;
+    b.compile();
+    return b;
+  },
+
   // Buttons masks
   LeftButton: 1,
   RightButton: 2,
