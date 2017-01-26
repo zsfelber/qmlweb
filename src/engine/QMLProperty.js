@@ -25,6 +25,8 @@ class QMLProperty {
     this.type = type;
     this.animation = null;
     this.needsUpdate = true;
+    this.get.owner = this;
+    this.set.owner = this;
 
     // This list contains all signals that hold references to this object.
     // It is needed when deleting, as we need to tidy up all references to this
@@ -300,6 +302,10 @@ class QMLProperty {
         //console.warn("PendingEvaluation : Pending property set/changed init :" + this.name + "  obj:" + this.obj);
       }
     }
+  }
+
+  toString() {
+    return this.obj+" . prop:"+this.name+" u:"+this.needsUpdate+" "+(this.binding?"b:"+this.binding.flags:"")+" "+(this.val?"v:"+this.val:"");
   }
 
   static pushEvalStack() {

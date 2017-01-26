@@ -67,6 +67,8 @@ function createProperty(type, obj, propName, options, namespaceObject) {
   const setter = function (value, flags) {
     prop.set.call(prop, value, flags, namespaceObject);
   }
+  getter.owner = prop;
+  setter.owner = prop;
 
   if (type === "alias") {
 
@@ -98,7 +100,7 @@ function createProperty(type, obj, propName, options, namespaceObject) {
 
     obj.$properties[propName] = prop;
 
-    QmlWeb.setupGetterSetter(obj, propName, getter, setter);
+    QmlWeb.setupGetterSetter(obj, propName, getter, setter, prop);
 
   } else {
     _set_prop(propName, prop, QMLProperty.ReasonInitPrivileged);
@@ -106,8 +108,8 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     obj.$properties[propName] = prop;
     obj.$properties_noalias[propName] = prop;
 
-    QmlWeb.setupGetterSetter(obj, propName, getter, setter);
-    QmlWeb.setupGetterSetter(obj.$noalias, propName, getter, setter);
+    QmlWeb.setupGetterSetter(obj, propName, getter, setter, prop);
+    QmlWeb.setupGetterSetter(obj.$noalias, propName, getter, setter, prop);
   }
 
   if (obj.$isComponentRoot) {
@@ -115,13 +117,13 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     if (item) {
       //console.warn("Context entry Element overriden by root property : "+type+(prop.type===type?" ":" ("+(prop.type)+") ")+propName+" in obj:"+obj);
       if (type === "alias") {
-        QmlWeb.setupGetterSetter(obj.$context.$elementoverloads, propName, getter, setter);
+        QmlWeb.setupGetterSetter(obj.$context.$elementoverloads, propName, getter, setter, prop);
       } else {
-        QmlWeb.setupGetterSetter(obj.$context.$elementoverloads, propName, getter, setter);
-        QmlWeb.setupGetterSetter(obj.$context.$elementoverloadsnoalias, propName, getter, setter);
+        QmlWeb.setupGetterSetter(obj.$context.$elementoverloads, propName, getter, setter, prop);
+        QmlWeb.setupGetterSetter(obj.$context.$elementoverloadsnoalias, propName, getter, setter, prop);
       }
     } else {
-      QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter);
+      QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter, prop);
     }
   }
 }
