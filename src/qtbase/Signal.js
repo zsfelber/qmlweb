@@ -176,9 +176,11 @@ class Signal {
           reason:err
         });
       } else {
-        console.error("Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  slot error:", err.message, err,
-          Function.prototype.toString.call(desc.slot)
-        );
+        if (desc.binding) {
+          console.warn("Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  slot(user function) error:", err.message, err, desc.binding);
+        } else {
+          console.warn("Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  slot(autobound) error:", err.message, err, desc.slot);
+        }
       }
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
         throw err;

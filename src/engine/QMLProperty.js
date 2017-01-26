@@ -126,11 +126,7 @@ class QMLProperty {
 
 
     } catch (e) {
-      if (QmlWeb.engine.operationState === QmlWeb.QMLOperationState.Init) {
-        console.log("QMLProperty.update binding error #"+this.propertyId, e, Function.prototype.toString.call(this.binding.implGet));
-      } else {
-        console.log("QMLProperty.update binding error #"+this.propertyId, e);
-      }
+      console.warn("QMLProperty.update binding error #"+this.propertyId, e);
       throw e;
     } finally {
       if (pushed) {
