@@ -37,6 +37,9 @@ const Qt = {
       $name: imp.clazz.$name,
       $id: imp.clazz.id
     });
+    if (QmlWeb.executionContext === QmlWeb.engine.rootContext) {
+      throw new Error("Root context at property Qt.createImpComponent : "+imp.file);
+    }
     component.$basePath = engine.extractBasePath(imp.file);
     component.$imports = imp.clazz.$imports;
     component.$file = imp.file; // just for debugging
@@ -60,6 +63,9 @@ const Qt = {
       parent,
       context: QmlWeb.executionContext
     });
+    if (QmlWeb.executionContext === QmlWeb.engine.rootContext) {
+      throw new Error("Root context at property Qt.createQmlObject : "+file+"\n"+src);
+    }
 
     const engine = QmlWeb.engine;
     engine.loadImports(clazz.$imports, undefined, component.importContextId);

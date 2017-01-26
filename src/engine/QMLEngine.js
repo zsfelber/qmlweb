@@ -603,10 +603,6 @@ class QMLEngine {
       const qdirInfo = qmldirs ? qmldirs[name] : null;
       // Are we have info on that component in some imported qmldir files?
 
-      /* This will also be set in applyProperties, but needs to be set here
-       * for Qt.createComponent to have the correct context. */
-      QmlWeb.executionContext = context;
-
       let filePath;
       if (qdirInfo) {
         filePath = qdirInfo.url;

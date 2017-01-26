@@ -57,6 +57,10 @@ class QMLProperty {
           parent: this.obj,
           context: namespaceObject.$context
         });
+        if (namespaceObject.$context === QmlWeb.engine.rootContext) {
+          throw new Error("Root context at property setVal : "+this);
+        }
+
         /* $basePath must be set here so that Components that are assigned to
          * properties (e.g. Repeater delegates) can properly resolve child
          * Components that live in the same directory in

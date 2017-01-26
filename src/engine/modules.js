@@ -263,6 +263,10 @@ function construct(meta) {
     item.$metaObject = meta.object;
   } else {
 
+    /* This will also be set in applyProperties, but needs to be set here
+     * for Qt.createImpComponent to have the correct context. */
+    QmlWeb.executionContext = meta.context;
+
     const component = QmlWeb.Qt.createImpComponent(clinfo);
 
     if (!component) {
