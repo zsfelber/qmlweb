@@ -252,10 +252,12 @@ function applyProperty(item, i, value, namespaceObject) {
 }
 
 function connectSignal(item, signalName, value, namespaceObject) {
-  if (!item[signalName]) {
+  const signal = item[signalName];
+
+  if (!signal) {
     console.warn(`No signal called ${signalName} found!`);
     return undefined;
-  } else if (typeof item[signalName].connect !== "function") {
+  } else if (typeof signal.connect !== "function") {
     console.warn(`${signalName} is not a signal!`);
     return undefined;
   }
@@ -268,12 +270,28 @@ function connectSignal(item, signalName, value, namespaceObject) {
     }
   }
 
-  const params = [];
-  for (const j in item[signalName].parameters) {
-    params.push(item[signalName].parameters[j].name);
+  let params;
+  if (signal.$name === "changed") {
+    params = ["val", "oldVal", "name"];
+    if (signal.parameters.length) {
+      console.log("'changed' signal with parameters : "+JSON.stringify(signal.parameters));
+      for (const j in signal.parameters) {
+        params[j] = signal.parameters[j].name;
+      }
+      if (signal.parameters.length>3) {
+        params.length = signal.parameters.length;
+      }
+    }
+  } else {
+    params = [];
+    for (const j in signal.parameters) {
+      params.push(signal.parameters[j].name);
+    }
   }
+
   params.push("connection");
   var ps = params.join(", ");
+
   if (!value.ps || ps!==value.ps) {
     value.ps = ps;
 
@@ -290,11 +308,11 @@ function connectSignal(item, signalName, value, namespaceObject) {
           ${value.src0}
         } catch (err) {
           if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
-            console.warn("connectSignal/slot error : "+this+" . signal:${signalName} : "+err.message+
-                         (connection && (connection.binding ? "  "+connection.binding.toString():
-                                         "  "+connection.slot.toString())
-                          :""  ) );
+            console.warn("connectSignal/slot error : "+this+
+                         (err.srcdumpok?" . signal:${signalName} : ":" : ")+err.message+
+                         (err.srcdumpok?"srcdump:ok":""+connection));
           }
+          err.srcdumpok = 1;
           if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
             throw err;
           }
@@ -311,7 +329,8 @@ function connectSignal(item, signalName, value, namespaceObject) {
   // Don't pass in __basePath argument, as QMLEngine.$basePath is set in the
   // value.src, as we need it set at the time the slot is called.
   const slot = value.eval(namespaceObject);
-  var connection = item[signalName].connect(item, slot);
+  var connection = signal.connect(item, slot);
+  connection.arglen = params.length;
   connection.binding = value;
   return connection;
 }

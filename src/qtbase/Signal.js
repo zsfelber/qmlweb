@@ -67,6 +67,12 @@ class Signal {
     };
     connection.index = this.connectedSlots.length;
     connection.signal = this;
+    connection.toString = function() {
+      return "Conn:"+connection.signal.obj+".signal:"+connection.signal.$name+" -> "+
+            (connection.binding ? connection.binding.toString():
+            (connection.slot ? connection.slot.toString() : ""));
+    };
+
     this.connectedSlots.push(connection);
 
     // Notify object of connect
@@ -163,6 +169,10 @@ class Signal {
     try {
       if (args) args.push(desc);
       else args = [desc];
+      if (desc.arglen!==undefined && desc.arglen !== args.length) {
+        console.warn(desc.thisObj+"  slot  argument mismatch: length:"+args.length+" expected:"+desc.arglen+"  : "+desc);
+      }
+
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
       if (err.ctType === "PendingEvaluation") {
@@ -177,11 +187,12 @@ class Signal {
         });
       } else {
         if (desc.binding) {
-          console.warn("Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  slot(autobound) error:", err.message, err, desc.binding.toString());
+          console.warn("Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  slot(autobound) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.binding.toString());
         } else {
-          console.warn("Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  slot(user function) error:", err.message, err, desc.slot.toString());
+          console.warn("Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  slot(user function) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.slot.toString());
         }
       }
+      err.srcdumpok = 1;
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
         throw err;
       }

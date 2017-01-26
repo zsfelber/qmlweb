@@ -163,8 +163,9 @@ class QMLBinding {
       return this.implGet.call(object, namespaceObject);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
-        console.warn("Binding/get error : "+err.message+" "+this);
+        console.warn("Binding/get error : "+err.message+(err.srcdumpok?" srcdump:ok":" "+this));
       }
+      err.srcdumpok = 1;
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
         throw err;
       }
@@ -187,8 +188,9 @@ class QMLBinding {
       this.implSet.call(object, value, flags, namespaceObject);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
-        console.warn("Binding/set error : "+err.message+" "+this);
+        console.warn("Binding/set error : "+err.message+(err.srcdumpok?" srcdump:ok":" "+this));
       }
+      err.srcdumpok = 1;
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
         throw err;
       }
