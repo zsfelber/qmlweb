@@ -3,6 +3,7 @@
 QmlWeb.engine = null;
 
 QmlWeb.useShadowDom = true;
+let contextIds = 0;
 
 const geometryProperties = [
   "width", "height", "fill", "x", "y", "left", "right", "top", "bottom"
@@ -13,6 +14,7 @@ class QMLContext {
     this.$elements = {};
     this.$elementoverloads = {};
     this.$elementoverloadsnoalias = {};
+    this.contextId = ++contextIds;
   }
 
   nameForObject(obj) {
