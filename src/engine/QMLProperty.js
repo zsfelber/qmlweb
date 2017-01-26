@@ -18,7 +18,7 @@ class QMLProperty {
     this.name = name;
     this.readOnly = options.readOnly;
     this.bound = options.bound;
-    this.changed = QmlWeb.Signal.signal("changed", [], { obj });
+    this.changed = QmlWeb.Signal.signal("changed", [{name:"val"}, {name:"oldVal"}, {name:"name"}], { obj });
     this.binding = null;
     this.namespaceObject = null;
     this.value = undefined;

@@ -6,6 +6,7 @@ class Signal {
     this.options = options;
 
     this.signal = (...args) => this.execute(...args);
+    this.signal.$signal = this;
     this.signal.parameters = params;
     this.signal.connect = this.connect.bind(this);
     this.signal.disconnect = this.disconnect.bind(this);
@@ -20,10 +21,11 @@ class Signal {
     QmlWeb.QMLProperty.pushEvalStack();
     for (const i in this.connectedSlots) {
       const desc = this.connectedSlots[i];
+      var args2 = args.slice(0);
       if (desc.type & Signal.QueuedConnection) {
-        Signal.$addQueued(desc, args);
+        Signal.$addQueued(desc, args2);
       } else {
-        Signal.$execute(desc, args);
+        Signal.$execute(desc, args2);
       }
     }
     QmlWeb.QMLProperty.popEvalStack();
@@ -167,10 +169,15 @@ class Signal {
 
   static $execute(desc, args) {
     try {
-      if (args) args.push(desc);
-      else args = [desc];
-      if (desc.arglen!==undefined && desc.arglen !== args.length) {
-        console.warn(desc.thisObj+"  slot  argument mismatch: length:"+args.length+" expected:"+desc.arglen+"  : "+desc);
+      if (desc.arglen) {
+        if (args.length >= desc.arglen) {
+          throw new Error("Too many arguments for signal call : "+args.length+" expected:"+(desc.arglen-1));
+        } else {
+          for (var i = args.length; i<desc.arglen-1; i++) {
+            args.push(undefined);
+          }
+          args.push(desc);
+        }
       }
 
       desc.slot.apply(desc.thisObj, args);

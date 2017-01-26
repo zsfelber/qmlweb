@@ -252,12 +252,12 @@ function applyProperty(item, i, value, namespaceObject) {
 }
 
 function connectSignal(item, signalName, value, namespaceObject) {
-  const signal = item[signalName];
+  const _signal = item[signalName];
 
-  if (!signal) {
+  if (!_signal) {
     console.warn(`No signal called ${signalName} found!`);
     return undefined;
-  } else if (typeof signal.connect !== "function") {
+  } else if (typeof _signal.connect !== "function") {
     console.warn(`${signalName} is not a signal!`);
     return undefined;
   }
@@ -270,23 +270,9 @@ function connectSignal(item, signalName, value, namespaceObject) {
     }
   }
 
-  let params;
-  if (signal.$name === "changed") {
-    params = ["val", "oldVal", "name"];
-    if (signal.parameters.length) {
-      console.log("'changed' signal with parameters : "+JSON.stringify(signal.parameters));
-      for (const j in signal.parameters) {
-        params[j] = signal.parameters[j].name;
-      }
-      if (signal.parameters.length>3) {
-        params.length = signal.parameters.length;
-      }
-    }
-  } else {
-    params = [];
-    for (const j in signal.parameters) {
-      params.push(signal.parameters[j].name);
-    }
+  const params = [];
+  for (const j in _signal.parameters) {
+    params.push(_signal.parameters[j].name);
   }
 
   params.push("connection");
@@ -309,7 +295,7 @@ function connectSignal(item, signalName, value, namespaceObject) {
         } catch (err) {
           if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
             console.warn("connectSignal/slot error : "+this+
-                         (err.srcdumpok?" . signal:${signalName} : ":" : ")+err.message+
+                         (err.srcdumpok?" . signal:${signalName} :":" :")+err.message+" "+
                          (err.srcdumpok?"srcdump:ok":""+connection));
           }
           err.srcdumpok = 1;
@@ -329,7 +315,7 @@ function connectSignal(item, signalName, value, namespaceObject) {
   // Don't pass in __basePath argument, as QMLEngine.$basePath is set in the
   // value.src, as we need it set at the time the slot is called.
   const slot = value.eval(namespaceObject);
-  var connection = signal.connect(item, slot);
+  var connection = _signal.connect(item, slot);
   connection.arglen = params.length;
   connection.binding = value;
   return connection;
