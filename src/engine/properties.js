@@ -277,45 +277,48 @@ function connectSignal(item, signalName, value, namespaceObject) {
 
   params.push("connection");
   var ps = params.join(", ");
+  var connection;
 
   if (!value.ps || ps!==value.ps) {
     value.ps = ps;
 
-    // Wrap value.src in IIFE in case it includes a "return"
-    // NOTE removed because it kills "this" :
-    // (function() {
-    //   ${value.src}
-    // })();
-    value.src = `(${ps}) {
+    try {
+      // Wrap value.src in IIFE in case it includes a "return"
+      // NOTE removed because it kills "this" :
+      // (function() {
+      //   ${value.src}
+      // })();
+      value.src = `(${ps}) {
         QmlWeb.engine.$oldBasePath = QmlWeb.engine.$basePath;
         QmlWeb.executionContext = __ns.$context;
         QmlWeb.engine.$basePath = __ns.$context.$basePath;
         try {
           ${value.src0}
-        } catch (err) {
-          if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
-            console.warn("connectSignal/slot error : "+this+
-                         (err.srcdumpok?" . signal:${signalName} :":" :")+err.message+" "+
-                         (err.srcdumpok?"srcdump:ok":""+connection));
-          }
-          err.srcdumpok = 1;
-          if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
-            throw err;
-          }
         } finally {
           QmlWeb.engine.$basePath = QmlWeb.engine.$oldBasePath;
         }
       }`;
-    value.flags &= ~QMLBinding.ImplBlock;
-    value.flags |= QMLBinding.ImplFunction;
-    value.compile();
-    value.src = value.src0;
-    delete `(${ps}) ${value.src0}`;
+      value.flags &= ~QMLBinding.ImplBlock;
+      value.flags |= QMLBinding.ImplFunction;
+      value.compile();
+      value.src = value.src0;
+      delete value.src0;
+    } catch (err) {
+      if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
+        console.warn("connectSignal/slot compile error : "+
+                     (err.srcdumpok?" . signal:"+signalName+" :":" :")+err.message+" "+
+                     (err.srcdumpok?"srcdump:ok":""+connection));
+      }
+      err.srcdumpok = 1;
+      if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
+        throw err;
+      }
+    }
   }
   // Don't pass in __basePath argument, as QMLEngine.$basePath is set in the
   // value.src, as we need it set at the time the slot is called.
   const slot = value.eval(namespaceObject);
-  var connection = _signal.connect(item, slot);
+  connection = _signal.connect(item, slot);
   connection.arglen = params.length;
   connection.binding = value;
   return connection;
