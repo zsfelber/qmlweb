@@ -65,6 +65,7 @@ QmlWeb.registerQmlType({
       clazz = QmlWeb.engine.loadClass(fileName);
     }
 
+    QmlWeb.helpers.mergeObjects(this, QmlWeb.engine.rootContext);
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const meta = { object: clazz, context: this, parent: this };
     const qmlComponent = new QMLComponent(meta);

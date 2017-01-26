@@ -631,7 +631,7 @@ class QMLEngine {
   }
 
   focusedElement() {
-    return this.rootContext.activeFocus;
+    return this.rootObject.$context.activeFocus;
   }
 
   //---------- Private Methods ----------

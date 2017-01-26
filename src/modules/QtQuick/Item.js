@@ -352,7 +352,7 @@ QmlWeb.registerQmlType({
       this.$context.activeFocus = this;
     } else if (document.qmlFocus === this) {
       document.getElementsByTagName("BODY")[0].focus();
-      document.qmlFocus = QmlWeb.engine.rootContext.base;
+      document.qmlFocus = QmlWeb.engine.rootObject.$context.base;
       this.$context.activeFocus = null;
     }
   }

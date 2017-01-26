@@ -146,6 +146,9 @@ Fixed import strategy to resolve preloaded qrc-s
 Extended Binding : understands impl/block, impl/function, impl/expression, bidirectional, alias flags
 
 Changed alias implementation to use QMLBinding in a special bidirectional mode, extended to understand &lt;arbitrary property path>.property
+As an extended version of QML we can now use 2-directional Bindings, as well as indirect alias like:
+property alias aliasprop:aaa.bbb[indexprop];
+property string indexprop;
 Resolving aliases as specified by qml standard (as expected, it doesn't see same object aliases, resolves property/property and property/element overload cases)
 
 Changed init time load strategy: for a single property (in engine.applyProperties), it aborts when a binding has not yet initialized,
@@ -156,3 +159,5 @@ Changed coding style to more advanced (also to support better ways), eg:
 - using 1 flag variable in QMLBinding(ImplFunction/ImplBlock/.../Bidrection/Alias), QMLProperty(reasons,priviligezed/break readonly, break bidirectional binding at set)
 instead of several global boolean properties
 - using 1 interface and 1 queue for engine.pendingOperations (instead of 'engine.bindedProperties' + engine.pendingOperations and 2 queues at startup finish)
+- using 1 namespaceObject instead of componentScope+objectScope, which was to decouple wrongly and hard to follow in debug (so in 2 or 3 cases I had to construct custom var = {..} namespace objects instead.
+It is ok to use trivial nsObject+nsObject.$context in most cases.)
