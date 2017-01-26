@@ -151,7 +151,7 @@ class QMLBinding {
       return this.implGet.call(object, namespaceObject);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
-        console.warn("Binding/get error : "+err.message+"  impl:\n"+this.implGet.toString());
+        console.warn("Binding/get error : "+err.message+" flags:"+this.flags+" prop:"+QmlWeb.formatPath(this.property)+"  impl:\n"+this.src);
       }
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
         throw err;
@@ -175,7 +175,7 @@ class QMLBinding {
       this.implSet.call(object, value, flags, namespaceObject);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
-        console.warn("Binding/set error : "+err.message+"  impl:\n"+this.implSet.toString());
+        console.warn("Binding/set error : "+err.message+" flags:"+this.flags+" prop:"+QmlWeb.formatPath(this.property)+"  impl:\n"+this.src);
       }
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
         throw err;

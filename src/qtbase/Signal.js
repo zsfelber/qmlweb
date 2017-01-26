@@ -166,7 +166,7 @@ class Signal {
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
       if (err.ctType === "PendingEvaluation") {
-        console.warn("PendingEvaluation : Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  pending operation:", err.message);
+        //console.warn("PendingEvaluation : Signal :" + desc.signal.$name + "  thisObj:" + desc.thisObj+"  pending operation:", err.message);
         QmlWeb.engine.pendingOperations.push({
           fun:desc.slot,
           thisObj:desc.thisObj,

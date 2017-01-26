@@ -3,7 +3,9 @@ const trivialProperties = {context:1};
 function formatPath(path, path0, first) {
   var p = "";
 
-  if (typeof path === "string") {
+  if (!path) {
+    p = path;
+  } else if (typeof path === "string") {
     if (!first && path0) {
       if (/^(\w|\$)+$/.test(path))
           p += "."+path;
@@ -198,7 +200,7 @@ function applyProperties(metaObject, item, namespaceObject) {
       }
     } catch (err) {
       if (err.ctType === "PendingEvaluation") {
-        console.warn("PendingEvaluation : Cannot apply property bindings (reevaluating at startup) :" + i + "  item:" + item);
+        //console.warn("PendingEvaluation : Cannot apply property bindings (reevaluating at startup) :" + i + "  item:" + item);
       } else {
         console.warn("Cannot apply property bindings  :" + i + "  item:" + item+"  "+err);
       }
@@ -298,6 +300,8 @@ function connectSignal(item, signalName, value, namespaceObject) {
     value.flags &= ~QMLBinding.ImplBlock;
     value.flags |= QMLBinding.ImplFunction;
     value.compile();
+    value.src = value.src0;
+    delete `(${ps}) ${value.src0}`;
   }
   // Don't pass in __basePath argument, as QMLEngine.$basePath is set in the
   // value.src, as we need it set at the time the slot is called.
