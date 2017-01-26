@@ -114,7 +114,12 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     var item = obj.$context.$elements[propName];
     if (item) {
       //console.warn("Context entry Element overriden by root property : "+type+(prop.type===type?" ":" ("+(prop.type)+") ")+propName+" in obj:"+obj);
-      QmlWeb.setupGetterSetter(obj.$context.$elementoverloads, propName, getter, setter);
+      if (type === "alias") {
+        QmlWeb.setupGetterSetter(obj.$context.$elementoverloads, propName, getter, setter);
+      } else {
+        QmlWeb.setupGetterSetter(obj.$context.$elementoverloads, propName, getter, setter);
+        QmlWeb.setupGetterSetter(obj.$context.$elementoverloadsnoalias, propName, getter, setter);
+      }
     } else {
       QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter);
     }

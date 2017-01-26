@@ -122,27 +122,35 @@ const Qt = {
   // Qt.binding
   binding(getterFunction, setterFunction, flags) {
     var QMLBinding = QmlWeb.QMLBinding;
-    flags |= QMLBinding.ImplFunction | QMLBinding.User;
-
-    if (!(getterFunction instanceof Function)) {
-      throw new Error("Qt.binding() argument 1 should be a getter (evaluator) function. Bad:", getterFunction);
-    }
-    if (setterFunction && !(setterFunction instanceof Function)) {
-      throw new Error("Qt.binding() argument 2 should be a setter (updater) function. Bad:", setterFunction);
-    }
-    if (flags & (QMLBinding.ImplBlock | QMLBinding._Alias)) {
-      throw new Error("Qt.binding() Invalid flags:", flags," Valid flags:ImplFunction,Bidirectional");
-    }
-    if (flags & QMLBinding.Bidirectional) {
-      if (!setterFunction) {
-        throw new Error("Qt.binding() argument 2 should be a setter (updater) function with  flags & Bidirectional");
-      }
-    }
-
     var b = new QMLBinding();
+
+    if (getterFunction instanceof Function || setterFunction instanceof Function) {
+      flags |= QMLBinding.User;
+    }
+
+    if (flags & QMLBinding.User) {
+
+      flags |= QMLBinding.ImplFunction;
+
+      if (!(getterFunction instanceof Function)) {
+        throw new Error("Qt.binding() argument 1 should be a getter (evaluator) function. Bad:", getterFunction);
+      }
+      if (setterFunction && !(setterFunction instanceof Function)) {
+        throw new Error("Qt.binding() argument 2 should be a setter (updater) function. Bad:", setterFunction);
+      }
+      if (flags & QMLBinding.Bidirectional) {
+        if (!setterFunction) {
+          throw new Error("Qt.binding() argument 2 should be a setter (updater) function with  flags & Bidirectional");
+        }
+      }
+      b.getterFunc = getterFunction;
+      b.setterFunc = setterFunction;
+    } else {
+      b.src = getterFunction;
+      throw new Error("Qt.binding() leave argument 2 if binding is initialized with an expression.", setterFunction);
+    }
+
     b.flags = flags;
-    b.getterFunc = getterFunction;
-    b.setterFunc = setterFunction;
     b.compile();
     return b;
   },

@@ -85,7 +85,7 @@ class QMLBinding {
         console.warn(e1.message+":\n"+e2.message+":\n"+info+":\n(_=) "+src0+"\n ->\n"+src);
       }
 
-      src = stripFunction(src);
+      src = this.stripFunction(src);
     }
 
     this.src = src;
@@ -107,13 +107,20 @@ class QMLBinding {
     });
   }
 
-  stripFunction(src) {
-    var match = /^function\s*(\w|\d|\$)*\(/.exec(src);
+  stripFunction(src, options) {
+    var match = /^function\s*(\w|\d|\$)*\((.*?)\)/m.exec(src);
     if (match) {
       if (!this.flags) {
         throw new Error("Binding is effectively a function but declared to expression : "+(info?info:src));
       }
-      src = src.substring(match[0].length-1);
+      src = src.substring(match[0].length);
+      if (!options || !options.stripargs) {
+        src = "("+match[1]+")"+src;
+      }
+      if (options) {
+        options.args = match[1];
+      }
+
       this.flags &= ~QMLBinding.ImplBlock;
       this.flags |= QMLBinding.ImplFunction;
     } else {
@@ -197,9 +204,9 @@ class QMLBinding {
     }
     this.src = _ubertrim(this.src);
     this.compiled = true;
-    this.implGet = QMLBinding.bindGet(this.src, this.property, this.flags);
+    this.implGet = this.bindGet();
     if (this.flags & QMLBinding.Bidirectional) {
-      this.implSet = QMLBinding.bindSet(this.src, this.property, this.flags);
+      this.implSet = this.bindSet();
     }
   }
 
@@ -207,115 +214,145 @@ class QMLBinding {
     return "Binding: flags:"+this.flags+" prop:"+QmlWeb.formatPath(this.property)+"  impl:\n"+this.src;
   }
 
-  static bindGet(src, property, flags) {
+  bindGet() {
 
-    if (property) {
-      var fp = QmlWeb.formatPath(property);
-      if (flags&(QMLBinding.ImplFunction|QMLBinding.ImplBlock)) {
-        throw new Error("Invalid binding property, passed along with a function/block : "+fp);
-      }
-      if (src) {
-        src = src + QmlWeb.formatPath(property, property);
-      } else {
-        src = fp;
-      }
-    }
-
-    if (!src) {
-      throw new Error("Invalid binding path : "+src);
-    }
-
+    var src = this.src;
     var vvith;
-    if (flags & QMLBinding.Alias) {
-      vvith = "with(QmlWeb) with(QmlWeb.executionContext.$elementoverloads) with(QmlWeb.executionContext) with(this.$noalias)";
+    if (this.flags & QMLBinding.Alias) {
+      vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(QmlWeb.executionContext.$elementoverloadsnoalias) with(this.$noalias)";
     } else {
       vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(QmlWeb.executionContext.$elementoverloads) with(this)";
     }
 
-    if (flags & QMLBinding.User) {
-      src = stripFunction(src);
+    if (this.flags & QMLBinding.User) {
+      if ((this.flags&QMLBinding.ImplBlock) || !(this.flags&QMLBinding.ImplFunction)) {
+        throw new Error("Invalid Qt.Binding flags : "+this.flags," Valid flags:User,ImplFunction,Bidirectional,Alias");
+      }
+      if (!this.getterFunc) {
+        throw new Error("Invalid Qt.binding call, no getterFunc: "+this);
+      }
+
+      src = this.stripFunction(this.getterFunc.toString(), {stripargs:1});
       return new Function("__ns", `
-        ${vvith} {
-          ${ (flags&QMLBinding.ImplFunction) ? "return function"+src+";" : (flags&QMLBinding.ImplBlock) ? src : "return "+src+";"}
-        }
+        ${vvith} ${src}
       `);
+
     } else {
+      if (this.property) {
+        var fp = QmlWeb.formatPath(this.property);
+        if (this.flags&(QMLBinding.ImplFunction|QMLBinding.ImplBlock)) {
+          throw new Error("Invalid binding property, passed along with a function/block : "+fp);
+        }
+        if (src) {
+          src = src + QmlWeb.formatPath(this.property, this.property);
+        } else {
+          src = fp;
+        }
+      }
+
+      if (!src) {
+        throw new Error("Invalid binding path : "+this);
+      }
+
       return new Function("__ns", `
         ${vvith} {
-          ${ (flags&QMLBinding.ImplFunction) ? "return function"+src+";" : (flags&QMLBinding.ImplBlock) ? src : "return "+src+";"}
+          ${ (this.flags&QMLBinding.ImplFunction) ? "return function"+src+";" : (this.flags&QMLBinding.ImplBlock) ? src : "return "+src+";"}
         }
       `);
     }
   }
 
-  static bindSet(src, property, flags) {
-    if (flags&(QMLBinding.ImplFunction|QMLBinding.ImplBlock)) {
-      throw new Error("Invalid writable/bidirectional binding, it should be an expression : "+src);
+  bindSet() {
+    if (this.flags & QMLBinding.User) {
+      if ((this.flags&QMLBinding.ImplBlock) || !(this.flags&QMLBinding.ImplFunction)) {
+        throw new Error("Invalid Qt.Binding flags : "+this.flags," Valid flags:User,ImplFunction,Bidirectional,Alias");
+      }
+      if (!this.setterFunc) {
+        throw new Error("Invalid bidirectional Qt.binding call, no setterFunc: "+this);
+      }
+    } else {
+      if (this.flags&(QMLBinding.ImplFunction|QMLBinding.ImplBlock)) {
+        throw new Error("Invalid writable/bidirectional binding, it should be an expression : "+this);
+      }
+      if (!this.property) {
+        throw new Error("Invalid bidirectional binding, no property: "+this);
+      }
     }
 
+    var src = this.src;
     var props, vvith;
-    if (flags & QMLBinding.Alias) {
+    if (this.flags & QMLBinding.Alias) {
       props = "$properties_noalias";
-      vvith = "with(QmlWeb) with(QmlWeb.executionContext.$elementoverloads) with(QmlWeb.executionContext) with(this.$noalias)";
+      vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(QmlWeb.executionContext.$elementoverloadsnoalias) with(this.$noalias)";
     } else {
       props = "$properties";
       vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(QmlWeb.executionContext.$elementoverloads) with(this)";
     }
 
-    // NOTE validate first
-    var fp = QmlWeb.formatPath(property, property);
-
-    if (src) {
+    if (this.flags & QMLBinding.User) {
+      var opt = {stripargs:1};
+      src = this.stripFunction(this.setterFunc.toString(), opt);
 
       return new Function("__value", "__flags", "__ns", `
-        ${vvith} {
-          var obj = ${src};
-          if (!obj) {
-            console.error("Writable/Bidirectional binding write error : target property '${src}' is null. Cannot set '${property}' on null.");
-            return;
-          }
-          var prop;
-          if (obj === this)
-            prop = obj.${props}${fp};
-          else
-            prop = obj.$properties${fp};
-
-          if (prop) {
-            if (prop.readOnly) {
-              throw new Error("Writable/Bidirectional binding write error : target property '${src} ${fp}' is read-only.");
-            } else {
-              prop.set(__value, __flags, __ns);
-            }
-          } else {
-            if (obj.$context.$elements${fp}) {
-              throw new Error("Writable/Bidirectional binding write error : target property '${src} ${fp}' is an element, considered readonly.");
-            } else {
-              throw new Error("Writable/Bidirectional binding write error : target property '${src} ${fp}' not found, cannot write to null.");
-            }
-          }
-        }
+        ${vvith} ${opt.args&&"__"!==opt.args.substring(0,2)?"var "+opt.args+"=__value;":""} ${src}
       `);
     } else {
 
-      return new Function("__value", "__flags", "__ns", `
-        ${vvith} {
-          var prop = this.${props}${fp};
+      // NOTE validate first
+      var fp = QmlWeb.formatPath(this.property, this.property);
 
-          if (prop) {
-            if (prop.readOnly) {
-              throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is read-only.");
-            } else {
-              prop.set(__value, __flags, __ns);
+      if (src) {
+
+        return new Function("__value", "__flags", "__ns", `
+          ${vvith} {
+            var obj = ${src};
+            if (!obj) {
+              console.error("Writable/Bidirectional binding write error : target property '${src}' is null. Cannot set '${fp}' on null.");
+              return;
             }
-          } else {
-            if (this.$context.$elements${fp}) {
-              throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is an element, considered readonly.");
+            var prop;
+            if (obj === this)
+              prop = obj.${props}${fp};
+            else
+              prop = obj.$properties${fp};
+
+            if (prop) {
+              if (prop.readOnly) {
+                throw new Error("Writable/Bidirectional binding write error : target property '${src} ${fp}' is read-only.");
+              } else {
+                prop.set(__value, __flags, __ns);
+              }
             } else {
-              throw new Error("Writable/Bidirectional binding write error : target property '${fp}' not found, cannot write to null.");
+              if (obj.$context.$elements${fp}) {
+                throw new Error("Writable/Bidirectional binding write error : target property '${src} ${fp}' is an element, considered readonly.");
+              } else {
+                throw new Error("Writable/Bidirectional binding write error : target property '${src} ${fp}' not found, cannot write to null.");
+              }
             }
           }
-        }
-      `);
+        `);
+      } else {
+
+        return new Function("__value", "__flags", "__ns", `
+          ${vvith} {
+            var prop = this.${props}${fp};
+
+            if (prop) {
+              if (prop.readOnly) {
+                throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is read-only.");
+              } else {
+                prop.set(__value, __flags, __ns);
+              }
+            } else {
+              if (this.$context.$elements${fp}) {
+                throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is an element, considered readonly.");
+              } else {
+                throw new Error("Writable/Bidirectional binding write error : target property '${fp}' not found, cannot write to null.");
+              }
+            }
+          }
+        `);
+      }
     }
 
   }

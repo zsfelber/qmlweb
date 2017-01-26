@@ -12,6 +12,7 @@ class QMLContext {
   constructor() {
     this.$elements = {};
     this.$elementoverloads = {};
+    this.$elementoverloadsnoalias = {};
   }
 
   nameForObject(obj) {
