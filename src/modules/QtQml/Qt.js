@@ -21,79 +21,12 @@ const Qt = {
 
     let imp = QmlWeb.resolveImport(name);
 
-    return this.createImpComponent(imp);
-  },
-
-  createImpComponent: imp => {
-    if (!imp.clazz) {
-      return undefined;
-    }
-    const engine = QmlWeb.engine;
-
-    const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-    component = new QMLComponent({
-      object: imp.clazz,
-      context: QmlWeb.executionContext,
-      $name: imp.clazz.$name,
-      $id: imp.clazz.id
-    });
-    if (QmlWeb.executionContext === QmlWeb.engine.rootContext) {
-      throw new Error("Root context at property Qt.createImpComponent : "+imp.file);
-    }
-    component.$basePath = extractBasePath(imp.file);
-    component.$imports = imp.clazz.$imports;
-    component.$file = imp.file; // just for debugging
-
-    QmlWeb.loadImports(imp.clazz.$imports, component.$basePath,
-      component.$importContextId);
-
-    // TODO gz name->file
-    engine.components[imp.file] = component;
-    return component;
+    return QmlWeb.createImpComponent(imp);
   },
 
   createQmlObject: (src, parent, file) => {
-    const clazz = QmlWeb.parseQML(src, file);
-
-    // Create and initialize objects
-
-    const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-    const component = new QMLComponent({
-      object: clazz,
-      parent,
-      context: QmlWeb.executionContext
-    });
-    if (QmlWeb.executionContext === QmlWeb.engine.rootContext) {
-      throw new Error("Root context at property Qt.createQmlObject : "+file+"\n"+src);
-    }
-
-    const engine = QmlWeb.engine;
-    QmlWeb.loadImports(clazz.$imports, undefined, component.$importContextId);
-
-    const resolvedFile = file || Qt.resolvedUrl("createQmlObject_function");
-    component.$basePath = extractBasePath(resolvedFile);
-    component.$imports = clazz.$imports; // for later use
-    // not just for debugging, but for basepath too, see above
-    component.$file = resolvedFile;
-
-    const obj = component.createObject(parent);
-
-    const QMLOperationState = QmlWeb.QMLOperationState;
-    if (engine.operationState !== QMLOperationState.Init &&
-        engine.operationState !== QMLOperationState.Idle) {
-      // We don't call those on first creation, as they will be called
-      // by the regular creation-procedures at the right time.
-      engine.$initializePropertyBindings();
-
-      engine.callCompletedSignals();
-    }
-
-    return obj;
+    return QmlWeb.createQmlObject(src, parent, file);
   },
-
-  // Returns url resolved relative to the URL of the caller.
-  // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
-  resolvedUrl: url => QmlWeb.qmlUrl(url),
 
   size: function size(width, height) {
     return new QmlWeb.QSizeF(width, height);

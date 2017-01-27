@@ -69,10 +69,10 @@ function construct(meta) {
   } else {
 
     /* This will also be set in applyProperties, but needs to be set here
-     * for Qt.createImpComponent to have the correct context. */
+     * for createImpComponent to have the correct context. */
     QmlWeb.executionContext = meta.context;
 
-    const component = QmlWeb.Qt.createImpComponent(clinfo);
+    const component = createImpComponent(clinfo);
 
     if (!component) {
       throw new Error(`${meta.object.$name?"Toplevel:"+meta.object.$name:meta.object.id?"Element:"+meta.object.id:""}. No constructor found for ${meta.object.$class}`);
@@ -114,7 +114,72 @@ function construct(meta) {
   return item;
 }
 
+
+function createImpComponent(imp, nocache) {
+  if (!imp.clazz) {
+    return undefined;
+  }
+  const engine = QmlWeb.engine;
+
+  const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
+  component = new QMLComponent({
+    object: imp.clazz,
+    parent: imp.parent,
+    context: QmlWeb.executionContext,
+    $name: imp.clazz.$name,
+    $id: imp.clazz.id
+  });
+  if (QmlWeb.executionContext === QmlWeb.engine.rootContext) {
+    throw new Error("Root context at property Qt.createImpComponent : "+imp.file);
+  }
+  component.$basePath = extractBasePath(imp.file);
+  component.$imports = imp.clazz.$imports;
+  component.$file = imp.file; // just for debugging
+
+  // TODO gz  undefined -> component.$basePath  from createQmlObject
+  QmlWeb.loadImports(imp.clazz.$imports, component.$basePath,
+    component.$importContextId);
+
+  if (!nocache) {
+    // TODO gz name->file
+    engine.components[imp.file] = component;
+  }
+  return component;
+}
+
+function createQmlObject(src, parent, file) {
+
+  const engine = QmlWeb.engine;
+
+  // Returns url resolved relative to the URL of the caller.
+  // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
+  // in QMLUrl.js
+  //var resolvedUrl = url => QmlWeb.qmlUrl(url),
+
+  const clazz = QmlWeb.parseQML(src, file);
+  var resolvedUrl = QmlWeb.$resolvePath;
+  file = file || /*Qt.*/resolvedUrl("createQmlObject_function");
+
+  var component = createImpComponent({clazz, parent, file}, true);
+
+  const obj = component.createObject(parent);
+
+  const QMLOperationState = QmlWeb.QMLOperationState;
+  if (engine.operationState !== QMLOperationState.Init &&
+      engine.operationState !== QMLOperationState.Idle) {
+    // We don't call those on first creation, as they will be called
+    // by the regular creation-procedures at the right time.
+    engine.$initializePropertyBindings();
+
+    engine.callCompletedSignals();
+  }
+
+  return obj;
+}
+
 QmlWeb.inherit = inherit;
 QmlWeb.callSuper = callSuper;
 QmlWeb.initializeConstr = initializeConstr;
 QmlWeb.construct = construct;
+QmlWeb.createImpComponent = createImpComponent;
+QmlWeb.createQmlObject = createQmlObject;
