@@ -53,7 +53,7 @@ function importSearchPaths(component) {
   if (!engine.componentImportPaths) {
     return [];
   }
-  const paths = engine.componentImportPaths[importContextId];
+  const paths = component.componentImportPaths;
   if (!paths) {
     return [];
   }
@@ -65,7 +65,7 @@ function qualifiedImportPath(component, qualifier) {
   if (!engine.componentImportPaths) {
     return "";
   }
-  const paths = engine.componentImportPaths[importContextId];
+  const paths = component.componentImportPaths;
   if (!paths || !paths.qualified) {
     return "";
   }
@@ -250,7 +250,7 @@ function $parseURIlong(uri) {
 // Return a path to load the file
 function $resolvePath(file, basePath) {
   if (!basePath) {
-    throw new Error("$resolvePath  '"+file+"'  basePath:"+basePath);
+    basePath = QmlWeb.engine.$object.$component.$basePath;
   }
   // probably, replace :// with :/ ?
   if (!file || file.indexOf(":/") !== -1 || file.indexOf("data:") === 0 ||

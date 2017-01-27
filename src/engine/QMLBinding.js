@@ -146,6 +146,9 @@ class QMLBinding {
   }*/
 
   get() {
+    QmlWeb.engine.$prevObject = QmlWeb.engine.$object;
+    QmlWeb.engine.$object = this;
+
     // .call is needed for `this` support
     try {
       if (!this.implGet) {
@@ -162,25 +165,21 @@ class QMLBinding {
         throw err;
       }
     } finally {
-      QmlWeb.engine.$basePath = QmlWeb.engine.$oldBasePath;
+      QmlWeb.engine.$object = QmlWeb.engine.$prevObject;
     }
   }
 
   set(value, flags) {
-    QmlWeb.engine.$oldBasePath = QmlWeb.engine.$basePath;
-    var object = this.$object ? this.$object : this;
-    var context = this.$context;
-    QmlWeb.executionContext = context;
-    if (basePath) {
-      QmlWeb.engine.$basePath = basePath;
-    }
+    QmlWeb.engine.$prevObject = QmlWeb.engine.$object;
+    QmlWeb.engine.$object = this;
+
     // .call is needed for `this` support
     try {
       if (!this.implSet) {
         console.warn("Binding/set error  compiled:"+this.compiled+"  no compiled setter  src:\n"+this.src);
         return;
       }
-      this.implSet.call(object, value, flags, namespaceObject);
+      this.implSet.call(this, value, flags);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         console.warn("Binding/set error : "+err.message+(err.srcdumpok?" srcdump:ok":" "+this));
@@ -190,24 +189,20 @@ class QMLBinding {
         throw err;
       }
     } finally {
-      QmlWeb.engine.$basePath = QmlWeb.engine.$oldBasePath;
+      QmlWeb.engine.$object = QmlWeb.engine.$prevObject;
     }
   }
 
   run() {
-    QmlWeb.engine.$oldBasePath = QmlWeb.engine.$basePath;
-    var object = this.$object ? this.$object : this;
-    var context = this.$context;
-    QmlWeb.executionContext = context;
-    if (basePath) {
-      QmlWeb.engine.$basePath = basePath;
-    }
+    QmlWeb.engine.$prevObject = QmlWeb.engine.$object;
+    QmlWeb.engine.$object = this;
+
     try {
       if (!this.implGet) {
         console.warn("Binding/run error  compiled:"+this.compiled+"  no compiled getter  src:\n"+this.src);
         return;
       }
-      this.implGet.call(object, args);
+      this.implGet.apply(this, arguments);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         console.warn("Binding/run error : "+err.message+(err.srcdumpok?" srcdump:ok":" "+this));
@@ -217,7 +212,7 @@ class QMLBinding {
         throw err;
       }
     } finally {
-      QmlWeb.engine.$basePath = QmlWeb.engine.$oldBasePath;
+      QmlWeb.engine.$object = QmlWeb.engine.$prevObject;
     }
   }
 
@@ -263,7 +258,7 @@ class QMLBinding {
         throw new Error("Qt.Binding should have no arguments : "+this);
       }
 
-      return new Function("__ns", `
+      return new Function(`
         ${vvith} ${this.src}
       `);
 
@@ -288,7 +283,7 @@ class QMLBinding {
         throw new Error("Invalid binding path : "+this);
       }
 
-      return new Function("__ns", `
+      return new Function(`
         ${vvith} {
           ${ (this.flags&QMLBinding.ImplFunction) ? "return function"+src+";" : (this.flags&QMLBinding.ImplBlock) ? src : "return "+src+";"}
         }
@@ -326,7 +321,7 @@ class QMLBinding {
     if (this.flags & QMLBinding.User) {
       this.stripFunction(this.setterFunc.toString(), true);
 
-      return eval(`funcition ("__value", "__flags", "__ns" ${this.args?", "+this.args,""}) {
+      return eval(`funcition ("__value", "__flags" ${this.args?", "+this.args,""}) {
         ${vvith} ${this.args?this.args+"=__value;":""} ${this.src}
       }`);
     } else {
@@ -336,7 +331,7 @@ class QMLBinding {
 
       if (src) {
 
-        return new Function("__value", "__flags", "__ns", `
+        return new Function("__value", "__flags", `
           ${vvith} {
             var obj = ${src};
             if (!obj) {
@@ -353,7 +348,7 @@ class QMLBinding {
               if (prop.readOnly) {
                 throw new Error("Writable/Bidirectional binding write error : target property '${src} ${fp}' is read-only.");
               } else {
-                prop.set(__value, __flags, __ns);
+                prop.set(__value, __flags);
               }
             } else {
               if (obj.$context.$elements${fp}) {
@@ -366,7 +361,7 @@ class QMLBinding {
         `);
       } else {
 
-        return new Function("__value", "__flags", "__ns", `
+        return new Function("__value", "__flags", `
           ${vvith} {
             var prop = this.${props}${fp};
 
@@ -374,7 +369,7 @@ class QMLBinding {
               if (prop.readOnly) {
                 throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is read-only.");
               } else {
-                prop.set(__value, __flags, __ns);
+                prop.set(__value, __flags);
               }
             } else {
               if (this.$context.$elements${fp}) {

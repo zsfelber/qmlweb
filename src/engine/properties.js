@@ -284,7 +284,7 @@ function connectSignal(item, signalName, value, namespaceObject) {
   }
 
   params.push("connection");
-  var ps = params.join(", ");
+  var ps = params.join(",");
   var connection;
 
   if (!value.args || ps!==value.args) {

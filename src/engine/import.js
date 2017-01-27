@@ -25,7 +25,6 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-let importContextIds = 0;
 
 
 // next 3 methods used in Qt.createComponent for qml files lookup
@@ -91,7 +90,6 @@ function preloadImports(component, imports) {
       constructors = mergeObjects(constructors, moduleConstructors);
     }
   }
-  component.$importContextId = ++importContextIds;
   component.perImportContextConstructors = constructors;
   QmlWeb.constructors = constructors; // TODO: why do we need this?
 }
