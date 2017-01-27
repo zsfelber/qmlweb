@@ -97,8 +97,12 @@ function preloadImports(component, imports) {
 }
 
 
-function loadImports(importsArray, currentFileDir = QmlWeb.engine.$basePath,
-    component) {
+function loadImports(importsArray, component) {
+
+  if (!component) {
+    throw new Error("loadImports   No component:"+component);
+  }
+
   var engine = QmlWeb.engine;
   if (!engine.qmldirsContents) {
     engine.qmldirsContents = {}; // cache
@@ -113,21 +117,18 @@ function loadImports(importsArray, currentFileDir = QmlWeb.engine.$basePath,
     }
   }
 
-  if (!component) {
-    throw new Error("loadImports   currentFileDir:"+currentFileDir+"  No importContextId:"+component);
-  }
-
   if (!importsArray || importsArray.length === 0) {
     return;
   }
 
   for (let i = 0; i < importsArray.length; i++) {
-    loadImport(importsArray[i], currentFileDir, component);
+    loadImport(importsArray[i], component);
   }
 }
 
-function loadImport(entry, currentFileDir, component) {
+function loadImport(entry, component) {
   var engine = QmlWeb.engine;
+  var currentFileDir = component.$basePath,
   let name = entry[1];
 
   // is it url to remote resource

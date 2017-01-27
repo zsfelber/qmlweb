@@ -137,8 +137,7 @@ function createImpComponent(imp, nocache) {
   component.$file = imp.file; // just for debugging
 
   // TODO gz  undefined -> component.$basePath  from createQmlObject
-  QmlWeb.loadImports(imp.clazz.$imports, component.$basePath,
-    component);
+  QmlWeb.loadImports(imp.clazz.$imports, component);
 
   if (!nocache) {
     // TODO gz name->file

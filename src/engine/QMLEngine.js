@@ -204,7 +204,7 @@ class QMLEngine {
     this.$basePathA.href = QmlWeb.extractBasePath(file);
     this.$basePath = this.$basePathA.href;
     const fileName = extractFileName(file);
-    const clazz = QmlWeb.loadClass(QmlWeb.$resolvePath(fileName));
+    const clazz = QmlWeb.loadClass(QmlWeb.$resolvePath(fileName, this.$basePathA.href));
     const component = this.loadQMLTree(clazz, parentComponent, file);
     console.log("loadFile success. LOADED : "+file);
     return component;
@@ -234,7 +234,8 @@ class QMLEngine {
       isFromFile: true
     });
 
-    QmlWeb.loadImports(clazz.$imports, undefined, component);
+    // TODO gz undefined->component.$basePath
+    QmlWeb.loadImports(clazz.$imports, component);
     component.$basePath = this.$basePath;
     component.$imports = clazz.$imports; // for later use
     component.$file = file; // just for debugging

@@ -77,8 +77,7 @@ QmlWeb.registerQmlType({
     qmlComponent.$basePath = QmlWeb.extractBasePath(clazz.$file);
     qmlComponent.$imports = clazz.$imports;
     qmlComponent.$file = clazz.$file;
-    QmlWeb.loadImports(clazz.$imports, qmlComponent.$basePath,
-      qmlComponent);
+    QmlWeb.loadImports(clazz.$imports, qmlComponent);
     const loadedComponent = this.$createComponentObject(qmlComponent, this);
     this.sourceComponent = loadedComponent;
     this.$sourceUrl = fileName;
