@@ -328,12 +328,12 @@ function $propertyInfo(prop) {
     return result;
   }
 
-  var ctx = QmlWeb.executionContext;
+  var obj = QmlWeb.$object;
   return {
-    in_context : _inf(ctx),
-    in_owner : _inf(ctx.$owner),
-    in_elementoverloads : _inf(ctx.$elementoverloads),
-    in_elementoverloadsnoalias : _inf(ctx.$elementoverloadsnoalias),
+    in_object : _inf(obj),
+    in_context : _inf(obj.$context),
+    in_elementoverloads : _inf(obj.$context.$elementoverloads),
+    in_elementoverloadsnoalias : _inf(obj.$context.$elementoverloadsnoalias),
   };
 }
 
