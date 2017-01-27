@@ -231,11 +231,10 @@ class QMLEngine {
       object: clazz,
       parent: parentComponent,
       context: newContext,
-      isComponentRoot: true,
       isFromFile: true
     });
 
-    QmlWeb.loadImports(clazz.$imports, undefined, component.$importContextId);
+    QmlWeb.loadImports(clazz.$imports, undefined, component);
     component.$basePath = this.$basePath;
     component.$imports = clazz.$imports; // for later use
     component.$file = file; // just for debugging

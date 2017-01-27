@@ -10,15 +10,15 @@ class QMLComponent {
       }
       this.$metaObject.$name = meta.object.$name;
       this.$metaObject.$id = meta.object.id;
-      this.$metaObject.context = meta.context;
-      this.$metaObject.isComponentRoot = meta.isComponentRoot;
     } else {
       this.$metaObject = meta.object;
     }
-    this.$context = meta.context;
-    this.isComponentRoot = meta.isComponentRoot;
 
     this.$jsImports = [];
+    this.perImportContextConstructors = {};
+    this.ctxQmldirs = {}; // resulting components lookup table
+    this.componentImportPaths = {};
+
 
     // no parent = is import root
     if (meta.isFromFile) {
@@ -61,7 +61,7 @@ class QMLComponent {
       }
     }
   }
-  $createObject(parent, properties = {}, context = this.$context) {
+  $createObject(parent, properties = {}/*, context = this.$context  : is parent usually*/) {
     const engine = QmlWeb.engine;
     const oldState = engine.operationState;
     engine.operationState = QmlWeb.QMLOperationState.Init;
@@ -71,22 +71,14 @@ class QMLComponent {
 
     let item;
     try {
-      if (!context) {
+      if (!this) {
         throw new Error("No context passed to $createObject");
-      }
-
-      const newContext = context.create();
-
-      if (this.$importContextId !== undefined) {
-        newContext.$importContextId = this.$importContextId;
       }
 
       item = QmlWeb.construct({
         object: this.$metaObject,
-        parent,
-        context: newContext,
+        parent, // parent automatically forwards $context, see QObject.constructor(parent)
         component: this,
-        isComponentRoot: this.isComponentRoot,
         isFromFile: this.isFromFile,
       });
 

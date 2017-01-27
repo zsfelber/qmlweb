@@ -15,11 +15,8 @@ function callSuper(self, meta) {
 }
 
 function initializeConstr(self, meta, info) {
-  self.$isComponentRoot = meta.isComponentRoot;
   self.$isFromFile = meta.isFromFile;
-  self.$context = meta.context;
   self.$component = meta.component;
-  self.$metaObject = meta.object;
 
   info = info || meta.super.$qmlTypeInfo || {};
   if (info.enums) {
@@ -62,6 +59,7 @@ function construct(meta) {
   let item;
 
   var clinfo = QmlWeb.findClass(meta.object.$class, meta.context);
+  clinfo.parent = meta.object.$parent;
 
   if (clinfo.classConstructor) {
     meta.super = clinfo.classConstructor;
@@ -92,15 +90,15 @@ function construct(meta) {
 
   // id
   if (meta.object.id) {
-    if (meta.context.hasOwnProperty(meta.object.id)) {
+    if (item.$context.hasOwnProperty(meta.object.id)) {
       console.warn("Context entry overriden by Element : "+meta.object.id+" object:"+item);
     }
     QmlWeb.setupGetterSetter(
-      meta.context, meta.object.id,
+      item.$context, meta.object.id,
       () => item,
       () => {}
     );
-    meta.context.$elements[meta.object.id] = item;
+    item.$context.$elements[meta.object.id] = item;
   }
 
   // keep path in item for probale use it later in Qt.resolvedUrl
@@ -129,7 +127,6 @@ function createImpComponent(imp, nocache) {
     context: QmlWeb.executionContext,
     $name: imp.clazz.$name,
     $id: imp.clazz.id,
-    isComponentRoot: false,
     isFromFile: true
   });
   if (QmlWeb.executionContext === QmlWeb.engine.rootContext) {
@@ -141,7 +138,7 @@ function createImpComponent(imp, nocache) {
 
   // TODO gz  undefined -> component.$basePath  from createQmlObject
   QmlWeb.loadImports(imp.clazz.$imports, component.$basePath,
-    component.$importContextId);
+    component);
 
   if (!nocache) {
     // TODO gz name->file

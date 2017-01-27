@@ -56,7 +56,6 @@ class QMLProperty {
           object: val,
           parent: this.obj,
           context: namespaceObject.$context,
-          isComponentRoot: false,
           isFromFile: false
         });
         if (namespaceObject.$context === QmlWeb.engine.rootContext) {

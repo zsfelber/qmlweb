@@ -50,7 +50,7 @@ QmlWeb.registerQmlType({
 
     const createProperty = QmlWeb.createProperty;
 
-    if (this.$isComponentRoot) {
+    if (!this.$parent) {
       createProperty("var", this, "activeFocus");
     }
 

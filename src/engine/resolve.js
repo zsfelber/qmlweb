@@ -48,7 +48,7 @@ function extractFileName(file) {
   return file.split(/[/\\]/).pop();
 }
 
-function importSearchPaths(importContextId) {
+function importSearchPaths(component) {
   var engine = QmlWeb.engine;
   if (!engine.componentImportPaths) {
     return [];
@@ -60,7 +60,7 @@ function importSearchPaths(importContextId) {
   return paths.unqualified || [];
 }
 
-function qualifiedImportPath(importContextId, qualifier) {
+function qualifiedImportPath(component, qualifier) {
   var engine = QmlWeb.engine;
   if (!engine.componentImportPaths) {
     return "";
@@ -142,7 +142,7 @@ function resolveImport(name) {
     const nameIsUrl = $parseURI(name) !== undefined;
     if (!nameIsUrl) {
       const moreDirs = importSearchPaths(
-        QmlWeb.executionContext.$importContextId);
+        QmlWeb.executionContext.$importContextId/*TODO gz component*/);
       for (let i = 0; i < moreDirs.length; i++) {
         file = `${moreDirs[i]}${name}`;
         clazz = QmlWeb.loadClass(file);
@@ -154,7 +154,7 @@ function resolveImport(name) {
   return {clazz, file};
 }
 
-function findClass(name, context) {
+function findClass(name, component) {
   var engine = QmlWeb.engine;
   // Load component from file. Please look at import.js for main notes.
   // Actually, we have to use that order:
@@ -167,7 +167,7 @@ function findClass(name, context) {
   //       That's not qml's original behaviour.
 
   // 3)regular (versioned) modules only: (from Component.constructor -> QmlWeb.loadImports)
-  let constructors = QmlWeb.perImportContextConstructors[context.$importContextId];
+  let constructors = component.perImportContextConstructors;
 
   const path = name.split(".");
   for (let ci = 0; ci < path.length; ++ci) {
@@ -183,7 +183,7 @@ function findClass(name, context) {
   } else {
 
     // 2) 3)preloaded qrc-s  4)
-    const qmldirs = engine.ctxQmldirs[context.$importContextId];
+    const qmldirs = component.ctxQmldirs;
 
     const qdirInfo = qmldirs ? qmldirs[name] : null;
     // Are we have info on that component in some imported qmldir files?

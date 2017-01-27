@@ -25,7 +25,6 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-const perImportContextConstructors = {};
 let importContextIds = 0;
 
 
@@ -44,16 +43,10 @@ function addImportPath(dirpath) {
  *
  * The importContextId ensures it is only accessible from the file in which
  * it was imported. */
-function addComponentImportPath(importContextId, dirpath, qualifier) {
+function addComponentImportPath(component, dirpath, qualifier) {
   var engine = QmlWeb.engine;
-  if (!engine.componentImportPaths) {
-    engine.componentImportPaths = {};
-  }
-  if (!engine.componentImportPaths[importContextId]) {
-    engine.componentImportPaths[importContextId] = {};
-  }
 
-  const paths = engine.componentImportPaths[importContextId];
+  const paths = component.componentImportPaths;
 
   if (qualifier) {
     if (!paths.qualified) {
@@ -69,8 +62,8 @@ function addComponentImportPath(importContextId, dirpath, qualifier) {
 }
 
 function preloadImports(component, imports) {
-  if (component.$importContextId) {
-    throw new Error("Component imports already loaded. "+this.$context.$basePath+" "+component.$file+"  importContextId:"+component.$importContextId);
+  if (component) {
+    throw new Error("Component imports already loaded. "+this.$context.$basePath+" "+component.$file+"  importContextId:"+component);
   }
 
   const mergeObjects = QmlWeb.helpers.mergeObjects;
@@ -99,13 +92,13 @@ function preloadImports(component, imports) {
     }
   }
   component.$importContextId = ++importContextIds;
-  perImportContextConstructors[component.$importContextId] = constructors;
+  component.perImportContextConstructors = constructors;
   QmlWeb.constructors = constructors; // TODO: why do we need this?
 }
 
 
 function loadImports(importsArray, currentFileDir = QmlWeb.engine.$basePath,
-    importContextId) {
+    component) {
   var engine = QmlWeb.engine;
   if (!engine.qmldirsContents) {
     engine.qmldirsContents = {}; // cache
@@ -120,12 +113,8 @@ function loadImports(importsArray, currentFileDir = QmlWeb.engine.$basePath,
     }
   }
 
-  if (!engine.ctxQmldirs) {
-    engine.ctxQmldirs = {}; // resulting components lookup table
-  }
-
-  if (!importContextId) {
-    throw new Error("loadImports   currentFileDir:"+currentFileDir+"  No importContextId:"+importContextId);
+  if (!component) {
+    throw new Error("loadImports   currentFileDir:"+currentFileDir+"  No importContextId:"+component);
   }
 
   if (!importsArray || importsArray.length === 0) {
@@ -133,11 +122,11 @@ function loadImports(importsArray, currentFileDir = QmlWeb.engine.$basePath,
   }
 
   for (let i = 0; i < importsArray.length; i++) {
-    loadImport(importsArray[i], currentFileDir, importContextId);
+    loadImport(importsArray[i], currentFileDir, component);
   }
 }
 
-function loadImport(entry, currentFileDir, importContextId) {
+function loadImport(entry, currentFileDir, component) {
   var engine = QmlWeb.engine;
   let name = entry[1];
 
@@ -214,10 +203,10 @@ function loadImport(entry, currentFileDir, importContextId) {
         /* Use entry[1] directly, as we don't want to include the
           * basePath, otherwise it gets prepended twice in
           * createComponent. */
-        addComponentImportPath(importContextId,
+        addComponentImportPath(component,
           `${entry[1]}/`, entry[3]);
       } else {
-        addComponentImportPath(importContextId, `${name}/`);
+        addComponentImportPath(component, `${name}/`);
       }
     }
 
@@ -226,10 +215,7 @@ function loadImport(entry, currentFileDir, importContextId) {
   }
 
   // NOTE we copy it to current component namespace (import context):
-  var qmldirs = engine.ctxQmldirs[importContextId];
-  if (!qmldirs) {
-    engine.ctxQmldirs[importContextId] = qmldirs = {};
-  }
+  var qmldirs = component.ctxQmldirs;
 
   if (content.qrcs) {
     for (const attrname in content.qrcs) {
@@ -247,7 +233,6 @@ function loadImport(entry, currentFileDir, importContextId) {
 
 
 
-QmlWeb.perImportContextConstructors = perImportContextConstructors;
 QmlWeb.preloadImports = preloadImports;
 QmlWeb.addImportPath = addImportPath;
 QmlWeb.addComponentImportPath = addComponentImportPath;

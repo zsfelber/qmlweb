@@ -71,7 +71,6 @@ QmlWeb.registerQmlType({
     const meta = { object: clazz,
                    context: this,
                    parent: this,
-                   isComponentRoot: false,
                    isFromFile: false        };
 
     const qmlComponent = new QMLComponent(meta);
@@ -79,7 +78,7 @@ QmlWeb.registerQmlType({
     qmlComponent.$imports = clazz.$imports;
     qmlComponent.$file = clazz.$file;
     QmlWeb.loadImports(clazz.$imports, qmlComponent.$basePath,
-      qmlComponent.$importContextId);
+      qmlComponent);
     const loadedComponent = this.$createComponentObject(qmlComponent, this);
     this.sourceComponent = loadedComponent;
     this.$sourceUrl = fileName;
@@ -96,7 +95,7 @@ QmlWeb.registerQmlType({
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     let qmlComponent = newItem;
     if (newItem instanceof QMLComponent) {
-      qmlComponent = newItem.$createObject(this, {}, this);
+      qmlComponent = newItem.$createObject(this, {}/*, this*/);
     }
     qmlComponent.parent = this;
     this.item = qmlComponent;
