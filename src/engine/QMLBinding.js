@@ -146,8 +146,8 @@ class QMLBinding {
   }*/
 
   get() {
-    QmlWeb.engine.$prevObject = QmlWeb.engine.$object;
-    QmlWeb.engine.$object = this;
+    var prevComponent = QmlWeb.engine.$component;
+    QmlWeb.engine.$component = this.$component;
 
     // .call is needed for `this` support
     try {
@@ -165,13 +165,13 @@ class QMLBinding {
         throw err;
       }
     } finally {
-      QmlWeb.engine.$object = QmlWeb.engine.$prevObject;
+      QmlWeb.engine.$component = prevComponent;
     }
   }
 
   set(value, flags) {
-    QmlWeb.engine.$prevObject = QmlWeb.engine.$object;
-    QmlWeb.engine.$object = this;
+    var prevComponent = QmlWeb.engine.$component;
+    QmlWeb.engine.$component = this.$component;
 
     // .call is needed for `this` support
     try {
@@ -189,13 +189,13 @@ class QMLBinding {
         throw err;
       }
     } finally {
-      QmlWeb.engine.$object = QmlWeb.engine.$prevObject;
+      QmlWeb.engine.$component = prevComponent;
     }
   }
 
   run() {
-    QmlWeb.engine.$prevObject = QmlWeb.engine.$object;
-    QmlWeb.engine.$object = this;
+    var prevComponent = QmlWeb.engine.$component;
+    QmlWeb.engine.$component = this.$component;
 
     try {
       if (!this.implGet) {
@@ -212,7 +212,7 @@ class QMLBinding {
         throw err;
       }
     } finally {
-      QmlWeb.engine.$object = QmlWeb.engine.$prevObject;
+      QmlWeb.engine.$component = prevComponent;
     }
   }
 
@@ -240,9 +240,9 @@ class QMLBinding {
     var src = this.src;
     var vvith;
     if (this.flags & QMLBinding.Alias) {
-      vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(QmlWeb.executionContext.$elementoverloadsnoalias) with(this.$noalias)";
+      vvith = "with(QmlWeb) with(this.$context) with(this.$context.$elementoverloadsnoalias) with(this.$noalias)";
     } else {
-      vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(QmlWeb.executionContext.$elementoverloads) with(this)";
+      vvith = "with(QmlWeb) with(this.$context) with(this.$context.$elementoverloads) with(this)";
     }
 
     if (this.flags & QMLBinding.User) {
@@ -312,10 +312,10 @@ class QMLBinding {
     var props, vvith;
     if (this.flags & QMLBinding.Alias) {
       props = "$properties_noalias";
-      vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(QmlWeb.executionContext.$elementoverloadsnoalias) with(this.$noalias)";
+      vvith = "with(QmlWeb) with(this.$context) with(this.$context.$elementoverloadsnoalias) with(this.$noalias)";
     } else {
       props = "$properties";
-      vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(QmlWeb.executionContext.$elementoverloads) with(this)";
+      vvith = "with(QmlWeb) with(this.$context) with(this.$context.$elementoverloads) with(this)";
     }
 
     if (this.flags & QMLBinding.User) {
@@ -391,9 +391,9 @@ class QMLBinding {
 
     var vvith;
     if (this.flags & QMLBinding.Alias) {
-      vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(QmlWeb.executionContext.$elementoverloadsnoalias) with(this.$noalias)";
+      vvith = "with(QmlWeb) with(this.$context) with(this.$context.$elementoverloadsnoalias) with(this.$noalias)";
     } else {
-      vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(QmlWeb.executionContext.$elementoverloads) with(this)";
+      vvith = "with(QmlWeb) with(this.$context) with(this.$context.$elementoverloads) with(this)";
     }
 
     if (!this.flags&QMLBinding.ImplFunction) {

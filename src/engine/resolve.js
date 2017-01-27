@@ -250,7 +250,7 @@ function $parseURIlong(uri) {
 // Return a path to load the file
 function $resolvePath(file, basePath) {
   if (!basePath) {
-    basePath = QmlWeb.engine.$object.$component.$basePath;
+    basePath = QmlWeb.engine.$component.$basePath;
   }
   // probably, replace :// with :/ ?
   if (!file || file.indexOf(":/") !== -1 || file.indexOf("data:") === 0 ||

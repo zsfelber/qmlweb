@@ -69,9 +69,10 @@ class QMLComponent {
     const engine = QmlWeb.engine;
     const oldState = engine.operationState;
     engine.operationState = QmlWeb.QMLOperationState.Init;
+
     // change base path to current component base path
-    const bp = engine.$basePath;
-    if (this.$basePath) engine.$basePath = this.$basePath;
+    var prevComponent = QmlWeb.engine.$component;
+    QmlWeb.engine.$component = this;
 
     let item;
     try {
@@ -93,10 +94,7 @@ class QMLComponent {
       }
 
     } finally {
-      // change base path back
-      // TODO looks a bit hacky
-      engine.$basePath = bp;
-
+      QmlWeb.engine.$component = prevComponent;
       engine.operationState = oldState;
     }
     return item;
