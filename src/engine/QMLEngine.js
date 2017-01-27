@@ -11,7 +11,7 @@ const geometryProperties = [
 
 class QMLContext {
   constructor() {
-    this.contextId = ++contextIds;
+    this.$contextId = ++contextIds;
   }
 
   nameForObject(obj) {
@@ -21,6 +21,13 @@ class QMLContext {
       }
     }
     return undefined;
+  }
+
+  create() {
+    const newContext = Object.create(this);
+    newContext.$contextId = ++contextIds;
+    newContext.$parent = this;
+    return newContext;
   }
 }
 
@@ -184,54 +191,6 @@ class QMLEngine {
     }
   }
 
-  // eslint-disable-next-line max-len
-  /** from http://docs.closure-library.googlecode.com/git/local_closure_goog_uri_uri.js.source.html
-   *
-   * Removes dot segments in given path component, as described in
-   * RFC 3986, section 5.2.4.
-   *
-   * @param {string} path A non-empty path component.
-   * @return {string} Path component with removed dot segments.
-   */
-  removeDotSegments(path) {
-    // path.startsWith("/") is not supported in some browsers
-    let leadingSlash = path && path[0] === "/";
-    const segments = path.split("/");
-    const out = [];
-
-    for (let pos = 0; pos < segments.length;) {
-      const segment = segments[pos++];
-
-      if (segment === ".") {
-        if (leadingSlash && pos === segments.length) {
-          out.push("");
-        }
-      } else if (segment === "..") {
-        if (out.length > 1 || out.length === 1 && out[0] !== "") {
-          out.pop();
-        }
-        if (leadingSlash && pos === segments.length) {
-          out.push("");
-        }
-      } else {
-        out.push(segment);
-        leadingSlash = true;
-      }
-    }
-
-    return out.join("/");
-  }
-
-  extractBasePath(file) {
-    // work both in url ("/") and windows ("\", from file://d:\test\) notation
-    const basePath = file.split(/[/\\]/);
-    basePath[basePath.length - 1] = "";
-    return basePath.join("/");
-  }
-
-  extractFileName(file) {
-    return file.split(/[/\\]/).pop();
-  }
 
   // Load file, parse and construct (.qml or .qml.js)
   loadFile(file, parentComponent = null) {
@@ -241,8 +200,8 @@ class QMLEngine {
     }
     this.$basePathA.href = this.extractBasePath(file);
     this.$basePath = this.$basePathA.href;
-    const fileName = this.extractFileName(file);
-    const clazz = this.loadClass(this.$resolvePath(fileName));
+    const fileName = extractFileName(file);
+    const clazz = QmlWeb.loadClass(this.$resolvePath(fileName));
     const component = this.loadQMLTree(clazz, parentComponent, file);
     console.log("loadFile success. LOADED : "+file);
     return component;
@@ -258,8 +217,7 @@ class QMLEngine {
   loadQMLTree(clazz, parentComponent = null, file = undefined) {
     QmlWeb.engine = this;
 
-    const newContext = Object.create(this.rootContext);
-    newContext.contextId = ++contextIds;
+    const newContext = this.rootContext.create();
     newContext.$elements = {};
     newContext.$elementoverloads = {};
     newContext.$elementoverloadsnoalias = {};
@@ -298,334 +256,6 @@ class QMLEngine {
     return component;
   }
 
-  // next 3 methods used in Qt.createComponent for qml files lookup
-  // http://doc.qt.io/qt-5/qqmlengine.html#addImportPath
-
-  addImportPath(dirpath) {
-    this.userAddedImportPaths.push(dirpath);
-  }
-
-  /* Add this dirpath to be checked for components. This is the result of
-   * something like:
-   *
-   * import "SomeDir/AnotherDirectory"
-   *
-   * The importContextId ensures it is only accessible from the file in which
-   * it was imported. */
-  addComponentImportPath(importContextId, dirpath, qualifier) {
-    if (!this.componentImportPaths) {
-      this.componentImportPaths = {};
-    }
-    if (!this.componentImportPaths[importContextId]) {
-      this.componentImportPaths[importContextId] = {};
-    }
-
-    const paths = this.componentImportPaths[importContextId];
-
-    if (qualifier) {
-      if (!paths.qualified) {
-        paths.qualified = {};
-      }
-      paths.qualified[qualifier] = dirpath;
-    } else {
-      if (!paths.unqualified) {
-        paths.unqualified = [];
-      }
-      paths.unqualified.push(dirpath);
-    }
-  }
-
-  importSearchPaths(importContextId) {
-    if (!this.componentImportPaths) {
-      return [];
-    }
-    const paths = this.componentImportPaths[importContextId];
-    if (!paths) {
-      return [];
-    }
-    return paths.unqualified || [];
-  }
-
-  qualifiedImportPath(importContextId, qualifier) {
-    if (!this.componentImportPaths) {
-      return "";
-    }
-    const paths = this.componentImportPaths[importContextId];
-    if (!paths || !paths.qualified) {
-      return "";
-    }
-    return paths.qualified[qualifier] || "";
-  }
-
-  setImportPathList(arrayOfDirs) {
-    this.userAddedImportPaths = arrayOfDirs;
-  }
-
-  importPathList() {
-    return this.userAddedImportPaths;
-  }
-
-  // `addModulePath` defines conrete path for module lookup
-  // e.g. addModulePath("QtQuick.Controls", "http://example.com/controls")
-  // will force system to `import QtQuick.Controls` module from
-  // `http://example.com/controls/qmldir`
-
-  addModulePath(moduleName, dirPath) {
-    // Keep the mapping. It will be used in loadImports() function.
-    // Remove trailing slash as it required for `readQmlDir`.
-    this.userAddedModulePaths[moduleName] = dirPath.replace(/\/$/, "");
-  }
-
-  /*registerProperty(obj, propName) {
-    const dependantProperties = [];
-    let value = obj[propName];
-
-    const getter = () => {
-      const QMLProperty = QmlWeb.QMLProperty;
-      if (QMLProperty.evaluatingProperty &&
-          dependantProperties.indexOf(QMLProperty.evaluatingProperty) === -1) {
-        dependantProperties.push(QMLProperty.evaluatingProperty);
-      }
-      return value;
-    };
-
-    const setter = newVal => {
-      value = newVal;
-      for (const i in dependantProperties) {
-        dependantProperties[i].update();
-      }
-    };
-
-    QmlWeb.setupGetterSetter(obj, propName, getter, setter);
-  }*/
-
-  loadImports(importsArray, currentFileDir = this.$basePath,
-      importContextId) {
-    if (!this.qmldirsContents) {
-      this.qmldirsContents = {}; // cache
-
-      // putting initial keys in qmldirsContents - is a hack. We should find a
-      // way to explain to qmlweb, is this built-in module or qmldir-style
-      // module.
-      for (const module in QmlWeb.modules) {
-        if (module !== "Main") {
-          this.qmldirsContents[module] = { module:module };
-        }
-      }
-    }
-
-    if (!this.ctxQmldirs) {
-      this.ctxQmldirs = {}; // resulting components lookup table
-    }
-
-    if (!importContextId) {
-      throw new Error("loadImports   currentFileDir:"+currentFileDir+"  No importContextId:"+importContextId);
-    }
-
-    if (!importsArray || importsArray.length === 0) {
-      return;
-    }
-
-    for (let i = 0; i < importsArray.length; i++) {
-      this.loadImport(importsArray[i], currentFileDir, importContextId);
-    }
-  }
-
-  loadImport(entry, currentFileDir, importContextId) {
-    let name = entry[1];
-
-    // is it url to remote resource
-    const nameIsUrl = name.charAt(0)==="//" || name.indexOf(":/") >= 0;
-    // is it a module name, e.g. QtQuick, QtQuick.Controls, etc
-    const nameIsQualifiedModuleName = entry[4];
-    // is it a js file
-    const nameIsJs = name.slice(-3) === ".js";
-    // local [relative] dir
-    const nameIsDir = !nameIsQualifiedModuleName && !nameIsUrl && !nameIsJs;
-
-    if (nameIsDir) {
-      name = this.$resolvePath(name, currentFileDir);
-      if (name[name.length - 1] === "/") {
-        // remove trailing slash as it required for `readQmlDir`
-        name = name.substr(0, name.length - 1);
-      }
-    }
-
-    let content = this.qmldirsContents[name];
-    // check if we have already loaded that qmldir file
-    if (!content) {
-      var qrcName;
-      if (nameIsQualifiedModuleName && this.userAddedModulePaths[name]) {
-        // 1. we have qualified module and user had configured path for that
-        // module with this.addModulePath
-        qrcName = this.userAddedModulePaths[name];
-        content = QmlWeb.readQmlDir(qrcName);
-      } else if (nameIsUrl || nameIsDir) {
-        // 2. direct load
-        // nameIsUrl => url do not need dirs
-        // nameIsDir => already computed full path above
-        qrcName = name;
-        content = QmlWeb.readQmlDir(name);
-      } else if (nameIsJs) {
-        // 3. Js file, don't need qmldir
-      } else {
-        // 4. qt-style lookup for qualified module
-        const probableDirs = [currentFileDir].concat(this.importPathList());
-        var diredName = name.replace(/\./g, "/");
-        qrcName = "qrc:/"+diredName;
-
-        for (let k = 0; k < probableDirs.length; k++) {
-          const file = probableDirs[k] + diredName;
-          content = QmlWeb.readQmlDir(file);
-          if (content) {
-            break;
-          }
-        }
-      }
-
-      // NOTE Making precompiled qrc entries available in imports :
-      var qrcModule = QmlWeb.qrcModules[qrcName];
-      if (qrcModule) {
-        if (!content) {
-          content = {};
-        }
-        content.qrcs = qrcModule;
-      }
-
-      // keep already loaded qmldir files
-      this.qmldirsContents[name] = content;
-    }
-
-    /* If there is no qmldir, add these directories to the list of places to
-      * search for components (within this import scope). "noqmldir" is
-      * inserted into the qmldir cache to avoid future attempts at fetching
-      * the qmldir file, but we always need to the call to
-      * "addComponentImportPath" for these sorts of directories. */
-    if (!content || content === "noqmldir") {
-      if (nameIsDir) {
-        if (entry[3]) {
-          /* Use entry[1] directly, as we don't want to include the
-            * basePath, otherwise it gets prepended twice in
-            * createComponent. */
-          this.addComponentImportPath(importContextId,
-            `${entry[1]}/`, entry[3]);
-        } else {
-          this.addComponentImportPath(importContextId, `${name}/`);
-        }
-      }
-
-      this.qmldirsContents[name] = "noqmldir";
-      return;
-    }
-
-    // NOTE we copy it to current component namespace (import context):
-    var qmldirs = this.ctxQmldirs[importContextId];
-    if (!qmldirs) {
-      this.ctxQmldirs[importContextId] = qmldirs = {};
-    }
-
-    if (content.qrcs) {
-      for (const attrname in content.qrcs) {
-        qmldirs[attrname] = {url : content.qrcs[attrname]};
-      }
-    }
-    for (const attrname in content.externals) {
-      qmldirs[attrname] = content.externals[attrname];
-    }
-
-    // keep already loaded qmldir files (done, see above)
-    //this.qmldirsContents[name] = content;
-  }
-
-  resolveImport(name) {
-
-    let file = this.$resolvePath(name);
-
-    let component = this.components[file];
-    let clazz;
-    // TODO gz
-    if (component) {
-      clazz = component.object;
-    }
-
-    if (!clazz) {
-      // If "name" was a full URL, "file" will be equivalent to name and this
-      // will try and load the Component from the full URL, otherwise, this
-      // doubles as checking for the file in the current directory.
-      clazz = this.loadClass(file);
-    }
-
-    // If the Component is not found, and it is not a URL, look for "name" in
-    // this context's importSearchPaths
-    if (!clazz) {
-      const nameIsUrl = this.$parseURI(name) !== undefined;
-      if (!nameIsUrl) {
-        const moreDirs = this.importSearchPaths(
-          QmlWeb.executionContext.importContextId);
-        for (let i = 0; i < moreDirs.length; i++) {
-          file = `${moreDirs[i]}${name}`;
-          clazz = this.loadClass(file);
-          if (clazz) break;
-        }
-      }
-    }
-
-    return {clazz, file};
-  }
-
-  findClass(name, context) {
-    // Load component from file. Please look at import.js for main notes.
-    // Actually, we have to use that order:
-    // 1) try to load component from current basePath
-    // 2) from importPathList
-    // 3) from directories in imports statements and then
-    // 4) from qmldir files
-    // Currently we use order: 3a, 2, 3b, 4, 1
-    // TODO: engine.qmldirs is global for all loaded components.
-    //       That's not qml's original behaviour.
-
-    // 3)regular (versioned) modules only: (from Component.constructor -> QmlWeb.loadImports)
-    let constructors = QmlWeb.perImportContextConstructors[context.importContextId];
-
-    const classComponents = name.split(".");
-    for (let ci = 0; ci < classComponents.length; ++ci) {
-      const c = classComponents[ci];
-      constructors = constructors[c];
-      if (constructors === undefined) {
-        break;
-      }
-    }
-
-    if (constructors !== undefined) {
-      return {clazzConstructor:constructors, classComponents:classComponents};
-    } else {
-
-      // 2) 3)preloaded qrc-s  4)
-      const qmldirs = this.ctxQmldirs[context.importContextId];
-
-      const qdirInfo = qmldirs ? qmldirs[name] : null;
-      // Are we have info on that component in some imported qmldir files?
-
-      let filePath;
-      if (qdirInfo) {
-        filePath = qdirInfo.url;
-      } else if (classComponents.length === 2) {
-        const qualified = this.qualifiedImportPath(
-          context.importContextId, classComponents[0]
-        );
-        filePath = `${qualified}${classComponents[1]}.qml`;
-      } else {
-        filePath = `${classComponents[0]}.qml`;
-      }
-
-      // 1) through engine.$resolvePath(name);
-      let imp = this.resolveImport(filePath);
-
-      imp.classComponents=classComponents;
-
-      return imp;
-    }
-  }
 
 
   size() {
@@ -688,100 +318,6 @@ class QMLEngine {
     this._tickers.forEach(ticker => ticker(now, elapsed));
   }*/
 
-  // Load resolved file, parse and construct as Component class (.qml)
-  loadClass(file) {
-    if (file in this.classes) {
-      return this.classes[file];
-    }
-
-    const uri = this.$parseURI(file);
-    if (!uri) {
-      console.warn("QMLEngine.loadClass: Empty url :", file);
-      return undefined;
-    }
-
-    let clazz;
-    if (uri.scheme === "qrc:/") {
-      let t0 = clazz;
-      clazz = QmlWeb.qrc[uri.path];
-      if (!clazz) {
-        console.warn("QMLEngine.loadClass: Empty qrc entry :", uri.path);
-        return undefined;
-      }
-
-      // QmlWeb.qrc contains pre-parsed Component objects, but they still need
-      // convertToEngine called on them.
-      if (!clazz.$class) {
-         console.warn("Using legacy semi-pre-parsed qrc is deprecated : "+src);
-         clazz = QmlWeb.convertToEngine(clazz);
-         clazz.$name = t0.$name;
-      }
-    } else {
-      const src = QmlWeb.getUrlContents(file, true);
-      if (!src) {
-        console.error("QMLEngine.loadClass: Failed to load:", file);
-        return undefined;
-      }
-
-      console.log("QMLEngine.loadClass: Loading file:", file);
-      clazz = QmlWeb.parseQML(src, file);
-    }
-
-    if (!clazz) {
-      console.warn("QMLEngine.loadClass: Empty file :", file);
-      return undefined;
-    }
-
-    if (clazz.$children.length !== 1) {
-      console.error("QMLEngine.loadClass: Failed to load:", file,
-        ": A QML component must only contain one root element!");
-      return undefined;
-    }
-
-    clazz.$file = file;
-    this.classes[file] = clazz;
-
-
-    return clazz;
-  }
-
-  // Load resolved file and parse as JavaScript
-  loadJS(file) {
-    if (file in this.js) {
-      return this.js[file];
-    }
-
-    const uri = this.$parseURI(file);
-    if (!uri) {
-      return undefined;
-    }
-
-    let jsData;
-    if (uri.scheme === "qrc:/") {
-      jsData = QmlWeb.qrc[uri.path];
-    } else {
-      QmlWeb.loadParser();
-      jsData = QmlWeb.jsparse(QmlWeb.getUrlContents(file));
-    }
-
-    if (!jsData) {
-      return undefined;
-    }
-
-    // Remove any ".pragma" statements, as they are not valid JavaScript
-    jsData.source = jsData.source.replace(/\.pragma.*(?:\r\n|\r|\n)/, "\n");
-
-    const contextSetter = new Function("$context", `
-      with(QmlWeb) with ($context) {
-        ${jsData.source}
-      }
-      ${jsData.exports.map(sym => `$context.${sym} = ${sym};`).join("")}
-    `);
-
-    this.js[file] = contextSetter;
-
-    return contextSetter;
-  }
 
   $registerStart(f) {
     this._whenStart.push(f);
@@ -894,84 +430,6 @@ class QMLEngine {
     console.log("$initializePendingOps : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+a3)+") functions:"+b+" errors:"+e);
   }
 
-  // This parses the full URL into scheme and path
-  $parseURI(uri) {
-    const match = uri.match(/^([^/]*?:\/)(.*)$/);
-    if (match) {
-      return {
-        scheme: match[1],
-        path: match[2],
-        authority: "",
-      };
-    }
-    return undefined;
-  }
-
-  // This parses the full URL into scheme, authority and path
-  $parseURIwAuth(uri) {
-    const match = uri.match(/^([^/]*?:\/)(.*?)\/(.*)$/);
-    if (match) {
-      return {
-        scheme: match[1],
-        authority: match[2],
-        path: match[3]
-      };
-    }
-    return undefined;
-  }
-
-  $parseURIlong(uri) {
-    const match = uri.match(/^([^/]*?:\/)(.*)\/(.*?)$/);
-    if (match) {
-      return {
-        scheme: match[1],
-        path: match[2],
-        file: match[3]
-      };
-    }
-    return undefined;
-  }
-
-  // Return a path to load the file
-  $resolvePath(file, basePath = this.$basePath) {
-    // probably, replace :// with :/ ?
-    if (!file || file.indexOf(":/") !== -1 || file.indexOf("data:") === 0 ||
-      file.indexOf("blob:") === 0) {
-      return file;
-    }
-
-    const basePathURI = this.$parseURI(basePath);
-    if (!basePathURI) {
-      return file;
-    }
-
-    let path = basePathURI.path;
-    if (file && file.charAt(0) === "/") {
-      path = file;
-    } else {
-      path = `${path}${file}`;
-    }
-
-    // Remove duplicate slashes and dot segments in the path
-    path = this.removeDotSegments(path.replace(/([^:]\/)\/+/g, "$1"));
-
-    return `${basePathURI.scheme}${basePathURI.authority}${path}`;
-  }
-
-  // Return a DOM-valid path to load the image (fileURL is an already-resolved
-  // URL)
-  $resolveImageURL(fileURL) {
-    const uri = this.$parseURI(fileURL);
-    // If we are within the resource system, look up a "real" path that can be
-    // used by the DOM. If not found, return the path itself without the
-    // "qrc:/" scheme.
-    if (uri && uri.scheme === "qrc:/") {
-      return QmlWeb.qrc[uri.path] || uri.path;
-    }
-
-    // Something we can't parse, just pass it through
-    return fileURL;
-  }
 
   callCompletedSignals() {
     // the while loop is better than for..in loop, because completedSignals

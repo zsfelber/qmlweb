@@ -67,8 +67,8 @@ function createProperty(type, obj, propName, options, namespaceObject) {
   const setter = function (value, flags) {
     prop.set.call(prop, value, flags, namespaceObject);
   }
-  getter.owner = prop;
-  setter.owner = prop;
+  getter.$owner = prop;
+  setter.$owner = prop;
 
   if (type === "alias") {
 

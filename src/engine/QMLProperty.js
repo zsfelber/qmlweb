@@ -25,8 +25,8 @@ class QMLProperty {
     this.type = type;
     this.animation = null;
     this.needsUpdate = true;
-    this.get.owner = this;
-    this.set.owner = this;
+    this.get.$owner = this;
+    this.set.$owner = this;
 
     // This list contains all signals that hold references to this object.
     // It is needed when deleting, as we need to tidy up all references to this

@@ -19,7 +19,7 @@ const Qt = {
   createComponent: name => {
     const engine = QmlWeb.engine;
 
-    let imp = engine.resolveImport(name);
+    let imp = QmlWeb.resolveImport(name);
 
     return this.createImpComponent(imp);
   },
@@ -40,11 +40,11 @@ const Qt = {
     if (QmlWeb.executionContext === QmlWeb.engine.rootContext) {
       throw new Error("Root context at property Qt.createImpComponent : "+imp.file);
     }
-    component.$basePath = engine.extractBasePath(imp.file);
+    component.$basePath = extractBasePath(imp.file);
     component.$imports = imp.clazz.$imports;
     component.$file = imp.file; // just for debugging
 
-    engine.loadImports(imp.clazz.$imports, component.$basePath,
+    loadImports(imp.clazz.$imports, component.$basePath,
       component.importContextId);
 
     // TODO gz name->file
@@ -68,10 +68,10 @@ const Qt = {
     }
 
     const engine = QmlWeb.engine;
-    engine.loadImports(clazz.$imports, undefined, component.importContextId);
+    loadImports(clazz.$imports, undefined, component.importContextId);
 
     const resolvedFile = file || Qt.resolvedUrl("createQmlObject_function");
-    component.$basePath = engine.extractBasePath(resolvedFile);
+    component.$basePath = extractBasePath(resolvedFile);
     component.$imports = clazz.$imports; // for later use
     // not just for debugging, but for basepath too, see above
     component.$file = resolvedFile;
@@ -102,7 +102,7 @@ const Qt = {
   include(path) {
     const engine = QmlWeb.engine;
 
-    const uri = engine.$resolvePath(path);
+    const uri = $resolvePath(path);
 
     /* Handle recursive includes */
     if (QmlWeb.executionContext.$qmlJsIncludes === undefined) {

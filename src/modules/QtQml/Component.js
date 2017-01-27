@@ -46,7 +46,7 @@ class QMLComponent {
     const engine = QmlWeb.engine;
     for (let i = 0; i < this.$jsImports.length; ++i) {
       const importDesc = this.$jsImports[i];
-      const js = engine.loadJS(engine.$resolvePath(importDesc[1]));
+      const js = engine.loadJS($resolvePath(importDesc[1]));
 
       if (!js) {
         console.log("Component.finalizeImports: failed to import JavaScript",
@@ -76,8 +76,7 @@ class QMLComponent {
         throw new Error("No context passed to $createObject");
       }
 
-      const newContext = Object.create(context);
-      newContext.contextId = ++contextIds;
+      const newContext = context.create();
 
       if (this.importContextId !== undefined) {
         newContext.importContextId = this.importContextId;
@@ -87,7 +86,8 @@ class QMLComponent {
         object: this.$metaObject,
         parent,
         context: newContext,
-        isComponentRoot: true
+        isComponentRoot: true,
+        component : this
       });
 
       this.finalizeImports(item.$context);

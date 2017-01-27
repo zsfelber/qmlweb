@@ -62,17 +62,17 @@ QmlWeb.registerQmlType({
     }
 
     if (!clazz) {
-      clazz = QmlWeb.engine.loadClass(fileName);
+      clazz = QmlWeb.loadClass(fileName);
     }
 
     QmlWeb.helpers.copy(this, QmlWeb.engine.rootContext);
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const meta = { object: clazz, context: this, parent: this };
     const qmlComponent = new QMLComponent(meta);
-    qmlComponent.$basePath = QmlWeb.engine.extractBasePath(clazz.$file);
+    qmlComponent.$basePath = QmlWeb.extractBasePath(clazz.$file);
     qmlComponent.$imports = clazz.$imports;
     qmlComponent.$file = clazz.$file;
-    QmlWeb.engine.loadImports(clazz.$imports, qmlComponent.$basePath,
+    QmlWeb.loadImports(clazz.$imports, qmlComponent.$basePath,
       qmlComponent.importContextId);
     const loadedComponent = this.$createComponentObject(qmlComponent, this);
     this.sourceComponent = loadedComponent;

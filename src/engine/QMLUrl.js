@@ -1,5 +1,5 @@
 function QMLUrl(val) {
-  return QmlWeb.engine.$resolvePath(`${val}`);
+  return QmlWeb.$resolvePath(`${val}`);
 }
 QMLUrl.plainType = true;
 QmlWeb.qmlUrl = QMLUrl;
