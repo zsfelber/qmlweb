@@ -35,6 +35,8 @@ class QMLContext {
 // QML engine. EXPORTED.
 class QMLEngine {
   constructor(element) {
+    QmlWeb.engine = this;
+
     //----------Public Members----------
 
     //this.fps = 60;
@@ -198,10 +200,10 @@ class QMLEngine {
     if (!this.$basePathA) {
       this.$basePathA = document.createElement("a");
     }
-    this.$basePathA.href = this.extractBasePath(file);
+    this.$basePathA.href = QmlWeb.extractBasePath(file);
     this.$basePath = this.$basePathA.href;
     const fileName = extractFileName(file);
-    const clazz = QmlWeb.loadClass(this.$resolvePath(fileName));
+    const clazz = QmlWeb.loadClass(QmlWeb.$resolvePath(fileName));
     const component = this.loadQMLTree(clazz, parentComponent, file);
     console.log("loadFile success. LOADED : "+file);
     return component;
@@ -230,7 +232,7 @@ class QMLEngine {
       context: newContext
     });
 
-    this.loadImports(clazz.$imports, undefined, component.importContextId);
+    QmlWeb.loadImports(clazz.$imports, undefined, component.importContextId);
     component.$basePath = this.$basePath;
     component.$imports = clazz.$imports; // for later use
     component.$file = file; // just for debugging

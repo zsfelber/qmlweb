@@ -1,4 +1,3 @@
-var engine = QmlWeb.engine;
 
 // eslint-disable-next-line max-len
 /** from http://docs.closure-library.googlecode.com/git/local_closure_goog_uri_uri.js.source.html
@@ -50,6 +49,7 @@ function extractFileName(file) {
 }
 
 function importSearchPaths(importContextId) {
+  var engine = QmlWeb.engine;
   if (!engine.componentImportPaths) {
     return [];
   }
@@ -61,6 +61,7 @@ function importSearchPaths(importContextId) {
 }
 
 function qualifiedImportPath(importContextId, qualifier) {
+  var engine = QmlWeb.engine;
   if (!engine.componentImportPaths) {
     return "";
   }
@@ -72,10 +73,12 @@ function qualifiedImportPath(importContextId, qualifier) {
 }
 
 function setImportPathList(arrayOfDirs) {
+  var engine = QmlWeb.engine;
   engine.userAddedImportPaths = arrayOfDirs;
 }
 
 function importPathList() {
+  var engine = QmlWeb.engine;
   return engine.userAddedImportPaths;
 }
 
@@ -85,6 +88,7 @@ function importPathList() {
 // `http://example.com/controls/qmldir`
 
 function addModulePath(moduleName, dirPath) {
+  var engine = QmlWeb.engine;
   // Keep the mapping. It will be used in loadImports() function.
   // Remove trailing slash as it required for `readQmlDir`.
   engine.userAddedModulePaths[moduleName] = dirPath.replace(/\/$/, "");
@@ -114,6 +118,7 @@ function addModulePath(moduleName, dirPath) {
 }*/
 
 function resolveImport(name) {
+  var engine = QmlWeb.engine;
 
   let file = $resolvePath(name);
 
@@ -150,6 +155,7 @@ function resolveImport(name) {
 }
 
 function findClass(name, context) {
+  var engine = QmlWeb.engine;
   // Load component from file. Please look at import.js for main notes.
   // Actually, we have to use that order:
   // 1) try to load component from current basePath
@@ -242,7 +248,7 @@ function $parseURIlong(uri) {
 }
 
 // Return a path to load the file
-function $resolvePath(file, basePath = engine.$basePath) {
+function $resolvePath(file, basePath = QmlWeb.engine.$basePath) {
   // probably, replace :// with :/ ?
   if (!file || file.indexOf(":/") !== -1 || file.indexOf("data:") === 0 ||
     file.indexOf("blob:") === 0) {

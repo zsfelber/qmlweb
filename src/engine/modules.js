@@ -22,9 +22,6 @@ QmlWeb.constructors = modules.Main;
 
 const dependants = {};
 
-const perImportContextConstructors = {};
-let importContextIds = 0;
-
 // Helper. Adds a type to the constructor list
 function registerGlobalQmlType(name, type) {
   QmlWeb[type.name] = type;

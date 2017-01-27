@@ -1,7 +1,8 @@
 // Load resolved file, parse and construct as Component class (.qml)
 function loadClass(file) {
-  if (file in this.classes) {
-    return this.classes[file];
+  var engine = QmlWeb.engine;
+  if (file in engine.classes) {
+    return engine.classes[file];
   }
 
   const uri = QmlWeb.$parseURI(file);
@@ -49,7 +50,7 @@ function loadClass(file) {
   }
 
   clazz.$file = file;
-  this.classes[file] = clazz;
+  engine.classes[file] = clazz;
 
 
   return clazz;
@@ -57,8 +58,9 @@ function loadClass(file) {
 
 // Load resolved file and parse as JavaScript
 function loadJS(file) {
-  if (file in this.js) {
-    return this.js[file];
+  var engine = QmlWeb.engine;
+  if (file in engine.js) {
+    return engine.js[file];
   }
 
   const uri = QmlWeb.$parseURI(file);
@@ -88,7 +90,7 @@ function loadJS(file) {
     ${jsData.exports.map(sym => `$context.${sym} = ${sym};`).join("")}
   `);
 
-  this.js[file] = contextSetter;
+  engine.js[file] = contextSetter;
 
   return contextSetter;
 }

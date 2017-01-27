@@ -25,10 +25,15 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+const perImportContextConstructors = {};
+let importContextIds = 0;
+
+
 // next 3 methods used in Qt.createComponent for qml files lookup
 // http://doc.qt.io/qt-5/qqmlengine.html#addImportPath
 
 function addImportPath(dirpath) {
+  var engine = QmlWeb.engine;
   engine.userAddedImportPaths.push(dirpath);
 }
 
@@ -40,6 +45,7 @@ function addImportPath(dirpath) {
  * The importContextId ensures it is only accessible from the file in which
  * it was imported. */
 function addComponentImportPath(importContextId, dirpath, qualifier) {
+  var engine = QmlWeb.engine;
   if (!engine.componentImportPaths) {
     engine.componentImportPaths = {};
   }
@@ -98,8 +104,9 @@ function preloadImports(component, imports) {
 }
 
 
-function loadImports(importsArray, currentFileDir = engine.$basePath,
+function loadImports(importsArray, currentFileDir = QmlWeb.engine.$basePath,
     importContextId) {
+  var engine = QmlWeb.engine;
   if (!engine.qmldirsContents) {
     engine.qmldirsContents = {}; // cache
 
@@ -131,6 +138,7 @@ function loadImports(importsArray, currentFileDir = engine.$basePath,
 }
 
 function loadImport(entry, currentFileDir, importContextId) {
+  var engine = QmlWeb.engine;
   let name = entry[1];
 
   // is it url to remote resource
