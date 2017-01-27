@@ -16,6 +16,7 @@ function callSuper(self, meta) {
 
 function initializeConstr(self, meta, info) {
   self.$isComponentRoot = meta.isComponentRoot;
+  self.$isFromFile = meta.isFromFile;
   self.$context = meta.context;
   self.$component = meta.component;
   self.$metaObject = meta.object;
@@ -62,9 +63,9 @@ function construct(meta) {
 
   var clinfo = QmlWeb.findClass(meta.object.$class, meta.context);
 
-  if (clinfo.clazzConstructor) {
-    meta.super = clinfo.clazzConstructor;
-    item = new clinfo.clazzConstructor(meta);
+  if (clinfo.classConstructor) {
+    meta.super = clinfo.classConstructor;
+    item = new clinfo.classConstructor(meta);
     meta.super = undefined;
   } else {
 
@@ -81,7 +82,7 @@ function construct(meta) {
     item = component.$createObject(meta.parent);
 
     if (typeof item.dom !== "undefined") {
-      item.dom.className += ` ${clinfo.classComponents[clinfo.classComponents.length - 1]}`;
+      item.dom.className += ` ${clinfo.path[clinfo.path.length - 1]}`;
       if (meta.object.id) {
         item.dom.className += `  ${meta.object.id}`;
       }
@@ -127,7 +128,9 @@ function createImpComponent(imp, nocache) {
     parent: imp.parent,
     context: QmlWeb.executionContext,
     $name: imp.clazz.$name,
-    $id: imp.clazz.id
+    $id: imp.clazz.id,
+    isComponentRoot: false,
+    isFromFile: true
   });
   if (QmlWeb.executionContext === QmlWeb.engine.rootContext) {
     throw new Error("Root context at property Qt.createImpComponent : "+imp.file);

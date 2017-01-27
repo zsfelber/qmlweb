@@ -1,4 +1,4 @@
-const trivialProperties = {context:1};
+const trivialProperties = {context:1, isComponentRoot:1, isFromFile:1, component:1, object:1};
 
 function formatPath(path, path0, first) {
   var p = "";

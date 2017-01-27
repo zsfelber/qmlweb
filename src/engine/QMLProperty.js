@@ -55,7 +55,9 @@ class QMLProperty {
         this.val = new QMLComponent({
           object: val,
           parent: this.obj,
-          context: namespaceObject.$context
+          context: namespaceObject.$context,
+          isComponentRoot: false,
+          isFromFile: false
         });
         if (namespaceObject.$context === QmlWeb.engine.rootContext) {
           throw new Error("Root context at property setVal : "+this);

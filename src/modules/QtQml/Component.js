@@ -10,16 +10,18 @@ class QMLComponent {
       }
       this.$metaObject.$name = meta.object.$name;
       this.$metaObject.$id = meta.object.id;
-      //?
       this.$metaObject.context = meta.context;
+      this.$metaObject.isComponentRoot = meta.isComponentRoot;
     } else {
       this.$metaObject = meta.object;
     }
     this.$context = meta.context;
+    this.isComponentRoot = meta.isComponentRoot;
 
     this.$jsImports = [];
 
-    if (meta.object.$imports instanceof Array) {
+    // no parent = is import root
+    if (meta.isFromFile) {
       const moduleImports = [];
       function _add_imp(importDesc) {
         if (/\.js$/.test(importDesc[1])) {
@@ -29,16 +31,13 @@ class QMLComponent {
         }
       }
 
-      for (let i = 0; i < meta.object.$imports.length; ++i) {
-        _add_imp(meta.object.$imports[i]);
+      if (meta.object.$imports) {
+        for (let i = 0; i < meta.object.$imports.length; ++i) {
+          _add_imp(meta.object.$imports[i]);
+        }
       }
       QmlWeb.preloadImports(this, moduleImports);
-    }
-
-    /* If this Component does not have any imports, it is likely one that was
-     * created within another Component file. It should inherit the
-     * importContextId of the Component file it was created within. */
-    if (this.$importContextId === undefined) {
+    } else {
       this.$importContextId = meta.context.$importContextId;
     }
   }
@@ -86,9 +85,11 @@ class QMLComponent {
         object: this.$metaObject,
         parent,
         context: newContext,
-        isComponentRoot: true,
-        component : this
+        component: this,
+        isComponentRoot: this.isComponentRoot,
+        isFromFile: this.isFromFile,
       });
+
       newContext.$owner = item;
       QmlWeb.setupGetter(newContext, "$ownerString", item.toString.bind(item));
       newContext.$component = this;

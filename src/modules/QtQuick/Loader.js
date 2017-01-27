@@ -67,7 +67,13 @@ QmlWeb.registerQmlType({
 
     QmlWeb.helpers.copy(this, QmlWeb.engine.rootContext);
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-    const meta = { object: clazz, context: this, parent: this };
+
+    const meta = { object: clazz,
+                   context: this,
+                   parent: this,
+                   isComponentRoot: false,
+                   isFromFile: false        };
+
     const qmlComponent = new QMLComponent(meta);
     qmlComponent.$basePath = QmlWeb.extractBasePath(clazz.$file);
     qmlComponent.$imports = clazz.$imports;

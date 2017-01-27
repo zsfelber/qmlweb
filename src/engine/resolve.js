@@ -169,9 +169,9 @@ function findClass(name, context) {
   // 3)regular (versioned) modules only: (from Component.constructor -> QmlWeb.loadImports)
   let constructors = QmlWeb.perImportContextConstructors[context.$importContextId];
 
-  const classComponents = name.split(".");
-  for (let ci = 0; ci < classComponents.length; ++ci) {
-    const c = classComponents[ci];
+  const path = name.split(".");
+  for (let ci = 0; ci < path.length; ++ci) {
+    const c = path[ci];
     constructors = constructors[c];
     if (constructors === undefined) {
       break;
@@ -179,7 +179,7 @@ function findClass(name, context) {
   }
 
   if (constructors !== undefined) {
-    return {clazzConstructor:constructors, classComponents:classComponents};
+    return {classConstructor:constructors, path:path};
   } else {
 
     // 2) 3)preloaded qrc-s  4)
@@ -191,19 +191,19 @@ function findClass(name, context) {
     let filePath;
     if (qdirInfo) {
       filePath = qdirInfo.url;
-    } else if (classComponents.length === 2) {
+    } else if (path.length === 2) {
       const qualified = qualifiedImportPath(
-        context.$importContextId, classComponents[0]
+        context.$importContextId, path[0]
       );
-      filePath = `${qualified}${classComponents[1]}.qml`;
+      filePath = `${qualified}${path[1]}.qml`;
     } else {
-      filePath = `${classComponents[0]}.qml`;
+      filePath = `${path[0]}.qml`;
     }
 
     // 1) through $resolvePath(name);
     let imp = resolveImport(filePath);
 
-    imp.classComponents=classComponents;
+    imp.path=path;
 
     return imp;
   }

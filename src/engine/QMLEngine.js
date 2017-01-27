@@ -230,7 +230,9 @@ class QMLEngine {
     const component = new QMLComponent({
       object: clazz,
       parent: parentComponent,
-      context: newContext
+      context: newContext,
+      isComponentRoot: true,
+      isFromFile: true
     });
 
     QmlWeb.loadImports(clazz.$imports, undefined, component.$importContextId);
@@ -245,6 +247,11 @@ class QMLEngine {
     } else {
       console.warn(clazz.$name+" : No DOM, it's a pure model object. Not added to screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
     }
+    newContext.$owner = this.rootObject;
+    QmlWeb.setupGetter(newContext, "$ownerString", this.rootObject.toString.bind(this.rootObject));
+    newContext.$component = component;
+    newContext.$componentFile = component.$file;
+
 
     this.operationState = QmlWeb.QMLOperationState.Idle;
 
@@ -255,11 +262,6 @@ class QMLEngine {
     this.updateGeometry();
 
     this.callCompletedSignals();
-
-    newContext.$owner = this.rootObject;
-    QmlWeb.setupGetter(newContext, "$ownerString", this.rootObject.toString.bind(this.rootObject));
-    newContext.$component = component;
-    newContext.$componentFile = component.$file;
 
     return component;
   }
