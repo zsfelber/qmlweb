@@ -40,7 +40,7 @@ class QMLProperty {
 
   // Called by update and set to actually set this.val, performing any type
   // conversion required.
-  $setVal(val, namespaceObject) {
+  $setVal(val) {
     const constructors = QmlWeb.constructors;
     if (constructors[this.type] === QmlWeb.qmlList) {
       this.val = QmlWeb.qmlList({
@@ -274,7 +274,7 @@ class QMLProperty {
         this.binding = null;
       }
 
-      this.$setVal(val, namespaceObject);
+      this.$setVal(val);
     }
 
     if (this.val !== oldVal) {

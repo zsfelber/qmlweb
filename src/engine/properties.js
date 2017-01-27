@@ -37,7 +37,7 @@ function formatPath(path, path0, first) {
  * @param {String} propName Property name
  * @param {Object} [options] Options that allow finetuning of the property
  */
-function createProperty(type, obj, propName, options, namespaceObject) {
+function createProperty(type, obj, propName, options) {
   if (!options) options = {};
 
   if (!namespaceObject) {
@@ -52,11 +52,11 @@ function createProperty(type, obj, propName, options, namespaceObject) {
   function _set_prop(propName, prop, flags) {
     obj[`${propName}Changed`] = prop.changed;
     if (options.hasOwnProperty("initialValue")) {
-      prop.set(options.initialValue, flags, namespaceObject);
+      prop.set(options.initialValue, flags);
     } else if (QMLProperty.typeInitialValues.hasOwnProperty(type)) {
       val = QMLProperty.typeInitialValues[type];
       if (val !== undefined) {
-        prop.set(val, flags, namespaceObject);
+        prop.set(val, flags);
       }
     }
   }
@@ -65,7 +65,7 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     return prop.get.call(prop);
   };
   const setter = function (value, flags) {
-    prop.set.call(prop, value, flags, namespaceObject);
+    prop.set.call(prop, value, flags);
   }
   getter.$owner = prop;
   setter.$owner = prop;
@@ -94,7 +94,7 @@ function createProperty(type, obj, propName, options, namespaceObject) {
     var p = formatPath(path0);
     var QMLBinding = QmlWeb.QMLBinding;
     var binding = new QMLBinding(p, proplast, QMLBinding.ImplExpression|QMLBinding.Alias);
-    prop.set(binding, QMLProperty.ReasonInitPrivileged, namespaceObject);
+    prop.set(binding, QMLProperty.ReasonInitPrivileged);
 
     _set_prop(propName, prop, QMLProperty.ReasonInit);
 
@@ -140,7 +140,7 @@ function createProperty(type, obj, propName, options, namespaceObject) {
  * @param {Object} namespaceObject.$context Component scope in which properties should be
  *                 evaluated
  */
-function applyProperties(metaObject, item, namespaceObject) {
+function applyProperties(metaObject, item) {
   if (!namespaceObject) {
     throw new Error("properties.applyProperties : missing namespaceObject argument.");
   }
@@ -185,21 +185,21 @@ function applyProperties(metaObject, item, namespaceObject) {
         // TODO binding when whithin group ??
         const signalName = i[2].toLowerCase() + i.slice(3);
         if (item.$setCustomSlot) {
-          item.$setCustomSlot(signalName, value, namespaceObject);
+          item.$setCustomSlot(signalName, value);
           continue;
-        } else if (connectSignal(item, signalName, value, namespaceObject)) {
+        } else if (connectSignal(item, signalName, value)) {
           continue;
         }
       }
 
       if (value instanceof Object) {
-        if (applyProperty(item, i, value, namespaceObject)) {
+        if (applyProperty(item, i, value)) {
           continue;
         }
       }
 
       if (item.$properties && i in item.$properties) {
-        item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged, namespaceObject);
+        item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged);
       } else if (i in item) {
         item[i] = value;
       } else if (item.$setCustomData) {
@@ -223,7 +223,7 @@ function applyProperties(metaObject, item, namespaceObject) {
   }
 }
 
-function applyProperty(item, i, value, namespaceObject) {
+function applyProperty(item, i, value) {
   const QMLProperty = QmlWeb.QMLProperty;
 
   if (value instanceof QmlWeb.QMLSignalDefinition) {
@@ -245,23 +245,23 @@ function applyProperty(item, i, value, namespaceObject) {
     }
     return true;
   } else if (value instanceof QmlWeb.QMLAliasDefinition) {
-    createProperty("alias", item, i, {path:value.path, readOnly:value.readonly}, namespaceObject);
+    createProperty("alias", item, i, {path:value.path, readOnly:value.readonly});
     // NOTE getter/setter/target moved to inside createProperty
 
     return true;
   } else if (value instanceof QmlWeb.QMLPropertyDefinition) {
-    createProperty(value.type, item, i, {readOnly:value.readonly, initialValue:value.value}, namespaceObject);
+    createProperty(value.type, item, i, {readOnly:value.readonly, initialValue:value.value});
     return true;
   } else if (item[i] && value instanceof QmlWeb.QMLMetaPropertyGroup) {
     // Apply properties one by one, otherwise apply at once
-    applyProperties(value, item[i], namespaceObject);
+    applyProperties(value, item[i]);
     return true;
   }
 
   return false;
 }
 
-function connectSignal(item, signalName, value, namespaceObject) {
+function connectSignal(item, signalName, value) {
   const _signal = item[signalName];
 
   if (!_signal) {

@@ -34,7 +34,7 @@ QmlWeb.registerQmlType({
       }
     }
   }
-  $setCustomSlot(propName, value, namespaceObject) {
-    this.$connections[propName] = { value, namespaceObject };
+  $setCustomSlot(propName, value) {
+    this.$connections[propName] = { value };
   }
 });
