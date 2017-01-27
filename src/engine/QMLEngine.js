@@ -257,7 +257,7 @@ class QMLEngine {
     this.callCompletedSignals();
 
     newContext.$owner = this.rootObject;
-    newContext.$ownerId = this.rootObject.objectId;
+    QmlWeb.setupGetter(newContext, "$ownerString", this.rootObject.toString.bind(this.rootObject));
     newContext.$component = component;
     newContext.$componentFile = component.$file;
 

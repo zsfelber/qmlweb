@@ -90,7 +90,7 @@ class QMLComponent {
         component : this
       });
       newContext.$owner = item;
-      newContext.$ownerId = item.objectId;
+      QmlWeb.setupGetter(newContext, "$ownerString", item.toString.bind(item));
       newContext.$component = this;
       newContext.$componentFile = this.$file;
 
