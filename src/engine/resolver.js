@@ -142,7 +142,7 @@ function resolveImport(name) {
     const nameIsUrl = $parseURI(name) !== undefined;
     if (!nameIsUrl) {
       const moreDirs = importSearchPaths(
-        QmlWeb.executionContext.importContextId);
+        QmlWeb.executionContext.$importContextId);
       for (let i = 0; i < moreDirs.length; i++) {
         file = `${moreDirs[i]}${name}`;
         clazz = QmlWeb.loadClass(file);
@@ -167,7 +167,7 @@ function findClass(name, context) {
   //       That's not qml's original behaviour.
 
   // 3)regular (versioned) modules only: (from Component.constructor -> QmlWeb.loadImports)
-  let constructors = QmlWeb.perImportContextConstructors[context.importContextId];
+  let constructors = QmlWeb.perImportContextConstructors[context.$importContextId];
 
   const classComponents = name.split(".");
   for (let ci = 0; ci < classComponents.length; ++ci) {
@@ -183,7 +183,7 @@ function findClass(name, context) {
   } else {
 
     // 2) 3)preloaded qrc-s  4)
-    const qmldirs = engine.ctxQmldirs[context.importContextId];
+    const qmldirs = engine.ctxQmldirs[context.$importContextId];
 
     const qdirInfo = qmldirs ? qmldirs[name] : null;
     // Are we have info on that component in some imported qmldir files?
@@ -193,7 +193,7 @@ function findClass(name, context) {
       filePath = qdirInfo.url;
     } else if (classComponents.length === 2) {
       const qualified = qualifiedImportPath(
-        context.importContextId, classComponents[0]
+        context.$importContextId, classComponents[0]
       );
       filePath = `${qualified}${classComponents[1]}.qml`;
     } else {

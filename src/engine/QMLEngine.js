@@ -23,10 +23,11 @@ class QMLContext {
     return undefined;
   }
 
-  create() {
+  create(owner) {
     const newContext = Object.create(this);
     newContext.$contextId = ++contextIds;
     newContext.$parent = this;
+    newContext.$owner = owner;
     return newContext;
   }
 }
@@ -232,7 +233,7 @@ class QMLEngine {
       context: newContext
     });
 
-    QmlWeb.loadImports(clazz.$imports, undefined, component.importContextId);
+    QmlWeb.loadImports(clazz.$imports, undefined, component.$importContextId);
     component.$basePath = this.$basePath;
     component.$imports = clazz.$imports; // for later use
     component.$file = file; // just for debugging
@@ -254,6 +255,11 @@ class QMLEngine {
     this.updateGeometry();
 
     this.callCompletedSignals();
+
+    newContext.$owner = this.rootObject;
+    newContext.$ownerId = this.rootObject.objectId;
+    newContext.$component = component;
+    newContext.$componentFile = component.$file;
 
     return component;
   }

@@ -330,7 +330,31 @@ function connectSignal(item, signalName, value, namespaceObject) {
   return connection;
 }
 
+
+function $propertyInfo(prop) {
+  function _inf(root) {
+    var result = {};
+    result.descriptor = Object.getOwnPropertyDescriptor(root, prop);
+    result.get = result.descriptor?result.descriptor.get:0;
+    result.property = result.get?result.get.$owner:0;
+    result.propertyString = result.property?result.property.toString():0;
+    result.object = result.property?result.property.obj:0;
+    result.objectString = result.object?result.object.toString():0;
+    return result;
+  }
+
+  var ctx = QmlWeb.executionContext;
+  return {
+    in_context : _inf(ctx),
+    in_owner : _inf(ctx.$owner),
+    in_elementoverloads : _inf(ctx.$elementoverloads),
+    in_elementoverloadsnoalias : _inf(ctx.$elementoverloadsnoalias),
+  };
+}
+
+
 QmlWeb.formatPath = formatPath;
 QmlWeb.createProperty = createProperty;
 QmlWeb.applyProperties = applyProperties;
 QmlWeb.connectSignal = connectSignal;
+QmlWeb.$propertyInfo = $propertyInfo;

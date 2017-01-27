@@ -45,7 +45,7 @@ const Qt = {
     component.$file = imp.file; // just for debugging
 
     QmlWeb.loadImports(imp.clazz.$imports, component.$basePath,
-      component.importContextId);
+      component.$importContextId);
 
     // TODO gz name->file
     engine.components[imp.file] = component;
@@ -68,7 +68,7 @@ const Qt = {
     }
 
     const engine = QmlWeb.engine;
-    QmlWeb.loadImports(clazz.$imports, undefined, component.importContextId);
+    QmlWeb.loadImports(clazz.$imports, undefined, component.$importContextId);
 
     const resolvedFile = file || Qt.resolvedUrl("createQmlObject_function");
     component.$basePath = extractBasePath(resolvedFile);

@@ -106,7 +106,7 @@ function construct(meta) {
   item.$context.$basePath = QmlWeb.engine.$basePath; //gut
 
   // We don't want to use the item's scope, but this Component's imports
-  item.$context.importContextId = meta.context.importContextId;
+  item.$context.$importContextId = meta.context.$importContextId;
 
   // Apply properties (Bindings won't get evaluated, yet)
   QmlWeb.applyProperties(meta.object, item, item/*, item.$context*/);

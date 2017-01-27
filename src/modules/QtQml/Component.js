@@ -38,8 +38,8 @@ class QMLComponent {
     /* If this Component does not have any imports, it is likely one that was
      * created within another Component file. It should inherit the
      * importContextId of the Component file it was created within. */
-    if (this.importContextId === undefined) {
-      this.importContextId = meta.context.importContextId;
+    if (this.$importContextId === undefined) {
+      this.$importContextId = meta.context.$importContextId;
     }
   }
   finalizeImports($context) {
@@ -78,8 +78,8 @@ class QMLComponent {
 
       const newContext = context.create();
 
-      if (this.importContextId !== undefined) {
-        newContext.importContextId = this.importContextId;
+      if (this.$importContextId !== undefined) {
+        newContext.$importContextId = this.$importContextId;
       }
 
       item = QmlWeb.construct({
@@ -89,6 +89,10 @@ class QMLComponent {
         isComponentRoot: true,
         component : this
       });
+      newContext.$owner = item;
+      newContext.$ownerId = item.objectId;
+      newContext.$component = this;
+      newContext.$componentFile = this.$file;
 
       this.finalizeImports(item.$context);
 
