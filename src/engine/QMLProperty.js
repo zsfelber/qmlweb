@@ -72,6 +72,7 @@ class QMLProperty {
           object: val,
           parent: this.obj,
           context: namespaceObject.$context
+          component: meta.component
         });
       }
     } else if (val instanceof Object || val === undefined || val === null) {

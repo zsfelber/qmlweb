@@ -5,14 +5,14 @@ function QMLList(meta) {
       list.push(QmlWeb.construct({
         object: meta.object[i],
         parent: meta.parent,
-        context: meta.context
+        component: meta.component
       }));
     }
   } else if (meta.object instanceof QmlWeb.QMLMetaElement) {
     list.push(QmlWeb.construct({
       object: meta.object,
       parent: meta.parent,
-      context: meta.context
+      component: meta.component
     }));
   }
 

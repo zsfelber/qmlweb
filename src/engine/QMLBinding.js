@@ -85,10 +85,11 @@ class QMLBinding {
         console.warn(e1.message+":\n"+e2.message+":\n"+info+":\n(_=) "+src0+"\n ->\n"+src);
       }
 
-      src = this.stripFunction(src);
+      var opt = {stripargs:1};
+      this.stripFunction(src, opt);
+    } else {
+      this.src = src;
     }
-
-    this.src = src;
 
     // Not serialized, but still means false:
     //this.compiled = false;
@@ -117,9 +118,8 @@ class QMLBinding {
       if (!options || !options.stripargs) {
         src = "("+match[1]+")"+src;
       }
-      if (options) {
-        options.args = match[1];
-      }
+      this.args = match[1];
+      this.src = src;
 
       this.flags &= ~QMLBinding.ImplBlock;
       this.flags |= QMLBinding.ImplFunction;
@@ -128,7 +128,6 @@ class QMLBinding {
         throw new Error("Binding is effectively not a function but declared so : "+(info?info:src));
       }
     }
-    return src;
   }
 
   /*toJSON() {
@@ -148,6 +147,7 @@ class QMLBinding {
   }*/
 
   get(namespaceObject, basePath) {
+    QmlWeb.engine.$oldBasePath = QmlWeb.engine.$basePath;
     var object = namespaceObject.$object ? namespaceObject.$object : namespaceObject;
     var context = namespaceObject.$context;
     QmlWeb.executionContext = context;
@@ -169,10 +169,13 @@ class QMLBinding {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
         throw err;
       }
+    } finally {
+      QmlWeb.engine.$basePath = QmlWeb.engine.$oldBasePath;
     }
   }
 
   set(namespaceObject, basePath, value, flags) {
+    QmlWeb.engine.$oldBasePath = QmlWeb.engine.$basePath;
     var object = namespaceObject.$object ? namespaceObject.$object : namespaceObject;
     var context = namespaceObject.$context;
     QmlWeb.executionContext = context;
@@ -194,6 +197,35 @@ class QMLBinding {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
         throw err;
       }
+    } finally {
+      QmlWeb.engine.$basePath = QmlWeb.engine.$oldBasePath;
+    }
+  }
+
+  run(namespaceObject, basePath, args) {
+    QmlWeb.engine.$oldBasePath = QmlWeb.engine.$basePath;
+    var object = namespaceObject.$object ? namespaceObject.$object : namespaceObject;
+    var context = namespaceObject.$context;
+    QmlWeb.executionContext = context;
+    if (basePath) {
+      QmlWeb.engine.$basePath = basePath;
+    }
+    try {
+      if (!this.implGet) {
+        console.warn("Binding/run error  compiled:"+this.compiled+"  no compiled getter  src:\n"+this.src);
+        return;
+      }
+      this.implGet.call(object, args);
+    } catch (err) {
+      if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
+        console.warn("Binding/run error : "+err.message+(err.srcdumpok?" srcdump:ok":" "+this));
+      }
+      err.srcdumpok = 1;
+      if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
+        throw err;
+      }
+    } finally {
+      QmlWeb.engine.$basePath = QmlWeb.engine.$oldBasePath;
     }
   }
 
@@ -206,9 +238,13 @@ class QMLBinding {
     }
     this.src = _ubertrim(this.src);
     this.compiled = true;
-    this.implGet = this.bindGet();
-    if (this.flags & QMLBinding.Bidirectional) {
-      this.implSet = this.bindSet();
+    if (this.flags&QMLBinding.ImplFunction) {
+      this.implRun = this.bindRun();
+    } else {
+      this.implGet = this.bindGet();
+      if (this.flags & QMLBinding.Bidirectional) {
+        this.implSet = this.bindSet();
+      }
     }
   }
 
@@ -234,21 +270,28 @@ class QMLBinding {
         throw new Error("Invalid Qt.binding call, no getterFunc: "+this);
       }
 
-      src = this.stripFunction(this.getterFunc.toString(), {stripargs:1});
+      this.stripFunction(this.getterFunc.toString(), {stripargs:1});
       return new Function("__ns", `
-        ${vvith} ${src}
+        ${vvith} ${this.src}
       `);
+      return eval(`funcition (${this.args}) {
+        ${vvith} ${this.src}
+      }`);
 
     } else {
       if (this.property) {
         var fp = QmlWeb.formatPath(this.property);
         if (this.flags&(QMLBinding.ImplFunction|QMLBinding.ImplBlock)) {
-          throw new Error("Invalid binding property, passed along with a function/block : "+fp);
+          throw new Error("Invalid binding property, passed along with a function/block : "+this);
         }
         if (src) {
           src = src + QmlWeb.formatPath(this.property, this.property);
         } else {
           src = fp;
+        }
+      } else {
+        if (this.flags&(QMLBinding.ImplFunction)) {
+          throw new Error("Function is not valid binding type for get : "+this);
         }
       }
 
@@ -293,10 +336,10 @@ class QMLBinding {
 
     if (this.flags & QMLBinding.User) {
       var opt = {stripargs:1};
-      src = this.stripFunction(this.setterFunc.toString(), opt);
+      this.stripFunction(this.setterFunc.toString(), opt);
 
       return new Function("__value", "__flags", "__ns", `
-        ${vvith} ${opt.args&&"__"!==opt.args.substring(0,2)?"var "+opt.args+"=__value;":""} ${src}
+        ${vvith} ${opt.args&&"__"!==opt.args.substring(0,2)?"var "+opt.args+"=__value;":""} ${this.src}
       `);
     } else {
 
@@ -357,6 +400,26 @@ class QMLBinding {
       }
     }
 
+  }
+
+
+
+  bindRun() {
+
+    var vvith;
+    if (this.flags & QMLBinding.Alias) {
+      vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(QmlWeb.executionContext.$elementoverloadsnoalias) with(this.$noalias)";
+    } else {
+      vvith = "with(QmlWeb) with(QmlWeb.executionContext) with(QmlWeb.executionContext.$elementoverloads) with(this)";
+    }
+
+    if (!this.flags&QMLBinding.ImplFunction) {
+      throw new Error("Binding/run should be a function : " + this);
+    }
+
+    return eval(`funcition (${this.args}) {
+      ${vvith} ${this.src}
+    }`);
   }
 
 }

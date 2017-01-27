@@ -193,7 +193,7 @@ function findClass(name, component) {
       filePath = qdirInfo.url;
     } else if (path.length === 2) {
       const qualified = qualifiedImportPath(
-        context.$importContextId, path[0]
+        component, path[0]
       );
       filePath = `${qualified}${path[1]}.qml`;
     } else {

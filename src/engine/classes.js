@@ -58,7 +58,7 @@ function initializeConstr(self, meta, info) {
 function construct(meta) {
   let item;
 
-  var clinfo = QmlWeb.findClass(meta.object.$class, meta.context);
+  var clinfo = QmlWeb.findClass(meta.object.$class, meta.component);
   clinfo.parent = meta.object.$parent;
 
   if (clinfo.classConstructor) {

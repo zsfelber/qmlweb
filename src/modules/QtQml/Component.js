@@ -14,14 +14,15 @@ class QMLComponent {
       this.$metaObject = meta.object;
     }
 
-    this.$jsImports = [];
-    this.perImportContextConstructors = {};
-    this.ctxQmldirs = {}; // resulting components lookup table
-    this.componentImportPaths = {};
-
 
     // no parent = is import root
     if (meta.isFromFile) {
+
+      this.$jsImports = [];
+      this.perImportContextConstructors = {};
+      this.ctxQmldirs = {}; // resulting components lookup table
+      this.componentImportPaths = {};
+
       const moduleImports = [];
       function _add_imp(importDesc) {
         if (/\.js$/.test(importDesc[1])) {
@@ -38,7 +39,10 @@ class QMLComponent {
       }
       QmlWeb.preloadImports(this, moduleImports);
     } else {
-      this.$importContextId = meta.context.$importContextId;
+      this.$jsImports = meta.component.$jsImports;
+      this.perImportContextConstructors = meta.component.perImportContextConstructors;
+      this.ctxQmldirs = meta.component.ctxQmldirs;
+      this.componentImportPaths = meta.component.componentImportPaths;
     }
   }
   finalizeImports($context) {
@@ -81,11 +85,6 @@ class QMLComponent {
         component: this,
         isFromFile: this.isFromFile,
       });
-
-      newContext.$owner = item;
-      QmlWeb.setupGetter(newContext, "$ownerString", item.toString.bind(item));
-      newContext.$component = this;
-      newContext.$componentFile = this.$file;
 
       this.finalizeImports(item.$context);
 
