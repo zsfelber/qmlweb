@@ -155,7 +155,7 @@ function createQmlObject(src, parent, file) {
 }
 
 QmlWeb.inherit = inherit;
-QmlWeb.callSuper = callSuper;
+QmlWeb.superAndInitMeta = superAndInitMeta;
 QmlWeb.initMeta = initMeta;
 QmlWeb.construct = construct;
 QmlWeb.createQmlObject = createQmlObject;
