@@ -224,7 +224,7 @@ function resolveClassImport(name, component) {
   }
 }
 
-function resolveComponent(imp, nocache) {
+function resolveComponent(imp, loaderComponent, nocache) {
   const engine = QmlWeb.engine;
 
   var component;

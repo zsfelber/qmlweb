@@ -6,12 +6,13 @@ class QMLComponent {
         if (this.$metaObject.length !== 1) {
           throw new Errror("Component should define 1 element : "+meta.clazz.$name+" "+meta.clazz.id);
         }
-        this.$metaObject = this.$metaObject[0];
+        this.$metaObject = QmlWeb.helpers.mergeObjects(this.$metaObject[0]);
       }
       this.$metaObject.$name = meta.clazz.$name;
       this.$metaObject.$id = meta.clazz.id;
       this.$metaObject.context = meta.context;
     } else {
+      this.$metaObject = QmlWeb.helpers.mergeObjects(meta.clazz);
       this.$metaObject = meta.clazz;
       this.$metaObject.context = meta.context;
     }
@@ -26,6 +27,8 @@ class QMLComponent {
       this.ctxQmldirs = meta.component.ctxQmldirs;
       this.componentImportPaths = meta.component.componentImportPaths;
       this.$basePath = meta.component.$basePath;
+
+      this.$metaObject.context = meta.context;
 
     } else {
 

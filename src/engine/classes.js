@@ -59,6 +59,9 @@ function construct(meta, parent, loaderComponent) {
 
   const item = constructSuper(meta, parent, loaderComponent);
 
+  // NOTE making a new level of class inheritance :
+  item = Object.create(item);
+
   // Finalize instantiation over supertype item :
 
   if (typeof item.dom !== "undefined") {
@@ -88,10 +91,11 @@ function construct(meta, parent, loaderComponent) {
 }
 
 function constructSuper(meta, parent, loaderComponent) {
+  if (!loaderComponent) loaderComponent = parent.$component;
   let item;
 
   // NOTE resolve superclass info:
-  var clinfo = QmlWeb.resolveClassImport(meta.$class, loaderComponent ? loaderComponent : parent.$component);
+  var clinfo = QmlWeb.resolveClassImport(meta.$class, loaderComponent);
 
   if (clinfo.classConstructor) {
     // NOTE class from module/qmldir cache:
@@ -102,7 +106,7 @@ function constructSuper(meta, parent, loaderComponent) {
   } else {
 
     // NOTE class component from resolved superclass info:
-    const component = QmlWeb.resolveComponent(clinfo);
+    const component = QmlWeb.resolveComponent(clinfo, loaderComponent);
 
     if (!component) {
       throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);
@@ -133,7 +137,7 @@ function createQmlObject(src, parent, file) {
   var resolvedUrl = QmlWeb.$resolvePath;
   file = file || /*Qt.*/resolvedUrl("createQmlObject_function");
 
-  var component = QmlWeb.resolveComponent({clazz, parent, file}, true);
+  var component = QmlWeb.resolveComponent({clazz, parent, file}, parent?parent.$component:null, true);
 
   const obj = component.createObject(parent);
 

@@ -27,7 +27,9 @@ class QMLContext {
     const newContext = Object.create(this);
     newContext.$contextId = ++contextIds;
     newContext.$parent = this;
-    newContext.$owner = owner;
+    newContext.$elements = {};
+    newContext.$elementoverloads = {};
+    newContext.$elementoverloadsnoalias = {};
     return newContext;
   }
 }
@@ -191,9 +193,6 @@ class QMLEngine {
     let newContext;
     if (!parent) {
       newContext = this.rootContext.create();
-      newContext.$elements = {};
-      newContext.$elementoverloads = {};
-      newContext.$elementoverloadsnoalias = {};
     }
 
     // Create and initialize objects
@@ -201,6 +200,7 @@ class QMLEngine {
     const component = new QMLComponent({
       clazz: clazz,
       context: newContext,
+      $basePath: file?QmlWeb.extractBasePath(file):null
     });
     this.$component = component;
 
