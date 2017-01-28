@@ -40,13 +40,6 @@ function formatPath(path, path0, first) {
 function createProperty(type, obj, propName, options) {
   if (!options) options = {};
 
-  if (!namespaceObject) {
-    if (!obj.$context) {
-      console.warn("properties.createProperty : missing namespaceObject . $context : "+obj);
-    }
-    namespaceObject = obj;
-  }
-
   const QMLProperty = QmlWeb.QMLProperty;
   const prop = new QMLProperty(type, obj, propName, options);
   function _set_prop(propName, prop, flags) {
@@ -136,14 +129,9 @@ function createProperty(type, obj, propName, options) {
  * Apply properties from metaObject to item.
  * @param {Object} metaObject Source of properties
  * @param {Object} item Target of property apply
- * @param {Object} namespaceObject Scope in which properties should be evaluated
- * @param {Object} namespaceObject.$context Component scope in which properties should be
  *                 evaluated
  */
 function applyProperties(metaObject, item) {
-  if (!namespaceObject) {
-    throw new Error("properties.applyProperties : missing namespaceObject argument.");
-  }
   const QMLProperty = QmlWeb.QMLProperty;
   var prevComponent = QmlWeb.engine.$component;
   QmlWeb.engine.$component = item.$component;
@@ -153,8 +141,7 @@ function applyProperties(metaObject, item) {
     if (metaObject.$children && metaObject.$children.length !== 0 && !(item instanceof QMLComponent)) {
       if (item.$defaultProperty) {
         item.$properties[item.$defaultProperty].set(
-            metaObject.$children, QMLProperty.ReasonInitPrivileged,
-            namespaceObject
+            metaObject.$children, QMLProperty.ReasonInitPrivileged
           );
       } else {
         throw new Error("Cannot assign to unexistant default property");
@@ -234,7 +221,7 @@ function applyProperty(item, i, value) {
   if (value instanceof QmlWeb.QMLSignalDefinition) {
     item[i] = QmlWeb.Signal.signal(i, value.parameters);
     if (!item.$parent) {
-      namespaceObject.$context[i] = item[i];
+      item.$context[i] = item[i];
     }
     return true;
   } else if (value instanceof QmlWeb.QMLMethod) {
@@ -242,11 +229,9 @@ function applyProperty(item, i, value) {
       throw new Error("Binding/run should be a function : " + value);
     }
     value.compile();
-    item[i] = value.run;//.bind(item);
-    //item[i] = value.eval(namespaceObject,
-    //  namespaceObject.$component.$basePath);
+    item[i] = value.run.bind(item);
     if (!item.$parent) {
-      namespaceObject.$context[i] = item[i];
+      item.$context[i] = item[i];
     }
     return true;
   } else if (value instanceof QmlWeb.QMLAliasDefinition) {
@@ -311,7 +296,7 @@ function connectSignal(item, signalName, value) {
       }
     }
   }
-  const slot = value.run;
+  const slot = value.run;//.bind(item);
   connection = _signal.connect(item, slot);
   connection.thisObj = this;
   connection.arglen = params.length;

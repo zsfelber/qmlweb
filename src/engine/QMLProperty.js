@@ -20,7 +20,6 @@ class QMLProperty {
     this.bound = options.bound;
     this.changed = QmlWeb.Signal.signal("changed", [{name:"val"}, {name:"oldVal"}, {name:"name"}], { obj });
     this.binding = null;
-    this.namespaceObject = null;
     this.value = undefined;
     this.type = type;
     this.animation = null;
@@ -109,7 +108,7 @@ class QMLProperty {
 
         var val = this.binding.get.call(this.obj);
 
-        this.$setVal(val, this.namespaceObject);
+        this.$setVal(val);
 
       } finally {
         for (var i in this.obsoleteConnections) {
@@ -228,11 +227,7 @@ class QMLProperty {
 
     let val = newVal;
     if (val instanceof QmlWeb.QMLBinding) {
-      if (!namespaceObject) {
-        throw new Error("Internal error: binding assigned without scope");
-      }
       this.binding = val;
-      this.namespaceObject = namespaceObject;
 
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         this.update(true);
