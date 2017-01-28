@@ -129,6 +129,12 @@ function resolveClass(file) {
   if (!clazz) {
     clazz = engine.classes[file];
   }
+
+  if (!clazz) {
+    clazz = QmlWeb.loadClass(file);
+    engine.classes[file] = clazz;
+  }
+
   return clazz;
 }
 
