@@ -245,8 +245,7 @@ function resolveComponent(imp, nocache) {
     //later from $createObject, not here
     //parent: imp.parent,
     $name: imp.clazz.$name,
-    $id: imp.clazz.id,
-    isFromFile: true
+    $id: imp.clazz.id
   });
   component.$basePath = extractBasePath(imp.file);
 

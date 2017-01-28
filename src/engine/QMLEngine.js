@@ -235,7 +235,6 @@ class QMLEngine {
       clazz: clazz,
       parent: parent,
       context: newContext,
-      isFromFile: true
     });
 
     // TODO gz undefined->component.$basePath

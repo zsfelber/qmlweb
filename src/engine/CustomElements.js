@@ -11,7 +11,7 @@ function getProperties(file) {
 
   const div = document.createElement("div");
   const engine = new QmlWeb.QMLEngine(div);
-  engine.loadFile(file);
+  QmlWeb.loadFile(file);
 
   const qml = engine.rootObject;
   const properties = Object.keys(qml.$properties).filter(name => {
@@ -65,7 +65,7 @@ function registerElement(name, file) {
       }
 
       const engine = this.engine = new QmlWeb.QMLEngine(this);
-      engine.loadFile(file);
+      QmlWeb.loadFile(file);
       engine.start();
       const qml = this.qml = engine.rootObject;
 

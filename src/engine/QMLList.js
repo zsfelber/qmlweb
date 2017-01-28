@@ -1,11 +1,11 @@
 function QMLList(meta, parent) {
   const list = [];
-  if (meta.clazz instanceof Array) {
-    for (const i in meta.clazz) {
+  if (meta instanceof Array) {
+    for (const i in meta) {
       // TODO gz
       list.push(QmlWeb.construct(meta[i], parent));
     }
-  } else if (meta.clazz instanceof QmlWeb.QMLMetaElement) {
+  } else if (meta instanceof QmlWeb.QMLMetaElement) {
     // TODO gz
     list.push(QmlWeb.construct(meta, parent));
   }

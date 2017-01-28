@@ -16,6 +16,7 @@ class QMLComponent {
     this.clazz = meta.clazz;
     this.$imports = meta.clazz.$imports; // for later use
     this.context = meta.context;
+    this.isFromFile = meta.isFromFile;
 
 
     // no component = is import root
@@ -53,7 +54,7 @@ class QMLComponent {
     const engine = QmlWeb.engine;
     for (let i = 0; i < this.$jsImports.length; ++i) {
       const importDesc = this.$jsImports[i];
-      const js = engine.loadJS($resolvePath(importDesc[1], this.$basePath));
+      const js = QmlWeb.loadJS($resolvePath(importDesc[1], this.$basePath));
 
       if (!js) {
         console.log("Component.finalizeImports: failed to import JavaScript",

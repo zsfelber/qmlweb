@@ -43,16 +43,15 @@ class QMLProperty {
   $setVal(val) {
     const constructors = this.obj.$component.moduleConstructors;
     if (constructors[this.type] === QmlWeb.qmlList) {
-      this.val = QmlWeb.qmlList({
-        clazz: val,
-      }, this.obj);
+      this.val = QmlWeb.qmlList(val, this.obj);
     } else if (val instanceof QmlWeb.QMLMetaElement) {
       const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
+      // Root element or nested Component element ?
       if (constructors[val.$class] === QMLComponent ||
           constructors[this.type] === QMLComponent) {
         this.val = new QMLComponent({
           clazz: val,
-          isFromFile: false
+          component: this.obj.$component
         });
 
         /* $basePath must be set here so that Components that are assigned to

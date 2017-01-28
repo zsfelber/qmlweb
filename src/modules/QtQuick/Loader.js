@@ -62,8 +62,8 @@ QmlWeb.registerQmlType({
 
     const meta = { clazz: clazz,
                    context: this,//TODO gz not yet working
-                   parent: this,
-                   isFromFile: false        };
+                   parent: this, // gz uses this
+                   component: this.$component        };
 
     const qmlComponent = new QMLComponent(meta);
     qmlComponent.$basePath = QmlWeb.extractBasePath(clazz.$file);
