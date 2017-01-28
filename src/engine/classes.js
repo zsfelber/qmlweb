@@ -62,10 +62,10 @@ function construct(meta) {
   var clinfo = QmlWeb.findClass(meta.object.$class, meta.component);
   clinfo.parent = meta.object.$parent;
 
-  if (clinfo.classConstructor) {
+  if (clinfo.moduleConstructor) {
     // NOTE superclass from module cache:
-    meta.super = clinfo.classConstructor;
-    item = new clinfo.classConstructor(meta);
+    meta.super = clinfo.moduleConstructor;
+    item = new clinfo.moduleConstructor(meta);
     meta.super = undefined;
   } else {
 

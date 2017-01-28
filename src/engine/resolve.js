@@ -179,7 +179,7 @@ function findClass(name, component) {
   }
 
   if (constructors !== undefined) {
-    return {classConstructor:constructors, path:path};
+    return {moduleConstructor:constructors, path:path};
   } else {
 
     // 2) 3)preloaded qrc-s  4)
