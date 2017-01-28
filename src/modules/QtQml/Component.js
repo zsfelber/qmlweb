@@ -21,12 +21,12 @@ class QMLComponent {
 
 
     // no component = is import root
-    if (meta.component) {
-      this.$jsImports = meta.component.$jsImports;
-      this.moduleConstructors = meta.component.moduleConstructors;
-      this.ctxQmldirs = meta.component.ctxQmldirs;
-      this.componentImportPaths = meta.component.componentImportPaths;
-      this.$basePath = meta.component.$basePath;
+    if (meta.loaderComponent) {
+      this.$jsImports = meta.loaderComponent.$jsImports;
+      this.moduleConstructors = meta.loaderComponent.moduleConstructors;
+      this.ctxQmldirs = meta.loaderComponent.ctxQmldirs;
+      this.componentImportPaths = meta.loaderComponent.componentImportPaths;
+      this.$basePath = meta.loaderComponent.$basePath;
 
       this.$metaObject.context = meta.context;
 

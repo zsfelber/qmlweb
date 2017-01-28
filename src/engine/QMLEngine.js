@@ -54,7 +54,6 @@ class QMLEngine {
     }
 
     // Cached component trees (post-QmlWeb.convertToEngine)
-    this.components = {};
     this.classes = {};
 
     // Cached parsed JS files (post-QmlWeb.jsparse)

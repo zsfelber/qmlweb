@@ -120,15 +120,7 @@ function addModulePath(moduleName, dirPath) {
 function resolveClass(file) {
   const engine = QmlWeb.engine;
 
-  let component = engine.components[file];
-  let clazz;
-  if (component) {
-    clazz = component.clazz;
-  }
-
-  if (!clazz) {
-    clazz = engine.classes[file];
-  }
+  let clazz = engine.classes[file];
 
   if (!clazz) {
     clazz = QmlWeb.loadClass(file);
@@ -224,35 +216,25 @@ function resolveClassImport(name, component) {
   }
 }
 
-function resolveComponent(imp, loaderComponent, nocache) {
+function resolveComponent(imp, loaderComponent) {
   const engine = QmlWeb.engine;
 
-  var component;
-  if (!nocache) {
-    component = engine.components[imp.file];
-    if (component) {
-      return component;
-    }
-  }
   if (!imp.clazz) {
     return undefined;
   }
 
   const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-  component = new QMLComponent({
+  var component = new QMLComponent({
     clazz: imp.clazz,
     $name: imp.clazz.$name,
     $id: imp.clazz.id,
-    $basePath: extractBasePath(imp.file)
+    $basePath: extractBasePath(imp.file),
+    loaderComponent: loaderComponent
   });
 
   // TODO gz  undefined -> component.$basePath  from createQmlObject
   QmlWeb.loadImports(imp.clazz.$imports, component);
 
-  if (!nocache) {
-    // TODO gz name->file
-    engine.components[imp.file] = component;
-  }
   return component;
 }
 
