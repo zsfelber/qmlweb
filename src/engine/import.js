@@ -61,9 +61,6 @@ function addComponentImportPath(component, dirpath, qualifier) {
 }
 
 function preloadImports(component, imports) {
-  if (component) {
-    throw new Error("Component imports already loaded. "+this.$component.$basePath+" "+component.$file+"  importContextId:"+component);
-  }
 
   const mergeObjects = QmlWeb.helpers.mergeObjects;
   let constructors = mergeObjects(modules.Main);
@@ -90,8 +87,9 @@ function preloadImports(component, imports) {
       constructors = mergeObjects(constructors, moduleConstructors);
     }
   }
+
   component.moduleConstructors = constructors;
-  QmlWeb.constructors = constructors; // TODO: why do we need this?
+  //QmlWeb.constructors = constructors; // TODO: why do we need this?
 }
 
 

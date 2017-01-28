@@ -15,8 +15,6 @@ function superAndInitMeta(self, meta) {
 }
 
 function initMeta(self, meta, info) {
-  self.$isFromFile = meta.isFromFile;
-  self.$component = meta.component;
   if (!self.$context) self.$context = meta.context;
   if (!self.$context) throw new Error("Instantiantion error, no context ! Either parent object nor metatype provides the 'context' variables' container !");
 
@@ -64,27 +62,27 @@ function construct(meta, parent) {
   // Finalize instantiation over supertype item :
 
   if (typeof item.dom !== "undefined") {
-    if (meta.clazz.id) {
-      item.dom.className += `  ${meta.clazz.id}`;
+    if (meta.id) {
+      item.dom.className += `  ${meta.id}`;
     }
   }
 
   // id
-  if (meta.clazz.id) {
-    if (item.$context.hasOwnProperty(meta.clazz.id)) {
-      console.warn("Context entry overriden by Element : "+meta.clazz.id+" object:"+item);
+  if (meta.id) {
+    if (item.$context.hasOwnProperty(meta.id)) {
+      console.warn("Context entry overriden by Element : "+meta.id+" object:"+item);
     }
     QmlWeb.setupGetterSetter(
-      item.$context, meta.clazz.id,
+      item.$context, meta.id,
       () => item,
       () => {}
     );
-    item.$context.$elements[meta.clazz.id] = item;
+    item.$context.$elements[meta.id] = item;
   }
 
   // Apply properties according to this metatype info
   // (Bindings won't get evaluated, yet)
-  QmlWeb.applyProperties(meta.clazz, item, item/*, item.$context*/);
+  QmlWeb.applyProperties(meta, item, item/*, item.$context*/);
 
   return item;
 }
@@ -93,9 +91,7 @@ function constructSuper(meta, parent) {
   let item;
 
   // NOTE resolve superclass info:
-  var clinfo = QmlWeb.resolveClassImport(meta.clazz.$class, meta.component);
-  //later from $createObject, not here
-  //clinfo.parent = meta.clazz.$parent;
+  var clinfo = QmlWeb.resolveClassImport(meta.$class, meta.component);
 
   if (clinfo.classConstructor) {
     // NOTE class from module/qmldir cache:
@@ -109,7 +105,7 @@ function constructSuper(meta, parent) {
     const component = QmlWeb.resolveComponent(clinfo);
 
     if (!component) {
-      throw new Error(`${meta.clazz.$name?"Toplevel:"+meta.clazz.$name:meta.clazz.id?"Element:"+meta.clazz.id:""}. No constructor found for ${meta.clazz.$class}`);
+      throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);
     }
 
     // NOTE recursive call to initialize the container for supertype  ($createObject -> constuct -> $createObject -> constuct ...) :

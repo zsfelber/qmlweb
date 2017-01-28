@@ -241,8 +241,6 @@ function resolveComponent(imp, nocache) {
   const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
   component = new QMLComponent({
     clazz: imp.clazz,
-    //later from $createObject, not here
-    //parent: imp.parent,
     $name: imp.clazz.$name,
     $id: imp.clazz.id
   });

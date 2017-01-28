@@ -10,13 +10,12 @@ class QMLComponent {
       }
       this.$metaObject.$name = meta.clazz.$name;
       this.$metaObject.$id = meta.clazz.id;
+      this.$metaObject.context = meta.context;
     } else {
       this.$metaObject = meta.clazz;
     }
     this.clazz = meta.clazz;
     this.$imports = meta.clazz.$imports; // for later use
-    this.context = meta.context;
-    this.isFromFile = meta.isFromFile;
 
 
     // no component = is import root
@@ -81,18 +80,15 @@ class QMLComponent {
 
     let item;
     try {
-      if (!this.context && !parent) {
+      if (!this.$metaObject.context && !parent) {
         throw new Error("No context passed to $createObject");
       }
 
       // NOTE recursive call to initialize the class then its container supertype  ($createObject -> constuct -> $createObject -> constuct ...) :
-      item = QmlWeb.construct({
-        clazz: this.$metaObject,
-        context, // no parent -> see initMeta
-        component: this,
-        isFromFile: this.isFromFile,
-      }, parent); // parent automatically forwards context, see QObject.constructor(parent)
-
+      // parent automatically forwards context, see QObject.constructor(parent)
+      // no parent -> this.$metaObject.context   see initMeta
+      item = QmlWeb.construct(this.$metaObject, parent);
+      item.$component = this;
       this.finalizeImports();
 
       for (var propname in properties) {

@@ -61,8 +61,7 @@ QmlWeb.registerQmlType({
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
 
     const meta = { clazz: clazz,
-                   context: this,//TODO gz not yet working
-                   parent: this, // gz uses this
+                   context: this,//TODO gz not yet working.  gz uses parent first (see createObject)
                    component: this.$component        };
 
     const qmlComponent = new QMLComponent(meta);
