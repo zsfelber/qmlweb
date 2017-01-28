@@ -133,6 +133,8 @@ See [Extending](docs/Extending.md).
 
 ## This Fork/Branch
 
+6. [@zsfelber/qmlweb](https://github.com/zsfelber/qmlweb).
+
 Intended to fix parse errors (like that of readonly property) and maybe another simple bugs which prevent my actual qml model to be compiled and used..
 
 Added:
@@ -159,5 +161,6 @@ Changed coding style to more advanced (also to support better ways), eg:
 - using 1 flag variable in QMLBinding(ImplFunction/ImplBlock/.../Bidrection/Alias), QMLProperty(reasons,priviligezed/break readonly, break bidirectional binding at set)
 instead of several global boolean properties
 - using 1 interface and 1 queue for engine.pendingOperations (instead of 'engine.bindedProperties' + engine.pendingOperations and 2 queues at startup finish)
-- using 1 namespaceObject instead of componentScope+objectScope, which was to decouple wrongly and hard to follow in debug (so in 2 or 3 cases I had to construct custom var = {..} namespace objects instead.
-It is ok to use trivial nsObject+nsObject.$context in most cases.)
+- Removed namespace objects, global executionContext, global $basePath stacks, componentScope+objectScope or so. These were confusing, lead to a lot of bugs.I simplified it.
+Using Component class which has the $basePath property, and "this" object and super (_proto) object hierarchy for stacking the context as many times as possible.
+- relocated a couple of compile time functions to resolve.js, load.js, import.js, classes.js

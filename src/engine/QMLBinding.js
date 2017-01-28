@@ -198,11 +198,11 @@ class QMLBinding {
     QmlWeb.engine.$component = this.$component;
 
     try {
-      if (!this.implGet) {
-        console.warn("Binding/run error  compiled:"+this.compiled+"  no compiled getter  src:\n"+this.src);
+      if (!this.implRun) {
+        console.warn("Binding/run error  compiled:"+this.compiled+"  no compiled runner  src:\n"+this.src);
         return;
       }
-      this.implGet.apply(this, arguments);
+      this.implRun.apply(this, arguments);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         console.warn("Binding/run error : "+err.message+(err.srcdumpok?" srcdump:ok":" "+this));
@@ -292,21 +292,6 @@ class QMLBinding {
   }
 
   bindSet() {
-    if (this.flags & QMLBinding.User) {
-      if ((this.flags&QMLBinding.ImplBlock) || !(this.flags&QMLBinding.ImplFunction)) {
-        throw new Error("Invalid Qt.Binding flags : "+this.flags," Valid flags:User,ImplFunction,Bidirectional,Alias");
-      }
-      if (!this.setterFunc) {
-        throw new Error("Invalid bidirectional Qt.binding call, no setterFunc: "+this);
-      }
-    } else {
-      if (this.flags&(QMLBinding.ImplFunction|QMLBinding.ImplBlock)) {
-        throw new Error("Invalid writable/bidirectional binding, it should be an expression : "+this);
-      }
-      if (!this.property) {
-        throw new Error("Invalid bidirectional binding, no property: "+this);
-      }
-    }
 
     var props, vvith;
     if (this.flags & QMLBinding.Alias) {
@@ -318,12 +303,28 @@ class QMLBinding {
     }
 
     if (this.flags & QMLBinding.User) {
-      this.stripFunction(this.setterFunc.toString(), true);
+      if ((this.flags&QMLBinding.ImplBlock) || !(this.flags&QMLBinding.ImplFunction)) {
+        throw new Error("Invalid Qt.Binding flags : "+this.flags," Valid flags:User,ImplFunction,Bidirectional,Alias");
+      }
+      if (!this.setterFunc) {
+        throw new Error("Invalid bidirectional Qt.binding call, no setterFunc: "+this);
+      }
 
-      return eval(`funcition ("__value", "__flags" ${this.args?", "+this.args,""}) {
-        ${vvith} ${this.args?this.args+"=__value;":""} ${this.src}
+      this.stripFunction(this.setterFunc.toString(), true);
+      if (this.args.split(",").length!==2) {
+        throw new Error("Invalid Qt.binding setter function arguments, should be (value, flags)");
+      }
+
+      return eval(`funcition (${this.args}) {
+        ${vvith} ${this.src}
       }`);
     } else {
+      if (this.flags&(QMLBinding.ImplFunction|QMLBinding.ImplBlock)) {
+        throw new Error("Invalid writable/bidirectional binding, it should be an expression : "+this);
+      }
+      if (!this.property) {
+        throw new Error("Invalid bidirectional binding, no property: "+this);
+      }
 
       // NOTE validate first
       var fp = QmlWeb.formatPath(this.property, this.property);
