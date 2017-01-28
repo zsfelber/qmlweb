@@ -57,10 +57,10 @@ function initMeta(self, meta, info) {
  */
 function construct(meta, parent, loaderComponent) {
 
-  const item = constructSuper(meta, parent, loaderComponent);
+  const superitem = constructSuper(meta, parent, loaderComponent);
 
   // NOTE making a new level of class inheritance :
-  item = Object.create(item);
+  const item = Object.create(superitem);
 
   // Finalize instantiation over supertype item :
 

@@ -27,8 +27,9 @@ class QMLComponent {
       this.ctxQmldirs = meta.loaderComponent.ctxQmldirs;
       this.componentImportPaths = meta.loaderComponent.componentImportPaths;
       this.$basePath = meta.loaderComponent.$basePath;
-
-      this.$metaObject.context = meta.context;
+      if (meta.$basePath && meta.$basePath !== this.$basePath) {
+        throw new Error("Component basePath:"+meta.$basePath+" in conflict with loader component : "+this.$basePath);
+      }
 
     } else {
 
@@ -37,6 +38,9 @@ class QMLComponent {
       this.ctxQmldirs = {}; // resulting components lookup table
       this.componentImportPaths = {};
       this.$basePath = meta.$basePath;
+      if (!this.$basePath) {
+        throw new Error("No component basePath present");
+      }
 
       const moduleImports = [];
       function _add_imp(importDesc) {
