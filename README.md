@@ -157,10 +157,18 @@ Changed init time load strategy: for a single property (in engine.applyPropertie
 signal evaluation reached uninitilized expression, or so. Then it places them to 1 single engine.pendingOperations queue, then attempts
 to resolve them again at startup finish. It became more flexible and intelligent.
 
-Changed coding style to more advanced (also to support better ways), eg:
+Removed namespace objects, global executionContext, global $basePath stacks, componentScope+objectScope, importContextId or so.
+These were too much complexity, source of a lot of experienced and possible bugs.I simplified it.
+Now using 1 single function parameter almost across whole api consequently :
+- current object passed as "this" func.call(obj,...), func.apply(obj,...), func.bind(obj,...) as possible
+- object.$context points to a shared QMLContext instance for loaded top component, parent is engine.rootContext
+(!== but parent of rootObject.context : rootObject is alterable if loading multiple roots subsequently)
+- Actual object's Component (obj.$component) for the $basePath, and a couple of import cache container variables (no importContextId anymore)
+- "this" object and super (_proto) hierarchy for stacking the context (currently loaded element's QML hierarchy is as of this.$component, this._proto.$component, this._proto._proto.$component ...)
+- (QtObject.) $parent instead of isTopComponent ( isTopComponent===(!cur.$parent) cur.$context===cur.$parent.$parent(...top).$context )
+
+Minor coding style changes, simplifications eg:
 - using 1 flag variable in QMLBinding(ImplFunction/ImplBlock/.../Bidrection/Alias), QMLProperty(reasons,priviligezed/break readonly, break bidirectional binding at set)
 instead of several global boolean properties
 - using 1 interface and 1 queue for engine.pendingOperations (instead of 'engine.bindedProperties' + engine.pendingOperations and 2 queues at startup finish)
-- Removed namespace objects, global executionContext, global $basePath stacks, componentScope+objectScope or so. These were confusing, lead to a lot of bugs.I simplified it.
-Using Component class which has the $basePath property, and "this" object and super (_proto) object hierarchy for stacking the context as many times as possible.
 - relocated a couple of compile time functions to resolve.js, load.js, import.js, classes.js

@@ -45,23 +45,23 @@ class Signal {
     }
     var connection;
     if (args.length === 1) {
-      connection = { signalObj: global, slot: args[0], type };
+      connection = { thisObj: global, slotObj: global, slot: args[0], type };
     } else if (typeof args[1] === "string" || args[1] instanceof String) {
       if (args[0].$tidyupList && args[0] !== this.obj) {
         args[0].$tidyupList.push(this.signal);
       }
       const slot = args[0][args[1]];
-      connection = { signalObj: args[0], slot, type };
+      connection = { thisObj: args[0], slotObj: args[0], slot, type };
     } else {
       if (args[0].$tidyupList &&
         (!this.obj || args[0] !== this.obj && args[0] !== this.obj.$parent)
       ) {
         args[0].$tidyupList.push(this.signal);
       }
-      connection = { signalObj: args[0], slot: args[1], type };
+      connection = { thisObj: args[0], slotObj: args[0], slot: args[1], type };
     }
     if (!connection.slot) {
-      throw new Error("Missing slot for signal:"+this.$name+"  connection   signalObj:"+connection.signalObj);
+      throw new Error("Missing slot for signal:"+this.$name+"  connection   slotObj:"+connection.slotObj);
     }
 
     connection.disconnect = function(all) {
@@ -94,14 +94,14 @@ class Signal {
       : typeof args[1] === "string" || args[1] instanceof String ? 3 : 4;
     let i = 0, j = 0;
     for (; i < this.connectedSlots.length; i++, j++) {
-      //const { slot, signalObj } = this.connectedSlots[i];
+      //const { slot, slotObj } = this.connectedSlots[i];
       const connection = this.connectedSlots[i];
       if (
         args.length === 0 ||
         callType === 1 && connection.slot === args[0] ||
-        callType === 2 && connection.signalObj === args[0] ||
-        callType === 3 && connection.signalObj === args[0] && connection.slot === args[0][args[1]] ||
-        connection.signalObj === args[0] && connection.slot === args[1]
+        callType === 2 && connection.slotObj === args[0] ||
+        callType === 3 && connection.slotObj === args[0] && connection.slot === args[0][args[1]] ||
+        connection.slotObj === args[0] && connection.slot === args[1]
       ) {
         this.tidyupConnection(connection);
         // We have removed an item from the list so the indexes shifted one
@@ -124,8 +124,8 @@ class Signal {
     for (const i in this.connectedSlots) {
       const con = this.connectedSlots[i];
       if (callType === 1 && con.slot === args[0] ||
-          callType === 2 && con.signalObj === args[0] && con.slot === args[0][args[1]] ||
-          con.signalObj === args[0] && con.slot === args[1]
+          callType === 2 && con.slotObj === args[0] && con.slot === args[0][args[1]] ||
+          con.slotObj === args[0] && con.slot === args[1]
       ) {
         return con;
       }
@@ -134,10 +134,10 @@ class Signal {
   }
 
   tidyupConnection(connection) {
-    if (connection.signalObj) {
-      const index = connection.signalObj.$tidyupList.indexOf(this.signal);
+    if (connection.slotObj) {
+      const index = connection.slotObj.$tidyupList.indexOf(this.signal);
       if (index >= 0) {
-        connection.signalObj.$tidyupList.splice(index, 1);
+        connection.slotObj.$tidyupList.splice(index, 1);
       }
     }
   }
@@ -183,7 +183,7 @@ class Signal {
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
       if (err.ctType === "PendingEvaluation") {
-        //console.warn("PendingEvaluation : Signal :" + desc.signal.$name + "  signalObj:" + desc.signalObj+"  pending operation:", err.message);
+        //console.warn("PendingEvaluation : Signal :" + desc.signal.$name + "  slotObj:" + desc.slotObj+" thisObj:"+connection.thisObj  pending operation:", err.message);
         QmlWeb.engine.pendingOperations.push({
           fun:desc.slot,
           thisObj:desc.thisObj,
@@ -194,9 +194,9 @@ class Signal {
         });
       } else {
         if (desc.binding) {
-          console.warn("Signal :" + desc.signal.$name + "  signalObj:" + desc.signalObj+"  slot(autobound) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.binding.toString());
+          console.warn("Signal :" + desc.signal.$name + "  slotObj:" + desc.slotObj+" thisObj:"+connection.thisObj+"  slot(autobound) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.binding.toString());
         } else {
-          console.warn("Signal :" + desc.signal.$name + "  signalObj:" + desc.signalObj+"  slot(user function) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.slot.toString());
+          console.warn("Signal :" + desc.signal.$name + "  slotObj:" + desc.slotObj+" thisObj:"+connection.thisObj+"  slot(user function) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.slot.toString());
         }
       }
       err.srcdumpok = 1;
