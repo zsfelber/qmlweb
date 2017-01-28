@@ -90,7 +90,7 @@ function registerElement(name, file) {
             }
           }
         );
-        qml.$properties[pname].changed.connect(() => this.applyAttribute(attr));
+        qml.$properties[pname].changed.connect(() => this.applyAttribute(attr)).thisObj = this;
       });
 
       // Set and update wrapper width/height
@@ -98,10 +98,10 @@ function registerElement(name, file) {
       this.style.height = `${qml.height}px`;
       qml.$properties.width.changed.connect(width => {
         this.style.width = `${width}px`;
-      });
+      }).thisObj = this;
       qml.$properties.height.changed.connect(height => {
         this.style.height = `${height}px`;
-      });
+      }).thisObj = this;
     }
 
     static get observedAttributes() {

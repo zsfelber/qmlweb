@@ -237,7 +237,7 @@ function applyProperty(item, i, value) {
       throw new Error("Binding/run should be a function : " + value);
     }
     value.compile();
-    item[i] = value.run.bind(item);
+    item[i] = value.run;//.bind(item);
     //item[i] = value.eval(namespaceObject,
     //  namespaceObject.$context.$basePath);
     if (!item.$parent) {
@@ -306,8 +306,9 @@ function connectSignal(item, signalName, value) {
       }
     }
   }
-  const slot = value.run.bind(this);
+  const slot = value.run;
   connection = _signal.connect(item, slot);
+  connection.thisObj = this;
   connection.arglen = params.length;
   connection.binding = value;
   return connection;
