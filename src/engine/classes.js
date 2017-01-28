@@ -62,10 +62,10 @@ function construct(meta) {
   var clinfo = QmlWeb.findClass(meta.object.$class, meta.component);
   clinfo.parent = meta.object.$parent;
 
-  if (clinfo.moduleConstructor) {
-    // NOTE class from module cache:
-    meta.super = clinfo.moduleConstructor;
-    item = new clinfo.moduleConstructor(meta);
+  if (clinfo.classConstructor) {
+    // NOTE class from module/qmldir cache:
+    meta.super = clinfo.classConstructor;
+    item = new clinfo.classConstructor(meta);
     meta.super = undefined;
   } else {
 
@@ -76,7 +76,7 @@ function construct(meta) {
       throw new Error(`${meta.object.$name?"Toplevel:"+meta.object.$name:meta.object.id?"Element:"+meta.object.id:""}. No constructor found for ${meta.object.$class}`);
     }
 
-    // NOTE recursive call to initialize the parent class  ($createObject -> constuct -> $createObject -> constuct ...) :
+    // NOTE recursive call to initialize the parent container  ($createObject -> constuct -> $createObject -> constuct ...) :
     item = component.$createObject(meta.parent);
 
     if (typeof item.dom !== "undefined") {
@@ -116,7 +116,7 @@ function createImpComponent(imp, nocache) {
 
   const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
   component = new QMLComponent({
-    object: imp.clazz,
+    clazz: imp.clazz,
     parent: imp.parent,
     $name: imp.clazz.$name,
     $id: imp.clazz.id,

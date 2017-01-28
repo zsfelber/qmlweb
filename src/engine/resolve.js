@@ -126,7 +126,7 @@ function resolveImport(name) {
   let clazz;
   // TODO gz
   if (component) {
-    clazz = component.object;
+    clazz = component.clazz;
   }
 
   if (!clazz) {
@@ -179,7 +179,7 @@ function findClass(name, component) {
   }
 
   if (constructors !== undefined) {
-    return {moduleConstructor:constructors, path:path};
+    return {classConstructor:constructors, path:path};
   } else {
 
     // 2) 3)preloaded qrc-s  4)

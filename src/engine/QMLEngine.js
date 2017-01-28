@@ -228,7 +228,7 @@ class QMLEngine {
     // Create and initialize objects
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const component = new QMLComponent({
-      object: clazz,
+      clazz: clazz,
       parent: parentComponent,
       context: newContext,
       isFromFile: true

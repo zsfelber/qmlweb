@@ -58,7 +58,7 @@ QmlWeb.registerQmlType({
     let clazz;
     // TODO gz
     if (component) {
-      clazz = component.object;
+      clazz = component.clazz;
     }
 
     if (!clazz) {
@@ -68,7 +68,7 @@ QmlWeb.registerQmlType({
     QmlWeb.helpers.copy(this, QmlWeb.engine.rootContext);
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
 
-    const meta = { object: clazz,
+    const meta = { clazz: clazz,
                    context: this,
                    parent: this,
                    isFromFile: false        };

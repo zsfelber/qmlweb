@@ -53,7 +53,7 @@ class QMLProperty {
       if (constructors[val.$class] === QMLComponent ||
           constructors[this.type] === QMLComponent) {
         this.val = new QMLComponent({
-          object: val,
+          clazz: val,
           parent: this.obj,
           context: namespaceObject.$context,
           isFromFile: false
@@ -68,6 +68,8 @@ class QMLProperty {
          * Component.createObject. */
         this.val.$basePath = namespaceObject.$context.$basePath;
       } else {
+        // NOTE gz : key entry point of QmlWeb.construct
+        // all the other ones just forward this
         this.val = QmlWeb.construct({
           object: val,
           parent: this.obj,
