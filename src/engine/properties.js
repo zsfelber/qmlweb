@@ -187,7 +187,7 @@ function applyProperties(metaObject, item) {
         if (item.$setCustomSlot) {
           item.$setCustomSlot(signalName, value);
           continue;
-        } else if (connectSignal(item, signalName, value)) {
+        } else if (connectSignal.call(item, item, signalName, value)) {
           continue;
         }
       }
@@ -306,9 +306,7 @@ function connectSignal(item, signalName, value) {
       }
     }
   }
-  // Don't pass in __basePath argument, as QMLEngine.$basePath is set in the
-  // value.src, as we need it set at the time the slot is called.
-  const slot = value.run(namespaceObject);
+  const slot = value.run.bind(this);
   connection = _signal.connect(item, slot);
   connection.arglen = params.length;
   connection.binding = value;
