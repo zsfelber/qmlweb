@@ -242,9 +242,9 @@ function resolveComponent(imp, nocache) {
   component = new QMLComponent({
     clazz: imp.clazz,
     $name: imp.clazz.$name,
-    $id: imp.clazz.id
+    $id: imp.clazz.id,
+    $basePath: extractBasePath(imp.file)
   });
-  component.$basePath = extractBasePath(imp.file);
 
   // TODO gz  undefined -> component.$basePath  from createQmlObject
   QmlWeb.loadImports(imp.clazz.$imports, component);

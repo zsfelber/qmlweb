@@ -52,12 +52,6 @@ class QMLProperty {
           clazz: val,
           component: this.obj.$component
         });
-
-        /* $basePath must be set here so that Components that are assigned to
-         * properties (e.g. Repeater delegates) can properly resolve child
-         * Components that live in the same directory in
-         * Component.createObject. */
-        this.val.$basePath = this.obj.$component.$basePath;
       } else {
         // NOTE gz : key entry point of QmlWeb.construct
         // all the other ones just forward this

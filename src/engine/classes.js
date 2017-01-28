@@ -55,9 +55,9 @@ function initMeta(self, meta, info) {
  *                      context
  * @return {Object} New qml object
  */
-function construct(meta, parent) {
+function construct(meta, parent, loaderComponent) {
 
-  const item = constructSuper(meta, parent);
+  const item = constructSuper(meta, parent, loaderComponent);
 
   // Finalize instantiation over supertype item :
 
@@ -87,11 +87,11 @@ function construct(meta, parent) {
   return item;
 }
 
-function constructSuper(meta, parent) {
+function constructSuper(meta, parent, loaderComponent) {
   let item;
 
   // NOTE resolve superclass info:
-  var clinfo = QmlWeb.resolveClassImport(meta.$class, meta.component);
+  var clinfo = QmlWeb.resolveClassImport(meta.$class, loaderComponent ? loaderComponent : parent.$component);
 
   if (clinfo.classConstructor) {
     // NOTE class from module/qmldir cache:

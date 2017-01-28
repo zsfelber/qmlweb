@@ -24,6 +24,7 @@ class QMLComponent {
       this.moduleConstructors = meta.component.moduleConstructors;
       this.ctxQmldirs = meta.component.ctxQmldirs;
       this.componentImportPaths = meta.component.componentImportPaths;
+      this.$basePath = meta.component.$basePath;
 
     } else {
 
@@ -31,6 +32,7 @@ class QMLComponent {
       this.moduleConstructors = {};
       this.ctxQmldirs = {}; // resulting components lookup table
       this.componentImportPaths = {};
+      this.$basePath = meta.$basePath;
 
       const moduleImports = [];
       function _add_imp(importDesc) {
@@ -84,10 +86,10 @@ class QMLComponent {
         throw new Error("No context passed to $createObject");
       }
 
-      // NOTE recursive call to initialize the class then its container supertype  ($createObject -> constuct -> $createObject -> constuct ...) :
+      // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.$metaObject.context   see initMeta
-      item = QmlWeb.construct(this.$metaObject, parent);
+      item = QmlWeb.construct(this.$metaObject, parent, this);
       item.$component = this;
       this.finalizeImports();
 

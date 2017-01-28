@@ -206,10 +206,6 @@ class QMLEngine {
 
     // TODO gz undefined->component.$basePath
     QmlWeb.loadImports(clazz.$imports, component);
-    // TODO gz
-    if (this.$object) {
-      component.$basePath = this.$component.$basePath;
-    }
 
     this.rootObject = component.$createObject(parent);
     if (this.rootObject.dom) {

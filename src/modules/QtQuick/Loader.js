@@ -62,12 +62,13 @@ QmlWeb.registerQmlType({
 
     const meta = { clazz: clazz,
                    context: this,//TODO gz not yet working.  gz uses parent first (see createObject)
-                   component: this.$component        };
+                   component: this.$component,
+                   $basePath: QmlWeb.extractBasePath(clazz.$file)// TODO gz  ignored if component presents
+                           };
 
     const qmlComponent = new QMLComponent(meta);
-    qmlComponent.$basePath = QmlWeb.extractBasePath(clazz.$file);
-    qmlComponent.$imports = clazz.$imports;
     QmlWeb.loadImports(clazz.$imports, qmlComponent);
+
     const loadedComponent = this.$createComponentObject(qmlComponent, this);
     this.sourceComponent = loadedComponent;
     this.$sourceUrl = fileName;
