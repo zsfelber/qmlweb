@@ -36,15 +36,15 @@ const Qt = {
     const uri = $resolvePath(path);
 
     /* Handle recursive includes */
-    if (QmlWeb.executionContext.$qmlJsIncludes === undefined) {
-      QmlWeb.executionContext.$qmlJsIncludes = [];
+    if (QmlWeb.engine.$component.$qmlJsIncludes === undefined) {
+      QmlWeb.engine.$component.$qmlJsIncludes = [];
     }
 
-    if (QmlWeb.executionContext.$qmlJsIncludes.indexOf(uri) >= 0) {
+    if (QmlWeb.engine.$component.$qmlJsIncludes.indexOf(uri) >= 0) {
       return;
     }
 
-    QmlWeb.executionContext.$qmlJsIncludes.push(uri);
+    QmlWeb.engine.$component.$qmlJsIncludes.push(uri);
 
     const js = QmlWeb.loadJS(uri);
 
@@ -53,7 +53,7 @@ const Qt = {
       return;
     }
 
-    QmlWeb.importJavascriptInContext(js, QmlWeb.executionContext);
+    QmlWeb.importJavascriptInContext(js, QmlWeb.engine.$component);
   },
 
   // Qt.binding

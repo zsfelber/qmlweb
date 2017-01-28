@@ -156,7 +156,7 @@ function resolveImport(name) {
     const nameIsUrl = $parseURI(name) !== undefined;
     if (!nameIsUrl) {
       const moreDirs = importSearchPaths(
-        QmlWeb.executionContext.$importContextId/*TODO gz component*/);
+        QmlWeb.engine.$component.$importContextId/*TODO gz component*/);
       for (let i = 0; i < moreDirs.length; i++) {
         file = `${moreDirs[i]}${name}`;
         // TODO gz resolveClass  += engine.containers[...]

@@ -145,81 +145,86 @@ function applyProperties(metaObject, item) {
     throw new Error("properties.applyProperties : missing namespaceObject argument.");
   }
   const QMLProperty = QmlWeb.QMLProperty;
-  QmlWeb.executionContext = namespaceObject.$context;
+  var prevComponent = QmlWeb.engine.$component;
+  QmlWeb.engine.$component = item.$component;
 
-  const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-  if (metaObject.$children && metaObject.$children.length !== 0 && !(item instanceof QMLComponent)) {
-    if (item.$defaultProperty) {
-      item.$properties[item.$defaultProperty].set(
-          metaObject.$children, QMLProperty.ReasonInitPrivileged,
-          namespaceObject
-        );
-    } else {
-      throw new Error("Cannot assign to unexistant default property");
-    }
-  }
-
-  // We purposefully set the default property AFTER using it, in order to only
-  // have it applied for instantiations of this component, but not for its
-  // internal children
-  if (metaObject.$defaultProperty) {
-    item.$defaultProperty = metaObject.$defaultProperty;
-  }
-
-  for (const i in metaObject) {
-    let _task;
-    const value = metaObject[i];
-    try {
-      if (i === "id" || i === "$class") { // keep them
-        item[i] = value;
-        continue;
-      }
-
-      // skip global id's and internal values
-      if (i === "id" || i[0] === "$") { // TODO: what? See above.
-        continue;
-      }
-
-      // slots
-      if (i.indexOf("on") === 0 && i.length > 2 && /[A-Z]/.test(i[2])) {
-        // TODO binding when whithin group ??
-        const signalName = i[2].toLowerCase() + i.slice(3);
-        if (item.$setCustomSlot) {
-          item.$setCustomSlot(signalName, value);
-          continue;
-        } else if (connectSignal.call(item, item, signalName, value)) {
-          continue;
-        }
-      }
-
-      if (value instanceof Object) {
-        if (applyProperty(item, i, value)) {
-          continue;
-        }
-      }
-
-      if (item.$properties && i in item.$properties) {
-        item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged);
-      } else if (i in item) {
-        item[i] = value;
-      } else if (item.$setCustomData) {
-        item.$setCustomData(i, value);
-      } else if (!trivialProperties[i]) {
-        console.warn(
-          `Cannot assign to non-existent property "${i}". Ignoring assignment.`
-        );
-      }
-    } catch (err) {
-      if (err.ctType === "PendingEvaluation") {
-        //console.warn("PendingEvaluation : Cannot apply property bindings (reevaluating at startup) :" + i + "  item:" + item);
+  try {
+    const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
+    if (metaObject.$children && metaObject.$children.length !== 0 && !(item instanceof QMLComponent)) {
+      if (item.$defaultProperty) {
+        item.$properties[item.$defaultProperty].set(
+            metaObject.$children, QMLProperty.ReasonInitPrivileged,
+            namespaceObject
+          );
       } else {
-        console.warn("Cannot apply property bindings  :" + i + "  item:" + item+"  "+err);
-      }
-
-      if (QmlWeb.engine.operationState === QmlWeb.QMLOperationState.Idle) {
-        throw err;
+        throw new Error("Cannot assign to unexistant default property");
       }
     }
+
+    // We purposefully set the default property AFTER using it, in order to only
+    // have it applied for instantiations of this component, but not for its
+    // internal children
+    if (metaObject.$defaultProperty) {
+      item.$defaultProperty = metaObject.$defaultProperty;
+    }
+
+    for (const i in metaObject) {
+      let _task;
+      const value = metaObject[i];
+      try {
+        if (i === "id" || i === "$class") { // keep them
+          item[i] = value;
+          continue;
+        }
+
+        // skip global id's and internal values
+        if (i === "id" || i[0] === "$") { // TODO: what? See above.
+          continue;
+        }
+
+        // slots
+        if (i.indexOf("on") === 0 && i.length > 2 && /[A-Z]/.test(i[2])) {
+          // TODO binding when whithin group ??
+          const signalName = i[2].toLowerCase() + i.slice(3);
+          if (item.$setCustomSlot) {
+            item.$setCustomSlot(signalName, value);
+            continue;
+          } else if (connectSignal.call(item, item, signalName, value)) {
+            continue;
+          }
+        }
+
+        if (value instanceof Object) {
+          if (applyProperty(item, i, value)) {
+            continue;
+          }
+        }
+
+        if (item.$properties && i in item.$properties) {
+          item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged);
+        } else if (i in item) {
+          item[i] = value;
+        } else if (item.$setCustomData) {
+          item.$setCustomData(i, value);
+        } else if (!trivialProperties[i]) {
+          console.warn(
+            `Cannot assign to non-existent property "${i}". Ignoring assignment.`
+          );
+        }
+      } catch (err) {
+        if (err.ctType === "PendingEvaluation") {
+          //console.warn("PendingEvaluation : Cannot apply property bindings (reevaluating at startup) :" + i + "  item:" + item);
+        } else {
+          console.warn("Cannot apply property bindings  :" + i + "  item:" + item+"  "+err);
+        }
+
+        if (QmlWeb.engine.operationState === QmlWeb.QMLOperationState.Idle) {
+          throw err;
+        }
+      }
+    }
+  } finally {
+    QmlWeb.engine.$component = prevComponent;
   }
 }
 

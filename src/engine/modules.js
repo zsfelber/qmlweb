@@ -1,4 +1,3 @@
-QmlWeb.executionContext = null;
 const notfound = {};
 
 const modules = {

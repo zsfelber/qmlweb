@@ -236,6 +236,7 @@ class QMLEngine {
       parent: parent,
       context: newContext,
     });
+    this.$component = component;
 
     // TODO gz undefined->component.$basePath
     QmlWeb.loadImports(clazz.$imports, component);

@@ -87,7 +87,7 @@ class QMLComponent {
 
       // NOTE recursive call to initialize the class then its container supertype  ($createObject -> constuct -> $createObject -> constuct ...) :
       item = QmlWeb.construct({
-        object: this.$metaObject,
+        clazz: this.$metaObject,
         context, // no parent -> see initMeta
         component: this,
         isFromFile: this.isFromFile,
