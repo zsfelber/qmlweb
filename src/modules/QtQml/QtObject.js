@@ -25,11 +25,11 @@ QmlWeb.registerQmlType({
 
     // Component get own properties
     this.$attributes = [];
-    for (const key in meta.object) {
-      if (!meta.object.hasOwnProperty(key) || !meta.object[key]) {
+    for (const key in meta.clazz) {
+      if (!meta.clazz.hasOwnProperty(key) || !meta.clazz[key]) {
         continue;
       }
-      const name = meta.object[key].__proto__.constructor.name;
+      const name = meta.clazz[key].__proto__.constructor.name;
       if (name === "QMLPropertyDefinition" || name === "QMLAliasDefinition") {
         this.$attributes.push(key);
       }

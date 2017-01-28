@@ -41,7 +41,7 @@ QmlWeb.registerQmlType({
     this.dom.style.pointerEvents = "none";
     // In case the class is qualified, only use the last part for the css class
     // name.
-    const classComponent = meta.object.$class.split(".").pop();
+    const classComponent = meta.clazz.$class.split(".").pop();
     this.dom.className = `${classComponent}${this.id ? ` ${this.id}` : ""}`;
     this.css = this.dom.style;
     this.impl = null; // Store the actually drawn element

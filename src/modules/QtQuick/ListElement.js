@@ -8,11 +8,11 @@ QmlWeb.registerQmlType({
     QmlWeb.superAndInitMeta(this, meta);
 
     const createProperty = QmlWeb.createProperty;
-    for (const i in meta.object) {
+    for (const i in meta.clazz) {
       if (i[0] !== "$") {
         createProperty("variant", this, i);
       }
     }
-    QmlWeb.applyProperties(meta.object, this, this/*, this.$context*/);
+    QmlWeb.applyProperties(meta.clazz, this, this/*, this.$context*/);
   }
 });

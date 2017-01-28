@@ -60,10 +60,10 @@ function initMeta(self, meta, info) {
 function construct(meta, parent) {
   let item;
 
-  // NOTE resolve class info:
-  var clinfo = QmlWeb.resolveClassImport(meta.object.$class, meta.component);
+  // NOTE resolve superclass info:
+  var clinfo = QmlWeb.resolveClassImport(meta.clazz.$class, meta.component);
   //later from $createObject, not here
-  //clinfo.parent = meta.object.$parent;
+  //clinfo.parent = meta.clazz.$parent;
 
   if (clinfo.classConstructor) {
     // NOTE class from module/qmldir cache:
@@ -73,40 +73,43 @@ function construct(meta, parent) {
     meta.super = undefined;
   } else {
 
-    // NOTE class component from resolved info:
+    // NOTE class component from resolved superclass info:
     const component = QmlWeb.resolveComponent(clinfo);
 
     if (!component) {
-      throw new Error(`${meta.object.$name?"Toplevel:"+meta.object.$name:meta.object.id?"Element:"+meta.object.id:""}. No constructor found for ${meta.object.$class}`);
+      throw new Error(`${meta.clazz.$name?"Toplevel:"+meta.clazz.$name:meta.clazz.id?"Element:"+meta.clazz.id:""}. No constructor found for ${meta.clazz.$class}`);
     }
 
-    // NOTE recursive call to initialize the container supertype  ($createObject -> constuct -> $createObject -> constuct ...) :
+    // NOTE recursive call to initialize the container for supertype  ($createObject -> constuct -> $createObject -> constuct ...) :
     item = component.$createObject(parent);
 
     if (typeof item.dom !== "undefined") {
       item.dom.className += ` ${clinfo.path[clinfo.path.length - 1]}`;
-      if (meta.object.id) {
-        item.dom.className += `  ${meta.object.id}`;
+      if (meta.clazz.id) {
+        item.dom.className += `  ${meta.clazz.id}`;
       }
     }
     // Handle default properties
   }
 
+  // Finalize instantiation over supertype item :
+
   // id
-  if (meta.object.id) {
-    if (item.$context.hasOwnProperty(meta.object.id)) {
-      console.warn("Context entry overriden by Element : "+meta.object.id+" object:"+item);
+  if (meta.clazz.id) {
+    if (item.$context.hasOwnProperty(meta.clazz.id)) {
+      console.warn("Context entry overriden by Element : "+meta.clazz.id+" object:"+item);
     }
     QmlWeb.setupGetterSetter(
-      item.$context, meta.object.id,
+      item.$context, meta.clazz.id,
       () => item,
       () => {}
     );
-    item.$context.$elements[meta.object.id] = item;
+    item.$context.$elements[meta.clazz.id] = item;
   }
 
-  // Apply properties (Bindings won't get evaluated, yet)
-  QmlWeb.applyProperties(meta.object, item, item/*, item.$context*/);
+  // Apply properties according to this metatype info
+  // (Bindings won't get evaluated, yet)
+  QmlWeb.applyProperties(meta.clazz, item, item/*, item.$context*/);
 
   return item;
 }

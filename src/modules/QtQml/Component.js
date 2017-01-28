@@ -1,17 +1,17 @@
 class QMLComponent {
   constructor(meta) {
-    if (QmlWeb.constructors[meta.object.$class] === QMLComponent) {
-      this.$metaObject = meta.object.$children;
+    if (QmlWeb.constructors[meta.clazz.$class] === QMLComponent) {
+      this.$metaObject = meta.clazz.$children;
       if (this.$metaObject instanceof Array) {
         if (this.$metaObject.length !== 1) {
-          throw new Errror("Component should define 1 element : "+meta.object.$name+" "+meta.object.id);
+          throw new Errror("Component should define 1 element : "+meta.clazz.$name+" "+meta.clazz.id);
         }
         this.$metaObject = this.$metaObject[0];
       }
-      this.$metaObject.$name = meta.object.$name;
-      this.$metaObject.$id = meta.object.id;
+      this.$metaObject.$name = meta.clazz.$name;
+      this.$metaObject.$id = meta.clazz.id;
     } else {
-      this.$metaObject = meta.object;
+      this.$metaObject = meta.clazz;
     }
     this.clazz = meta.clazz;
     this.$imports = meta.clazz.$imports; // for later use
@@ -41,9 +41,9 @@ class QMLComponent {
         }
       }
 
-      if (meta.object.$imports) {
-        for (let i = 0; i < meta.object.$imports.length; ++i) {
-          _add_imp(meta.object.$imports[i]);
+      if (meta.clazz.$imports) {
+        for (let i = 0; i < meta.clazz.$imports.length; ++i) {
+          _add_imp(meta.clazz.$imports[i]);
         }
       }
       QmlWeb.preloadImports(this, moduleImports);
