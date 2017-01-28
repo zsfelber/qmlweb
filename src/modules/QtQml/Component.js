@@ -80,7 +80,7 @@ class QMLComponent {
 
     let item;
     try {
-      if (!this) {
+      if (!this.context && !parent) {
         throw new Error("No context passed to $createObject");
       }
 
@@ -88,7 +88,7 @@ class QMLComponent {
       item = QmlWeb.construct({
         object: this.$metaObject,
         parent, // parent automatically forwards context, see QObject.constructor(parent)
-        context,
+        context, // no parent -> see initMeta
         component: this,
         isFromFile: this.isFromFile,
       });
