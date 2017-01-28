@@ -58,6 +58,38 @@ function initMeta(self, meta, info) {
  * @return {Object} New qml object
  */
 function construct(meta, parent) {
+
+  cons item = constructSuper(meta, parent);
+
+  // Finalize instantiation over supertype item :
+
+  if (typeof item.dom !== "undefined") {
+    if (meta.clazz.id) {
+      item.dom.className += `  ${meta.clazz.id}`;
+    }
+  }
+
+  // id
+  if (meta.clazz.id) {
+    if (item.$context.hasOwnProperty(meta.clazz.id)) {
+      console.warn("Context entry overriden by Element : "+meta.clazz.id+" object:"+item);
+    }
+    QmlWeb.setupGetterSetter(
+      item.$context, meta.clazz.id,
+      () => item,
+      () => {}
+    );
+    item.$context.$elements[meta.clazz.id] = item;
+  }
+
+  // Apply properties according to this metatype info
+  // (Bindings won't get evaluated, yet)
+  QmlWeb.applyProperties(meta.clazz, item, item/*, item.$context*/);
+
+  return item;
+}
+
+function constructSuper(meta, parent) {
   let item;
 
   // NOTE resolve superclass info:
@@ -85,32 +117,9 @@ function construct(meta, parent) {
 
     if (typeof item.dom !== "undefined") {
       item.dom.className += ` ${clinfo.path[clinfo.path.length - 1]}`;
-      if (meta.clazz.id) {
-        item.dom.className += `  ${meta.clazz.id}`;
-      }
     }
     // Handle default properties
   }
-
-  // Finalize instantiation over supertype item :
-
-  // id
-  if (meta.clazz.id) {
-    if (item.$context.hasOwnProperty(meta.clazz.id)) {
-      console.warn("Context entry overriden by Element : "+meta.clazz.id+" object:"+item);
-    }
-    QmlWeb.setupGetterSetter(
-      item.$context, meta.clazz.id,
-      () => item,
-      () => {}
-    );
-    item.$context.$elements[meta.clazz.id] = item;
-  }
-
-  // Apply properties according to this metatype info
-  // (Bindings won't get evaluated, yet)
-  QmlWeb.applyProperties(meta.clazz, item, item/*, item.$context*/);
-
   return item;
 }
 
