@@ -224,7 +224,6 @@ function resolveComponent(imp, nocache) {
   var component;
   if (!nocache) {
     component = engine.components[imp.file];
-    // TODO gz (parent : remove or ?)
     if (component) {
       return component;
     }
@@ -237,7 +236,8 @@ function resolveComponent(imp, nocache) {
   const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
   component = new QMLComponent({
     clazz: imp.clazz,
-    parent: imp.parent,
+    //later from $createObject, not here
+    //parent: imp.parent,
     $name: imp.clazz.$name,
     $id: imp.clazz.id,
     isFromFile: true

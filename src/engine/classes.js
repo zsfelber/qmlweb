@@ -62,7 +62,8 @@ function construct(meta) {
 
   // NOTE resolve class info:
   var clinfo = QmlWeb.resolveClassImport(meta.object.$class, meta.component);
-  clinfo.parent = meta.object.$parent;
+  //later from $createObject, not here
+  //clinfo.parent = meta.object.$parent;
 
   if (clinfo.classConstructor) {
     // NOTE class from module/qmldir cache:
