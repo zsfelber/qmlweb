@@ -58,25 +58,25 @@ function initMeta(self, meta, info) {
 function construct(meta) {
   let item;
 
-  // NOTE resolve superclass info:
+  // NOTE resolve class info:
   var clinfo = QmlWeb.findClass(meta.object.$class, meta.component);
   clinfo.parent = meta.object.$parent;
 
   if (clinfo.moduleConstructor) {
-    // NOTE superclass from module cache:
+    // NOTE class from module cache:
     meta.super = clinfo.moduleConstructor;
     item = new clinfo.moduleConstructor(meta);
     meta.super = undefined;
   } else {
 
-    // NOTE superclass component from resolved info:
+    // NOTE class component from resolved info:
     const component = createImpComponent(clinfo);
 
     if (!component) {
       throw new Error(`${meta.object.$name?"Toplevel:"+meta.object.$name:meta.object.id?"Element:"+meta.object.id:""}. No constructor found for ${meta.object.$class}`);
     }
 
-    // NOTE recursive call to initialize the superclass  ($createObject -> constuct -> $createObject -> constuct ...) :
+    // NOTE recursive call to initialize the parent class  ($createObject -> constuct -> $createObject -> constuct ...) :
     item = component.$createObject(meta.parent);
 
     if (typeof item.dom !== "undefined") {

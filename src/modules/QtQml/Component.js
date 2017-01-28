@@ -81,7 +81,7 @@ class QMLComponent {
         throw new Error("No context passed to $createObject");
       }
 
-      // NOTE recursive call to initialize the class then its superclass  ($createObject -> constuct -> $createObject -> constuct ...) :
+      // NOTE recursive call to initialize the class then its parent class  ($createObject -> constuct -> $createObject -> constuct ...) :
       item = QmlWeb.construct({
         object: this.$metaObject,
         parent, // parent automatically forwards $context, see QObject.constructor(parent)
