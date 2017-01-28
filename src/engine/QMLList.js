@@ -1,19 +1,13 @@
-function QMLList(meta) {
+function QMLList(meta, parent) {
   const list = [];
   if (meta.object instanceof Array) {
     for (const i in meta.object) {
-      list.push(QmlWeb.construct({
-        object: meta.object[i],
-        parent: meta.parent,
-        component: meta.component
-      }));
+      // TODO gz
+      list.push(QmlWeb.construct(meta[i], parent));
     }
   } else if (meta.object instanceof QmlWeb.QMLMetaElement) {
-    list.push(QmlWeb.construct({
-      object: meta.object,
-      parent: meta.parent,
-      component: meta.component
-    }));
+    // TODO gz
+    list.push(QmlWeb.construct(meta, parent));
   }
 
   return list;

@@ -57,7 +57,7 @@ function initMeta(self, meta, info) {
  *                      context
  * @return {Object} New qml object
  */
-function construct(meta) {
+function construct(meta, parent) {
   let item;
 
   // NOTE resolve class info:
@@ -68,6 +68,7 @@ function construct(meta) {
   if (clinfo.classConstructor) {
     // NOTE class from module/qmldir cache:
     meta.super = clinfo.classConstructor;
+    meta.parent = parent;
     item = new clinfo.classConstructor(meta);
     meta.super = undefined;
   } else {
@@ -79,8 +80,8 @@ function construct(meta) {
       throw new Error(`${meta.object.$name?"Toplevel:"+meta.object.$name:meta.object.id?"Element:"+meta.object.id:""}. No constructor found for ${meta.object.$class}`);
     }
 
-    // NOTE recursive call to initialize the parent container  ($createObject -> constuct -> $createObject -> constuct ...) :
-    item = component.$createObject(meta.parent);
+    // NOTE recursive call to initialize the container supertype  ($createObject -> constuct -> $createObject -> constuct ...) :
+    item = component.$createObject(parent);
 
     if (typeof item.dom !== "undefined") {
       item.dom.className += ` ${clinfo.path[clinfo.path.length - 1]}`;

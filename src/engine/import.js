@@ -62,7 +62,7 @@ function addComponentImportPath(component, dirpath, qualifier) {
 
 function preloadImports(component, imports) {
   if (component) {
-    throw new Error("Component imports already loaded. "+this.$context.$basePath+" "+component.$file+"  importContextId:"+component);
+    throw new Error("Component imports already loaded. "+this.$component.$basePath+" "+component.$file+"  importContextId:"+component);
   }
 
   const mergeObjects = QmlWeb.helpers.mergeObjects;

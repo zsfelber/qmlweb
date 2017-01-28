@@ -10,7 +10,6 @@ class QMLComponent {
       }
       this.$metaObject.$name = meta.object.$name;
       this.$metaObject.$id = meta.object.id;
-      this.$metaObject.parent = meta.object.parent;
     } else {
       this.$metaObject = meta.object;
     }
@@ -19,8 +18,14 @@ class QMLComponent {
     this.context = meta.context;
 
 
-    // no parent = is import root
-    if (meta.isFromFile) {
+    // no component = is import root
+    if (meta.component) {
+      this.$jsImports = meta.component.$jsImports;
+      this.moduleConstructors = meta.component.moduleConstructors;
+      this.ctxQmldirs = meta.component.ctxQmldirs;
+      this.componentImportPaths = meta.component.componentImportPaths;
+
+    } else {
 
       this.$jsImports = [];
       this.moduleConstructors = {};
@@ -42,11 +47,6 @@ class QMLComponent {
         }
       }
       QmlWeb.preloadImports(this, moduleImports);
-    } else {
-      this.$jsImports = meta.component.$jsImports;
-      this.moduleConstructors = meta.component.moduleConstructors;
-      this.ctxQmldirs = meta.component.ctxQmldirs;
-      this.componentImportPaths = meta.component.componentImportPaths;
     }
   }
   finalizeImports() {
@@ -84,14 +84,13 @@ class QMLComponent {
         throw new Error("No context passed to $createObject");
       }
 
-      // NOTE recursive call to initialize the class then its parent container  ($createObject -> constuct -> $createObject -> constuct ...) :
+      // NOTE recursive call to initialize the class then its container supertype  ($createObject -> constuct -> $createObject -> constuct ...) :
       item = QmlWeb.construct({
         object: this.$metaObject,
-        parent, // parent automatically forwards context, see QObject.constructor(parent)
         context, // no parent -> see initMeta
         component: this,
         isFromFile: this.isFromFile,
-      });
+      }, parent); // parent automatically forwards context, see QObject.constructor(parent)
 
       this.finalizeImports();
 

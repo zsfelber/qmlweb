@@ -41,41 +41,29 @@ class QMLProperty {
   // Called by update and set to actually set this.val, performing any type
   // conversion required.
   $setVal(val) {
-    const constructors = QmlWeb.constructors;
+    const constructors = this.obj.$component.moduleConstructors;
     if (constructors[this.type] === QmlWeb.qmlList) {
       this.val = QmlWeb.qmlList({
-        object: val,
-        parent: this.obj,
-        context: namespaceObject.$context
-      });
+        clazz: val,
+      }, this.obj);
     } else if (val instanceof QmlWeb.QMLMetaElement) {
       const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
       if (constructors[val.$class] === QMLComponent ||
           constructors[this.type] === QMLComponent) {
         this.val = new QMLComponent({
           clazz: val,
-          parent: this.obj,
-          context: namespaceObject.$context,
           isFromFile: false
         });
-        if (namespaceObject.$context === QmlWeb.engine.rootContext) {
-          throw new Error("Root context at property setVal : "+this);
-        }
 
         /* $basePath must be set here so that Components that are assigned to
          * properties (e.g. Repeater delegates) can properly resolve child
          * Components that live in the same directory in
          * Component.createObject. */
-        this.val.$basePath = this.obj.$context.$basePath;
+        this.val.$basePath = this.obj.$component.$basePath;
       } else {
         // NOTE gz : key entry point of QmlWeb.construct
         // all the other ones just forward this
-        this.val = QmlWeb.construct({
-          object: val,
-          parent: this.obj,
-          context: namespaceObject.$context
-          component: meta.component
-        });
+        this.val = QmlWeb.construct(val, this.obj);
       }
     } else if (val instanceof Object || val === undefined || val === null) {
       this.val = val;

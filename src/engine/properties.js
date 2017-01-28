@@ -239,7 +239,7 @@ function applyProperty(item, i, value) {
     value.compile();
     item[i] = value.run;//.bind(item);
     //item[i] = value.eval(namespaceObject,
-    //  namespaceObject.$context.$basePath);
+    //  namespaceObject.$component.$basePath);
     if (!item.$parent) {
       namespaceObject.$context[i] = item[i];
     }
