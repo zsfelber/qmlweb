@@ -85,7 +85,8 @@ class QMLBinding {
         console.warn(e1.message+":\n"+e2.message+":\n"+info+":\n(_=) "+src0+"\n ->\n"+src);
       }
 
-      this.stripFunction(src, true);
+      this.stripFunction(src);
+      delete this.args;
     } else {
       this.src = src;
     }
@@ -108,23 +109,25 @@ class QMLBinding {
   }
 
   stripFunction(src, stripargs) {
-    var match = /^function\s*(\w|\d|\$)*\((.*?)\)/m.exec(src);
-    if (match) {
-      if (!this.flags) {
-        throw new Error("Binding is effectively a function but declared to expression : "+(info?info:src));
-      }
-      src = src.substring(match[0].length);
-      if (!stripargs) {
-        src = "("+match[1]+")"+src;
-      }
-      this.args = match[1];
-      this.src = src;
+    if (src) {
+      var match = /^function\s*(?:\w|\d|\$)*\((.*?)\)/m.exec(src);
+      if (match) {
+        if (!this.flags) {
+          throw new Error("Binding is effectively a function but declared to expression : "+(info?info:src));
+        }
+        src = src.substring(match[0].length);
+        if (!stripargs) {
+          src = "("+match[1]+")"+src;
+        }
+        this.args = match[1];
+        this.src = src;
 
-      this.flags &= ~QMLBinding.ImplBlock;
-      this.flags |= QMLBinding.ImplFunction;
-    } else {
-      if (this.flags & QMLBinding.ImplFunction) {
-        throw new Error("Binding is effectively not a function but declared so : "+(info?info:src));
+        this.flags &= ~QMLBinding.ImplBlock;
+        this.flags |= QMLBinding.ImplFunction;
+      } else {
+        if (this.flags & QMLBinding.ImplFunction) {
+          throw new Error("Binding is effectively not a function but declared so : "+(info?info:src));
+        }
       }
     }
   }
@@ -226,6 +229,7 @@ class QMLBinding {
     this.src = _ubertrim(this.src);
     this.compiled = true;
     if (this.flags&QMLBinding.ImplFunction) {
+      this.stripFunction(src, true);
       this.implRun = this.bindRun();
     } else {
       this.implGet = this.bindGet();
