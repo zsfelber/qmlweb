@@ -62,8 +62,8 @@ QmlWeb.registerQmlType({
 
     const meta = { clazz: clazz,
                    context: this,//TODO gz not yet working.  gz uses parent first (see createObject)
-                   component: this.$component,
-                   $basePath: QmlWeb.extractBasePath(clazz.$file)// TODO gz  ignored if component presents
+                   loaderComponent: this.$component,
+                   $file: clazz.$file// TODO gz  ignored if component presents
                            };
 
     const qmlComponent = new QMLComponent(meta);

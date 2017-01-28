@@ -91,7 +91,10 @@ function construct(meta, parent, loaderComponent) {
 }
 
 function constructSuper(meta, parent, loaderComponent) {
-  if (!loaderComponent) loaderComponent = parent.$component;
+  if (!loaderComponent) {
+    loaderComponent = parent.$component;
+  }
+
   let item;
 
   // NOTE resolve superclass info:

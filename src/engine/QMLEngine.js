@@ -23,10 +23,9 @@ class QMLContext {
     return undefined;
   }
 
-  create(owner) {
+  create() {
     const newContext = Object.create(this);
     newContext.$contextId = ++contextIds;
-    newContext.$parent = this;
     newContext.$elements = {};
     newContext.$elementoverloads = {};
     newContext.$elementoverloadsnoalias = {};
@@ -187,13 +186,15 @@ class QMLEngine {
   }
 
   loadQMLTree(clazz, parent = null, file = undefined) {
+    var loaderComponent = parent ? parent.$component : null;
     QmlWeb.engine = this;
 
     // Create and initialize objects
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const component = new QMLComponent({
       clazz: clazz,
-      $basePath: file?QmlWeb.extractBasePath(file):null
+      $file: file,
+      loaderComponent : loaderComponent
     });
     this.$component = component;
 

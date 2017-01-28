@@ -17,6 +17,11 @@ class QMLComponent {
     this.clazz = meta.clazz;
     this.$imports = meta.clazz.$imports; // for later use
     this.loaderComponent = meta.loaderComponent;
+    this.$file = meta.$file;
+    this.$basePath = this.$file?QmlWeb.extractBasePath(this.$file):null;
+    if (this.$file !== this.clazz.$file) {
+      throw new Error("Assertion failed. $file-s in Component and class differ :  this.$file:"+this.$file+" === this.clazz.$file:"+this.clazz.$file);
+    }
 
     // no component = is import root
     if (meta.loaderComponent) {
@@ -24,8 +29,8 @@ class QMLComponent {
       this.moduleConstructors = meta.loaderComponent.moduleConstructors;
       this.ctxQmldirs = meta.loaderComponent.ctxQmldirs;
       this.componentImportPaths = meta.loaderComponent.componentImportPaths;
-      this.$basePath = meta.$basePath;
       this.context = meta.loaderComponent.context;
+      this.$name = meta.clazz.$name;
       if (!this.$basePath) {
         this.$basePath = meta.loaderComponent.$basePath;
       }
@@ -33,10 +38,22 @@ class QMLComponent {
         throw new Error("No component basePath present");
       }
       if (!this.context) {
-        throw new Error("No context in parent Component");
+        throw new Error("No context in loader Component");
+      }
+      if (!this.$file) {
+        throw new Error("Unsupported, no file with loader Component");
+      }
+      // TODO gz  verify
+      // NOTE it just opened another QML document (and this is the superclass of loader):
+      this.isNewContextLevel = this.$file !== meta.loaderComponent.$file;
+      if (this.isNewContextLevel) {
+        this.context = this.context.create();
+        if ((meta.clazz.$class+".qml") !== meta.loaderComponent.$name) {
+          throw new Error("Assertion failed. Not a superclass loader but file changed? :  meta.clazz.$class.qml:"+(meta.clazz.$class+".qml")+" === meta.loaderComponent.$name:"+meta.loaderComponent.$name);
+        }
       }
 
-      this.$metaObject.context = meta.context;
+      this.$metaObject.context = this.context;
 
     } else {
 
@@ -44,8 +61,8 @@ class QMLComponent {
       this.moduleConstructors = {};
       this.ctxQmldirs = {}; // resulting components lookup table
       this.componentImportPaths = {};
-      this.$basePath = meta.$basePath;
       this.context = engine.rootContext.create();
+      this.isNewContextLevel = true;
       if (!this.$basePath) {
         throw new Error("No component basePath present");
       }

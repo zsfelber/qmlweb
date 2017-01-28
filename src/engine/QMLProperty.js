@@ -50,7 +50,7 @@ class QMLProperty {
           constructors[this.type] === QMLComponent) {
         this.val = new QMLComponent({
           clazz: val,
-          component: this.obj.$component
+          loaderComponent: this.obj.$component,
         });
       } else {
         // NOTE gz : key entry point of QmlWeb.construct

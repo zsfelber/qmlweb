@@ -228,8 +228,8 @@ function resolveComponent(imp, loaderComponent) {
     clazz: imp.clazz,
     $name: imp.clazz.$name,
     $id: imp.clazz.id,
-    $basePath: extractBasePath(imp.file),
-    loaderComponent: loaderComponent
+    $file: imp.file,
+    loaderComponent: loaderComponent,
   });
 
   // TODO gz  undefined -> component.$basePath  from createQmlObject
