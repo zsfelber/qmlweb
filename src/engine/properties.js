@@ -109,7 +109,8 @@ function createProperty(type, obj, propName, options) {
     throw new Error("Root context at property init : "+this);
   }
 
-  if (!obj.$parent) {
+  // top component scope : not in super, not in child element, not in child element super
+  if (!obj.$component.loaderComponent) {
     var item = obj.$context.$elements[propName];
     if (item) {
       //console.warn("Context entry Element overriden by root property : "+type+(prop.type===type?" ":" ("+(prop.type)+") ")+propName+" in obj:"+obj);

@@ -16,6 +16,7 @@ class QMLComponent {
     }
     this.clazz = meta.clazz;
     this.$imports = meta.clazz.$imports; // for later use
+    this.loaderComponent = meta.loaderComponent;
 
     // no component = is import root
     if (meta.loaderComponent) {
