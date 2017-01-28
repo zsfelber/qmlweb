@@ -9,7 +9,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
     this.modelChanged.connect(this, this.$styleChanged);
     this.delegateChanged.connect(this, this.$styleChanged);
     this.orientationChanged.connect(this, this.$styleChanged);

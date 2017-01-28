@@ -7,14 +7,14 @@ function inherit(constructor, baseClass) {
   constructor.prototype.constructor = baseClass;
 }
 
-function callSuper(self, meta) {
+function superAndInitMeta(self, meta) {
   const info = meta.super.$qmlTypeInfo || {};
   meta.super = meta.super.prototype.constructor;
   meta.super.call(self, meta);
-  initializeConstr(self, meta, info);
+  initMeta(self, meta, info);
 }
 
-function initializeConstr(self, meta, info) {
+function initMeta(self, meta, info) {
   self.$isFromFile = meta.isFromFile;
   self.$component = meta.component;
 
@@ -172,7 +172,7 @@ function createQmlObject(src, parent, file) {
 
 QmlWeb.inherit = inherit;
 QmlWeb.callSuper = callSuper;
-QmlWeb.initializeConstr = initializeConstr;
+QmlWeb.initMeta = initMeta;
 QmlWeb.construct = construct;
 QmlWeb.createImpComponent = createImpComponent;
 QmlWeb.createQmlObject = createQmlObject;

@@ -32,7 +32,7 @@ QmlWeb.registerQmlType({
   defaultProperty: "data"
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     if (!this.dom) { // Create a dom element for this item.
       this.dom = document.createElement(meta.tagName || "div");

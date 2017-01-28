@@ -17,7 +17,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     // TODO: rewrite as an attached object and forbid constructing
     this.Component.completed.connect(this, this.Component$onCompleted);

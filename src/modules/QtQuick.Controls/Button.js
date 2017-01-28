@@ -12,7 +12,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     this.Component.completed.connect(this, this.Component$onCompleted);
     this.textChanged.connect(this, this.$onTextChanged);

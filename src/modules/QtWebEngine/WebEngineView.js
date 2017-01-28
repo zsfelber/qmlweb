@@ -11,7 +11,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     // TODO: implement more features on top of WebView
   }

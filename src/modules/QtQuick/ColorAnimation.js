@@ -9,7 +9,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     this.easing.$add = QmlWeb.QColor.$add;
     this.easing.$subtract = QmlWeb.QColor.$subtract;

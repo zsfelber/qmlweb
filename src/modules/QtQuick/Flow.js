@@ -12,7 +12,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);

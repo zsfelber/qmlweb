@@ -10,7 +10,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     this.impl = document.createElement("label");
     this.impl.style.pointerEvents = "auto";

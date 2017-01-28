@@ -21,7 +21,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     const createProperty = QmlWeb.createProperty;
     this.border = new QmlWeb.QObject(this);

@@ -12,7 +12,7 @@ QmlWeb.registerQmlType({
   defaultProperty: "animations"
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     this.$runningAnimations = 0;
 

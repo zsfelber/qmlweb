@@ -47,7 +47,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
     this.font = new QMLFont(this);

@@ -24,7 +24,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     const fc = this.impl = document.createElement("span");
     fc.style.pointerEvents = "none";

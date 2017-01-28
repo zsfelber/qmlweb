@@ -21,7 +21,7 @@ QmlWeb.registerQmlType({
 }, class extends QmlWeb.QObject {
   constructor(meta) {
     super(meta.parent);
-    QmlWeb.initializeConstr(this, meta);
+    QmlWeb.initMeta(this, meta);
 
     // Component get own properties
     this.$attributes = [];

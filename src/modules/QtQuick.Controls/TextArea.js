@@ -5,7 +5,7 @@ QmlWeb.registerQmlType({
   baseClass: "QtQuick.TextEdit"
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
     const textarea = this.impl;
     textarea.style.padding = "5px";
     textarea.style.borderWidth = "1px";

@@ -9,7 +9,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     this.xChanged.connect(this.$parent, this.$parent.$updateTransform);
     this.yChanged.connect(this.$parent, this.$parent.$updateTransform);

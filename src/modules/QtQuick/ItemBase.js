@@ -13,7 +13,7 @@ QmlWeb.registerQmlType({
   defaultProperty: "data"
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     this.dataChanged.connect(this, this.$onDataChanged);
 

@@ -6,6 +6,6 @@ QmlWeb.registerQmlType({
   defaultProperty: "$items"
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
   }
 });

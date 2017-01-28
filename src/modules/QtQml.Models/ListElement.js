@@ -5,6 +5,6 @@ QmlWeb.registerQmlType({
   baseClass: "QtQuick.ListElement"
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
   }
 });

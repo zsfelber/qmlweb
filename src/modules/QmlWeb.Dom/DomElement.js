@@ -9,7 +9,7 @@ QmlWeb.registerQmlType({
 }, class {
   constructor(meta) {
     meta.tagName = meta.object.tagName;
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     // TODO: support properties, styles, perhaps changing the tagName
   }

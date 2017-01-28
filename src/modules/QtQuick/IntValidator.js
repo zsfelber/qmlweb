@@ -9,7 +9,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
   }
   validate(string) {
     const regExp = /^(-|\+)?\s*[0-9]+$/;

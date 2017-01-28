@@ -14,7 +14,7 @@ QmlWeb.registerQmlType({
   defaultProperty: "delegate"
 }, class {
   constructor(meta) {
-    QmlWeb.callSuper(this, meta);
+    QmlWeb.superAndInitMeta(this, meta);
 
     this.parent = meta.parent;
     // TODO: some (all ?) of the components including Repeater needs to know own
