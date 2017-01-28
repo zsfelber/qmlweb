@@ -49,7 +49,7 @@ function extractFileName(file) {
 }
 
 function importSearchPaths(component) {
-  var engine = QmlWeb.engine;
+  const engine = QmlWeb.engine;
   if (!engine.componentImportPaths) {
     return [];
   }
@@ -61,7 +61,7 @@ function importSearchPaths(component) {
 }
 
 function qualifiedImportPath(component, qualifier) {
-  var engine = QmlWeb.engine;
+  const engine = QmlWeb.engine;
   if (!engine.componentImportPaths) {
     return "";
   }
@@ -73,12 +73,12 @@ function qualifiedImportPath(component, qualifier) {
 }
 
 function setImportPathList(arrayOfDirs) {
-  var engine = QmlWeb.engine;
+  const engine = QmlWeb.engine;
   engine.userAddedImportPaths = arrayOfDirs;
 }
 
 function importPathList() {
-  var engine = QmlWeb.engine;
+  const engine = QmlWeb.engine;
   return engine.userAddedImportPaths;
 }
 
@@ -88,7 +88,7 @@ function importPathList() {
 // `http://example.com/controls/qmldir`
 
 function addModulePath(moduleName, dirPath) {
-  var engine = QmlWeb.engine;
+  const engine = QmlWeb.engine;
   // Keep the mapping. It will be used in loadImports() function.
   // Remove trailing slash as it required for `readQmlDir`.
   engine.userAddedModulePaths[moduleName] = dirPath.replace(/\/$/, "");
@@ -118,7 +118,7 @@ function addModulePath(moduleName, dirPath) {
 }*/
 
 function resolveClass(file) {
-  var engine = QmlWeb.engine;
+  const engine = QmlWeb.engine;
 
   let component = engine.components[file];
   let clazz;
@@ -140,7 +140,7 @@ function resolveClass(file) {
 
 
 function resolveImport(name) {
-  var engine = QmlWeb.engine;
+  const engine = QmlWeb.engine;
 
   let file = $resolvePath(name);
 
@@ -170,7 +170,7 @@ function resolveImport(name) {
 }
 
 function resolveClassImport(name, component) {
-  var engine = QmlWeb.engine;
+  const engine = QmlWeb.engine;
   // Load component from file. Please look at import.js for main notes.
   // Actually, we have to use that order:
   // 1) try to load component from current basePath
@@ -225,7 +225,7 @@ function resolveClassImport(name, component) {
 }
 
 function resolveComponent(imp, nocache) {
-  var engine = QmlWeb.engine;
+  const engine = QmlWeb.engine;
 
   var component;
   if (!nocache) {
@@ -237,7 +237,6 @@ function resolveComponent(imp, nocache) {
   if (!imp.clazz) {
     return undefined;
   }
-  const engine = QmlWeb.engine;
 
   const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
   component = new QMLComponent({

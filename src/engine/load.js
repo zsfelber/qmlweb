@@ -52,7 +52,7 @@ function loadClass(file) {
 
 // Load resolved file and parse as JavaScript
 function loadJS(file) {
-  var engine = QmlWeb.engine;
+  const engine = QmlWeb.engine;
   if (file in engine.js) {
     return engine.js[file];
   }

@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // http://doc.qt.io/qt-5/qqmlengine.html#addImportPath
 
 function addImportPath(dirpath) {
-  var engine = QmlWeb.engine;
+  const engine = QmlWeb.engine;
   engine.userAddedImportPaths.push(dirpath);
 }
 
@@ -43,7 +43,7 @@ function addImportPath(dirpath) {
  * The importContextId ensures it is only accessible from the file in which
  * it was imported. */
 function addComponentImportPath(component, dirpath, qualifier) {
-  var engine = QmlWeb.engine;
+  const engine = QmlWeb.engine;
 
   const paths = component.componentImportPaths;
 
@@ -101,7 +101,7 @@ function loadImports(importsArray, component) {
     throw new Error("loadImports   No component:"+component);
   }
 
-  var engine = QmlWeb.engine;
+  const engine = QmlWeb.engine;
   if (!engine.qmldirsContents) {
     engine.qmldirsContents = {}; // cache
 
@@ -125,8 +125,8 @@ function loadImports(importsArray, component) {
 }
 
 function loadImport(entry, component) {
-  var engine = QmlWeb.engine;
-  var currentFileDir = component.$basePath,
+  const engine = QmlWeb.engine;
+  var currentFileDir = component.$basePath;
   let name = entry[1];
 
   // is it url to remote resource

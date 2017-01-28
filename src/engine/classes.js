@@ -59,7 +59,7 @@ function initMeta(self, meta, info) {
  */
 function construct(meta, parent) {
 
-  cons item = constructSuper(meta, parent);
+  const item = constructSuper(meta, parent);
 
   // Finalize instantiation over supertype item :
 
