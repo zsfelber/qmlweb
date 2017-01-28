@@ -1,10 +1,14 @@
-function importJavascriptInContext(contextSetter, $context) {
+function importJavascriptInContext(contextSetter, $component) {
   /* Set the QmlWeb.executionContext so that any internal calls to Qt.include
    * will have the proper context */
-  const oldExecutionContext = QmlWeb.executionContext;
-  QmlWeb.executionContext = $context;
-  contextSetter($context);
-  QmlWeb.executionContext = oldExecutionContext;
+  var prevComponent = QmlWeb.engine.$component;
+  QmlWeb.engine.$component = $component;
+
+  try {
+    contextSetter($context);
+  } finally {
+    QmlWeb.engine.$component = prevComponent;
+  }
 }
 
 QmlWeb.importJavascriptInContext = importJavascriptInContext;

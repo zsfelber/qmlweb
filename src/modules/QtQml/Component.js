@@ -10,6 +10,7 @@ class QMLComponent {
       }
       this.$metaObject.$name = meta.object.$name;
       this.$metaObject.$id = meta.object.id;
+      this.$metaObject.parent = meta.object.parent;
     } else {
       this.$metaObject = meta.object;
     }
@@ -19,7 +20,7 @@ class QMLComponent {
     if (meta.isFromFile) {
 
       this.$jsImports = [];
-      this.perImportContextConstructors = {};
+      this.moduleConstructors = {};
       this.ctxQmldirs = {}; // resulting components lookup table
       this.componentImportPaths = {};
 
@@ -40,12 +41,12 @@ class QMLComponent {
       QmlWeb.preloadImports(this, moduleImports);
     } else {
       this.$jsImports = meta.component.$jsImports;
-      this.perImportContextConstructors = meta.component.perImportContextConstructors;
+      this.moduleConstructors = meta.component.moduleConstructors;
       this.ctxQmldirs = meta.component.ctxQmldirs;
       this.componentImportPaths = meta.component.componentImportPaths;
     }
   }
-  finalizeImports($context) {
+  finalizeImports() {
     const engine = QmlWeb.engine;
     for (let i = 0; i < this.$jsImports.length; ++i) {
       const importDesc = this.$jsImports[i];
@@ -58,10 +59,10 @@ class QMLComponent {
       }
 
       if (importDesc[3] !== "") {
-        $context[importDesc[3]] = {};
-        QmlWeb.importJavascriptInContext(js, $context[importDesc[3]]);
+        this.$object.$context[importDesc[3]] = {};
+        QmlWeb.importJavascriptInContext(js, this.$object.$context[importDesc[3]]);
       } else {
-        QmlWeb.importJavascriptInContext(js, $context);
+        QmlWeb.importJavascriptInContext(js, this.$object.$conteximpt);
       }
     }
   }
@@ -80,6 +81,7 @@ class QMLComponent {
         throw new Error("No context passed to $createObject");
       }
 
+      // NOTE recursive call to initialize the class then its superclass  ($createObject -> constuct -> $createObject -> constuct ...) :
       item = QmlWeb.construct({
         object: this.$metaObject,
         parent, // parent automatically forwards $context, see QObject.constructor(parent)
@@ -87,7 +89,7 @@ class QMLComponent {
         isFromFile: this.isFromFile,
       });
 
-      this.finalizeImports(item.$context);
+      this.finalizeImports();
 
       for (var propname in properties) {
         item[propname] = properties[propname];

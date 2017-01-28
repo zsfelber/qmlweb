@@ -167,7 +167,7 @@ function findClass(name, component) {
   //       That's not qml's original behaviour.
 
   // 3)regular (versioned) modules only: (from Component.constructor -> QmlWeb.loadImports)
-  let constructors = component.perImportContextConstructors;
+  let constructors = component.moduleConstructors;
 
   const path = name.split(".");
   for (let ci = 0; ci < path.length; ++ci) {

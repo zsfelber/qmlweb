@@ -58,25 +58,25 @@ function initMeta(self, meta, info) {
 function construct(meta) {
   let item;
 
+  // NOTE resolve superclass info:
   var clinfo = QmlWeb.findClass(meta.object.$class, meta.component);
   clinfo.parent = meta.object.$parent;
 
   if (clinfo.classConstructor) {
+    // NOTE superclass from module cache:
     meta.super = clinfo.classConstructor;
     item = new clinfo.classConstructor(meta);
     meta.super = undefined;
   } else {
 
-    /* This will also be set in applyProperties, but needs to be set here
-     * for createImpComponent to have the correct context. */
-    QmlWeb.executionContext = meta.context;
-
+    // NOTE superclass component from resolved info:
     const component = createImpComponent(clinfo);
 
     if (!component) {
       throw new Error(`${meta.object.$name?"Toplevel:"+meta.object.$name:meta.object.id?"Element:"+meta.object.id:""}. No constructor found for ${meta.object.$class}`);
     }
 
+    // NOTE recursive call to initialize the superclass  ($createObject -> constuct -> $createObject -> constuct ...) :
     item = component.$createObject(meta.parent);
 
     if (typeof item.dom !== "undefined") {
@@ -118,14 +118,10 @@ function createImpComponent(imp, nocache) {
   component = new QMLComponent({
     object: imp.clazz,
     parent: imp.parent,
-    context: QmlWeb.executionContext,
     $name: imp.clazz.$name,
     $id: imp.clazz.id,
     isFromFile: true
   });
-  if (QmlWeb.executionContext === QmlWeb.engine.rootContext) {
-    throw new Error("Root context at property Qt.createImpComponent : "+imp.file);
-  }
   component.$basePath = extractBasePath(imp.file);
   component.$imports = imp.clazz.$imports;
   component.$file = imp.file; // just for debugging

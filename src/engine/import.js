@@ -90,7 +90,7 @@ function preloadImports(component, imports) {
       constructors = mergeObjects(constructors, moduleConstructors);
     }
   }
-  component.perImportContextConstructors = constructors;
+  component.moduleConstructors = constructors;
   QmlWeb.constructors = constructors; // TODO: why do we need this?
 }
 
