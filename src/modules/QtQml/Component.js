@@ -10,15 +10,12 @@ class QMLComponent {
       }
       this.$metaObject.$name = meta.clazz.$name;
       this.$metaObject.$id = meta.clazz.id;
-      this.$metaObject.context = meta.context;
     } else {
       this.$metaObject = QmlWeb.helpers.mergeObjects(meta.clazz);
       this.$metaObject = meta.clazz;
-      this.$metaObject.context = meta.context;
     }
     this.clazz = meta.clazz;
     this.$imports = meta.clazz.$imports; // for later use
-
 
     // no component = is import root
     if (meta.loaderComponent) {
@@ -26,10 +23,19 @@ class QMLComponent {
       this.moduleConstructors = meta.loaderComponent.moduleConstructors;
       this.ctxQmldirs = meta.loaderComponent.ctxQmldirs;
       this.componentImportPaths = meta.loaderComponent.componentImportPaths;
-      this.$basePath = meta.loaderComponent.$basePath;
-      if (meta.$basePath && meta.$basePath !== this.$basePath) {
-        throw new Error("Component basePath:"+meta.$basePath+" in conflict with loader component : "+this.$basePath);
+      this.$basePath = meta.$basePath;
+      this.context = meta.loaderComponent.context;
+      if (!this.$basePath) {
+        this.$basePath = meta.loaderComponent.$basePath;
       }
+      if (!this.$basePath) {
+        throw new Error("No component basePath present");
+      }
+      if (!this.context) {
+        throw new Error("No context in parent Component");
+      }
+
+      this.$metaObject.context = meta.context;
 
     } else {
 
@@ -38,9 +44,15 @@ class QMLComponent {
       this.ctxQmldirs = {}; // resulting components lookup table
       this.componentImportPaths = {};
       this.$basePath = meta.$basePath;
+      this.context = engine.rootContext.create();
       if (!this.$basePath) {
         throw new Error("No component basePath present");
       }
+      if (!this.context) {
+        throw new Error("No context");
+      }
+
+      this.$metaObject.context = this.context;
 
       const moduleImports = [];
       function _add_imp(importDesc) {
@@ -90,9 +102,6 @@ class QMLComponent {
 
     let item;
     try {
-      if (!this.$metaObject.context && !parent) {
-        throw new Error("No context passed to $createObject");
-      }
 
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)

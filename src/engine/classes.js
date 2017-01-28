@@ -15,8 +15,8 @@ function superAndInitMeta(self, meta) {
 }
 
 function initMeta(self, meta, info) {
-  if (!self.$context) self.$context = meta.context;
-  if (!self.$context) throw new Error("Instantiantion error, no context ! Either parent object nor metatype provides the 'context' variables' container !");
+  self.$context = meta.context;
+  if (!self.$context) throw new Error("Instantiantion error, no context !");
 
   info = info || meta.super.$qmlTypeInfo || {};
   if (info.enums) {

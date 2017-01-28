@@ -189,16 +189,10 @@ class QMLEngine {
   loadQMLTree(clazz, parent = null, file = undefined) {
     QmlWeb.engine = this;
 
-    let newContext;
-    if (!parent) {
-      newContext = this.rootContext.create();
-    }
-
     // Create and initialize objects
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const component = new QMLComponent({
       clazz: clazz,
-      context: newContext,
       $basePath: file?QmlWeb.extractBasePath(file):null
     });
     this.$component = component;
