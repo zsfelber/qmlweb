@@ -13,6 +13,7 @@ class QMLComponent {
       this.$metaObject.context = meta.context;
     } else {
       this.$metaObject = meta.clazz;
+      this.$metaObject.context = meta.context;
     }
     this.clazz = meta.clazz;
     this.$imports = meta.clazz.$imports; // for later use
