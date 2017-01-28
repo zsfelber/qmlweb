@@ -48,14 +48,13 @@ class QMLComponent {
       this.isNewContextLevel = this.$file !== meta.loaderComponent.$file;
       if (this.isNewContextLevel) {
         this.context = this.context.create();
-        if ((meta.clazz.$class+".qml") !== meta.loaderComponent.$name) {
-          throw new Error("Assertion failed. Not a superclass loader but file changed? :  meta.clazz.$class.qml:"+(meta.clazz.$class+".qml")+" === meta.loaderComponent.$name:"+meta.loaderComponent.$name);
-        }
+        console.warn("Component isNewContextLevel  "+meta.loaderComponent.$file+" -> "+this.$file);
       }
 
       this.$metaObject.context = this.context;
 
     } else {
+      const engine = QmlWeb.engine;
 
       this.$jsImports = [];
       this.moduleConstructors = {};
