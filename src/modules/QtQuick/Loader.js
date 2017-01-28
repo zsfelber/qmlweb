@@ -54,29 +54,20 @@ QmlWeb.registerQmlType({
       console.warn("Loader.$onSourceChanged  Not an absolute resource id:"+fileName);
     }
 
-    let component = engine.components[fileName];
     let clazz;
-    // TODO gz
-    if (component) {
-      clazz = component.clazz;
-    }
-
-    if (!clazz) {
-      clazz = QmlWeb.loadClass(fileName);
-    }
+    clazz = QmlWeb.resolveClass(fileName);
 
     QmlWeb.helpers.copy(this, QmlWeb.engine.rootContext);
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
 
     const meta = { clazz: clazz,
-                   context: this,
+                   context: this,//TODO gz not yet working
                    parent: this,
                    isFromFile: false        };
 
     const qmlComponent = new QMLComponent(meta);
     qmlComponent.$basePath = QmlWeb.extractBasePath(clazz.$file);
     qmlComponent.$imports = clazz.$imports;
-    qmlComponent.$file = clazz.$file;
     QmlWeb.loadImports(clazz.$imports, qmlComponent);
     const loadedComponent = this.$createComponentObject(qmlComponent, this);
     this.sourceComponent = loadedComponent;

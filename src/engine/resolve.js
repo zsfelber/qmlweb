@@ -117,24 +117,32 @@ function addModulePath(moduleName, dirPath) {
   QmlWeb.setupGetterSetter(obj, propName, getter, setter);
 }*/
 
-function resolveImport(name) {
+function resolveClass(file) {
   var engine = QmlWeb.engine;
-
-  let file = $resolvePath(name);
 
   let component = engine.components[file];
   let clazz;
-  // TODO gz
   if (component) {
     clazz = component.clazz;
   }
 
   if (!clazz) {
-    // If "name" was a full URL, "file" will be equivalent to name and this
-    // will try and load the Component from the full URL, otherwise, this
-    // doubles as checking for the file in the current directory.
-    clazz = QmlWeb.loadClass(file);
+    clazz = engine.classes[file];
   }
+  return clazz;
+}
+
+
+function resolveImport(name) {
+  var engine = QmlWeb.engine;
+
+  let file = $resolvePath(name);
+
+  let clazz;
+  // If "name" was a full URL, "file" will be equivalent to name and this
+  // will try and load the Component from the full URL, otherwise, this
+  // doubles as checking for the file in the current directory.
+  clazz = resolveClass(file);
 
   // If the Component is not found, and it is not a URL, look for "name" in
   // this context's importSearchPaths
@@ -145,7 +153,8 @@ function resolveImport(name) {
         QmlWeb.executionContext.$importContextId/*TODO gz component*/);
       for (let i = 0; i < moreDirs.length; i++) {
         file = `${moreDirs[i]}${name}`;
-        clazz = QmlWeb.loadClass(file);
+        // TODO gz resolveClass  += engine.containers[...]
+        clazz = resolveClass(file);
         if (clazz) break;
       }
     }
@@ -154,7 +163,7 @@ function resolveImport(name) {
   return {clazz, file};
 }
 
-function findClass(name, component) {
+function resolveClassImport(name, component) {
   var engine = QmlWeb.engine;
   // Load component from file. Please look at import.js for main notes.
   // Actually, we have to use that order:
@@ -207,6 +216,42 @@ function findClass(name, component) {
 
     return imp;
   }
+}
+
+function resolveComponent(imp, nocache) {
+  var engine = QmlWeb.engine;
+
+  var component;
+  if (!nocache) {
+    component = engine.components[imp.file];
+    // TODO gz (parent : remove or ?)
+    if (component) {
+      return component;
+    }
+  }
+  if (!imp.clazz) {
+    return undefined;
+  }
+  const engine = QmlWeb.engine;
+
+  const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
+  component = new QMLComponent({
+    clazz: imp.clazz,
+    parent: imp.parent,
+    $name: imp.clazz.$name,
+    $id: imp.clazz.id,
+    isFromFile: true
+  });
+  component.$basePath = extractBasePath(imp.file);
+
+  // TODO gz  undefined -> component.$basePath  from createQmlObject
+  QmlWeb.loadImports(imp.clazz.$imports, component);
+
+  if (!nocache) {
+    // TODO gz name->file
+    engine.components[imp.file] = component;
+  }
+  return component;
 }
 
 // This parses the full URL into scheme and path
@@ -309,9 +354,13 @@ QmlWeb.setImportPathList = setImportPathList;
 QmlWeb.importPathList = importPathList;
 QmlWeb.addModulePath = addModulePath;
 
+QmlWeb.resolveClass = resolveClass;
+
 QmlWeb.resolveImport = resolveImport;
 
-QmlWeb.findClass = findClass;
+QmlWeb.resolveClassImport = resolveClassImport;
+
+QmlWeb.resolveComponent = resolveComponent;
 
 // This parses the full URL into scheme and path
 QmlWeb.$parseURI = $parseURI;

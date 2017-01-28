@@ -1,13 +1,9 @@
 // Load resolved file, parse and construct as Component class (.qml)
 function loadClass(file) {
-  var engine = QmlWeb.engine;
-  if (file in engine.classes) {
-    return engine.classes[file];
-  }
 
   const uri = QmlWeb.$parseURI(file);
   if (!uri) {
-    console.warn("QMLEngine.loadClass: Empty url :", file);
+    console.warn("qmlweb loadClass: Empty url :", file);
     return undefined;
   }
 
@@ -16,7 +12,7 @@ function loadClass(file) {
     let t0 = clazz;
     clazz = QmlWeb.qrc[uri.path];
     if (!clazz) {
-      console.warn("QMLEngine.loadClass: Empty qrc entry :", uri.path);
+      console.warn("qmlweb loadClass: Empty qrc entry :", uri.path);
       return undefined;
     }
 
@@ -30,28 +26,26 @@ function loadClass(file) {
   } else {
     const src = QmlWeb.getUrlContents(file, true);
     if (!src) {
-      console.error("QMLEngine.loadClass: Failed to load:", file);
+      console.error("qmlweb loadClass: Failed to load:", file);
       return undefined;
     }
 
-    console.log("QMLEngine.loadClass: Loading file:", file);
+    console.log("qmlweb loadClass: Loading file:", file);
     clazz = QmlWeb.parseQML(src, file);
   }
 
   if (!clazz) {
-    console.warn("QMLEngine.loadClass: Empty file :", file);
+    console.warn("qmlweb loadClass: Empty file :", file);
     return undefined;
   }
 
   if (clazz.$children.length !== 1) {
-    console.error("QMLEngine.loadClass: Failed to load:", file,
+    console.error("qmlweb loadClass: Failed to load:", file,
       ": A QML component must only contain one root element!");
     return undefined;
   }
 
   clazz.$file = file;
-  engine.classes[file] = clazz;
-
 
   return clazz;
 }

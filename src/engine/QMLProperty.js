@@ -66,7 +66,7 @@ class QMLProperty {
          * properties (e.g. Repeater delegates) can properly resolve child
          * Components that live in the same directory in
          * Component.createObject. */
-        this.val.$basePath = namespaceObject.$context.$basePath;
+        this.val.$basePath = this.obj.$context.$basePath;
       } else {
         // NOTE gz : key entry point of QmlWeb.construct
         // all the other ones just forward this

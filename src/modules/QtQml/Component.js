@@ -14,6 +14,9 @@ class QMLComponent {
     } else {
       this.$metaObject = meta.object;
     }
+    this.clazz = meta.clazz;
+    this.$imports = meta.clazz.$imports; // for later use
+    this.context = meta.context;
 
 
     // no parent = is import root
@@ -66,7 +69,7 @@ class QMLComponent {
       }
     }
   }
-  $createObject(parent, properties = {}/*, context = this.$context  : is parent usually*/) {
+  $createObject(parent, properties = {}) {
     const engine = QmlWeb.engine;
     const oldState = engine.operationState;
     engine.operationState = QmlWeb.QMLOperationState.Init;
@@ -84,7 +87,8 @@ class QMLComponent {
       // NOTE recursive call to initialize the class then its parent container  ($createObject -> constuct -> $createObject -> constuct ...) :
       item = QmlWeb.construct({
         object: this.$metaObject,
-        parent, // parent automatically forwards $context, see QObject.constructor(parent)
+        parent, // parent automatically forwards context, see QObject.constructor(parent)
+        context,
         component: this,
         isFromFile: this.isFromFile,
       });

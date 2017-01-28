@@ -17,11 +17,9 @@ const Qt = {
   },
   // Load file, parse and construct as Component (.qml)
   createComponent: name => {
-    const engine = QmlWeb.engine;
-
     let imp = QmlWeb.resolveImport(name);
 
-    return QmlWeb.createImpComponent(imp);
+    return QmlWeb.resolveComponent(imp);
   },
 
   createQmlObject: (src, parent, file) => {
@@ -33,7 +31,6 @@ const Qt = {
   },
 
   include(path) {
-    const engine = QmlWeb.engine;
 
     // TODO gz (engine)basePath
     const uri = $resolvePath(path);
@@ -49,7 +46,7 @@ const Qt = {
 
     QmlWeb.executionContext.$qmlJsIncludes.push(uri);
 
-    const js = engine.loadJS(uri);
+    const js = QmlWeb.loadJS(uri);
 
     if (!js) {
       console.error("Unable to load JavaScript module:", uri, path);

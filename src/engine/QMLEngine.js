@@ -196,7 +196,7 @@ class QMLEngine {
 
 
   // Load file, parse and construct (.qml or .qml.js)
-  loadFile(file, parentComponent = null) {
+  loadFile(file, parent = null) {
     // Create an anchor element to get the absolute path from the DOM
     if (!this.$basePathA) {
       this.$basePathA = document.createElement("a");
@@ -204,8 +204,9 @@ class QMLEngine {
     this.$basePathA.href = QmlWeb.extractBasePath(file);
     this.$basePath = this.$basePathA.href;
     const fileName = extractFileName(file);
-    const clazz = QmlWeb.loadClass(QmlWeb.$resolvePath(fileName, this.$basePathA.href));
-    const component = this.loadQMLTree(clazz, parentComponent, file);
+    // TODO gz resolveClass  += engine.containers[...]
+    const clazz = QmlWeb.resolveClass(QmlWeb.$resolvePath(fileName, this.$basePathA.href));
+    const component = this.loadQMLTree(clazz, parent, file);
     console.log("loadFile success. LOADED : "+file);
     return component;
   }
@@ -213,44 +214,45 @@ class QMLEngine {
   // parse and construct qml
   // file is not required; only for debug purposes
   // This function is only used by the QmlWeb tests
-  loadQML(src, parentComponent = null, file = undefined) {
-    return this.loadQMLTree(QmlWeb.parseQML(src, file), parentComponent, file);
+  loadQML(src, parent = null, file = undefined) {
+    return this.loadQMLTree(QmlWeb.parseQML(src, file), parent, file);
   }
 
-  loadQMLTree(clazz, parentComponent = null, file = undefined) {
+  loadQMLTree(clazz, parent = null, file = undefined) {
     QmlWeb.engine = this;
 
-    const newContext = this.rootContext.create();
-    newContext.$elements = {};
-    newContext.$elementoverloads = {};
-    newContext.$elementoverloadsnoalias = {};
+    let newContext;
+    if (!parent) {
+      newContext = this.rootContext.create();
+      newContext.$elements = {};
+      newContext.$elementoverloads = {};
+      newContext.$elementoverloadsnoalias = {};
+    }
 
     // Create and initialize objects
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     const component = new QMLComponent({
       clazz: clazz,
-      parent: parentComponent,
+      parent: parent,
       context: newContext,
       isFromFile: true
     });
 
     // TODO gz undefined->component.$basePath
     QmlWeb.loadImports(clazz.$imports, component);
-    component.$basePath = this.$basePath;
-    component.$imports = clazz.$imports; // for later use
-    component.$file = file; // just for debugging
+    // TODO gz
+    if (this.$object) {
+      component.$basePath = this.$component.$basePath;
+    }
 
-    this.rootObject = component.$createObject(parentComponent);
+    this.rootObject = component.$createObject(parent);
     if (this.rootObject.dom) {
       console.log(clazz.$name+" : DOM element FOUND ! Added to engine screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
       this.domTarget.appendChild(this.rootObject.dom);
     } else {
       console.warn(clazz.$name+" : No DOM, it's a pure model object. Not added to screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
     }
-    newContext.$owner = this.rootObject;
     QmlWeb.setupGetter(newContext, "$ownerString", this.rootObject.toString.bind(this.rootObject));
-    newContext.$component = component;
-    newContext.$componentFile = component.$file;
 
 
     this.operationState = QmlWeb.QMLOperationState.Idle;

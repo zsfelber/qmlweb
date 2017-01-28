@@ -17,6 +17,8 @@ function superAndInitMeta(self, meta) {
 function initMeta(self, meta, info) {
   self.$isFromFile = meta.isFromFile;
   self.$component = meta.component;
+  if (!self.$context) self.$context = meta.context;
+  if (!self.$context) throw new Error("Instantiantion error, no context ! Either parent object nor metatype provides the 'context' variables' container !");
 
   info = info || meta.super.$qmlTypeInfo || {};
   if (info.enums) {
@@ -59,7 +61,7 @@ function construct(meta) {
   let item;
 
   // NOTE resolve class info:
-  var clinfo = QmlWeb.findClass(meta.object.$class, meta.component);
+  var clinfo = QmlWeb.resolveClassImport(meta.object.$class, meta.component);
   clinfo.parent = meta.object.$parent;
 
   if (clinfo.classConstructor) {
@@ -70,7 +72,7 @@ function construct(meta) {
   } else {
 
     // NOTE class component from resolved info:
-    const component = createImpComponent(clinfo);
+    const component = QmlWeb.resolveComponent(clinfo);
 
     if (!component) {
       throw new Error(`${meta.object.$name?"Toplevel:"+meta.object.$name:meta.object.id?"Element:"+meta.object.id:""}. No constructor found for ${meta.object.$class}`);
@@ -108,34 +110,6 @@ function construct(meta) {
 }
 
 
-function createImpComponent(imp, nocache) {
-  if (!imp.clazz) {
-    return undefined;
-  }
-  const engine = QmlWeb.engine;
-
-  const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-  component = new QMLComponent({
-    clazz: imp.clazz,
-    parent: imp.parent,
-    $name: imp.clazz.$name,
-    $id: imp.clazz.id,
-    isFromFile: true
-  });
-  component.$basePath = extractBasePath(imp.file);
-  component.$imports = imp.clazz.$imports;
-  component.$file = imp.file; // just for debugging
-
-  // TODO gz  undefined -> component.$basePath  from createQmlObject
-  QmlWeb.loadImports(imp.clazz.$imports, component);
-
-  if (!nocache) {
-    // TODO gz name->file
-    engine.components[imp.file] = component;
-  }
-  return component;
-}
-
 function createQmlObject(src, parent, file) {
 
   const engine = QmlWeb.engine;
@@ -149,7 +123,7 @@ function createQmlObject(src, parent, file) {
   var resolvedUrl = QmlWeb.$resolvePath;
   file = file || /*Qt.*/resolvedUrl("createQmlObject_function");
 
-  var component = createImpComponent({clazz, parent, file}, true);
+  var component = QmlWeb.resolveComponent({clazz, parent, file}, true);
 
   const obj = component.createObject(parent);
 
@@ -170,5 +144,4 @@ QmlWeb.inherit = inherit;
 QmlWeb.callSuper = callSuper;
 QmlWeb.initMeta = initMeta;
 QmlWeb.construct = construct;
-QmlWeb.createImpComponent = createImpComponent;
 QmlWeb.createQmlObject = createQmlObject;
