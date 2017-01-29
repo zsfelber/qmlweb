@@ -3,43 +3,10 @@
 QmlWeb.engine = null;
 
 QmlWeb.useShadowDom = true;
-let contextIds = 0;
 
 const geometryProperties = [
   "width", "height", "fill", "x", "y", "left", "right", "top", "bottom"
 ];
-
-class QMLContext {
-  constructor() {
-    this.$contextId = ++contextIds;
-  }
-
-  nameForObject(obj) {
-    for (const name in this) {
-      if (this[name] === obj) {
-        return name;
-      }
-    }
-    return undefined;
-  }
-
-  createChild() {
-    const childContext = Object.create(this);
-    childContext.$contextId = ++contextIds;
-
-    if (!childContext.$elements) {
-      childContext.$elements = {};
-      childContext.$elementoverloads = {};
-      childContext.$elementoverloadsnoalias = {};
-    } else {
-      childContext.$elements = Object.create(childContext.$elements);
-      childContext.$elementoverloads = Object.create(childContext.$elementoverloads);
-      childContext.$elementoverloadsnoalias = Object.create(childContext.$elementoverloadsnoalias);
-    }
-
-    return childContext;
-  }
-}
 
 
 // QML engine. EXPORTED.
@@ -79,7 +46,7 @@ class QMLEngine {
 
     // Root object of the engine
     this.rootObject = null;
-    this.rootContext = new QMLContext();
+    this.rootContext = new QmlWeb.QMLContext();
 
     // Base path of qml engine (used for resource loading)
     this.$basePath = "";

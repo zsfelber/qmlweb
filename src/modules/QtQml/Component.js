@@ -8,11 +8,17 @@ class QMLComponent {
     this.moduleConstructors = {};
     this.ctxQmldirs = {}; // resulting components lookup table
     this.componentImportPaths = {};
+
+    // NOTE making a new level of $context inheritance :
+    // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
+    // NOTE gz  object is prototyped from bottom to top, in terms of [type]->[supertype] relationship
+    // see also Object.create in classes.construct
+    // see also Object.create in QMLContext.createChild
     if (loaderComponent) {
-      this.context = loaderComponent.context.createChild();
+      this.meta.context = this.context = loaderComponent.context.createChild();
       console.warn("Component  "+this.$file+" -> "+loaderComponent.context.$file);
     } else {
-      this.context = engine.rootContext.createChild();
+      this.meta.context = this.context = engine.rootContext.createChild();
       console.warn("Component  "+this.$file);
     }
 
@@ -101,11 +107,10 @@ class QMLComponent {
 
     let item;
     try {
-
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
-      item = QmlWeb.construct(this, parent, this);
+      item = QmlWeb.construct(this.meta, parent, this);
       this.finalizeImports();
 
       for (var propname in properties) {

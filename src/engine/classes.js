@@ -56,11 +56,15 @@ function initMeta(self, meta, info) {
  * @return {Object} New qml object
  */
 function construct(meta, parent, loaderComponent) {
-  if (!loaderComponent) throw new Error("construct : error, no loaderComponent !");
+
 
   const superitem = constructSuper(meta, parent, loaderComponent);
 
   // NOTE making a new level of class inheritance :
+  // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
+  // NOTE gz  object is prototyped from bottom to top, in terms of [type]->[supertype] relationship
+  // see also Component.constructor
+  // see also Object.create in QMLContext.createChild
   const item = Object.create(superitem);
   item.$component = loaderComponent;
 
@@ -94,6 +98,9 @@ function construct(meta, parent, loaderComponent) {
 
 function constructSuper(meta, parent, loaderComponent) {
   if (!loaderComponent) {
+    if (!parent) {
+      throw new Error("construct : error, no loaderComponent !");
+    }
     loaderComponent = parent.$component;
   }
 

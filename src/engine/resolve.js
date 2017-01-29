@@ -234,11 +234,6 @@ function resolveComponent(imp, loaderComponent) {
   return component;
 }
 
-function createComponent(meta, loaderComponent) {
-  const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-  return new QMLComponent(meta, loaderComponent);
-}
-
 // This parses the full URL into scheme and path
 function $parseURI(uri) {
   const match = uri.match(/^([^/]*?:\/)(.*)$/);
@@ -346,8 +341,6 @@ QmlWeb.resolveImport = resolveImport;
 QmlWeb.resolveClassImport = resolveClassImport;
 
 QmlWeb.resolveComponent = resolveComponent;
-
-QmlWeb.createComponent = createComponent;
 
 // This parses the full URL into scheme and path
 QmlWeb.$parseURI = $parseURI;
