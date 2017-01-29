@@ -234,7 +234,7 @@ function applyProperty(item, i, value) {
       throw new Error("Binding/run should be a function : " + value);
     }
     value.compile();
-    item[i] = value.run.bind(item);
+    item[i] = value.run.bind({binding:value, bindingObj:item});
     if (!item.$parent) {
       item.$context[i] = item[i];
     }
@@ -278,7 +278,6 @@ function connectSignal(item, signalName, value) {
     params.push(_signal.parameters[j].name);
   }
 
-  params.push("connection");
   var ps = params.join(",");
   var connection;
 
@@ -301,11 +300,10 @@ function connectSignal(item, signalName, value) {
       }
     }
   }
-  const slot = value.run;//.bind(item);
-  connection = _signal.connect(item, slot);
-  connection.thisObj = this;
-  connection.arglen = params.length;
+  connection = _signal.connect(item, value.run);
+  connection.thisObj = connection;
   connection.binding = value;
+  connection.bindingObj = this;
   return connection;
 }
 

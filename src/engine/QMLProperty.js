@@ -101,7 +101,7 @@ class QMLProperty {
         this.obsoleteConnections = QmlWeb.helpers.mergeObjects(this.evalTreeConnections);
         this.evalTreeConnections = {};
 
-        var val = this.binding.get.call(this.obj);
+        var val = this.binding.get(this.obj);
 
         this.$setVal(val);
 
@@ -247,7 +247,7 @@ class QMLProperty {
           if (!this.binding.compiled) {
             this.binding.compile();
           }
-          this.binding.set.call(this.obj, newVal, flags);
+          this.binding.set(this.obj, newVal, flags);
         }
       } else if (!(flags & QMLProperty.ReasonAnimation)) {
         this.binding = null;

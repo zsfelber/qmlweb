@@ -169,17 +169,6 @@ class Signal {
 
   static $execute(desc, args) {
     try {
-      if (desc.arglen) {
-        if (args.length >= desc.arglen) {
-          throw new Error("Too many arguments for signal call : "+args.length+" expected:"+(desc.arglen-1));
-        } else {
-          for (var i = args.length; i<desc.arglen-1; i++) {
-            args.push(undefined);
-          }
-          args.push(desc);
-        }
-      }
-
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
       if (err.ctType === "PendingEvaluation") {

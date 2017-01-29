@@ -120,7 +120,6 @@ class QMLBinding {
           src = "("+match[1]+")"+src;
         }
         this.args = match[1];
-        this.src = src;
 
         this.flags &= ~QMLBinding.ImplBlock;
         this.flags |= QMLBinding.ImplFunction;
@@ -130,6 +129,7 @@ class QMLBinding {
         }
       }
     }
+    this.src = src;
   }
 
   /*toJSON() {
@@ -148,7 +148,7 @@ class QMLBinding {
     }
   }*/
 
-  get() {
+  get(obj) {
     var prevComponent = QmlWeb.engine.$component;
     QmlWeb.engine.$component = this.$component;
 
@@ -158,7 +158,7 @@ class QMLBinding {
         console.warn("Binding/get error  compiled:"+this.compiled+"  no compiled getter  src:\n"+this.src);
         return;
       }
-      return this.implGet.call(this);
+      return this.implGet.call(obj);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         console.warn("Binding/get error : "+err.message+(err.srcdumpok?" srcdump:ok":" "+this));
@@ -172,7 +172,7 @@ class QMLBinding {
     }
   }
 
-  set(value, flags) {
+  set(obj, value, flags) {
     var prevComponent = QmlWeb.engine.$component;
     QmlWeb.engine.$component = this.$component;
 
@@ -182,7 +182,7 @@ class QMLBinding {
         console.warn("Binding/set error  compiled:"+this.compiled+"  no compiled setter  src:\n"+this.src);
         return;
       }
-      this.implSet.call(this, value, flags);
+      this.implSet.call(obj, value, flags);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         console.warn("Binding/set error : "+err.message+(err.srcdumpok?" srcdump:ok":" "+this));
@@ -196,19 +196,20 @@ class QMLBinding {
     }
   }
 
+  // this == connection : var connection = Signal.connect(...); binding.run.call(connection, ...);
   run() {
     var prevComponent = QmlWeb.engine.$component;
-    QmlWeb.engine.$component = this.$component;
+    QmlWeb.engine.$component = this.bindingObj.$component;
 
     try {
-      if (!this.implRun) {
-        console.warn("Binding/run error  compiled:"+this.compiled+"  no compiled runner  src:\n"+this.src);
+      if (!this.binding.implRun) {
+        console.warn("Binding/run error  compiled:"+this.binding.compiled+"  no compiled runner  src:\n"+this.binding.src);
         return;
       }
-      this.implRun.apply(this, arguments);
+      this.binding.implRun.apply(this.bindingObj, arguments);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
-        console.warn("Binding/run error : "+err.message+(err.srcdumpok?" srcdump:ok":" "+this));
+        console.warn("Binding/run error : "+err.message+(err.srcdumpok?" srcdump:ok":" "+this.binding));
       }
       err.srcdumpok = 1;
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Running) {
