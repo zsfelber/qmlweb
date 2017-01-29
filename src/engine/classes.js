@@ -8,15 +8,12 @@ function inherit(constructor, baseClass) {
 }
 
 function superAndInitMeta(self, meta) {
-  var _sup = self.constructor;
-  _sup.call(_sup.prototype, meta);
+  self.constructor.call(self.__proto__, meta);
+  if (!self.$context) throw new Error("Instantiantion error, no context !");
   initMeta(self, meta);
 }
 
 function initMeta(self, meta) {
-  self.$context = meta.context;
-  if (!self.$context) throw new Error("Instantiantion error, no context !");
-
   const info = self.constructor.$qmlTypeInfo;
   if (info) {
     self.$info = info;

@@ -1,8 +1,12 @@
 let objectIds = 0;
 
 class QObject {
-  constructor(parent) {
+  constructor(parent, meta) {
     this.$parent = parent;
+    if (meta) {
+      this.$context = meta.context;
+    }
+
     if (parent && parent.$tidyupList) {
       parent.$tidyupList.push(this);
     }

@@ -20,7 +20,7 @@ QmlWeb.registerQmlType({
   },
 }, class extends QmlWeb.QObject {
   constructor(meta) {
-    super(meta.parent);
+    super(meta.parent, meta);
     QmlWeb.initMeta(this, meta);
 
     // Component get own properties
