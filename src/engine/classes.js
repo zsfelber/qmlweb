@@ -8,8 +8,8 @@ function inherit(constructor, baseClass) {
 }
 
 function superAndInitMeta(self, meta) {
-  meta.super = self.constructor.prototype.constructor;
-  meta.super.call(self, meta);
+  var _sup = self.constructor;
+  _sup.call(_sup.prototype, meta);
   initMeta(self, meta);
 }
 
@@ -126,7 +126,6 @@ function constructSuper(meta, parent, loaderComponent) {
     // NOTE class from module/qmldir cache:
     meta.parent = parent;
     item = new clinfo.classConstructor(meta);
-    meta.super = undefined;
   } else {
 
     // NOTE class component from resolved superclass info:
