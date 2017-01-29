@@ -26,9 +26,17 @@ class QMLContext {
   createChild() {
     const childContext = Object.create(this);
     childContext.$contextId = ++contextIds;
-    childContext.$elements = {};
-    childContext.$elementoverloads = {};
-    childContext.$elementoverloadsnoalias = {};
+
+    if (!childContext.$elements) {
+      childContext.$elements = {};
+      childContext.$elementoverloads = {};
+      childContext.$elementoverloadsnoalias = {};
+    } else {
+      childContext.$elements = Object.create(childContext.$elements);
+      childContext.$elementoverloads = Object.create(childContext.$elementoverloads);
+      childContext.$elementoverloadsnoalias = Object.create(childContext.$elementoverloadsnoalias);
+    }
+
     return childContext;
   }
 }
