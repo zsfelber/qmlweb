@@ -174,7 +174,7 @@ function resolveClassImport(name, component) {
   //       That's not qml's original behaviour.
 
   // 3)regular (versioned) modules only: (from Component.constructor -> QmlWeb.loadImports)
-  let constructors = component.moduleConstructors;
+  let constructors = component ? component.moduleConstructors : QmlWeb.constructors;
 
   const path = name.split(".");
   for (let ci = 0; ci < path.length; ++ci) {
@@ -187,7 +187,7 @@ function resolveClassImport(name, component) {
 
   if (constructors !== undefined) {
     return {classConstructor:constructors, path:path};
-  } else {
+  } else if (component) {
 
     // 2) 3)preloaded qrc-s  4)
     const qmldirs = component.ctxQmldirs;
@@ -213,6 +213,8 @@ function resolveClassImport(name, component) {
     imp.path=path;
 
     return imp;
+  } else {
+    throw new Error("Could not resolve object import dirs with no component (no registered global type found) : "+name);
   }
 }
 

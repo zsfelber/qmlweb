@@ -111,7 +111,8 @@ function registerQmlType(options, constructor) {
     enums: descriptor.enums,
     signals: descriptor.signals,
     defaultProperty: descriptor.defaultProperty,
-    properties: descriptor.properties
+    properties: descriptor.properties,
+    $name: options.module+"."+options.name
   };
 
   if (descriptor.global) {

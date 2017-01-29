@@ -8,44 +8,47 @@ function inherit(constructor, baseClass) {
 }
 
 function superAndInitMeta(self, meta) {
-  const info = meta.super.$qmlTypeInfo || {};
-  meta.super = meta.super.prototype.constructor;
+  meta.super = self.constructor.prototype.constructor;
   meta.super.call(self, meta);
-  initMeta(self, meta, info);
+  initMeta(self, meta);
 }
 
-function initMeta(self, meta, info) {
+function initMeta(self, meta) {
   self.$context = meta.context;
   if (!self.$context) throw new Error("Instantiantion error, no context !");
 
-  info = info || meta.super.$qmlTypeInfo || {};
-  if (info.enums) {
-    // TODO: not exported to the whole file scope yet
-    for (var name in info.enums) {
-      self[name] = info.enums[name];
+  const info = self.constructor.$qmlTypeInfo;
+  if (info) {
+    self.$info = info;
+    self.$classname = info.$name;
+    if (info.enums) {
+      // TODO: not exported to the whole file scope yet
+      for (var name in info.enums) {
+        self[name] = info.enums[name];
 
-      if (!global[name]) {
-        global[name] = self[name]; // HACK
+        if (!global[name]) {
+          global[name] = self[name]; // HACK
+        }
       }
     }
-  }
-  if (info.properties) {
-    for (var name in info.properties) {
-      let desc = info.properties[name];
-      if (typeof desc === "string") {
-        desc = { type: desc };
+    if (info.properties) {
+      for (var name in info.properties) {
+        let desc = info.properties[name];
+        if (typeof desc === "string") {
+          desc = { type: desc };
+        }
+        QmlWeb.createProperty(desc.type, self, name, desc);
       }
-      QmlWeb.createProperty(desc.type, self, name, desc);
     }
-  }
-  if (info.signals) {
-    for (var name in info.signals) {
-      const params = info.signals[name];
-      self[name] = QmlWeb.Signal.signal(name, params);
+    if (info.signals) {
+      for (var name in info.signals) {
+        const params = info.signals[name];
+        self[name] = QmlWeb.Signal.signal(name, params);
+      }
     }
-  }
-  if (info.defaultProperty) {
-    self.$defaultProperty = info.defaultProperty;
+    if (info.defaultProperty) {
+      self.$defaultProperty = info.defaultProperty;
+    }
   }
 }
 
@@ -67,6 +70,7 @@ function construct(meta, parent, loaderComponent) {
   // see also Object.create in QMLContext.createChild
   const item = Object.create(superitem);
   item.$component = loaderComponent;
+  item.$classname = loaderComponent.$name;
 
   // Finalize instantiation over supertype item :
 
@@ -120,7 +124,6 @@ function constructSuper(meta, parent, loaderComponent) {
 
   if (clinfo.classConstructor) {
     // NOTE class from module/qmldir cache:
-    meta.super = clinfo.classConstructor;
     meta.parent = parent;
     item = new clinfo.classConstructor(meta);
     meta.super = undefined;
