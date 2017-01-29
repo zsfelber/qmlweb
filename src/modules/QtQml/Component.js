@@ -67,9 +67,10 @@ class QMLComponent {
       }
     }
 
-    this.$id = this.$meta.$id;
-    this.$name = this.$meta.$name;
-    //this.$imports = this.$meta.$imports; // for later use
+    this.$id = this.meta.$id;
+    this.$name = this.meta.$name;
+    this.$file = this.meta.$file;
+    //this.$imports = this.meta.$imports; // for later use
     if (this.$file) {
       this.$basePath = QmlWeb.extractBasePath(this.$file);
     }

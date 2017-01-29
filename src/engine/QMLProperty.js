@@ -40,7 +40,7 @@ class QMLProperty {
   // Called by update and set to actually set this.val, performing any type
   // conversion required.
   $setVal(val) {
-    const constructors = this.obj.$component.moduleConstructors;
+    const constructors = this.obj.$component ? this.obj.$component.moduleConstructors : QmlWeb.constructors;
     if (constructors[this.type] === QmlWeb.qmlList) {
       this.val = QmlWeb.qmlList(val, this.obj);
     } else if (val instanceof QmlWeb.QMLMetaElement) {
