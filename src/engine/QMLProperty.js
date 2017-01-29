@@ -42,6 +42,7 @@ class QMLProperty {
   $setVal(val) {
     const constructors = this.obj.$component ? this.obj.$component.moduleConstructors : QmlWeb.constructors;
     if (constructors[this.type] === QmlWeb.qmlList) {
+      // NOTE gz : key entry point 1 of QmlWeb.construct  -> see entry point 0
       this.val = QmlWeb.qmlList(val, this.obj);
     } else if (val instanceof QmlWeb.QMLMetaElement) {
       // Root element or nested Component element ?
@@ -51,8 +52,10 @@ class QMLProperty {
           clazz: val,
         }, this.obj.$component);
       } else {
-        // NOTE gz : key entry point of QmlWeb.construct
+        // NOTE gz : key entry point 0 of QmlWeb.construct
         // all the other ones just forward this
+        // Call to here comes from
+        // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
         this.val = QmlWeb.construct(val, this.obj);
       }
     } else if (val instanceof Object || val === undefined || val === null) {

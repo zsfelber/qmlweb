@@ -13,6 +13,6 @@ QmlWeb.registerQmlType({
         createProperty("variant", this, i);
       }
     }
-    QmlWeb.applyProperties(meta.clazz, this, this/*, this.$context*/);
+    QmlWeb.applyProperties(meta.clazz, this);
   }
 });

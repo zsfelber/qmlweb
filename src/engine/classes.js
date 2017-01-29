@@ -100,7 +100,7 @@ function construct(meta, parent, loaderComponent) {
 
   // Apply properties according to this metatype info
   // (Bindings won't get evaluated, yet)
-  QmlWeb.applyProperties(meta, item, item/*, item.$context*/);
+  QmlWeb.applyProperties(meta, item);
 
   return item;
 }
