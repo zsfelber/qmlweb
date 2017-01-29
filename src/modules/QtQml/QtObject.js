@@ -18,10 +18,10 @@ QmlWeb.registerQmlType({
        { type: "QtObject", name: "element" }
      ]
   },
-}, class extends QmlWeb.QObject {
+}, class QtObject0 extends QmlWeb.QObject {
   constructor(meta) {
     super(meta.parent, meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, QtObject0);
 
     // Component get own properties
     this.$attributes = [];

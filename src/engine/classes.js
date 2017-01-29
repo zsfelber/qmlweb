@@ -8,13 +8,20 @@ function inherit(constructor, baseClass) {
 }
 
 function superAndInitMeta(self, meta) {
-  self.constructor.call(self.__proto__, meta);
+
+  // NOTE
+  // meta._constructor : this class
+  // self.constructor : superclass
+
+  var constructor = meta._constructor;
+  meta._constructor = self.constructor;
+  self.constructor.call(self, meta);
   if (!self.$context) throw new Error("Instantiantion error, no context !");
-  initMeta(self, meta);
+  initMeta(self, meta, constructor);
 }
 
-function initMeta(self, meta) {
-  const info = self.constructor.$qmlTypeInfo;
+function initMeta(self, meta, constructor) {
+  const info = constructor.$qmlTypeInfo;
   if (info) {
     self.$info = info;
     self.$classname = info.$name;
@@ -46,6 +53,8 @@ function initMeta(self, meta) {
     if (info.defaultProperty) {
       self.$defaultProperty = info.defaultProperty;
     }
+  } else {
+    throw new Error("initMeta : No type info : "+self);
   }
 }
 
@@ -122,6 +131,7 @@ function constructSuper(meta, parent, loaderComponent) {
   if (clinfo.classConstructor) {
     // NOTE class from module/qmldir cache:
     meta.parent = parent;
+    meta._constructor = clinfo.classConstructor;
     item = new clinfo.classConstructor(meta);
   } else {
 
