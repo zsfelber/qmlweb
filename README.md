@@ -153,19 +153,27 @@ property alias aliasprop:aaa.bbb[indexprop];
 property string indexprop;
 Resolving aliases as specified by qml standard (as expected, it doesn't see same object aliases, resolves property/property and property/element overload cases)
 
-Changed init time load strategy: for a single property (in engine.applyProperties), it aborts when a binding has not yet initialized,
-signal evaluation reached uninitilized expression, or so. Then it places them to 1 single engine.pendingOperations queue, then attempts
-to resolve them again at startup finish. It became more flexible and intelligent.
+Changed init time load strategy: for a single property (in engine.applyProperties), it aborts (temporally omits it) when a binding has not yet initialized,
+signal evaluation reached uninitilized expression, or so. Then it places them to 1 single engine.pendingOperations queue.
+After whole load cycle it attempts to resolve all of them subsequentially, from a queue in the exact order it appeared initially.
+It became more flexible and intelligent.
+
+JS Object oriented implementation of qml inheritance (_proto chain) for stacking the context, like this.$component, this._proto.$component, this._proto._proto.$component ...)
+1 single stack of loader components, Component's import cache variables, $context and 'this' object hirearchy (_protos) cover everything intuitively,
+the as - intended way. Main abstraction 1 is now "Component" that covers file loading stack, context inheritance (prototyping from top-to-bottom).
+Main 2 is classes.js/construct method which manages object inheritance (which now also deals with a prototype chain, but from bottom-to-top as for
+traversing the include graph from current type (QML) to the supertype (element tag QML) operation, thus starting this from the QObject supertype,
+as intended).
+
 
 Removed namespace objects, global executionContext, global $basePath stacks, componentScope+objectScope, importContextId or so.
 These were too much complexity, source of a lot of experienced and possible bugs.I simplified it.
 Now using 1 single function parameter almost across whole api consequently :
 - current object passed as "this" func.call(obj,...), func.apply(obj,...), func.bind(obj,...) as possible
-- object.$context points to a shared QMLContext instance for loaded top component, parent is engine.rootContext
+- object.$context points to a shared QMLContext instance in every loaded top component, parent is engine.rootContext
 (!== but parent of rootObject.context : rootObject is alterable if loading multiple roots subsequently)
 - Actual object's Component (obj.$component) for the $basePath, and a couple of import cache container variables (no importContextId anymore)
-- "this" object and super (_proto) hierarchy for stacking the context (currently loaded element's QML hierarchy is as of this.$component, this._proto.$component, this._proto._proto.$component ...)
-- (QtObject.) $parent instead of isTopComponent ( isTopComponent===(!cur.$parent) cur.$context===cur.$parent.$parent(...top).$context )
+
 
 Minor coding style changes, simplifications eg:
 - using 1 flag variable in QMLBinding(ImplFunction/ImplBlock/.../Bidrection/Alias), QMLProperty(reasons,priviligezed/break readonly, break bidirectional binding at set)

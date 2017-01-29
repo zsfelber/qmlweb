@@ -37,7 +37,7 @@ class QMLEngine {
     this.completedSignals = [];
 
     // Current operation state of the engine (Idle, init, etc.)
-    this.operationState = 1;
+    this.operationState = QmlWeb.QMLOperationState.Init;
 
     // List of properties whose values are bindings. For internal use only.
     // +
@@ -162,37 +162,44 @@ class QMLEngine {
 
   loadQMLTree(clazz, parent = null, file = undefined) {
     QmlWeb.engine = this;
+    var prevState = this.operationState;
+    this.operationState = QmlWeb.QMLOperationState.Init;
 
-    // Create and initialize objects
-    const component = QmlWeb.createComponent({
-      clazz: clazz,
-      $file: file
-    });
-    this.$component = component;
+    try {
+      // Create and initialize objects
+      const component = QmlWeb.createComponent({
+        clazz: clazz,
+        $file: file
+      });
+      this.$component = component;
 
-    // TODO gz undefined->component.$basePath
-    QmlWeb.loadImports(clazz.$imports, component);
+      // TODO gz undefined->component.$basePath
+      QmlWeb.loadImports(clazz.$imports, component);
 
-    this.rootObject = component.$createObject(parent);
-    if (this.rootObject.dom) {
-      console.log(clazz.$name+" : DOM element FOUND ! Added to engine screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
-      this.domTarget.appendChild(this.rootObject.dom);
-    } else {
-      console.warn(clazz.$name+" : No DOM, it's a pure model object. Not added to screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
+      this.rootObject = component.$createObject(parent);
+      if (this.rootObject.dom) {
+        console.log(clazz.$name+" : DOM element FOUND ! Added to engine screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
+        this.domTarget.appendChild(this.rootObject.dom);
+      } else {
+        console.warn(clazz.$name+" : No DOM, it's a pure model object. Not added to screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
+      }
+
+
+      this.operationState = QmlWeb.QMLOperationState.Idle;
+
+      this.$initializePendingOps();
+
+      this.start();
+
+      this.updateGeometry();
+
+      this.callCompletedSignals();
+
+      return component;
+
+    } finally {
+      this.operationState = prevState;
     }
-
-
-    this.operationState = QmlWeb.QMLOperationState.Idle;
-
-    this.$initializePendingOps();
-
-    this.start();
-
-    this.updateGeometry();
-
-    this.callCompletedSignals();
-
-    return component;
   }
 
 
