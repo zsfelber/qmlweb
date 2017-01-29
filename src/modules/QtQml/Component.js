@@ -49,7 +49,7 @@ class QMLComponent {
     QmlWeb.preloadImports(this, moduleImports);
   }
 
-  function copyMeta(meta) {
+  copyMeta(meta) {
     this.meta = {};
 
     QmlWeb.helpers.copy(this.meta, meta.clazz);
@@ -96,6 +96,7 @@ class QMLComponent {
       }
     }
   }
+
   $createObject(parent, properties = {}) {
     const engine = QmlWeb.engine;
     const oldState = engine.operationState;
