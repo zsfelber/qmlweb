@@ -77,6 +77,11 @@ function construct(meta, parent, loaderComponent) {
   }
 
   // id
+  // see also Component.constructor
+  // see also Object.create in classes.construct
+  // see also Object.create in QMLContext.createChild
+  // see also QMLProperty.createProperty how element access can be hidden by same name property or alias
+  // see also QMLBinding.bindXXX methods how a name is eventually resolved at runtime
   if (meta.id) {
     if (item.$context.hasOwnProperty(meta.id)) {
       console.warn("Context entry overriden by Element : "+meta.id+" object:"+item);
@@ -87,6 +92,10 @@ function construct(meta, parent, loaderComponent) {
       () => {}
     );
     item.$context.$elements[meta.id] = item;
+    // NOTE important : also remove here obsolete element - id - overrider - properties
+    // which were inherited from prototype (so prefer current QML elements over inherited container properties) ::
+    item.$context.$elementoverloads[meta.id] = undefined;
+    item.$context.$elementoverloadsnoalias[meta.id] = undefined;
   }
 
   // Apply properties according to this metatype info

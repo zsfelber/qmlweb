@@ -110,7 +110,12 @@ function createProperty(type, obj, propName, options) {
   }
 
   // put property to context
-  // obj.$context is always the $component's current context in each element (this.proto is superclass, context.proto is containing document's context)
+  // obj.$context is always the $component's current context in each element
+  // (this.proto is superclass, context.proto is containing document's context)
+  // see also Component.constructor
+  // see also Object.create in classes.construct
+  // see also Object.create in QMLContext.createChild
+  // see also classes.construct where $context.$elements come from
   var item = obj.$context.$elements[propName];
   if (item) {
     //console.warn("Context entry Element overriden by root property : "+type+(prop.type===type?" ":" ("+(prop.type)+") ")+propName+" in obj:"+obj);
