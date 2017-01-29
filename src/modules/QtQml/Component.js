@@ -16,7 +16,7 @@ class QMLComponent {
     // see also Object.create in QMLContext.createChild
     if (loaderComponent) {
       this.meta.context = this.context = loaderComponent.context.createChild();
-      console.warn("Component  "+this.$file+" -> "+loaderComponent.context.$file);
+      console.warn("Component  "+loaderComponent.$file+" -> "+this.$file);
     } else {
       this.meta.context = this.context = engine.rootContext.createChild();
       console.warn("Component  "+this.$file);
