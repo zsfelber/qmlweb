@@ -58,15 +58,14 @@ QmlWeb.registerQmlType({
     clazz = QmlWeb.resolveClass(fileName);
 
     QmlWeb.helpers.copy(this, QmlWeb.engine.rootContext);
-    const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
 
     const meta = { clazz: clazz,
                    context: this,//TODO gz not yet working.  gz uses parent first (see createObject)
-                   loaderComponent: this.$component,
                    $file: clazz.$file// TODO gz  ignored if component presents
                            };
 
-    const qmlComponent = new QMLComponent(meta);
+    const qmlComponent = QmlWeb.createComponent(meta, this.$component);
+
     QmlWeb.loadImports(clazz.$imports, qmlComponent);
 
     const loadedComponent = this.$createComponentObject(qmlComponent, this);

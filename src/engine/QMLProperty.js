@@ -44,14 +44,12 @@ class QMLProperty {
     if (constructors[this.type] === QmlWeb.qmlList) {
       this.val = QmlWeb.qmlList(val, this.obj);
     } else if (val instanceof QmlWeb.QMLMetaElement) {
-      const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
       // Root element or nested Component element ?
       if (constructors[val.$class] === QMLComponent ||
           constructors[this.type] === QMLComponent) {
-        this.val = new QMLComponent({
+        this.val = QmlWeb.createComponent({
           clazz: val,
-          loaderComponent: this.obj.$component,
-        });
+        }, loaderComponent);
       } else {
         // NOTE gz : key entry point of QmlWeb.construct
         // all the other ones just forward this

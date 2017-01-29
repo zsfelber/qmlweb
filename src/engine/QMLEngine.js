@@ -23,13 +23,13 @@ class QMLContext {
     return undefined;
   }
 
-  create() {
-    const newContext = Object.create(this);
-    newContext.$contextId = ++contextIds;
-    newContext.$elements = {};
-    newContext.$elementoverloads = {};
-    newContext.$elementoverloadsnoalias = {};
-    return newContext;
+  createChild() {
+    const childContext = Object.create(this);
+    childContext.$contextId = ++contextIds;
+    childContext.$elements = {};
+    childContext.$elementoverloads = {};
+    childContext.$elementoverloadsnoalias = {};
+    return childContext;
   }
 }
 
@@ -190,12 +190,10 @@ class QMLEngine {
     QmlWeb.engine = this;
 
     // Create and initialize objects
-    const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-    const component = new QMLComponent({
+    const component = QmlWeb.createComponent({
       clazz: clazz,
-      $file: file,
-      loaderComponent : loaderComponent
-    });
+      $file: file
+    }, loaderComponent);
     this.$component = component;
 
     // TODO gz undefined->component.$basePath
@@ -208,7 +206,6 @@ class QMLEngine {
     } else {
       console.warn(clazz.$name+" : No DOM, it's a pure model object. Not added to screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
     }
-    QmlWeb.setupGetter(newContext, "$ownerString", this.rootObject.toString.bind(this.rootObject));
 
 
     this.operationState = QmlWeb.QMLOperationState.Idle;

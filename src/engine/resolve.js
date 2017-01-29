@@ -223,19 +223,24 @@ function resolveComponent(imp, loaderComponent) {
     return undefined;
   }
 
-  const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-  var component = new QMLComponent({
+  const component = QmlWeb.createComponent({
     clazz: imp.clazz,
-    $name: imp.clazz.$name,
-    $id: imp.clazz.id,
-    $file: imp.file,
-    loaderComponent: loaderComponent,
-  });
+    $file: imp.file
+  }, loaderComponent);
 
   // TODO gz  undefined -> component.$basePath  from createQmlObject
   QmlWeb.loadImports(imp.clazz.$imports, component);
 
   return component;
+}
+
+function createComponent(meta, loaderComponent) {
+  const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
+  if (loaderComponent) {
+    return loaderComponent.createChild(meta);
+  } else {
+    return new QMLComponent(meta);
+  }
 }
 
 // This parses the full URL into scheme and path
@@ -345,6 +350,8 @@ QmlWeb.resolveImport = resolveImport;
 QmlWeb.resolveClassImport = resolveClassImport;
 
 QmlWeb.resolveComponent = resolveComponent;
+
+QmlWeb.createComponent = createComponent;
 
 // This parses the full URL into scheme and path
 QmlWeb.$parseURI = $parseURI;
