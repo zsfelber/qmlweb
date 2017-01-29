@@ -51,6 +51,9 @@ class QMLComponent {
 
   copyMeta(meta) {
     this.meta = {};
+    if (meta.$file !== meta.clazz.$file) {
+      throw new Error("Assertion failed. $file-s in Component and class differ :  meta.$file:"+meta.$file+" === meta.clazz.$file:"+meta.clazz.$file);
+    }
 
     QmlWeb.helpers.copy(this.meta, meta.clazz);
 
@@ -64,16 +67,13 @@ class QMLComponent {
       }
     }
 
-    this.$id = meta.clazz.$id;
-    this.$name = meta.clazz.$name;
-    //this.$imports = meta.clazz.$imports; // for later use
+    this.$id = this.$meta.$id;
+    this.$name = this.$meta.$name;
+    //this.$imports = this.$meta.$imports; // for later use
     if (this.$file) {
       this.$basePath = QmlWeb.extractBasePath(this.$file);
     }
 
-    if (this.$file !== this.clazz.$file) {
-      throw new Error("Assertion failed. $file-s in Component and class differ :  this.$file:"+this.$file+" === this.clazz.$file:"+this.clazz.$file);
-    }
   }
 
   finalizeImports() {
