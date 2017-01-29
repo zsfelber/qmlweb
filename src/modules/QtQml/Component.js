@@ -1,8 +1,9 @@
 class QMLComponent {
-  constructor(meta, loaderComponent) {
+  constructor(meta) {
     this.copyMeta(meta);
     // no component = is import root
     const engine = QmlWeb.engine;
+    const loaderComponent = QmlWeb.engine.$component;
 
     this.$jsImports = [];
     this.moduleConstructors = {};

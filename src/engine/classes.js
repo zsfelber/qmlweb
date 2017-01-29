@@ -64,10 +64,9 @@ function initMeta(self, meta, constructor) {
  *                      context
  * @return {Object} New qml object
  */
-function construct(meta, parent, loaderComponent) {
-
-
-  const superitem = constructSuper(meta, parent, loaderComponent);
+function construct(meta, parent) {
+  const loaderComponent = QmlWeb.engine.$component;
+  const superitem = constructSuper(meta, parent);
 
   // NOTE making a new level of class inheritance :
   // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
@@ -115,18 +114,12 @@ function construct(meta, parent, loaderComponent) {
   return item;
 }
 
-function constructSuper(meta, parent, loaderComponent) {
-  if (!loaderComponent) {
-    if (!parent) {
-      throw new Error("construct : error, no loaderComponent !");
-    }
-    loaderComponent = parent.$component;
-  }
+function constructSuper(meta, parent) {
 
   let item;
 
   // NOTE resolve superclass info:
-  var clinfo = QmlWeb.resolveClassImport(meta.$class, loaderComponent);
+  var clinfo = QmlWeb.resolveClassImport(meta.$class);
 
   if (clinfo.classConstructor) {
     // NOTE class from module/qmldir cache:
@@ -136,7 +129,7 @@ function constructSuper(meta, parent, loaderComponent) {
   } else {
 
     // NOTE class component from resolved superclass info:
-    const component = QmlWeb.resolveComponent(clinfo, loaderComponent);
+    const component = QmlWeb.resolveComponent(clinfo);
 
     if (!component) {
       throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);

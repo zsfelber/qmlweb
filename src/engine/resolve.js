@@ -133,6 +133,7 @@ function resolveClass(file) {
 
 function resolveImport(name) {
   const engine = QmlWeb.engine;
+  const loaderComponent = QmlWeb.engine.$component;
 
   let file = $resolvePath(name);
 
@@ -147,8 +148,7 @@ function resolveImport(name) {
   if (!clazz) {
     const nameIsUrl = $parseURI(name) !== undefined;
     if (!nameIsUrl) {
-      const moreDirs = importSearchPaths(
-        QmlWeb.engine.$component.$importContextId/*TODO gz component*/);
+      const moreDirs = importSearchPaths(loaderComponent);
       for (let i = 0; i < moreDirs.length; i++) {
         file = `${moreDirs[i]}${name}`;
         // TODO gz resolveClass  += engine.containers[...]
@@ -161,7 +161,8 @@ function resolveImport(name) {
   return {clazz, file};
 }
 
-function resolveClassImport(name, component) {
+function resolveClassImport(name) {
+  const loaderComponent = QmlWeb.engine.$component;
   const engine = QmlWeb.engine;
   // Load component from file. Please look at import.js for main notes.
   // Actually, we have to use that order:
@@ -174,7 +175,7 @@ function resolveClassImport(name, component) {
   //       That's not qml's original behaviour.
 
   // 3)regular (versioned) modules only: (from Component.constructor -> QmlWeb.loadImports)
-  let constructors = component ? component.moduleConstructors : QmlWeb.constructors;
+  let constructors = loaderComponent ? loaderComponent.moduleConstructors : QmlWeb.constructors;
 
   const path = name.split(".");
   for (let ci = 0; ci < path.length; ++ci) {
@@ -187,10 +188,10 @@ function resolveClassImport(name, component) {
 
   if (constructors !== undefined) {
     return {classConstructor:constructors, path:path};
-  } else if (component) {
+  } else if (loaderComponent) {
 
     // 2) 3)preloaded qrc-s  4)
-    const qmldirs = component.ctxQmldirs;
+    const qmldirs = loaderComponent.ctxQmldirs;
 
     const qdirInfo = qmldirs ? qmldirs[name] : null;
     // Are we have info on that component in some imported qmldir files?
@@ -200,7 +201,7 @@ function resolveClassImport(name, component) {
       filePath = qdirInfo.url;
     } else if (path.length === 2) {
       const qualified = qualifiedImportPath(
-        component, path[0]
+        loaderComponent, path[0]
       );
       filePath = `${qualified}${path[1]}.qml`;
     } else {
@@ -214,11 +215,11 @@ function resolveClassImport(name, component) {
 
     return imp;
   } else {
-    throw new Error("Could not resolve object import dirs with no component (no registered global type found) : "+name);
+    throw new Error("Could not resolve object import dirs with no loader component (no registered global type found) : "+name);
   }
 }
 
-function resolveComponent(imp, loaderComponent) {
+function resolveComponent(imp) {
   const engine = QmlWeb.engine;
 
   if (!imp.clazz) {
@@ -228,7 +229,7 @@ function resolveComponent(imp, loaderComponent) {
   const component = createComponent({
     clazz: imp.clazz,
     $file: imp.file
-  }, loaderComponent);
+  });
 
   // TODO gz  undefined -> component.$basePath  from createQmlObject
   QmlWeb.loadImports(imp.clazz.$imports, component);

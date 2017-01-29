@@ -161,14 +161,13 @@ class QMLEngine {
   }
 
   loadQMLTree(clazz, parent = null, file = undefined) {
-    var loaderComponent = parent ? parent.$component : null;
     QmlWeb.engine = this;
 
     // Create and initialize objects
     const component = QmlWeb.createComponent({
       clazz: clazz,
       $file: file
-    }, loaderComponent);
+    });
     this.$component = component;
 
     // TODO gz undefined->component.$basePath
