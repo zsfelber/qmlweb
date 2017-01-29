@@ -1,5 +1,5 @@
 class QMLComponent {
-  constructor(meta) {
+  constructor(meta, loaderComponent) {
     this.copyMeta(meta);
     // no component = is import root
     const engine = QmlWeb.engine;
@@ -8,13 +8,22 @@ class QMLComponent {
     this.moduleConstructors = {};
     this.ctxQmldirs = {}; // resulting components lookup table
     this.componentImportPaths = {};
-    this.context = engine.rootContext.createChild();
-    this.isNewContextLevel = true;
+    if (loaderComponent) {
+      this.context = loaderComponent.context.createChild();
+      console.warn("Component  "+this.$file+" -> "+loaderComponent.context.$file);
+    } else {
+      this.context = engine.rootContext.createChild();
+      console.warn("Component  "+this.$file);
+    }
+
     if (!this.$basePath) {
       throw new Error("No component basePath present");
     }
     if (!this.context) {
-      throw new Error("No context");
+      throw new Error("No component context");
+    }
+    if (!this.$file) {
+      throw new Error("No component file");
     }
 
     const moduleImports = [];
@@ -34,54 +43,24 @@ class QMLComponent {
     QmlWeb.preloadImports(this, moduleImports);
   }
 
-  createChild(meta) {
-    var childComponent = Object.create(this);
-    childComponent.copyMeta(meta);
-    childComponent.$jsImports = this.$jsImports;
-    childComponent.moduleConstructors = this.moduleConstructors;
-    childComponent.ctxQmldirs = this.ctxQmldirs;
-    childComponent.componentImportPaths = this.componentImportPaths;
-    childComponent.context = this.context;
-    if (!childComponent.$basePath) {
-      childComponent.$basePath = this.$basePath;
-    }
-    if (!childComponent.$basePath) {
-      throw new Error("No component basePath present");
-    }
-    if (!childComponent.context) {
-      throw new Error("No context in loader Component");
-    }
-    if (!childComponent.$file) {
-      throw new Error("Unsupported, no file with loader Component");
-    }
-    // TODO gz  verify
-    // NOTE it just opened another QML document (and childComponent is the superclass of loader):
-    childComponent.isNewContextLevel = childComponent.$file !== this.$file;
-    if (childComponent.isNewContextLevel) {
-      childComponent.context = childComponent.context.createChild();
-      console.warn("Component isNewContextLevel  "+this.$file+" -> "+childComponent.$file);
-    }
-
-    this.$metaObject.context = this.context;
-  }
-
   function copyMeta(meta) {
+    this.meta = {};
+
+    QmlWeb.helpers.copy(this.meta, meta.clazz);
+
     if (QmlWeb.constructors[meta.clazz.$class] === QMLComponent) {
-      this.$metaObject = meta.clazz.$children;
-      if (this.$metaObject instanceof Array) {
-        if (this.$metaObject.length !== 1) {
+      var metaObject = meta.clazz.$children;
+      if (metaObject instanceof Array) {
+        if (metaObject.length !== 1) {
           throw new Errror("Component should define 1 element : "+meta.clazz.$name+" "+meta.clazz.id);
         }
-        this.$class = this.$metaObject[0].$class;
-        this.id = this.$metaObject[0].id;
+        QmlWeb.helpers.copy(this.meta, metaObject[0]);
       }
     }
-    this.clazz = meta.clazz;
+
     this.$id = meta.clazz.$id;
     this.$name = meta.clazz.$name;
-    this.$imports = meta.clazz.$imports; // for later use
-    this.loaderComponent = meta.loaderComponent;
-    this.$file = meta.$file;
+    //this.$imports = meta.clazz.$imports; // for later use
     if (this.$file) {
       this.$basePath = QmlWeb.extractBasePath(this.$file);
     }
@@ -127,7 +106,6 @@ class QMLComponent {
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
       item = QmlWeb.construct(this, parent, this);
-      item.$component = this;
       this.finalizeImports();
 
       for (var propname in properties) {

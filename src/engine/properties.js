@@ -110,20 +110,18 @@ function createProperty(type, obj, propName, options) {
   }
 
   // put property to context
-  // Only top level in each file (but this restarts for every imported file, when it has just started to load)
-  if (obj.$component.isNewContextLevel) {
-    var item = obj.$context.$elements[propName];
-    if (item) {
-      //console.warn("Context entry Element overriden by root property : "+type+(prop.type===type?" ":" ("+(prop.type)+") ")+propName+" in obj:"+obj);
-      if (type === "alias") {
-        QmlWeb.setupGetterSetter(obj.$context.$elementoverloads, propName, getter, setter, prop);
-      } else {
-        QmlWeb.setupGetterSetter(obj.$context.$elementoverloads, propName, getter, setter, prop);
-        QmlWeb.setupGetterSetter(obj.$context.$elementoverloadsnoalias, propName, getter, setter, prop);
-      }
+  // obj.$context is always the $component's current context in each element (this.proto is superclass, context.proto is containing document's context)
+  var item = obj.$context.$elements[propName];
+  if (item) {
+    //console.warn("Context entry Element overriden by root property : "+type+(prop.type===type?" ":" ("+(prop.type)+") ")+propName+" in obj:"+obj);
+    if (type === "alias") {
+      QmlWeb.setupGetterSetter(obj.$context.$elementoverloads, propName, getter, setter, prop);
     } else {
-      QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter, prop);
+      QmlWeb.setupGetterSetter(obj.$context.$elementoverloads, propName, getter, setter, prop);
+      QmlWeb.setupGetterSetter(obj.$context.$elementoverloadsnoalias, propName, getter, setter, prop);
     }
+  } else {
+    QmlWeb.setupGetterSetter(obj.$context, propName, getter, setter, prop);
   }
 }
 

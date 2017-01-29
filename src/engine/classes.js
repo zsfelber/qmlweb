@@ -56,11 +56,13 @@ function initMeta(self, meta, info) {
  * @return {Object} New qml object
  */
 function construct(meta, parent, loaderComponent) {
+  if (!loaderComponent) throw new Error("construct : error, no loaderComponent !");
 
   const superitem = constructSuper(meta, parent, loaderComponent);
 
   // NOTE making a new level of class inheritance :
   const item = Object.create(superitem);
+  item.$component = loaderComponent;
 
   // Finalize instantiation over supertype item :
 

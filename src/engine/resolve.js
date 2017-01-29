@@ -223,7 +223,7 @@ function resolveComponent(imp, loaderComponent) {
     return undefined;
   }
 
-  const component = QmlWeb.createComponent({
+  const component = createComponent({
     clazz: imp.clazz,
     $file: imp.file
   }, loaderComponent);
@@ -236,11 +236,7 @@ function resolveComponent(imp, loaderComponent) {
 
 function createComponent(meta, loaderComponent) {
   const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-  if (loaderComponent) {
-    return loaderComponent.createChild(meta);
-  } else {
-    return new QMLComponent(meta);
-  }
+  return new QMLComponent(meta, loaderComponent);
 }
 
 // This parses the full URL into scheme and path
