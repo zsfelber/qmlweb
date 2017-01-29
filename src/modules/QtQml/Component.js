@@ -113,7 +113,7 @@ class QMLComponent {
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
-      item = QmlWeb.construct(this.meta, parent, this);
+      item = QmlWeb.construct(this.meta, parent);
       this.finalizeImports();
 
       for (var propname in properties) {
