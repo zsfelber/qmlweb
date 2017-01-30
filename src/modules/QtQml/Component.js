@@ -38,6 +38,7 @@ class QMLComponent {
       }
     }
     this.loaderComponent = loaderComponent;
+    this.flags = flags;
 
     if (!this.$basePath) {
       throw new Error("No component basePath present");
@@ -129,7 +130,7 @@ class QMLComponent {
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
-      item = QmlWeb.construct(this.meta, parent);
+      item = QmlWeb.construct(this.meta, parent, this.flags);
       this.finalizeImports();
 
       for (var propname in properties) {
