@@ -9,6 +9,7 @@ class QMLComponent {
     this.moduleConstructors = {};
     this.ctxQmldirs = {}; // resulting components lookup table
     this.componentImportPaths = {};
+    this.flags = flags;
 
     // NOTE making a new level of $context inheritance :
     // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship

@@ -39,9 +39,11 @@ class QMLProperty {
 
   // Called by update and set to actually set this.val, performing any type
   // conversion required.
-  $setVal(val) {
+  $setVal(val, flags) {
     var prevComponent = QmlWeb.engine.$component;
-    QmlWeb.engine.$component = this.obj.$component;
+    if (!(flags & QMLProperty.SetChildren)) {
+      QmlWeb.engine.$component = this.obj.$component;
+    }
 
     try {
       const constructors = this.obj.$component ? this.obj.$component.moduleConstructors : QmlWeb.constructors;
@@ -89,7 +91,7 @@ class QMLProperty {
 
   // Updater recalculates the value of a property if one of the dependencies
   // changed
-  update(preventhacks) {
+  update(preventhacks, flags) {
     this.needsUpdate = false;
 
     if (!this.binding) {
@@ -111,7 +113,7 @@ class QMLProperty {
 
         var val = this.binding.get(this.obj);
 
-        this.$setVal(val);
+        this.$setVal(val, flags);
 
       } finally {
         for (var i in this.obsoleteConnections) {
@@ -233,7 +235,7 @@ class QMLProperty {
       this.binding = val;
 
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
-        this.update(true);
+        this.update(true, flags);
       } else {
         QmlWeb.engine.pendingOperations.push({
            property:this,
@@ -261,7 +263,7 @@ class QMLProperty {
         this.binding = null;
       }
 
-      this.$setVal(val);
+      this.$setVal(val, flags);
     }
 
     if (this.val !== oldVal) {
@@ -367,6 +369,7 @@ QMLProperty.ReasonInit = 1;
 QMLProperty.ReasonAnimation = 2;
 QMLProperty.Privileged = 4;
 QMLProperty.RemoveBidirectionalBinding = 8;
+QMLProperty.SetChildren = 16;
 QMLProperty.ReasonInitPrivileged = QMLProperty.ReasonInit | QMLProperty.Privileged;
 
 QmlWeb.QMLProperty = QMLProperty;
