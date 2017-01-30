@@ -121,8 +121,10 @@ function createProperty(type, obj, propName, options) {
   // see also QObject.createChild()->Object.create() in classes.construct
   // see also Object.create in QMLContext.createChild
   // see also classes.construct where $context.$elements come from
-  var item = ctx.$elements[propName];
-  if (item) {
+
+  // NOTE obj.$elements (bottom-to-top) : not ctx.$elements (top-to-bottom)
+  var elmt = obj.$elements[propName];
+  if (elmt) {
     //console.warn("Context entry Element overriden by root property : "+type+(prop.type===type?" ":" ("+(prop.type)+") ")+propName+" in obj:"+obj);
     if (type === "alias") {
       QmlWeb.setupGetterSetter(ctx.$elementoverloads, propName, getter, setter, prop);
@@ -203,7 +205,7 @@ function applyProperties(metaObject, item) {
           item[i] = value;
         } else if (item.$setCustomData) {
           item.$setCustomData(i, value);
-        } else if (!trivialProperties[i]) {
+        } else if (!trivialProperties[i] && !/^\$/.test(i)) {
           console.warn(
             `Cannot assign to non-existent property "${i}". Ignoring assignment.`
           );

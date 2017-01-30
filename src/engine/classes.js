@@ -98,7 +98,7 @@ function construct(meta, parent, nested) {
   // see also QMLProperty.createProperty how element access can be hidden by same name property or alias
   // see also QMLBinding.bindXXX methods how a name is eventually resolved at runtime
   if (meta.id) {
-    if (topctx.hasOwnProperty(meta.id)) {
+    if (ctx.hasOwnProperty(meta.id)) {
       console.warn("Context entry overriden by Element : "+meta.id+" object:"+item);
     }
     QmlWeb.setupGetterSetter(

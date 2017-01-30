@@ -1,8 +1,6 @@
-let contextIds = 0;
 
 class QMLContext {
   constructor() {
-    this.$contextId = ++contextIds;
   }
 
   nameForObject(obj) {
@@ -16,7 +14,6 @@ class QMLContext {
 
   createChild(info) {
     const childContext = Object.create(this);
-    childContext.$contextId = ++contextIds;
     childContext.$info = info;
 
     if (!childContext.$elements) {
@@ -24,9 +21,9 @@ class QMLContext {
       childContext.$elementoverloads = {};
       childContext.$elementoverloadsnoalias = {};
     } else {
-      childContext.$elements = Object.create(childContext.$elements);
-      childContext.$elementoverloads = Object.create(childContext.$elementoverloads);
-      childContext.$elementoverloadsnoalias = Object.create(childContext.$elementoverloadsnoalias);
+      childContext.$elements = Object.create(this.$elements);
+      childContext.$elementoverloads = Object.create(this.$elementoverloads);
+      childContext.$elementoverloadsnoalias = Object.create(this.$elementoverloadsnoalias);
     }
 
     return childContext;

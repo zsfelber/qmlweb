@@ -27,11 +27,11 @@ class QObject {
 
   createChild() {
     const childObj = Object.create(this);
-    childObj.$properties = Object.create(childObj.$properties);
-    childObj.$properties_noalias = Object.create(childObj.$properties_noalias);
-    childObj.$elements = Object.create(childObj.$elements);
-    childObj.$noalias = Object.create(childObj.$noalias);
-    childObj.$signals = Object.create(childObj.$signals);
+    childObj.$properties = Object.create(this.$properties);
+    childObj.$properties_noalias = Object.create(this.$properties_noalias);
+    childObj.$elements = Object.create(this.$elements);
+    childObj.$noalias = Object.create(this.$noalias);
+    childObj.$signals = Object.create(this.$signals);
 
     return childObj;
   }
