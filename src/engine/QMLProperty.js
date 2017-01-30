@@ -57,8 +57,8 @@ class QMLProperty {
     try {
       const constructors = this.obj.$component ? this.obj.$component.moduleConstructors : QmlWeb.constructors;
       if (constructors[this.type] === QmlWeb.qmlList) {
-        // NOTE gz : key entry point 1 of component.$createObject -> QmlWeb.construct  -> see key entry point 2
-        this.val = QmlWeb.qmlList(val, this.obj);
+        // NOTE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
+        this.val = QmlWeb.qmlList(val, correctObjProto, QmlWeb.QMLComponent.Nested);
       } else if (val instanceof QmlWeb.QMLMetaElement) {
         // Root element or nested Component element ?
         if (constructors[val.$class] === QMLComponent ||
@@ -69,11 +69,11 @@ class QMLProperty {
             $file: val.$file
           }, QmlWeb.QMLComponent.Nested);
         } else {
-          // NOTE gz : key entry point 2 of component.$createObject -> QmlWeb.construct
+          // NOTE gz : key entry point 2 of QmlWeb.construct
           // all the other ones just forward these
           // Call to here comes from
           // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
-          this.val = QmlWeb.addQmlElement(val, correctObjProto);
+          this.val = QmlWeb.construct(val, correctObjProto, QmlWeb.QMLComponent.Nested);
         }
       } else if (val instanceof Object || val === undefined || val === null) {
         this.val = val;

@@ -176,17 +176,18 @@ class QMLComponent {
     return item;
   }
   toString() {
+    var c = "Cmp_";
     var f = "";
     var fn = this.flags;
     for (;;) {
       if (fn>=QMLComponent.Element) { f+="e";    fn-=QMLComponent.Element; }
-      else if (fn>=QMLComponent.Root) { f+="R";  fn-=QMLComponent.Root; }
-      else if (fn>=QMLComponent.Nested) { f+="n";fn-=QMLComponent.Nested; }
-      else if (fn>=QMLComponent.Super) { f+="s"; fn-=QMLComponent.Super; }
+      else if (fn>=QMLComponent.Root) { c+="R";  fn-=QMLComponent.Root; }
+      else if (fn>=QMLComponent.Nested) { c+="N";fn-=QMLComponent.Nested; }
+      else if (fn>=QMLComponent.Super) { c+="S"; fn-=QMLComponent.Super; }
       else break;
     }
 
-    return "C["+this.$file+(this.flags?" f"+f:"")+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
+    return c+"["+this.$file+(this.flags?" "+f:"")+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
   }
 
   static getAttachedObject() {

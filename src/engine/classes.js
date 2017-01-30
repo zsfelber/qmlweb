@@ -68,7 +68,11 @@ function construct(meta, parent, flags) {
   const component = QmlWeb.engine.$component;
   let loaderComponent = component.loaderComponent;
 
-  const superitem = constructSuperOrNested(meta, parent, flags | QmlWeb.QMLComponent.Super);
+  if (!(flags & QmlWeb.QMLComponent.Nested)) {
+    flags |= QmlWeb.QMLComponent.Super;
+  }
+
+  const superitem = constructSuperOrNested(meta, parent, flags);
 
   // NOTE making a new level of class inheritance :
   // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
@@ -105,8 +109,6 @@ function construct(meta, parent, flags) {
   var ctx = item.$context;
 
   var currentTopComponent = ctx.component;
-  if (currentTopComponent.flags &  QmlWeb.QMLComponent.Nested) throw new Error("Assertion failed. Top component should not be nested.");
-
   var topctx = currentTopComponent.context;
   if (ctx !== topctx) throw new Error("Assertion failed. Each component should share the current top loader context.");
 
@@ -217,13 +219,6 @@ function constructSuperOrNested(meta, parent, flags) {
   return item;
 }
 
-function addQmlElement(meta, parent) {
-
-  const result = constructSuperOrNested(meta, parent, flags | QmlWeb.QMLComponent.Nested);
-
-  return result;
-}
-
 function createQmlObject(src, parent, file) {
 
   const engine = QmlWeb.engine;
@@ -258,5 +253,4 @@ QmlWeb.inherit = inherit;
 QmlWeb.superAndInitMeta = superAndInitMeta;
 QmlWeb.initMeta = initMeta;
 QmlWeb.construct = construct;
-QmlWeb.addQmlElement = addQmlElement;
 QmlWeb.createQmlObject = createQmlObject;
