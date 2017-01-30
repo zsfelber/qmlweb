@@ -80,10 +80,12 @@ function construct(meta, parent, flags) {
 
   if (component.flags & QmlWeb.QMLComponent.Root) {
     if (loaderComponent) {
-      throw new Error("Assertion failed. Root with loader : "+component);
+      // root Component sole element
+      item.$component = loaderComponent;
+    } else {
+      // root Component
+      item.$component = loaderComponent = component;
     }
-    // root
-    item.$component = loaderComponent = component;
   } else if (!loaderComponent) {
     throw new Error("Assertion failed. No loader : "+component);
   } else if (item.$component !==  component) {

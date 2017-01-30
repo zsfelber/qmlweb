@@ -22,7 +22,12 @@ class QMLComponent {
         this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
       }
       if (flags&QMLComponent.Root) {
-        throw new Error("Component has Loader but Root flag is set too : "+this);
+        if (!(loaderComponent.flags&QMLComponent.Root)) {
+          throw new Error("Invalid root Component construction : "+this);
+        }
+        if (loaderComponent.loaderComponent) {
+          throw new Error("Root Component could not have a Loader on stack when initialized : "+this);
+        }
       }
 
       if (flags&QMLComponent.Super) {
