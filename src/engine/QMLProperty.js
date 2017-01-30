@@ -39,37 +39,41 @@ class QMLProperty {
 
   // Called by update and set to actually set this.val, performing any type
   // conversion required.
-  $setVal(val, flags, declaringContainer) {
+  $setVal(val, flags, declaringItem) {
     var prevComponent = QmlWeb.engine.$component;
+    var correctObjProto;
     if (flags & QMLProperty.SetChildren) {
-      // NOTE declaringContainer is passed only along with SetChildren
-      // declaringContainer !== this.obj.$component
-      // declaringContainer means : the QML where the current child element (val) is declared
+      // NOTE declaringItem is passed only along with SetChildren
+      // declaringItem !== this.obj.$component
+      // declaringItem means : the QML where the current child element (val) is declared
       // what this.obj.$component is here : the QML supertype where the default property (eg"data") defined (eg"ItemBase")
-      QmlWeb.engine.$component = declaringContainer;
+      QmlWeb.engine.$component = declaringItem.$component;
+      correctObjProto = declaringItem;
     } else {
       QmlWeb.engine.$component = this.obj.$component;
+      correctObjProto = this.obj;
     }
 
     try {
       const constructors = this.obj.$component ? this.obj.$component.moduleConstructors : QmlWeb.constructors;
       if (constructors[this.type] === QmlWeb.qmlList) {
-        // NOTE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
-        this.val = QmlWeb.qmlList(val, this.obj, QmlWeb.QMLComponent.Nested);
+        // NOTE gz : key entry point 1 of component.$createObject -> QmlWeb.construct  -> see key entry point 2
+        this.val = QmlWeb.qmlList(val, this.obj);
       } else if (val instanceof QmlWeb.QMLMetaElement) {
         // Root element or nested Component element ?
         if (constructors[val.$class] === QMLComponent ||
             constructors[this.type] === QMLComponent) {
+          // TODO gz , legacy code works here  ?? : val is usually a QMLMetaElement
           this.val = QmlWeb.createComponent({
             clazz: val,
             $file: val.$file
           }, QmlWeb.QMLComponent.Nested);
         } else {
-          // NOTE gz : key entry point 2 of QmlWeb.construct
+          // NOTE gz : key entry point 2 of component.$createObject -> QmlWeb.construct
           // all the other ones just forward these
           // Call to here comes from
           // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
-          this.val = QmlWeb.construct(val, this.obj, QmlWeb.QMLComponent.Nested);
+          this.val = QmlWeb.addQmlElement(val, correctObjProto);
         }
       } else if (val instanceof Object || val === undefined || val === null) {
         this.val = val;
@@ -97,7 +101,7 @@ class QMLProperty {
 
   // Updater recalculates the value of a property if one of the dependencies
   // changed
-  update(preventhacks, flags, declaringContainer) {
+  update(preventhacks, flags, declaringItem) {
     this.needsUpdate = false;
 
     if (!this.binding) {
@@ -119,7 +123,7 @@ class QMLProperty {
 
         var val = this.binding.get(this.obj);
 
-        this.$setVal(val, flags, declaringContainer);
+        this.$setVal(val, flags, declaringItem);
 
       } finally {
         for (var i in this.obsoleteConnections) {
@@ -228,7 +232,7 @@ class QMLProperty {
   }
 
   // Define setter
-  set(newVal, flags, declaringContainer) {
+  set(newVal, flags, declaringItem) {
     flags = flags || QMLProperty.ReasonUser;
     if (this.readOnly && !(flags & QMLProperty.Privileged)) {
       throw new Error(`property '${this.name}' has read only access`);
@@ -246,7 +250,7 @@ class QMLProperty {
         QmlWeb.engine.pendingOperations.push({
            property:this,
            info:"Pending property set/binding initialization.",
-           flags, declaringContainer
+           flags, declaringItem
            });
         //console.warn("PendingEvaluation : Pending property set/binding :" + this.name + "  obj:" + this.obj);
         return;
@@ -269,7 +273,7 @@ class QMLProperty {
         this.binding = null;
       }
 
-      this.$setVal(val, flags, declaringContainer);
+      this.$setVal(val, flags, declaringItem);
     }
 
     if (this.val !== oldVal) {

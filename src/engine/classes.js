@@ -79,14 +79,14 @@ function construct(meta, parent, flags) {
   item.$classname = component.$name;
 
   if (component.flags & QmlWeb.QMLComponent.Root) {
-    if (component.flags & QmlWeb.QMLComponent.Element) {
-      if (!loaderComponent) throw new Error("loaderComponent should be present here : "+item);
+    if (loaderComponent) throw new Error("loaderComponent should not be present here : "+item);
+    // root Component
+    item.$component = loaderComponent = component;
+  } else if ((component.flags & QmlWeb.QMLComponent.Element)&&(component.flags & QmlWeb.QMLComponent.Nested)) {
+    if (!loaderComponent) throw new Error("loaderComponent should be present here : "+item);
+    if (loaderComponent.flags & QmlWeb.QMLComponent.Root) {
       // root's Sole Element
       item.$component = loaderComponent;
-    } else {
-      if (loaderComponent) throw new Error("loaderComponent should not be present here : "+item);
-      // root Component
-      item.$component = loaderComponent = component;
     }
   } else if (!loaderComponent) {
     throw new Error("Assertion failed. No loader : "+component);
@@ -200,7 +200,7 @@ function constructSuper(meta, parent, flags) {
   } else {
 
     // NOTE class component from resolved superclass info:
-    const component = QmlWeb.resolveComponent(clinfo, flags);
+    const component = QmlWeb.resolveComponent(clinfo, flags | QmlWeb.QMLComponent.Super);
 
     if (!component) {
       throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);
@@ -217,6 +217,18 @@ function constructSuper(meta, parent, flags) {
   return item;
 }
 
+function addQmlElement(meta, parent, properties) {
+  var nested = QmlWeb.createComponent({
+    clazz: meta,
+    $file: meta.$file
+  }, QmlWeb.QMLComponent.Nested);
+  // NOTE gz : key entry point 2 of QmlWeb.construct
+  // all the other ones just forward these
+  // Call to here comes from
+  // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
+  var result = nested.$createObject(parent, properties);
+  return result;
+}
 
 function createQmlObject(src, parent, file) {
 
@@ -252,4 +264,5 @@ QmlWeb.inherit = inherit;
 QmlWeb.superAndInitMeta = superAndInitMeta;
 QmlWeb.initMeta = initMeta;
 QmlWeb.construct = construct;
+QmlWeb.addQmlElement = addQmlElement;
 QmlWeb.createQmlObject = createQmlObject;
