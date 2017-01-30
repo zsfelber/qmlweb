@@ -14,9 +14,10 @@ class QMLContext {
     return undefined;
   }
 
-  createChild() {
+  createChild(info) {
     const childContext = Object.create(this);
     childContext.$contextId = ++contextIds;
+    childContext.$info = info;
 
     if (!childContext.$elements) {
       childContext.$elements = {};

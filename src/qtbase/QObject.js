@@ -22,7 +22,7 @@ class QObject {
     this.$noalias = {};
     this.$signals = {};
 
-    this.objectId = objectIds++;
+    this.$objectId = ++objectIds;
   }
 
   createChild() {
@@ -83,7 +83,7 @@ class QObject {
   }
 
   toString() {
-    return this.constructor.name+":"+this.id+":"+this.objectId;
+    return this.constructor.name+":"+this.id+":"+this.$objectId;
   }
 }
 

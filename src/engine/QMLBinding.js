@@ -224,8 +224,8 @@ class QMLBinding {
  * Compile binding. Afterwards you may call binding.eval/get/set to evaluate.
  */
   compile() {
-    if (!this.bindingId) {
-      this.bindingId = ++bindingIds;
+    if (!this.$bindingId) {
+      this.$bindingId = ++bindingIds;
     }
     this.src = _ubertrim(this.src);
     this.compiled = true;

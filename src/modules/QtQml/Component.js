@@ -16,13 +16,13 @@ class QMLComponent {
     // see also QObject.createChild()->Object.create() in classes.construct
     // see also Object.create in QMLContext.createChild
     if (loaderComponent) {
-      this.meta.context = this.context = loaderComponent.context.createChild();
-      console.warn("Component  "+loaderComponent.$file+" -> "+this.$file);
       if (meta.nested) {
         this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
       }
+      this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent.$file+" -> "+this.$file+(this.nestedLevel?" : "+this.nestedLevel:""));
+      console.warn("Component  "+loaderComponent.$file+" -> "+this.$file);
     } else {
-      this.meta.context = this.context = engine.rootContext.createChild();
+      this.meta.context = this.context = engine.rootContext.createChild(this.$file);
       console.warn("Component  "+this.$file);
       if (meta.nested) {
         throw new Error("Component is nested but no loader Component.");

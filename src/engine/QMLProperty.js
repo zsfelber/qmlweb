@@ -32,7 +32,7 @@ class QMLProperty {
     // object.
     this.$tidyupList = [];
 
-    this.propertyId = ++propertyIds;
+    this.$propertyId = ++propertyIds;
     this.evalTreeConnections = {};
     this.childEvalTreeConnections = 0;
   }
@@ -125,7 +125,7 @@ class QMLProperty {
 
 
     } catch (e) {
-      console.warn("QMLProperty.update binding error #"+this.propertyId, e);
+      console.warn("QMLProperty.update binding error #"+this.$propertyId, e);
       throw e;
     } finally {
       if (pushed) {
@@ -188,16 +188,16 @@ class QMLProperty {
       //);
 
       QMLProperty.evaluatingProperties.stack.forEach(function (parent) {
-        var con = parent.evalTreeConnections[this.propertyId];
+        var con = parent.evalTreeConnections[this.$propertyId];
         if (con) {
-          delete parent.obsoleteConnections[this.propertyId];
+          delete parent.obsoleteConnections[this.$propertyId];
         } else {
           con = this.changed.connect(
             parent,
             QMLProperty.prototype.updateLater,
             QmlWeb.Signal.UniqueConnection
           );
-          parent.evalTreeConnections[this.propertyId] = con;
+          parent.evalTreeConnections[this.$propertyId] = con;
           con.signalOwner = this;
           this.childEvalTreeConnections++;
         }
@@ -212,7 +212,7 @@ class QMLProperty {
     if (this.needsUpdate && (this.bound || this.binding)) {
       QmlWeb.engine.pendingOperations.push({
          property:this,
-         info:"Pending property get/binding initialization. #"+this.propertyId,
+         info:"Pending property get/binding initialization. #"+this.$propertyId,
          });
       throw new QmlWeb.PendingEvaluation(`Binding not yet initialized.`, this);
     }
@@ -322,7 +322,7 @@ class QMLProperty {
     // TODO say warnings if already on stack. This means binding loop.
     // BTW actually we do not loop because needsUpdate flag is reset before
     // entering update again.
-    if (QMLProperty.evaluatingProperties.map[prop.propertyId]) {
+    if (QMLProperty.evaluatingProperties.map[prop.$propertyId]) {
       console.error("Property binding loop detected for property",
         prop.name,
         [prop].slice(0)
@@ -330,13 +330,13 @@ class QMLProperty {
       return false;
     }
     QMLProperty.evaluatingProperty = prop;
-    QMLProperty.evaluatingProperties.map[prop.propertyId] = prop;
+    QMLProperty.evaluatingProperties.map[prop.$propertyId] = prop;
     QMLProperty.evaluatingProperties.stack.push(prop); //keep stack of props
     return true;
   }
 
   static popEvaluatingProperty() {
-    delete QMLProperty.evaluatingProperties.map[QMLProperty.evaluatingProperty.propertyId];
+    delete QMLProperty.evaluatingProperties.map[QMLProperty.evaluatingProperty.$propertyId];
     QMLProperty.evaluatingProperty = QMLProperty.evaluatingProperties.stack.pop();
     //QMLProperty.evaluatingProperty = QMLProperty.evaluatingProperties.stack[
     //  QMLProperty.evaluatingProperties.length - 1
