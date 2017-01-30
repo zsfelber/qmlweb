@@ -68,7 +68,7 @@ function construct(meta, parent, flags) {
   const component = QmlWeb.engine.$component;
   let loaderComponent = component.loaderComponent;
 
-  const superitem = constructSuper(meta, parent, flags);
+  const superitem = constructSuperOrNested(meta, parent, flags | QmlWeb.QMLComponent.Super);
 
   // NOTE making a new level of class inheritance :
   // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
@@ -185,7 +185,7 @@ function construct(meta, parent, flags) {
   return item;
 }
 
-function constructSuper(meta, parent, flags) {
+function constructSuperOrNested(meta, parent, flags) {
 
   let item;
 
@@ -200,7 +200,7 @@ function constructSuper(meta, parent, flags) {
   } else {
 
     // NOTE class component from resolved superclass info:
-    const component = QmlWeb.resolveComponent(clinfo, flags | QmlWeb.QMLComponent.Super);
+    const component = QmlWeb.resolveComponent(clinfo, flags);
 
     if (!component) {
       throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);
@@ -217,16 +217,10 @@ function constructSuper(meta, parent, flags) {
   return item;
 }
 
-function addQmlElement(meta, parent, properties) {
-  var nested = QmlWeb.createComponent({
-    clazz: meta,
-    $file: meta.$file
-  }, QmlWeb.QMLComponent.Nested);
-  // NOTE gz : key entry point 2 of QmlWeb.construct
-  // all the other ones just forward these
-  // Call to here comes from
-  // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
-  var result = nested.$createObject(parent, properties);
+function addQmlElement(meta, parent) {
+
+  const result = constructSuperOrNested(meta, parent, flags | QmlWeb.QMLComponent.Nested);
+
   return result;
 }
 
