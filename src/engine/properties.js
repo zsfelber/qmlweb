@@ -114,7 +114,7 @@ function createProperty(type, obj, propName, options) {
     throw new Error("Loader component at property init : "+this);
   }
 
-  if (obj.$component.nestedLevel <== 2) {
+  if (obj.$component.nestedLevel === 1) {
     // put property to context
     // ctx is the $component's current loader context (the current QML)
     // (this.proto is superclass, context.proto is containing document's context)

@@ -75,7 +75,6 @@ function construct(meta, parent, nested) {
   // see also Object.create in QMLContext.createChild
   const item = Object.create(superitem);
   item.$component = loaderComponent;
-  item.$context = loaderComponent.context;
   item.$classname = loaderComponent.$name;
 
   // Finalize instantiation over supertype item :
