@@ -79,16 +79,18 @@ function construct(meta, parent, flags) {
   item.$classname = component.$name;
 
   if (component.flags & QmlWeb.QMLComponent.Root) {
-    if (loaderComponent) {
-      // root Component sole element
+    if (component.flags & QmlWeb.QMLComponent.Element) {
+      if (!loaderComponent) throw new Error("loaderComponent should be present here : "+item);
+      // root's Sole Element
       item.$component = loaderComponent;
     } else {
+      if (loaderComponent) throw new Error("loaderComponent should not be present here : "+item);
       // root Component
       item.$component = loaderComponent = component;
     }
   } else if (!loaderComponent) {
     throw new Error("Assertion failed. No loader : "+component);
-  } else if (item.$component !==  component) {
+  } else if ((flags&QmlWeb.QMLComponent.Super) && item.$component !==  component) {
     throw new Error("Assertion failed. $component differs from that in stack : "+item.$component+" ===  "+component);
   }
 
@@ -103,7 +105,7 @@ function construct(meta, parent, flags) {
   var ctx = item.$context;
 
   var currentTopComponent = ctx.component;
-  if (currentTopComponent.flags ===  QmlWeb.QMLComponent.Nested) throw new Error("Assertion failed. Top component should not be nested.");
+  if (currentTopComponent.flags &  QmlWeb.QMLComponent.Nested) throw new Error("Assertion failed. Top component should not be nested.");
 
   var topctx = currentTopComponent.context;
   if (ctx !== topctx) throw new Error("Assertion failed. Each component should share the current top loader context.");
@@ -129,7 +131,7 @@ function construct(meta, parent, flags) {
       if (loaderComponent.context !== topctx) {
         isTop = 1;
 
-        if (component.flags !== QmlWeb.QMLComponent.Nested || !loaderComponent) {
+        if (!(component.flags & QmlWeb.QMLComponent.Nested) || !loaderComponent) {
           throw new Error("Assertion failed. The current component here should be the directly nested element still parsing in loader component, not its superclass QML document. Invalid component flags:"+component.flags+"  of  "+item);
         }
 

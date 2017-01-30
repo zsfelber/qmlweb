@@ -28,6 +28,9 @@ class QMLComponent {
         if (loaderComponent.loaderComponent) {
           throw new Error("Root Component could not have a Loader on stack when initialized : "+this);
         }
+        if (!flags&QMLComponent.Element) {
+          throw new Error("Invalid root Component construction, sole child should be Element : "+this);
+        }
       }
 
       if (flags&QMLComponent.Super) {
@@ -149,7 +152,7 @@ class QMLComponent {
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
-      item = QmlWeb.construct(this.meta, parent, this.flags);
+      item = QmlWeb.construct(this.meta, parent, this.flags|QMLComponent.Element);
       this.finalizeImports();
 
       for (var propname in properties) {
@@ -173,7 +176,17 @@ class QMLComponent {
     return item;
   }
   toString() {
-    return "C["+this.$file+(this.flags?" f"+this.flags:"")+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
+    var f = "";
+    var fn = this.flags;
+    for (;;) {
+      if (fn>=QMLComponent.Element) { f+="e";    fn-=QMLComponent.Element; }
+      else if (fn>=QMLComponent.Root) { f+="R";  fn-=QMLComponent.Root; }
+      else if (fn>=QMLComponent.Nested) { f+="n";fn-=QMLComponent.Nested; }
+      else if (fn>=QMLComponent.Super) { f+="s"; fn-=QMLComponent.Super; }
+      else break;
+    }
+
+    return "C["+this.$file+(this.flags?" f"+f:"")+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
   }
 
   static getAttachedObject() {
@@ -201,4 +214,5 @@ QmlWeb.registerQmlType({
 QMLComponent.Super = 1;
 QMLComponent.Nested = 2;
 QMLComponent.Root = 4;
+QMLComponent.Element = 8;
 QmlWeb.QMLComponent = QMLComponent;
