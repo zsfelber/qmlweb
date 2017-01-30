@@ -136,7 +136,7 @@ function constructSuper(meta, parent, nested) {
   } else {
 
     // NOTE class component from resolved superclass info:
-    const component = QmlWeb.resolveComponent(clinfo, nested);
+    const component = QmlWeb.resolveComponent(clinfo, nested, true);
 
     if (!component) {
       throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);

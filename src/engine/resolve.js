@@ -219,7 +219,7 @@ function resolveClassImport(name) {
   }
 }
 
-function resolveComponent(imp, nested) {
+function resolveComponent(imp, nested, super) {
   const engine = QmlWeb.engine;
 
   if (!imp.clazz) {
@@ -229,7 +229,7 @@ function resolveComponent(imp, nested) {
   const component = createComponent({
     clazz: imp.clazz,
     $file: imp.file,
-    nested: nested
+    nested, super
   });
 
   // TODO gz  undefined -> component.$basePath  from createQmlObject

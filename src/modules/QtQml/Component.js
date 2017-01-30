@@ -19,7 +19,11 @@ class QMLComponent {
       if (meta.nested) {
         this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
       }
-      this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent.$file+" -> "+this.$file+(this.nestedLevel?" : "+this.nestedLevel:""));
+      if (meta.super) {
+        this.meta.context = this.context = loaderComponent.context;
+      } else {
+        this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent.$file+" -> "+this.$file+(this.nestedLevel?" : "+this.nestedLevel:""));
+      }
       console.warn("Component  "+loaderComponent.$file+" -> "+this.$file);
     } else {
       this.meta.context = this.context = engine.rootContext.createChild(this.$file);
