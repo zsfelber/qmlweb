@@ -81,20 +81,23 @@ function construct(meta, parent, flags) {
   // see also Component.constructor
   // see also Object.create in QMLContext.createChild
   const item = superitem.createChild();
-  item.$classname = meta.$name;
-  item.$context = meta.context;
-  item.$component = meta.component;
+
+  if (flags & QmlWeb.QMLComponent.Element) {
+    item.$classname = meta.$name;
+    item.$context = meta.context;
+    item.$component = meta.component;
+  }
 
   if (component.flags & QmlWeb.QMLComponent.Root) {
     if (loaderComponent) throw new Error("loaderComponent should not be present here : "+item);
     // root Component
-    item.$component = loaderComponent = component;
-  } else if ((component.flags & QmlWeb.QMLComponent.Element)&&(component.flags & QmlWeb.QMLComponent.Nested)) {
-    if (!loaderComponent) throw new Error("loaderComponent should be present here : "+item);
-    if (loaderComponent.flags & QmlWeb.QMLComponent.Root) {
-      // root's Sole Element
-      item.$component = loaderComponent;
-    }
+    loaderComponent = component;
+  //} else if ((component.flags & QmlWeb.QMLComponent.Element)&&(component.flags & QmlWeb.QMLComponent.Nested)) {
+  //  if (!loaderComponent) throw new Error("loaderComponent should be present here : "+item);
+  //  if (loaderComponent.flags & QmlWeb.QMLComponent.Root) {
+  //    // root's Sole Element
+  //    item.$component = loaderComponent;
+  //  }
   } else if (!loaderComponent) {
     throw new Error("Assertion failed. No loader : "+component);
   } else if ((flags&QmlWeb.QMLComponent.Super) && item.$component !==  component) {
