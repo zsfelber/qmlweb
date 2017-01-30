@@ -21,14 +21,20 @@ class QMLComponent {
       if (flags&QMLComponent.Nested) {
         this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
       }
+
       if (flags&QMLComponent.Super) {
         this.meta.context = this.context = loaderComponent.context;
       } else {
         this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent.$file+" -> "+this.$file+(this.nestedLevel?" : "+this.nestedLevel:""));
+        this.context.component = this;
+        this.context.nestedLevel = this.nestedLevel;
       }
+
       console.warn("Component  "+loaderComponent.$file+" -> "+this.$file);
     } else {
       this.meta.context = this.context = engine.rootContext.createChild(this.$file);
+      this.context.component = this;
+
       console.warn("Component  "+this.$file);
       if (flags&QMLComponent.Nested) {
         throw new Error("Component is nested but no loader Component.");
@@ -37,6 +43,7 @@ class QMLComponent {
         console.warn("Component is super but no loader Component : "+this.$file);
       }
     }
+
     this.loaderComponent = loaderComponent;
     this.flags = flags;
 

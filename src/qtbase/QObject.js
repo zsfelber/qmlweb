@@ -6,6 +6,7 @@ class QObject {
     if (meta) {
       this.$context = meta.context;
       this.$component = meta.component;
+      this.$base = this;
     }
 
     if (parent && parent.$tidyupList) {
@@ -26,12 +27,16 @@ class QObject {
   }
 
   createChild() {
+
     const childObj = Object.create(this);
     childObj.$properties = Object.create(this.$properties);
     childObj.$properties_noalias = Object.create(this.$properties_noalias);
     childObj.$elements = Object.create(this.$elements);
     childObj.$noalias = Object.create(this.$noalias);
     childObj.$signals = Object.create(this.$signals);
+
+    this.$base.$leaf = childObj;
+    if (this.$base !== childObj.$base) throw new Error("Assertion failed, inconsistent $base : "+childObj);
 
     return childObj;
   }

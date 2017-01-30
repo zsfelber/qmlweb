@@ -86,10 +86,12 @@ function construct(meta, parent, flags) {
 
   var ctx = item.$context;
 
-  var currentTopComponent = loaderComponent;
-  while (currentTopComponent.nestedLevel>1) currentTopComponent = currentTopComponent.loaderComponent;
+  var currentTopComponent = ctx.component;
+  if (currentTopComponent.nestedLevel) throw new Error("Assertion failed. Top component should not be nested.");
 
   var topctx = currentTopComponent.context;
+  if (ctx !== topctx) throw new Error("Assertion failed. Each component should share the current top loader context.");
+
 
   // id
   // see also Component.constructor
@@ -102,11 +104,11 @@ function construct(meta, parent, flags) {
       console.warn("Context entry overriden by Element : "+meta.id+" object:"+item);
     }
     QmlWeb.setupGetterSetter(
-      topctx, meta.id,
+      ctx, meta.id,
       () => item,
       () => {}
     );
-    topctx.$elements[meta.id] = item;
+    ctx.$elements[meta.id] = item;
     item.$elements[meta.id] = item;
     // NOTE important : also remove here obsolete element - id - overrider - properties
     // which were inherited from prototype (so prefer current QML elements over inherited container properties) ::

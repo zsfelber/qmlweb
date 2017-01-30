@@ -110,9 +110,6 @@ function createProperty(type, obj, propName, options) {
   if (ctx === QmlWeb.engine.rootContext) {
     throw new Error("Root context at property init : "+this);
   }
-  if (!obj.$component.nestedLevel) {
-    throw new Error("Loader component at property init : "+this);
-  }
 
   // put property to context
   // ctx is the $component's current loader context (the current QML)
