@@ -106,7 +106,7 @@ function createProperty(type, obj, propName, options) {
   }
 
 
-  // This means : we are in the loader component directly, and not in a super QML of current nested (or root) element :
+  // This means : we are in the loader component directly, and not in a super QML of nested (or root) element :
   if (obj.$component.flags & QmlWeb.QMLComponent.Nested) {
 
     var ctx = obj.$context;

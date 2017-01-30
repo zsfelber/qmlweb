@@ -176,7 +176,7 @@ class QMLComponent {
     return item;
   }
   toString() {
-    var c = "Cmp_";
+    var c = "";
     var f = "";
     var fn = this.flags;
     for (;;) {

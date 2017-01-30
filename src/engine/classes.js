@@ -82,26 +82,28 @@ function construct(meta, parent, flags) {
   // see also Object.create in QMLContext.createChild
   const item = superitem.createChild();
 
+  // means : created by Component.$createObject
   if (flags & QmlWeb.QMLComponent.Element) {
     item.$classname = meta.$name;
     item.$context = meta.context;
     item.$component = meta.component;
+  } else if (flags & QmlWeb.QMLComponent.Super) {
+    console.warn("custom Super construct (not Component.$createObject) : "+item);
   }
 
   if (component.flags & QmlWeb.QMLComponent.Root) {
     if (loaderComponent) throw new Error("loaderComponent should not be present here : "+item);
     // root Component
     loaderComponent = component;
-  //} else if ((component.flags & QmlWeb.QMLComponent.Element)&&(component.flags & QmlWeb.QMLComponent.Nested)) {
-  //  if (!loaderComponent) throw new Error("loaderComponent should be present here : "+item);
-  //  if (loaderComponent.flags & QmlWeb.QMLComponent.Root) {
-  //    // root's Sole Element
-  //    item.$component = loaderComponent;
-  //  }
   } else if (!loaderComponent) {
     throw new Error("Assertion failed. No loader : "+component);
-  } else if ((flags&QmlWeb.QMLComponent.Super) && item.$component !==  component) {
-    throw new Error("Assertion failed. $component differs from that in stack : "+item.$component+" ===  "+component);
+  } else if (flags&QmlWeb.QMLComponent.Super) {
+    if (item.$component !==  component) {
+      throw new Error("Assertion failed. $component differs from that in stack : "+item.$component+" ===  "+component);
+    }
+  } else {
+    // nested
+    loaderComponent = component;
   }
 
   // Finalize instantiation over supertype item :
@@ -152,6 +154,15 @@ function construct(meta, parent, flags) {
         }
       } else {
         isTop = 0;
+
+        var p;
+        if (item.$elements[meta.id]) {
+          if ((p=item.__proto__) && p.$elements && p[meta.id]) {
+            console.warn("Overriden element:"+meta.id+" in "+item+"  overrides "+p+"."+meta.id);
+          } else {
+            throw new Error("Duplicated element id:"+meta.id+" in "+item);
+          }
+        }
       }
     }
 
@@ -165,15 +176,6 @@ function construct(meta, parent, flags) {
       loaderComponent.context.$elements[meta.id] = item;
 
     } else {
-
-      var p;
-      if (item.$elements[meta.id]) {
-        if ((p=item.__proto__) && p.$elements && p[meta.id]) {
-          console.warn("Overriden element:"+meta.id+" in "+item+"  overrides "+p+"."+meta.id);
-        } else {
-          throw new Error("Duplicated element id:"+meta.id+" in "+item);
-        }
-      }
 
       item.$elements[meta.id] = item;
 
