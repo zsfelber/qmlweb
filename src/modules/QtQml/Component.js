@@ -31,6 +31,9 @@ class QMLComponent {
       if (meta.nested) {
         throw new Error("Component is nested but no loader Component.");
       }
+      if (meta.super) {
+        throw new Error("Component is super but no loader Component.");
+      }
     }
     this.loaderComponent = loaderComponent;
 
