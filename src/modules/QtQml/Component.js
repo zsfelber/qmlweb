@@ -34,7 +34,7 @@ class QMLComponent {
         throw new Error("Component is nested but no loader Component.");
       }
       if (flags&QMLComponent.Super) {
-        throw new Error("Component is super but no loader Component.");
+        console.warn("Component is super but no loader Component : "+this.$file);
       }
     }
     this.loaderComponent = loaderComponent;

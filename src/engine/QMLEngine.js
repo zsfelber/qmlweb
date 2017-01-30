@@ -170,7 +170,7 @@ class QMLEngine {
       const component = QmlWeb.createComponent({
         clazz: clazz,
         $file: file
-      });
+      }, QmlWeb.QMLComponent.Super);
       this.$component = component;
 
       // TODO gz undefined->component.$basePath
