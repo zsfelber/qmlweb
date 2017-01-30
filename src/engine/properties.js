@@ -143,7 +143,7 @@ function applyProperties(metaObject, item) {
     if (metaObject.$children && metaObject.$children.length !== 0 && !(item instanceof QMLComponent)) {
       if (item.$defaultProperty) {
         item.$properties[item.$defaultProperty].set(
-            metaObject.$children, QMLProperty.ReasonInitPrivileged|QMLProperty.SetChildren
+            metaObject.$children, QMLProperty.ReasonInitPrivileged|QMLProperty.SetChildren, item.$component
           );
       } else {
         throw new Error("Cannot assign to unexistant default property");

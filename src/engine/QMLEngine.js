@@ -342,7 +342,7 @@ class QMLEngine {
 
           if (property.needsUpdate) {
             a2++;
-            property.update(false, op.flags);
+            property.update(false, op.flags, op.declaringContainer);
           } else if (geometryProperties.indexOf(property.name) >= 0) {
             a3++;
             // It is possible that bindings with these names was already evaluated

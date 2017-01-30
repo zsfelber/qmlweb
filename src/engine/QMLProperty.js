@@ -39,9 +39,15 @@ class QMLProperty {
 
   // Called by update and set to actually set this.val, performing any type
   // conversion required.
-  $setVal(val, flags) {
+  $setVal(val, flags, declaringContainer) {
     var prevComponent = QmlWeb.engine.$component;
-    if (!(flags & QMLProperty.SetChildren)) {
+    if (flags & QMLProperty.SetChildren) {
+      // NOTE declaringContainer is passed only along with SetChildren
+      // declaringContainer !== this.obj.$component
+      // declaringContainer means : the QML where the current child element (val) is declared
+      // what this.obj.$component is here : the QML supertype where the default property (eg"data") defined (eg"ItemBase")
+      QmlWeb.engine.$component = declaringContainer;
+    } else {
       QmlWeb.engine.$component = this.obj.$component;
     }
 
@@ -91,7 +97,7 @@ class QMLProperty {
 
   // Updater recalculates the value of a property if one of the dependencies
   // changed
-  update(preventhacks, flags) {
+  update(preventhacks, flags, declaringContainer) {
     this.needsUpdate = false;
 
     if (!this.binding) {
@@ -113,7 +119,7 @@ class QMLProperty {
 
         var val = this.binding.get(this.obj);
 
-        this.$setVal(val, flags);
+        this.$setVal(val, flags, declaringContainer);
 
       } finally {
         for (var i in this.obsoleteConnections) {
@@ -222,7 +228,7 @@ class QMLProperty {
   }
 
   // Define setter
-  set(newVal, flags) {
+  set(newVal, flags, declaringContainer) {
     flags = flags || QMLProperty.ReasonUser;
     if (this.readOnly && !(flags & QMLProperty.Privileged)) {
       throw new Error(`property '${this.name}' has read only access`);
@@ -240,7 +246,7 @@ class QMLProperty {
         QmlWeb.engine.pendingOperations.push({
            property:this,
            info:"Pending property set/binding initialization.",
-           flags:flags,
+           flags, declaringContainer
            });
         //console.warn("PendingEvaluation : Pending property set/binding :" + this.name + "  obj:" + this.obj);
         return;
@@ -263,7 +269,7 @@ class QMLProperty {
         this.binding = null;
       }
 
-      this.$setVal(val, flags);
+      this.$setVal(val, flags, declaringContainer);
     }
 
     if (this.val !== oldVal) {

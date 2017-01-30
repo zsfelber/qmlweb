@@ -57,7 +57,6 @@ class QMLComponent {
       if (!(flags&QMLComponent.Root)) {
         throw new Error("Component has no loader but Root flag is not set : "+this);
       }
-      flags |= QMLComponent.Super;
     }
 
     this.loaderComponent = loaderComponent;
@@ -153,7 +152,7 @@ class QMLComponent {
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
-      item = QmlWeb.construct(this.meta, parent, this.flags|QMLComponent.Element);
+      item = QmlWeb.construct(this.meta, parent, QMLComponent.Element);
       this.finalizeImports();
 
       for (var propname in properties) {
