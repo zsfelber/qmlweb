@@ -64,9 +64,9 @@ function initMeta(self, meta, constructor) {
  *                      context
  * @return {Object} New qml object
  */
-function construct(meta, parent, nested) {
+function construct(meta, parent, flags) {
   const loaderComponent = QmlWeb.engine.$component;
-  const superitem = constructSuper(meta, parent, nested);
+  const superitem = constructSuper(meta, parent, flags);
 
   // NOTE making a new level of class inheritance :
   // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
@@ -121,7 +121,7 @@ function construct(meta, parent, nested) {
   return item;
 }
 
-function constructSuper(meta, parent, nested) {
+function constructSuper(meta, parent, flags) {
 
   let item;
 
@@ -136,7 +136,7 @@ function constructSuper(meta, parent, nested) {
   } else {
 
     // NOTE class component from resolved superclass info:
-    const component = QmlWeb.resolveComponent(clinfo, nested, true);
+    const component = QmlWeb.resolveComponent(clinfo, flags);
 
     if (!component) {
       throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);
@@ -167,7 +167,7 @@ function createQmlObject(src, parent, file) {
   var resolvedUrl = QmlWeb.$resolvePath;
   file = file || /*Qt.*/resolvedUrl("createQmlObject_function");
 
-  var component = QmlWeb.resolveComponent({clazz, parent, file}, parent?parent.$component:null, true);
+  var component = QmlWeb.resolveComponent({clazz, parent, file}, parent?parent.$component:null, QmlWeb.QMLComponent.Nested);
 
   const obj = component.createObject(parent);
 

@@ -1,5 +1,5 @@
 class QMLComponent {
-  constructor(meta) {
+  constructor(meta, flags) {
     this.copyMeta(meta);
     // no component = is import root
     const engine = QmlWeb.engine;
@@ -16,10 +16,12 @@ class QMLComponent {
     // see also QObject.createChild()->Object.create() in classes.construct
     // see also Object.create in QMLContext.createChild
     if (loaderComponent) {
-      if (meta.nested) {
+      if (!(flags&QMLComponent.Super)===!(flags&QMLComponent.Nested)) throw new Error("Assertion failed : either meta.nested or meta.super  It is "+((flags&QMLComponent.Super)?"both":"neither"));
+
+      if (flags&QMLComponent.Nested) {
         this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
       }
-      if (meta.super) {
+      if (flags&QMLComponent.Super) {
         this.meta.context = this.context = loaderComponent.context;
       } else {
         this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent.$file+" -> "+this.$file+(this.nestedLevel?" : "+this.nestedLevel:""));
@@ -28,10 +30,10 @@ class QMLComponent {
     } else {
       this.meta.context = this.context = engine.rootContext.createChild(this.$file);
       console.warn("Component  "+this.$file);
-      if (meta.nested) {
+      if (flags&QMLComponent.Nested) {
         throw new Error("Component is nested but no loader Component.");
       }
-      if (meta.super) {
+      if (flags&QMLComponent.Super) {
         throw new Error("Component is super but no loader Component.");
       }
     }
@@ -171,3 +173,7 @@ QmlWeb.registerQmlType({
   baseClass: "QtObject",
   constructor: QMLComponent
 });
+
+QMLComponent.Super = 1;
+QMLComponent.Nested = 2;
+QmlWeb.QMLComponent = QMLComponent;
