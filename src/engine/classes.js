@@ -73,8 +73,7 @@ function construct(meta, parent, nested) {
   // NOTE gz  object is prototyped from bottom to top, in terms of [type]->[supertype] relationship
   // see also Component.constructor
   // see also Object.create in QMLContext.createChild
-  const item = Object.create(superitem);
-  item.$component = loaderComponent;
+  const item = superitem.createChild();
   item.$classname = loaderComponent.$name;
 
   // Finalize instantiation over supertype item :
@@ -87,22 +86,28 @@ function construct(meta, parent, nested) {
 
   var ctx = item.$context;
 
+  var currentTopComponent = loaderComponent;
+  while (currentTopComponent.nestedLevel>1) currentTopComponent = currentTopComponent.loaderComponent;
+
+  var topctx = currentTopComponent.context;
+
   // id
   // see also Component.constructor
-  // see also Object.create in classes.construct
+  // see also QObject.createChild()->Object.create() in classes.construct
   // see also Object.create in QMLContext.createChild
   // see also QMLProperty.createProperty how element access can be hidden by same name property or alias
   // see also QMLBinding.bindXXX methods how a name is eventually resolved at runtime
   if (meta.id) {
-    if (ctx.hasOwnProperty(meta.id)) {
+    if (topctx.hasOwnProperty(meta.id)) {
       console.warn("Context entry overriden by Element : "+meta.id+" object:"+item);
     }
     QmlWeb.setupGetterSetter(
-      ctx, meta.id,
+      topctx, meta.id,
       () => item,
       () => {}
     );
-    ctx.$elements[meta.id] = item;
+    topctx.$elements[meta.id] = item;
+    item.$elements[meta.id] = item;
     // NOTE important : also remove here obsolete element - id - overrider - properties
     // which were inherited from prototype (so prefer current QML elements over inherited container properties) ::
     ctx.$elementoverloads[meta.id] = undefined;

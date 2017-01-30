@@ -1,5 +1,8 @@
+let signalIds = 0;
+
 class Signal {
   constructor(name, params = [], options = {}) {
+    this.signalId = ++signalIds;
     this.$name = name;
     this.connectedSlots = [];
     this.obj = options.obj;
@@ -14,7 +17,7 @@ class Signal {
 
     // TODO Fix Keys that don't have an obj for the signal
     if (this.obj && this.obj.$signals !== undefined) {
-      this.obj.$signals.push(this.signal);
+      this.obj.$signals[this.signalId] = this.signal;
     }
   }
   execute(...args) {

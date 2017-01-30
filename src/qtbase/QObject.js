@@ -18,10 +18,22 @@ class QObject {
 
     this.$properties = {};
     this.$properties_noalias = {};
+    this.$elements = {};
     this.$noalias = {};
-    this.$signals = [];
+    this.$signals = {};
 
     this.objectId = objectIds++;
+  }
+
+  createChild() {
+    const childObj = Object.create(this);
+    childObj.$properties = Object.create(childObj.$properties);
+    childObj.$properties_noalias = Object.create(childObj.$properties_noalias);
+    childObj.$elements = Object.create(childObj.$elements);
+    childObj.$noalias = Object.create(childObj.$noalias);
+    childObj.$signals = Object.create(childObj.$signals);
+
+    return childObj;
   }
 
   $delete() {

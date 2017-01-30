@@ -13,7 +13,7 @@ class QMLComponent {
     // NOTE making a new level of $context inheritance :
     // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
     // NOTE gz  object is prototyped from bottom to top, in terms of [type]->[supertype] relationship
-    // see also Object.create in classes.construct
+    // see also QObject.createChild()->Object.create() in classes.construct
     // see also Object.create in QMLContext.createChild
     if (loaderComponent) {
       this.meta.context = this.context = loaderComponent.context.createChild();
