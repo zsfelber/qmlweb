@@ -42,6 +42,7 @@ class QMLComponent {
       if (flags&QMLComponent.Super) {
         console.warn("Component is super but no loader Component : "+this.$file);
       }
+      flags = QMLComponent.Super;
     }
 
     this.loaderComponent = loaderComponent;
@@ -161,7 +162,7 @@ class QMLComponent {
     return item;
   }
   toString() {
-    return "C["+this.$file+" f"+this.flags+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
+    return "C["+this.$file+(this.flags?" f"+this.flags:"")+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
   }
 
   static getAttachedObject() {

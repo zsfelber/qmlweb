@@ -65,7 +65,9 @@ function initMeta(self, meta, constructor) {
  * @return {Object} New qml object
  */
 function construct(meta, parent, flags) {
-  const loaderComponent = QmlWeb.engine.$component;
+  const component = QmlWeb.engine.$component;
+  const loaderComponent = component.loaderComponent;
+
   const superitem = constructSuper(meta, parent, flags);
 
   // NOTE making a new level of class inheritance :
@@ -74,10 +76,15 @@ function construct(meta, parent, flags) {
   // see also Component.constructor
   // see also Object.create in QMLContext.createChild
   const item = superitem.createChild();
-  item.$classname = loaderComponent.$name;
+  item.$classname = component.$name;
 
-  if (item.$component.loaderComponent !==  loaderComponent) {
-    throw new Error("Assertion failed. $component.loaderComponent differs from that in stack : "+item.$component.loaderComponent+" ===  "+loaderComponent);
+  if (!loaderComponent) {
+    // root
+    item.$component = component;
+  }
+
+  if (item.$component !==  component) {
+    throw new Error("Assertion failed. $component differs from that in stack : "+item.$component+" ===  "+component);
   }
 
   // Finalize instantiation over supertype item :
@@ -110,11 +117,11 @@ function construct(meta, parent, flags) {
 
     // This means : we are in the loader component directly, and not in a super QML of current nested (or root) element :
     if (loaderComponent.context !== topctx) {
-      if (item.$component.flags !== QmlWeb.QMLComponent.Nested || !item.$component.loaderComponent) {
-        throw new Error("Assertion failed. The current component here should be the directly nested element still parsing in loader component, not its superclass QML document. Invalid component flags:"+item.$component.flags+"  of  "+item);
+      if (component.flags !== QmlWeb.QMLComponent.Nested || !loaderComponent) {
+        throw new Error("Assertion failed. The current component here should be the directly nested element still parsing in loader component, not its superclass QML document. Invalid component flags:"+component.flags+"  of  "+item);
       }
 
-      if (item.$component.loaderComponent.context !==  ctx.__proto__) {
+      if (loaderComponent.context !==  ctx.__proto__) {
         throw new Error("Assertion failed. Directly nested component should inherit its context from loader context.");
       }
 
