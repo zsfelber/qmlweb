@@ -53,6 +53,7 @@ function initMeta(self, meta, constructor) {
     if (info.defaultProperty) {
       self.$defaultProperty = info.defaultProperty;
     }
+
   } else {
     throw new Error("initMeta : No type info : "+self);
   }
@@ -80,7 +81,9 @@ function construct(meta, parent, flags) {
   // see also Component.constructor
   // see also Object.create in QMLContext.createChild
   const item = superitem.createChild();
-  item.$classname = component.$name;
+  item.$classname = meta.$name;
+  item.$context = meta.context;
+  item.$component = meta.component;
 
   if (component.flags & QmlWeb.QMLComponent.Root) {
     if (loaderComponent) throw new Error("loaderComponent should not be present here : "+item);
