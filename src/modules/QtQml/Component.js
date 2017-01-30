@@ -21,6 +21,9 @@ class QMLComponent {
       if (flags&QMLComponent.Nested) {
         this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
       }
+      if (flags&QMLComponent.Root) {
+        throw new Error("Component has Loader but Root flag is set too : "+this);
+      }
 
       if (flags&QMLComponent.Super) {
         this.meta.context = this.context = loaderComponent.context;
@@ -35,14 +38,17 @@ class QMLComponent {
       this.meta.context = this.context = engine.rootContext.createChild(this.toString());
       this.context.component = this;
 
-      console.warn("Component  "+this.$file);
+      console.warn("Component  "+this);
       if (flags&QMLComponent.Nested) {
         throw new Error("Component is nested but no loader Component.");
       }
       if (flags&QMLComponent.Super) {
-        console.warn("Component is super but no loader Component : "+this.$file);
+        console.warn("Component is super but no loader Component : "+this);
       }
-      flags = QMLComponent.Super;
+      if (!(flags&QMLComponent.Root)) {
+        throw new Error("Component has no loader but Root flag is not set : "+this);
+      }
+      flags |= QMLComponent.Super;
     }
 
     this.loaderComponent = loaderComponent;
@@ -189,4 +195,5 @@ QmlWeb.registerQmlType({
 
 QMLComponent.Super = 1;
 QMLComponent.Nested = 2;
+QMLComponent.Root = 4;
 QmlWeb.QMLComponent = QMLComponent;

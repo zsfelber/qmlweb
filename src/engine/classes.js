@@ -66,7 +66,7 @@ function initMeta(self, meta, constructor) {
  */
 function construct(meta, parent, flags) {
   const component = QmlWeb.engine.$component;
-  const loaderComponent = component.loaderComponent;
+  let loaderComponent = component.loaderComponent;
 
   const superitem = constructSuper(meta, parent, flags);
 
@@ -78,12 +78,15 @@ function construct(meta, parent, flags) {
   const item = superitem.createChild();
   item.$classname = component.$name;
 
-  if (!loaderComponent) {
+  if (component.flags & QmlWeb.QMLComponent.Root) {
+    if (loaderComponent) {
+      throw new Error("Assertion failed. Root with loader : "+component);
+    }
     // root
-    item.$component = component;
-  }
-
-  if (item.$component !==  component) {
+    item.$component = loaderComponent = component;
+  } else if (!loaderComponent) {
+    throw new Error("Assertion failed. No loader : "+component);
+  } else if (item.$component !==  component) {
     throw new Error("Assertion failed. $component differs from that in stack : "+item.$component+" ===  "+component);
   }
 
@@ -115,20 +118,32 @@ function construct(meta, parent, flags) {
       console.warn("Context entry overriden by Element : "+meta.id+" object:"+item);
     }
 
-    // This means : we are in the loader component directly, and not in a super QML of current nested (or root) element :
-    if (loaderComponent.context !== topctx) {
-      if (component.flags !== QmlWeb.QMLComponent.Nested || !loaderComponent) {
-        throw new Error("Assertion failed. The current component here should be the directly nested element still parsing in loader component, not its superclass QML document. Invalid component flags:"+component.flags+"  of  "+item);
-      }
+    var isTop;
+    if (component.flags & QmlWeb.QMLComponent.Root) {
+       isTop = 1;
+    } else {
 
-      if (loaderComponent.context !==  ctx.__proto__) {
-        throw new Error("Assertion failed. Directly nested component should inherit its context from loader context.");
-      }
+      // This means : we are in the loader component directly, and not in a super QML of current nested (or root) element :
+      if (loaderComponent.context !== topctx) {
+        isTop = 1;
 
-      if (loaderComponent.context.$elements[meta.id]) {
-        throw new Error("Duplicated element id:"+meta.id+" in "+loaderComponent);
-      }
+        if (component.flags !== QmlWeb.QMLComponent.Nested || !loaderComponent) {
+          throw new Error("Assertion failed. The current component here should be the directly nested element still parsing in loader component, not its superclass QML document. Invalid component flags:"+component.flags+"  of  "+item);
+        }
 
+        if (loaderComponent.context !==  ctx.__proto__) {
+          throw new Error("Assertion failed. Directly nested component should inherit its context from loader context.");
+        }
+
+        if (loaderComponent.context.$elements[meta.id]) {
+          throw new Error("Duplicated element id:"+meta.id+" in "+loaderComponent);
+        }
+      } else {
+        isTop = 0;
+      }
+    }
+
+    if (isTop) {
       QmlWeb.setupGetterSetter(
         loaderComponent.context, meta.id,
         () => item,
