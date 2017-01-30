@@ -76,6 +76,10 @@ function construct(meta, parent, flags) {
   const item = superitem.createChild();
   item.$classname = loaderComponent.$name;
 
+  if (item.$component.loaderComponent !==  loaderComponent) {
+    throw new Error("Assertion failed. $component.loaderComponent differs from that in stack : "+item.$component.loaderComponent+" ===  "+loaderComponent);
+  }
+
   // Finalize instantiation over supertype item :
 
   if (typeof item.dom !== "undefined") {
@@ -87,7 +91,7 @@ function construct(meta, parent, flags) {
   var ctx = item.$context;
 
   var currentTopComponent = ctx.component;
-  if (currentTopComponent.nestedLevel) throw new Error("Assertion failed. Top component should not be nested.");
+  if (currentTopComponent.flags ===  QmlWeb.QMLComponent.Nested) throw new Error("Assertion failed. Top component should not be nested.");
 
   var topctx = currentTopComponent.context;
   if (ctx !== topctx) throw new Error("Assertion failed. Each component should share the current top loader context.");
@@ -104,10 +108,18 @@ function construct(meta, parent, flags) {
       console.warn("Context entry overriden by Element : "+meta.id+" object:"+item);
     }
 
-    // This means : we are in the loader component directly, and not in a super QML of current nested element :
+    // This means : we are in the loader component directly, and not in a super QML of current nested (or root) element :
     if (loaderComponent.context !== topctx) {
-      if (item.$component.flags !== QmlWeb.QMLComponent.Nested) {
+      if (item.$component.flags !== QmlWeb.QMLComponent.Nested || !item.$component.loaderComponent) {
         throw new Error("Assertion failed. The current component here should be the directly nested element still parsing in loader component, not its superclass QML document. Invalid component flags:"+item.$component.flags+"  of  "+item);
+      }
+
+      if (item.$component.loaderComponent.context !==  ctx.__proto__) {
+        throw new Error("Assertion failed. Directly nested component should inherit its context from loader context.");
+      }
+
+      if (loaderComponent.context.$elements[meta.id]) {
+        throw new Error("Duplicated element id:"+meta.id+" in "+loaderComponent);
       }
 
       QmlWeb.setupGetterSetter(
@@ -115,10 +127,18 @@ function construct(meta, parent, flags) {
         () => item,
         () => {}
       );
+
+      loaderComponent.context.$elements[meta.id] = item;
+
     } else {
 
+      var p;
       if (item.$elements[meta.id]) {
-        throw new Error("Duplicated element id:"+meta.id+" in "+item);
+        if ((p=item.__proto__) && p.$elements && p[meta.id]) {
+          console.warn("Overriden element:"+meta.id+" in "+item+"  overrides "+p+"."+meta.id);
+        } else {
+          throw new Error("Duplicated element id:"+meta.id+" in "+item);
+        }
       }
 
       item.$elements[meta.id] = item;

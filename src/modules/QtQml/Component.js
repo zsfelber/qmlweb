@@ -25,14 +25,14 @@ class QMLComponent {
       if (flags&QMLComponent.Super) {
         this.meta.context = this.context = loaderComponent.context;
       } else {
-        this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent.$file+" -> "+this.$file+(this.nestedLevel?" : "+this.nestedLevel:""));
+        this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this);
         this.context.component = this;
         this.context.nestedLevel = this.nestedLevel;
       }
 
-      console.warn("Component  "+loaderComponent.$file+" -> "+this.$file);
+      console.warn("Component  "+loaderComponent+" -> "+this);
     } else {
-      this.meta.context = this.context = engine.rootContext.createChild(this.$file);
+      this.meta.context = this.context = engine.rootContext.createChild(this.toString());
       this.context.component = this;
 
       console.warn("Component  "+this.$file);
@@ -160,6 +160,10 @@ class QMLComponent {
 
     return item;
   }
+  toString() {
+    return "C["+this.$file+" f"+this.flags+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
+  }
+
   static getAttachedObject() {
     // see QMLEngine.js for explanation how it is used.
     if (!this.$Component) {

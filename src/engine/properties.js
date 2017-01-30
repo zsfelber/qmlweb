@@ -105,22 +105,26 @@ function createProperty(type, obj, propName, options) {
     QmlWeb.setupGetterSetter(obj.$noalias, propName, getter, setter, prop);
   }
 
-  var ctx = obj.$context;
 
-  if (ctx === QmlWeb.engine.rootContext) {
-    throw new Error("Root context at property init : "+this);
+  // This means : we are in the loader component directly, and not in a super QML of current nested (or root) element :
+  if (obj.$component.flags ===  QmlWeb.QMLComponent.Nested) {
+
+    var ctx = obj.$context;
+    if (obj.$component.loaderComponent && obj.$component.loaderComponent.context !==  ctx.__proto__) {
+      throw new Error("Assertion failed. Directly nested component should inherit its context from loader context.");
+    }
+
+    // put property to context
+    // ctx is the $component's current loader context (the current QML)
+    // (this.proto is superclass, context.proto is containing document's context)
+    // see also Component.constructor
+    // see also QObject.createChild()->Object.create() in classes.construct
+    // see also Object.create in QMLContext.createChild
+    // see also classes.construct where $context.$elements come from
+
+    // current leaf nested element context (its own supertype hierarchy doesn't matter) :
+    QmlWeb.setupGetterSetter(ctx, propName, getter, setter, prop);
   }
-
-  // put property to context
-  // ctx is the $component's current loader context (the current QML)
-  // (this.proto is superclass, context.proto is containing document's context)
-  // see also Component.constructor
-  // see also QObject.createChild()->Object.create() in classes.construct
-  // see also Object.create in QMLContext.createChild
-  // see also classes.construct where $context.$elements come from
-
-  // current leaf nested element context (its own supertype hierarchy doesn't matter) :
-  QmlWeb.setupGetterSetter(ctx, propName, getter, setter, prop);
 }
 
 /**
