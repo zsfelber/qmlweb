@@ -60,11 +60,11 @@ QmlWeb.registerQmlType({
     QmlWeb.helpers.copy(this, QmlWeb.engine.rootContext);
 
     const meta = { clazz: clazz,
-                   context: this,//TODO gz not yet working.  gz uses parent first (see createObject)
-                   $file: clazz.$file// TODO gz  ignored if component presents
+                   context: this,//TODO gz   ignored.  gz uses loaderComponent.context or rootContext
+                   $file: clazz.$file
                            };
 
-    const qmlComponent = QmlWeb.createComponent(meta, this.$component);
+    const qmlComponent = QmlWeb.createComponent(meta);
 
     QmlWeb.loadImports(clazz.$imports, qmlComponent);
 

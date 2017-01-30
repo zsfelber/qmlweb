@@ -64,9 +64,9 @@ function initMeta(self, meta, constructor) {
  *                      context
  * @return {Object} New qml object
  */
-function construct(meta, parent) {
+function construct(meta, parent, nested) {
   const loaderComponent = QmlWeb.engine.$component;
-  const superitem = constructSuper(meta, parent);
+  const superitem = constructSuper(meta, parent, nested);
 
   // NOTE making a new level of class inheritance :
   // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
@@ -75,6 +75,7 @@ function construct(meta, parent) {
   // see also Object.create in QMLContext.createChild
   const item = Object.create(superitem);
   item.$component = loaderComponent;
+  item.$context = loaderComponent.context;
   item.$classname = loaderComponent.$name;
 
   // Finalize instantiation over supertype item :
@@ -85,6 +86,8 @@ function construct(meta, parent) {
     }
   }
 
+  var ctx = item.$context;
+
   // id
   // see also Component.constructor
   // see also Object.create in classes.construct
@@ -92,19 +95,19 @@ function construct(meta, parent) {
   // see also QMLProperty.createProperty how element access can be hidden by same name property or alias
   // see also QMLBinding.bindXXX methods how a name is eventually resolved at runtime
   if (meta.id) {
-    if (item.$context.hasOwnProperty(meta.id)) {
+    if (ctx.hasOwnProperty(meta.id)) {
       console.warn("Context entry overriden by Element : "+meta.id+" object:"+item);
     }
     QmlWeb.setupGetterSetter(
-      item.$context, meta.id,
+      ctx, meta.id,
       () => item,
       () => {}
     );
-    item.$context.$elements[meta.id] = item;
+    ctx.$elements[meta.id] = item;
     // NOTE important : also remove here obsolete element - id - overrider - properties
     // which were inherited from prototype (so prefer current QML elements over inherited container properties) ::
-    item.$context.$elementoverloads[meta.id] = undefined;
-    item.$context.$elementoverloadsnoalias[meta.id] = undefined;
+    ctx.$elementoverloads[meta.id] = undefined;
+    ctx.$elementoverloadsnoalias[meta.id] = undefined;
   }
 
   // Apply properties according to this metatype info
@@ -114,7 +117,7 @@ function construct(meta, parent) {
   return item;
 }
 
-function constructSuper(meta, parent) {
+function constructSuper(meta, parent, nested) {
 
   let item;
 
@@ -129,7 +132,7 @@ function constructSuper(meta, parent) {
   } else {
 
     // NOTE class component from resolved superclass info:
-    const component = QmlWeb.resolveComponent(clinfo);
+    const component = QmlWeb.resolveComponent(clinfo, nested);
 
     if (!component) {
       throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);

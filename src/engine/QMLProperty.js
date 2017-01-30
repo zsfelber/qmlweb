@@ -40,30 +40,39 @@ class QMLProperty {
   // Called by update and set to actually set this.val, performing any type
   // conversion required.
   $setVal(val) {
-    const constructors = this.obj.$component ? this.obj.$component.moduleConstructors : QmlWeb.constructors;
-    if (constructors[this.type] === QmlWeb.qmlList) {
-      // NOTE gz : key entry point 1 of QmlWeb.construct  -> see entry point 0
-      this.val = QmlWeb.qmlList(val, this.obj);
-    } else if (val instanceof QmlWeb.QMLMetaElement) {
-      // Root element or nested Component element ?
-      if (constructors[val.$class] === QMLComponent ||
-          constructors[this.type] === QMLComponent) {
-        this.val = QmlWeb.createComponent({
-          clazz: val,
-        }, this.obj.$component);
+    var prevComponent = QmlWeb.engine.$component;
+    QmlWeb.engine.$component = this.obj.$component;
+
+    try {
+      const constructors = this.obj.$component ? this.obj.$component.moduleConstructors : QmlWeb.constructors;
+      if (constructors[this.type] === QmlWeb.qmlList) {
+        // NOTE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
+        this.val = QmlWeb.qmlList(val, this.obj, true);
+      } else if (val instanceof QmlWeb.QMLMetaElement) {
+        // Root element or nested Component element ?
+        if (constructors[val.$class] === QMLComponent ||
+            constructors[this.type] === QMLComponent) {
+          this.val = QmlWeb.createComponent({
+            clazz: val,
+            $file: val.$file,
+            nested: true
+          });
+        } else {
+          // NOTE gz : key entry point 2 of QmlWeb.construct
+          // all the other ones just forward these
+          // Call to here comes from
+          // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
+          this.val = QmlWeb.construct(val, this.obj, true);
+        }
+      } else if (val instanceof Object || val === undefined || val === null) {
+        this.val = val;
+      } else if (constructors[this.type].plainType) {
+        this.val = constructors[this.type](val);
       } else {
-        // NOTE gz : key entry point 0 of QmlWeb.construct
-        // all the other ones just forward this
-        // Call to here comes from
-        // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
-        this.val = QmlWeb.construct(val, this.obj);
+        this.val = new constructors[this.type](val);
       }
-    } else if (val instanceof Object || val === undefined || val === null) {
-      this.val = val;
-    } else if (constructors[this.type].plainType) {
-      this.val = constructors[this.type](val);
-    } else {
-      this.val = new constructors[this.type](val);
+    } finally {
+      QmlWeb.engine.$component = prevComponent;
     }
   }
 

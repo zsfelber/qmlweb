@@ -18,10 +18,17 @@ class QMLComponent {
     if (loaderComponent) {
       this.meta.context = this.context = loaderComponent.context.createChild();
       console.warn("Component  "+loaderComponent.$file+" -> "+this.$file);
+      if (meta.nested) {
+        this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
+      }
     } else {
       this.meta.context = this.context = engine.rootContext.createChild();
       console.warn("Component  "+this.$file);
+      if (meta.nested) {
+        throw new Error("Component is nested but no loader Component.");
+      }
     }
+    this.loaderComponent = loaderComponent;
 
     if (!this.$basePath) {
       throw new Error("No component basePath present");
@@ -51,7 +58,7 @@ class QMLComponent {
   }
 
   copyMeta(meta) {
-    this.meta = {};
+    this.meta = {component:this};
     if (meta.$file !== meta.clazz.$file) {
       throw new Error("Assertion failed. $file-s in Component and class differ :  meta.$file:"+meta.$file+" === meta.clazz.$file:"+meta.clazz.$file);
     }

@@ -5,6 +5,7 @@ class QObject {
     this.$parent = parent;
     if (meta) {
       this.$context = meta.context;
+      this.$component = meta.component;
     }
 
     if (parent && parent.$tidyupList) {

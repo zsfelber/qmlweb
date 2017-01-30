@@ -174,6 +174,9 @@ Now using 1 single function parameter almost across whole api consequently :
 (!== but parent of rootObject.context : rootObject is alterable if loading multiple roots subsequently)
 - Actual object's Component (obj.$component) for the $basePath, and a couple of import cache container variables (no importContextId anymore)
 
+QMLProperty : new alias support codes goes here. Property get strategy changed to lazy, a new way of listening the evaluation tree is implemented.
+Connection cleanup strategy was not implemented here, I did it, too. So now, with deferring unnecessary tree evaluations as well as removing obsolete
+evaluation tree connections, this step gives major performance bonus.
 
 Minor coding style changes, simplifications eg:
 - using 1 flag variable in QMLBinding(ImplFunction/ImplBlock/.../Bidrection/Alias), QMLProperty(reasons,priviligezed/break readonly, break bidirectional binding at set)
