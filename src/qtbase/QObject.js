@@ -88,7 +88,7 @@ class QObject {
   }
 
   toString() {
-    return this.constructor.name+":"+this.id+":"+this.$objectId;
+    return this.$classname+"("+this.constructor.name+"):"+this.id+":"+this.$objectId;
   }
 }
 

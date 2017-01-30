@@ -103,12 +103,33 @@ function construct(meta, parent, flags) {
     if (ctx.hasOwnProperty(meta.id)) {
       console.warn("Context entry overriden by Element : "+meta.id+" object:"+item);
     }
-    QmlWeb.setupGetterSetter(
-      ctx, meta.id,
-      () => item,
-      () => {}
-    );
-    item.$elements[meta.id] = item;
+
+    // This means : we are in the loader component directly, and not in a super QML of current nested element :
+    if (loaderComponent.context !== topctx) {
+      if (item.$component.flags !== QmlWeb.QMLComponent.Nested) {
+        throw new Error("Assertion failed. The current component here should be the directly nested element still parsing in loader component, not its superclass QML document. Invalid component flags:"+item.$component.flags+"  of  "+item);
+      }
+
+      QmlWeb.setupGetterSetter(
+        loaderComponent.context, meta.id,
+        () => item,
+        () => {}
+      );
+    } else {
+
+      if (item.$elements[meta.id]) {
+        throw new Error("Duplicated element id:"+meta.id+" in "+item);
+      }
+
+      item.$elements[meta.id] = item;
+
+      QmlWeb.setupGetterSetter(
+        ctx, meta.id,
+        () => item,
+        () => {}
+      );
+    }
+
   }
 
   // Apply properties according to this metatype info
