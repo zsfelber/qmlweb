@@ -119,19 +119,8 @@ function createProperty(type, obj, propName, options) {
   // see also Object.create in QMLContext.createChild
   // see also classes.construct where $context.$elements come from
 
-  // NOTE obj.$elements (bottom-to-top) : not ctx.$elements (top-to-bottom)
-  var elmt = obj.$elements[propName];
-  if (elmt) {
-    //console.warn("Context entry Element overriden by root property : "+type+(prop.type===type?" ":" ("+(prop.type)+") ")+propName+" in obj:"+obj);
-    if (type === "alias") {
-      QmlWeb.setupGetterSetter(ctx.$elementoverloads, propName, getter, setter, prop);
-    } else {
-      QmlWeb.setupGetterSetter(ctx.$elementoverloads, propName, getter, setter, prop);
-      QmlWeb.setupGetterSetter(ctx.$elementoverloadsnoalias, propName, getter, setter, prop);
-    }
-  } else {
-    QmlWeb.setupGetterSetter(ctx, propName, getter, setter, prop);
-  }
+  // current leaf nested element context (its own supertype hierarchy doesn't matter) :
+  QmlWeb.setupGetterSetter(ctx, propName, getter, setter, prop);
 }
 
 /**

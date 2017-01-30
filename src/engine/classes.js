@@ -108,12 +108,7 @@ function construct(meta, parent, flags) {
       () => item,
       () => {}
     );
-    ctx.$elements[meta.id] = item;
     item.$elements[meta.id] = item;
-    // NOTE important : also remove here obsolete element - id - overrider - properties
-    // which were inherited from prototype (so prefer current QML elements over inherited container properties) ::
-    ctx.$elementoverloads[meta.id] = undefined;
-    ctx.$elementoverloadsnoalias[meta.id] = undefined;
   }
 
   // Apply properties according to this metatype info
