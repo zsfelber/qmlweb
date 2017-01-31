@@ -35,25 +35,25 @@ class QMLComponent {
       }
 
       if (flags&QMLComponent.Super) {
-        this.topComponent = (loaderComponent.topComponent?loaderComponent.topComponent:loaderComponent);
-        this.topContext = this.topComponent.context;
+        this.loaderComponent = loaderComponent.loaderComponent;
+        this.topComponent = loaderComponent.topComponent;
+
+        this.meta.context = this.context = this.loaderComponent.createChild(
+                                      this.loaderComponent +" -> "+this.topComponent + ".." +this);
 
         if (this.topComponent.flags & QMLComponent.Super) {
-          throw new Error("Asserion failed. Parent Component should be Nested or Root. "+this.topComponent+"  "+loaderComponent+" -> "+this)
+          throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.context.$info)
         }
-
-        this.meta.context = this.context = this.topContext.createChild(this.topComponent +
-                                            (loaderComponent.topComponent?" ("+loaderComponent+")":"")  +" -> "+this);
-        this.context.component = this;
-        this.context.topComponent = this.topComponent;
-        this.context.topContext = this.topContext;
       } else {
+        this.loaderComponent = loaderComponent;
+        this.topComponent = this;
+
         this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this);
-        this.context.component = this;
-        this.context.topComponent = this;
-        this.context.topContext = this.context;
         this.context.nestedLevel = this.nestedLevel;
       }
+      this.context.component = this;
+      this.context.topContext = this.topComponent.context;
+      this.context.loaderContext = this.loaderComponent.context;
 
       console.warn("Component  "+this.context.$info);
     } else {
@@ -72,7 +72,6 @@ class QMLComponent {
       }
     }
 
-    this.loaderComponent = loaderComponent;
     this.flags = flags;
 
     if (!this.$basePath) {

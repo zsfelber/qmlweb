@@ -19,7 +19,6 @@ class QObject {
 
     this.$properties = {};
     this.$properties_noalias = {};
-    this.$elements = {};
     this.$noalias = {};
     this.$signals = {};
 
@@ -32,7 +31,6 @@ class QObject {
     childObj.$base = this.$base;
     childObj.$properties = Object.create(this.$properties);
     childObj.$properties_noalias = Object.create(this.$properties_noalias);
-    childObj.$elements = Object.create(this.$elements);
     childObj.$noalias = Object.create(this.$noalias);
     childObj.$signals = Object.create(this.$signals);
 

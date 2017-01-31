@@ -182,10 +182,16 @@ function constructSuperOrNested(meta, parent, flags) {
 
 
 function registerElementInParent(item, id) {
-  var ctx = item.$parent.$context;
-  var cmp = item.$parent.$component;
+  var ctx = item.$context.$loaderContext;
+  var cmp = item.$component.$loaderComponent;
   if (cmp.context !== ctx) {
     throw new Error("Assertion failed. Component integrity error.  "+cmp);
+  }
+
+  var chkctx = item.$parent.$context;
+  var chkcmp = item.$parent.$component;
+  if (chkctx !== ctx || chkcmp !== cmp) {
+    throw new Error("Assertion failed. Component context integrity error.  "+ctx);
   }
 
   var topcmp = ctx.topComponent;
