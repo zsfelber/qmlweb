@@ -60,23 +60,32 @@ class QMLProperty {
           // (TODO ?indirect) this is the case and only case when default alias points to a nested item :
 
           // place the child Elements to top level (not to ItemBase where the 'data' property is :
-          QmlWeb.engine.$component = this.obj.$component.includeElementComponent;
-          correctObjProto = this.obj.$leaf;
-          if (!correctObjProto || correctObjProto.$component !== this.obj.$component.includeElementComponent) {
+          if (this.obj.$component.flags & QmlWeb.QMLComponent.Nested) {
+            // the include element in parent QML, it is self:
+            QmlWeb.engine.$component = this.obj.$component;
+            correctObjProto = this.obj;
+          } else {
+            // the include element in parent QML:
+            QmlWeb.engine.$component = this.obj.$component.loaderComponent;
+            correctObjProto = this.obj.$leaf;
+          }
+          if (!correctObjProto || correctObjProto.$component !== QmlWeb.engine.$component) {
             throw new Error("Error in object prototype chain : "+this.obj+"  "+correctObjProto);
           }
+          if (!(QmlWeb.engine.$component.flags & QmlWeb.QMLComponent.Nested)) {
+            throw new Error("In object : "+this.obj+"  Error, it should be nested:"+QmlWeb.engine.$component);
+          }
+          if (!declaringItem.$component.next || !(declaringItem.$component.next.flags & QmlWeb.QMLComponent.Nested)) {
+            throw new Error("In delcaringItem : "+declaringItem+"  of "+declaringItem.$component+"  Error, its next Component should be nested:"+declaringItem.$component.next);
+          }
+
 
           //  we setup a temporal import context here (which is relative to declaringItem's component) :
           prevImport = QmlWeb.engine.$component.boundImportComponent;
 
-          if (QmlWeb.engine.$component.flags & QmlWeb.QMLComponent.Nested) {
-            //  declaringItem.$component is the include element in a parent QML,
-            //  but we need .next : this is the topmost QML of included element hierarchy (the loaded QML file)
-            QmlWeb.engine.$component.bindImports(declaringItem.$component.next);
-          } else {
-            QmlWeb.engine.$component.bindImports(declaringItem.$component);
-          }
-
+          //  declaringItem.$component is the include element in a parent QML,
+          //  but we need .next : this is the topmost QML of included element hierarchy (the loaded QML file)
+          QmlWeb.engine.$component.bindImports(declaringItem.$component.next);
 
         } else {
           QmlWeb.engine.$component = declaringItem.$component;
