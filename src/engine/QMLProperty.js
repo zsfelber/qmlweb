@@ -43,12 +43,23 @@ class QMLProperty {
     var prevComponent = QmlWeb.engine.$component;
     var correctObjProto;
     if (flags & QMLProperty.SetChildren) {
-      // NOTE declaringItem is passed only along with SetChildren
-      // declaringItem !== this.obj.$component
-      // declaringItem means : the QML where the current child element (val) is declared
-      // what this.obj.$component is here : the QML supertype where the default property (eg"data") defined (eg"ItemBase")
-      QmlWeb.engine.$component = declaringItem.$component;
-      correctObjProto = declaringItem;
+      if (declaringItem) {
+        // NOTE declaringItem is passed only along with SetChildren
+        // declaringItem !== this.obj.$component
+        // declaringItem means : the QML where the current child element (val) is declared
+        // what this.obj.$component is here : the QML supertype where the default property (eg"data") defined (eg"ItemBase")
+        QmlWeb.engine.$component = declaringItem.$component;
+        correctObjProto = declaringItem;
+      } else {
+        // This means : if no declaredItem, it is coming through a QMLBinding.
+        // TODO (?:to check) this is the case and only case when default alias points to a nested item :
+        // then the correct place we put the value into is top of included element class hierarchy :
+        QmlWeb.engine.$component = this.obj.$component.topComponent;
+        correctObjProto = this.obj.$leaf;
+        if (!correctObjProto || correctObjProto.$component !== this.obj.$component.topComponent) {
+          throw new Error("Error in object prototype chain : "+this.obj+"  "+correctObjProto)
+        }
+      }
     } else {
       QmlWeb.engine.$component = this.obj.$component;
       correctObjProto = this.obj;

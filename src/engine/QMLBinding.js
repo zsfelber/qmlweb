@@ -336,7 +336,7 @@ class QMLBinding {
 
       if (this.src) {
 
-        return new Function("__value", "__flags", `
+        return new Function("$$__value", "$$__flags", `
           ${vvith} {
             var obj = ${this.src};
             if (!obj) {
@@ -353,7 +353,7 @@ class QMLBinding {
               if (prop.readOnly) {
                 throw new Error("Writable/Bidirectional binding write error : target property '${this.src} ${fp}' is read-only.");
               } else {
-                prop.set(__value, __flags);
+                prop.set($$__value, $$__flags);
               }
             } else {
               if (obj.$context.$elements${fp}) {
@@ -366,7 +366,7 @@ class QMLBinding {
         `);
       } else {
 
-        return new Function("__value", "__flags", `
+        return new Function("$$__value", "$$__flags", `
           ${vvith} {
             var prop = this.${props}${fp};
 
@@ -374,7 +374,7 @@ class QMLBinding {
               if (prop.readOnly) {
                 throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is read-only.");
               } else {
-                prop.set(__value, __flags);
+                prop.set($$__value, $$__flags);
               }
             } else {
               if (this.$context.$elements${fp}) {
