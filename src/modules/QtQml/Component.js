@@ -23,26 +23,32 @@ class QMLComponent {
         this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
       }
       if (flags&QMLComponent.Root) {
-        if (!(loaderComponent.flags&QMLComponent.Root)) {
-          throw new Error("Invalid root Component construction : "+this);
-        }
-        if (loaderComponent.loaderComponent) {
-          throw new Error("Root Component could not have a Loader on stack when initialized : "+this);
-        }
-        if (!flags&QMLComponent.Element) {
-          throw new Error("Invalid root Component construction, sole child should be Element : "+this);
-        }
+        throw new Error("Invalid root Component construction (a loader Component is found) : "+this);
       }
 
       if (flags&QMLComponent.Super) {
         this.loaderComponent = loaderComponent.loaderComponent;
         this.topComponent = loaderComponent.topComponent;
 
-        this.meta.context = this.context = this.loaderComponent.createChild(
-                                      this.loaderComponent +" -> "+this.topComponent + ".." +this);
+        if (this.loaderComponent) {
+          this.meta.context = this.context = this.loaderComponent.context.createChild(
+                                        this.loaderComponent +" -> .. " +this);
 
-        if (this.topComponent.flags & QMLComponent.Super) {
-          throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.context.$info)
+          if (this.topComponent.flags & QMLComponent.Super) {
+            throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.context.$info)
+          }
+        } else {
+
+          if (this.topComponent !== loaderComponent) {
+            throw new Error("Assertion failed.  "+this.topComponent+" === "+loaderComponent);
+          }
+
+          if (!this.topComponent || !(this.topComponent.flags&QMLComponent.Root)) {
+            throw new Error("Top Component should be a Root if no loader : "+this);
+          }
+
+          this.meta.context = this.context = engine.rootContext.createChild(this.topComponent + " .. " +this);
+
         }
       } else {
         this.loaderComponent = loaderComponent;
@@ -51,14 +57,13 @@ class QMLComponent {
         this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this);
         this.context.nestedLevel = this.nestedLevel;
       }
-      this.context.component = this;
-      this.context.topContext = this.topComponent.context;
-      this.context.loaderContext = this.loaderComponent.context;
 
       console.warn("Component  "+this.context.$info);
     } else {
+      this.loaderComponent = null;
+      this.topComponent = this;
+
       this.meta.context = this.context = engine.rootContext.createChild(this.toString());
-      this.context.component = this;
 
       console.warn("Component  "+this);
       if (flags&QMLComponent.Nested) {
@@ -71,6 +76,10 @@ class QMLComponent {
         throw new Error("Component has no loader but Root flag is not set : "+this);
       }
     }
+
+    this.context.component = this;
+    this.context.topContext = this.topComponent.context;
+    this.context.loaderContext = this.loaderComponent?this.loaderComponent.context:null;
 
     this.flags = flags;
 
