@@ -181,7 +181,7 @@ function constructSuperOrNested(meta, parent, flags) {
 }
 
 
-function registerElementInParent(item, id);
+function registerElementInParent(item, id) {
   var ctx = item.$parent.$context;
   var cmp = item.$parent.$component;
   if (cmp.context !== ctx) {

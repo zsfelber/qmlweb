@@ -244,9 +244,9 @@ class QMLBinding {
 
     var vvith;
     if (this.flags & QMLBinding.Alias) {
-      vvith = "with(QmlWeb) with(this.$context.topContext) with(this.$elements) with(this.$noalias)";
+      vvith = "with(QmlWeb) with(this.$context.topContext) with(this.$noalias)";
     } else {
-      vvith = "with(QmlWeb) with(this.$context.topContext) with(this.$elements) with(this)";
+      vvith = "with(QmlWeb) with(this.$context.topContext) with(this)";
     }
 
     if (this.flags & QMLBinding.User) {
@@ -301,10 +301,10 @@ class QMLBinding {
     var props, vvith;
     if (this.flags & QMLBinding.Alias) {
       props = "$properties_noalias";
-      vvith = "with(QmlWeb) with(this.$context.topContext) with(this.$elements) with(this.$noalias)";
+      vvith = "with(QmlWeb) with(this.$context.topContext) with(this.$noalias)";
     } else {
       props = "$properties";
-      vvith = "with(QmlWeb) with(this.$context.topContext) with(this.$elements) with(this)";
+      vvith = "with(QmlWeb) with(this.$context.topContext) with(this)";
     }
 
     if (this.flags & QMLBinding.User) {
@@ -356,7 +356,7 @@ class QMLBinding {
                 prop.set(__value, __flags);
               }
             } else {
-              if (obj.$elements${fp}) {
+              if (obj.$context.$elements${fp}) {
                 throw new Error("Writable/Bidirectional binding write error : target property '${this.src} ${fp}' is an element, considered readonly.");
               } else {
                 throw new Error("Writable/Bidirectional binding write error : target property '${this.src} ${fp}' not found, cannot write to null.");
@@ -377,7 +377,7 @@ class QMLBinding {
                 prop.set(__value, __flags);
               }
             } else {
-              if (this.$elements${fp}) {
+              if (this.$context.$elements${fp}) {
                 throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is an element, considered readonly.");
               } else {
                 throw new Error("Writable/Bidirectional binding write error : target property '${fp}' not found, cannot write to null.");
@@ -396,9 +396,9 @@ class QMLBinding {
 
     var vvith;
     if (this.flags & QMLBinding.Alias) {
-      vvith = "with(QmlWeb) with(this.$context.topContext) with(this.$elements) with(this.$noalias)";
+      vvith = "with(QmlWeb) with(this.$context.topContext) with(this.$noalias)";
     } else {
-      vvith = "with(QmlWeb) with(this.$context.topContext) with(this.$elements) with(this)";
+      vvith = "with(QmlWeb) with(this.$context.topContext) with(this)";
     }
 
     if (!this.flags&QMLBinding.ImplFunction) {

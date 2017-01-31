@@ -46,7 +46,7 @@ class QObject {
     if (this.$component === component) {
       result = this;
     } else if (__proto__.parentFor) {
-      result = __proto__.parentFor(component),
+      result = __proto__.parentFor(component);
     } else {
       result = null;
     }
