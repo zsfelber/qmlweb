@@ -41,34 +41,46 @@ class QMLProperty {
   // conversion required.
   $setVal(val, flags, declaringItem) {
     var prevComponent = QmlWeb.engine.$component;
+    var prevImport = QmlWeb.engine.$importerComponent;
     var correctObjProto;
-    if (flags & QMLProperty.SetChildren) {
-      if (declaringItem) {
+
+    try {
+      if (flags & QMLProperty.SetChildren) {
+
         // NOTE declaringItem is passed only along with SetChildren
         // declaringItem !== this.obj.$component
         // declaringItem means : the QML where the current child element (val) is declared
         // what this.obj.$component is here : the QML supertype where the default property (eg"data") defined (eg"ItemBase")
-        QmlWeb.engine.$component = declaringItem.$component;
-        correctObjProto = declaringItem;
-      } else {
-        // This means : if no declaredItem, it is coming through a QMLBinding.
-        // TODO (?:to check) this is the case and only case when default alias points to a nested item :
-        // then the correct place we put the value into is top of included element class hierarchy :
-        QmlWeb.engine.$component = this.obj.$component.topComponent;
-        correctObjProto = this.obj.$leaf;
-        if (!correctObjProto || correctObjProto.$component !== this.obj.$component.topComponent) {
-          throw new Error("Error in object prototype chain : "+this.obj+"  "+correctObjProto)
-        }
-      }
-    } else {
-      QmlWeb.engine.$component = this.obj.$component;
-      correctObjProto = this.obj;
-    }
 
-    try {
+        if (!declaringItem) {
+          throw new Error("declaringItem not specified with SetChildren flag : "+this.obj);
+        }
+        if (flags & QMLProperty.ThroughBinding) {
+          // This means : it is coming through a QMLBinding.
+          // (TODO ?indirect) this is the case and only case when default alias points to a nested item :
+
+          // place the child Elements to top level (not to ItemBase where the 'data' property is :
+          QmlWeb.engine.$component = this.obj.$component.topComponent;
+          correctObjProto = this.obj.$leaf;
+          if (!correctObjProto || correctObjProto.$component !== this.obj.$component.topComponent) {
+            throw new Error("Error in object prototype chain : "+this.obj+"  "+correctObjProto);
+          }
+
+          //  we setup a special import context here (which is relative to declaringItem's component) :
+          QmlWeb.engine.$component.bindImports(declaringItem.$component);
+
+        } else {
+          QmlWeb.engine.$component = declaringItem.$component;
+          correctObjProto = declaringItem;
+        }
+      } else {
+        QmlWeb.engine.$component = this.obj.$component;
+        correctObjProto = this.obj;
+      }
+
       const constructors = this.obj.$component ? this.obj.$component.moduleConstructors : QmlWeb.constructors;
       if (constructors[this.type] === QmlWeb.qmlList) {
-        // NOTE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
+        // NOTcomponentE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
         this.val = QmlWeb.qmlList(val, correctObjProto, QmlWeb.QMLComponent.Nested);
       } else if (val instanceof QmlWeb.QMLMetaElement) {
         // Root element or nested Component element ?
@@ -95,6 +107,7 @@ class QMLProperty {
       }
     } finally {
       QmlWeb.engine.$component = prevComponent;
+      QmlWeb.engine.$importerComponent = prevImport;
     }
   }
 
@@ -278,7 +291,7 @@ class QMLProperty {
           if (!this.binding.compiled) {
             this.binding.compile();
           }
-          this.binding.set(this.obj, newVal, flags);
+          this.binding.set(this.obj, newVal, flags, declaringItem);
         }
       } else if (!(flags & QMLProperty.ReasonAnimation)) {
         this.binding = null;
@@ -391,6 +404,7 @@ QMLProperty.ReasonAnimation = 2;
 QMLProperty.Privileged = 4;
 QMLProperty.RemoveBidirectionalBinding = 8;
 QMLProperty.SetChildren = 16;
+QMLProperty.ThroughBinding = 32;
 QMLProperty.ReasonInitPrivileged = QMLProperty.ReasonInit | QMLProperty.Privileged;
 
 QmlWeb.QMLProperty = QMLProperty;

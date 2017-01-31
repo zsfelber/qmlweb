@@ -159,6 +159,31 @@ class QMLComponent {
     }
   }
 
+  bindImports(sourceComponent) {
+    console.warn("bindImports : binding imports...  "+this+"  ==> "+sourceComponent);
+    if (this.boundImportComponent) {
+      console.warn("bindImports : rebind imports from "+this.boundImportComponent);
+      if (this.boundImportComponent === sourceComponent) {
+        return ;
+      }
+    }
+
+    if (!this.$jsImports.isEmpty() ||
+        !Object.keys(this.moduleConstructors).isEmpty() ||
+        !Object.keys(this.ctxQmldirs).isEmpty() ||
+        !Object.keys(this.componentImportPaths).isEmpty()  ) {
+      throw new Error("bindImports : imports already loaded, cannot bind imports to another Component : "+this);
+    }
+
+    this.boundImportComponent = sourceComponent;
+
+    this.$jsImports = Object.create(sourceComponent.$jsImports);
+    this.moduleConstructors = Object.create(sourceComponent.moduleConstructors);
+    this.ctxQmldirs = Object.create(sourceComponent.ctxQmldirs); // resulting components lookup table
+    this.componentImportPaths = Object.create(sourceComponent.componentImportPaths);
+  }
+
+
   $createObject(parent, properties = {}) {
     const engine = QmlWeb.engine;
     const oldState = engine.operationState;

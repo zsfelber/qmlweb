@@ -172,7 +172,7 @@ class QMLBinding {
     }
   }
 
-  set(obj, value, flags) {
+  set(obj, value, flags, declaringItem) {
     var prevComponent = QmlWeb.engine.$component;
     QmlWeb.engine.$component = this.$component;
 
@@ -182,7 +182,7 @@ class QMLBinding {
         console.warn("Binding/set error  compiled:"+this.compiled+"  no compiled setter  src:\n"+this.src);
         return;
       }
-      this.implSet.call(obj, value, flags);
+      this.implSet.call(obj, value, flags, declaringItem);
     } catch (err) {
       if (QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
         console.warn("Binding/set error : "+err.message+(err.srcdumpok?" srcdump:ok":" "+this));
@@ -336,7 +336,7 @@ class QMLBinding {
 
       if (this.src) {
 
-        return new Function("$$__value", "$$__flags", `
+        return new Function("$$__value", "$$__flags", "$$__declaringItem", `
           ${vvith} {
             var obj = ${this.src};
             if (!obj) {
@@ -353,7 +353,7 @@ class QMLBinding {
               if (prop.readOnly) {
                 throw new Error("Writable/Bidirectional binding write error : target property '${this.src} ${fp}' is read-only.");
               } else {
-                prop.set($$__value, $$__flags);
+                prop.set($$__value, $$__flags | QmlWeb.QMLProperty.ThroughBinding, $$__declaringItem);
               }
             } else {
               if (obj.$context.$elements${fp}) {
@@ -366,7 +366,7 @@ class QMLBinding {
         `);
       } else {
 
-        return new Function("$$__value", "$$__flags", `
+        return new Function("$$__value", "$$__flags", "$$__declaringItem", `
           ${vvith} {
             var prop = this.${props}${fp};
 
@@ -374,7 +374,7 @@ class QMLBinding {
               if (prop.readOnly) {
                 throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is read-only.");
               } else {
-                prop.set($$__value, $$__flags);
+                prop.set($$__value, $$__flags | QmlWeb.QMLProperty.ThroughBinding, $$__declaringItem);
               }
             } else {
               if (this.$context.$elements${fp}) {
