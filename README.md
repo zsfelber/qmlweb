@@ -137,15 +137,15 @@ See [Extending](docs/Extending.md).
 
 Intended to fix parse errors (like that of readonly property) and maybe another simple bugs which prevent my actual qml model to be compiled and used..
 As time has gone, I found the whole code needed a  serious refresh impulse which I did. These made my branch something might be called "QmlWeb2", in fact-
-I haven't yet given a name. Just enjoy despite these are my Anonymous Updates.
+I haven't yet given any name. Just enjoy despite these are my Anonymous Updates.
 
 Added:
-Understand my [@zsfelber/qmlweb-parser] extensions:
+Support for [@zsfelber/qmlweb-parser](https://github.com/zsfelber/qmlweb-parser) extensions:
 [readonly]  [list<xxx> templates]   [var xxx = {"aaa:" : <expression>}  json like var property syntax ]
 
-Understand my [@zsfelber/gulp-qmlweb] extensions.
+Support for [@zsfelber/gulp-qmlweb](https://github.com/zsfelber/gulp-qmlweb) extensions.
 
-# Details
+### Details
 
 Fixed import strategy to resolve preloaded qrc-s
 
