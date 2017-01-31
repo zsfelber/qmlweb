@@ -67,7 +67,6 @@ function initMeta(self, meta, constructor) {
  */
 function construct(meta, parent, flags) {
   const component = QmlWeb.engine.$component;
-  let loaderComponent = component.loaderComponent;
 
   if (!(flags & QmlWeb.QMLComponent.Nested)) {
     flags |= QmlWeb.QMLComponent.Super;
@@ -96,18 +95,13 @@ function construct(meta, parent, flags) {
   }
 
   if (flags & QmlWeb.QMLComponent.Root) {
-    if (loaderComponent) throw new Error("loaderComponent should not be present here : "+item);
-    // root Component
-    loaderComponent = component;
-  } else if (!loaderComponent) {
+    if (component.loaderComponent) throw new Error("component.loaderComponent should not be present here : "+item);
+  } else if (!component.loaderComponent) {
     throw new Error("Assertion failed. No loader : "+component);
   } else if (flags&QmlWeb.QMLComponent.Super) {
     if (item.$component !==  component) {
       throw new Error("Assertion failed. $component differs from that in stack : "+item.$component+" ===  "+component);
     }
-  } else {
-    // nested
-    loaderComponent = component;
   }
 
   // Finalize instantiation over supertype item :
@@ -119,83 +113,29 @@ function construct(meta, parent, flags) {
   }
 
   var ctx = item.$context;
-  var topcmp = ctx.topComponent;
-  var topctx = topcmp.context;
-  if (ctx !== topctx) {
-    if (ctx.component.topContext !== topctx) {
-      throw new Error("Assertion failed. Component integrity error.  "+item.$component);
-    }
-    if (!topctx.isPrototypeOf(ctx)) {
-      throw new Error("Assertion failed. Each component should fork from the current top loader context.");
-    }
-  }
 
-  // id
-  // see also Component.constructor
-  // see also QObject.createChild()->Object.create() in classes.construct
-  // see also Object.create in QMLContext.createChild
-  // see also QMLProperty.createProperty how element access can be hidden by same name property or alias
-  // see also QMLBinding.bindXXX methods how a name is eventually resolved at runtime
-  if (meta.id) {
-    if (ctx.hasOwnProperty(meta.id)) {
-      console.warn("Context entry overriden by Element : "+meta.id+" object:"+item);
-    }
-
-      // This means : we are in the loader component directly, and not in a super QML of current nested (or root) element :
-
-    if (flags & QmlWeb.QMLComponent.Nested) {
-
-      if (loaderComponent.context === topctx) {
-        throw new Error("Assertion failed. Invalid context:"+loaderComponent.context.$info+" === "+topctx.$info);
-      }
-
-      if (loaderComponent.context !==  ctx.__proto__) {
-        throw new Error("Assertion failed. Directly nested component should inherit its context from loader context.");
-      }
-
-      if (topctx.$elements[meta.id]) {
-        throw new Error("Duplicated element id:"+meta.id+" in "+item.$component);
-      }
-
-      QmlWeb.setupGetterSetter(
-        topctx, meta.id,
-        () => item,
-        () => {}
-      );
-
+  // each element into parent context, by id :
+  if (flags & QmlWeb.QMLComponent.Nested) {
+    if (meta.id) {
+      registerElementInParent(item, meta.id);
     } else {
-      var chkparent = item.parentCreatedBy(topcmp);
-      if (parent !== chkparent) {
-        throw new Error("parent !== chkparent   "+parent+" !== "+chkparent);
-      }
-
-      var p, pe = parent.$elements[meta.id];
-      if (pe && (p=parent.__proto__) && !(pe = p.$elements[meta.id])) {
-        throw new Error("Duplicated element id:"+meta.id+" in "+topcmp);
-      }
-
-      QmlWeb.setupGetterSetter(
-        topctx, meta.id,
-        () => item,
-        () => {}
-      );
+      console.warn("No element id for item  : "+item+"  ctx:"+ctx.$info);
     }
-
-    if (isTop) {
-
-    } else {
-
-      item.parentCreatedBy(topcmp).$elements[meta.id] = item;
-
-    }
-
   }
 
   // Apply properties according to this metatype info
   // (Bindings won't get evaluated, yet)
   QmlWeb.applyProperties(meta, item);
 
-  return item;
+  // always put self into context, by internal id :
+
+  if (item.id) {
+
+    putElement(item, item.id, ctx);;
+
+  } else {
+    console.warn("No id of item for self : "+item+"  ctx:"+ctx.$info);
+  }
 }
 
 function constructSuperOrNested(meta, parent, flags) {
@@ -239,6 +179,65 @@ function constructSuperOrNested(meta, parent, flags) {
   }
   return item;
 }
+
+
+function registerElementInParent(item, id);
+  var ctx = item.$parent.$context;
+  var cmp = item.$parent.$component;
+  if (cmp.context !== ctx) {
+    throw new Error("Assertion failed. Component integrity error.  "+cmp);
+  }
+
+  var topcmp = ctx.topComponent;
+  var topctx = topcmp.context;
+  if (ctx.component.topContext !== topctx) {
+    throw new Error("Assertion failed. Component integrity error.  "+cmp);
+  }
+
+  if (cmp.flags & (QmlWeb.QMLComponent.Nested|QmlWeb.QMLComponent.Root)) {
+
+    // This means : we are in the loader component directly, and not in a super QML of current nested (or root) element :
+
+    if (ctx !== topctx) {
+      throw new Error("Assertion failed. Invalid context:"+ctx.$info+" === "+topctx.$info);
+    }
+  } else {
+    if (ctx === topctx) {
+      throw new Error("Assertion failed. Invalid context:"+ctx.$info+" !== "+topctx.$info);
+    }
+    if (!topctx.isPrototypeOf(ctx)) {
+      throw new Error("Assertion failed. Each component should fork from the current top loader context.");
+    }
+  }
+
+  putElement(item, id, ctx);
+}
+
+function putElement(item, id, ctx) {
+
+  // id
+  // see also Component.constructor
+  // see also QObject.createChild()->Object.create() in classes.construct
+  // see also Object.create in QMLContext.createChild
+  // see also QMLProperty.createProperty how element access can be hidden by same name property or alias
+  // see also QMLBinding.bindXXX methods how a name is eventually resolved at runtime
+
+  if (ctx.hasOwnProperty(id)) {
+    console.warn("Context entry overriden by Element : "+id+" object:"+item);
+  }
+
+  if (ctx.$elements[id]) {
+    throw new Error("Duplicated element id:"+id+" in "+ctx.$info);
+  }
+
+  QmlWeb.setupGetterSetter(
+    ctx, id,
+    () => item,
+    () => {}
+  );
+}
+
+
 
 function createQmlObject(src, parent, file) {
 
