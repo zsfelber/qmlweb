@@ -18,13 +18,8 @@ class QMLContext {
 
     if (!childContext.$elements) {
       childContext.$elements = {};
-      childContext.$noalias = {};
     } else {
       childContext.$elements = Object.create(this.$elements);
-      // NOTE see trick :
-      // $noalias is inherited not from $noalias but full context,
-      // because noalias only matters in context in this object's alias bindings to prevent access
-      // it only this object' aliases : not the parent (or inherited/supertype) aliases (at least in my interpretation).
       childContext.$noalias = Object.create(this/*!!!!! .$noalias*/);
     }
 

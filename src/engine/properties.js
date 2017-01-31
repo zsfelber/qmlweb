@@ -117,13 +117,15 @@ function createProperty(type, obj, propName, options) {
   // see also classes.construct where $context.$elements come from
 
   // current leaf nested element context (its own supertype hierarchy doesn't matter) :
+  //
+  // NOTE trick :
+  //
+  // see namespace setting in QMLBinding with(...) -s :  we also put alias here.
+  // as context is inherited from container qml and evaluating upto >PARENT< context ('this.$context.topContext'),
+  // $noalias only matters in context in this object's alias bindings to prevent access
+  // it only this object' aliases : not the parent (or inherited/supertype) aliases (at least in my interpretation).
+  //
   QmlWeb.setupGetterSetter(ctx, propName, getter, setter, prop);
-  if (type !== "alias") {
-    // NOTE see trick in components.js : $noalias is inherited not from $noalias but full context,
-    // because noalias only matters in context in this object's alias bindings to prevent access
-    // it only this (or inherited) object' aliases : not the parent aliases.
-    QmlWeb.setupGetterSetter(ctx.$noalias, propName, getter, setter, prop);
-  }
 }
 
 /**

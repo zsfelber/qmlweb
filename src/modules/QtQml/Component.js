@@ -46,10 +46,12 @@ class QMLComponent {
                                             (loaderComponent.topComponent?" ("+loaderComponent+")":"")  +" -> "+this);
         this.context.component = this;
         this.context.topComponent = this.topComponent;
+        this.context.topContext = this.topContext;
       } else {
         this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this);
         this.context.component = this;
         this.context.topComponent = this;
+        this.context.topContext = this.context;
         this.context.nestedLevel = this.nestedLevel;
       }
 
