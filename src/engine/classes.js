@@ -216,7 +216,7 @@ function registerElementInParent(item, id) {
     if (ctx === topctx) {
       throw new Error("Assertion failed. Invalid context:"+ctx.$info+" !== "+(topctx?topctx.$info:"<null>"));
     }
-    if (!topctx || !topctx.isPrototypeOf(ctx)) {
+    if (!topctx || topctx.__proto__ !== ctx.__proto__) {
       throw new Error("Assertion failed. Each component should fork from the current top loader context.");
     }
   }
@@ -243,6 +243,11 @@ function putElement(item, id, ctx) {
 
   QmlWeb.setupGetterSetter(
     ctx, id,
+    () => item,
+    () => {}
+  );
+  QmlWeb.setupGetterSetter(
+    ctx.$noalias, id,
     () => item,
     () => {}
   );
