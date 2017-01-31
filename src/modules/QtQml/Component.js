@@ -53,14 +53,6 @@ class QMLComponent {
           }
         } else {
 
-          if (this.loaderComponent !== loaderComponent) {
-            throw new Error("Assertion failed.  "+this.loaderComponent+" === "+loaderComponent);
-          }
-
-          if (!this.loaderComponent || !(this.loaderComponent.flags&QMLComponent.Root)) {
-            throw new Error("Top Component should be a Root if no loader : "+this);
-          }
-
           this.meta.context = this.context = engine.rootContext.createChild(this.loaderComponent + " .. " +this);
 
         }
