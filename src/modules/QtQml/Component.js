@@ -26,6 +26,8 @@ class QMLComponent {
         throw new Error("Invalid root Component construction (a loader Component is found) : "+this);
       }
 
+      loaderComponent.next = this;
+
       if (flags&QMLComponent.Super) {
         this.loaderComponent = loaderComponent.loaderComponent;
         this.topComponent = loaderComponent.topComponent;
@@ -171,10 +173,10 @@ class QMLComponent {
       }
     }
 
-    if (!this.$jsImports.isEmpty() ||
-        !Object.keys(this.moduleConstructors).isEmpty() ||
-        !Object.keys(this.ctxQmldirs).isEmpty() ||
-        !Object.keys(this.componentImportPaths).isEmpty()  ) {
+    if (this.$jsImports.length ||
+        Object.keys(this.moduleConstructors).length ||
+        Object.keys(this.ctxQmldirs).length ||
+        Object.keys(this.componentImportPaths).length  ) {
       console.warn("bindImports : imports already loaded, of : "+this+", now rebinding imports to another Component");
     }
 
