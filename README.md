@@ -140,10 +140,12 @@ As time has gone, I found the whole code needed a  serious refresh impulse which
 I haven't yet given a name. Just enjoy despite these are my Anonymous Updates.
 
 Added:
-Understand my qmlweb-parser extensions:
+Understand my [@zsfelber/qmlweb-parser] extensions:
 [readonly]  [list<xxx> templates]   [var xxx = {"aaa:" : <expression>}  json like var property syntax ]
 
-Understand my gulp-qmlweb extensions
+Understand my [@zsfelber/gulp-qmlweb] extensions.
+
+# Details
 
 Fixed import strategy to resolve preloaded qrc-s
 
