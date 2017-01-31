@@ -41,7 +41,7 @@ class QMLProperty {
   // conversion required.
   $setVal(val, flags, declaringItem) {
     var prevComponent = QmlWeb.engine.$component;
-    var prevImport = QmlWeb.engine.$importerComponent;
+    var prevImport = 0;
     var correctObjProto;
 
     try {
@@ -66,7 +66,8 @@ class QMLProperty {
             throw new Error("Error in object prototype chain : "+this.obj+"  "+correctObjProto);
           }
 
-          //  we setup a special import context here (which is relative to declaringItem's component) :
+          //  we setup a temporal import context here (which is relative to declaringItem's component) :
+          prevImport = QmlWeb.engine.$component.boundImportComponent;
           QmlWeb.engine.$component.bindImports(declaringItem.$component);
 
         } else {
@@ -106,8 +107,10 @@ class QMLProperty {
         this.val = new constructors[this.type](val);
       }
     } finally {
+      if (prevImport) {
+        QmlWeb.engine.$component.bindImports(prevImport);
+      }
       QmlWeb.engine.$component = prevComponent;
-      QmlWeb.engine.$importerComponent = prevImport;
     }
   }
 

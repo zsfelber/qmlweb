@@ -56,6 +56,9 @@ class QMLComponent {
 
         this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this);
         this.context.nestedLevel = this.nestedLevel;
+
+        // Nested item top level uses loader Component imports:
+        this.bindImports(loaderComponent);
       }
 
       console.warn("Component  "+this.context.$info);
@@ -172,7 +175,7 @@ class QMLComponent {
         !Object.keys(this.moduleConstructors).isEmpty() ||
         !Object.keys(this.ctxQmldirs).isEmpty() ||
         !Object.keys(this.componentImportPaths).isEmpty()  ) {
-      throw new Error("bindImports : imports already loaded, cannot bind imports to another Component : "+this);
+      console.warn("bindImports : imports already loaded, of : "+this+", now rebinding imports to another Component");
     }
 
     this.boundImportComponent = sourceComponent;
