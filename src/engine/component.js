@@ -18,12 +18,13 @@ class QMLContext {
 
     if (!childContext.$elements) {
       childContext.$elements = {};
-      childContext.$elementoverloads = {};
-      childContext.$elementoverloadsnoalias = {};
     } else {
       childContext.$elements = Object.create(this.$elements);
-      childContext.$elementoverloads = Object.create(this.$elementoverloads);
-      childContext.$elementoverloadsnoalias = Object.create(this.$elementoverloadsnoalias);
+      // NOTE see trick :
+      // $noalias is inherited not from $noalias but full context,
+      // because noalias only matters in context in this object's alias bindings to prevent access
+      // it only this (or inherited) object' aliases : not the parent aliases (at least in my interpretation).
+      childContext.$elements.$noalias = Object.create(this.$elements/*!!!!! .$noalias*/);
     }
 
     return childContext;

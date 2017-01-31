@@ -107,7 +107,7 @@ function createProperty(type, obj, propName, options) {
 
 
   // This means : we are in the loader component directly, and not in a super QML of nested (or root) element :
-  if (obj.$component.flags & QmlWeb.QMLComponent.Nested) {
+  if (obj.$component.flags & (QmlWeb.QMLComponent.Root|QmlWeb.QMLComponent.Nested)) {
 
     var ctx = obj.$context;
     if (obj.$component.loaderComponent && obj.$component.loaderComponent.context !==  ctx.__proto__) {
@@ -124,6 +124,12 @@ function createProperty(type, obj, propName, options) {
 
     // current leaf nested element context (its own supertype hierarchy doesn't matter) :
     QmlWeb.setupGetterSetter(ctx, propName, getter, setter, prop);
+    if (type !== "alias") {
+      // NOTE see trick in components.js : $noalias is inherited not from $noalias but full context,
+      // because noalias only matters in context in this object's alias bindings to prevent access
+      // it only this (or inherited) object' aliases : not the parent aliases.
+      QmlWeb.setupGetterSetter(ctx.$noalias, propName, getter, setter, prop);
+    }
   }
 }
 

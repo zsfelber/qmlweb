@@ -74,6 +74,9 @@ function construct(meta, parent, flags) {
   }
 
   const superitem = constructSuperOrNested(meta, parent, flags);
+  if (flags !== superitem.$component.flags) {
+    throw new Error("Assertion failed. Flags should match. "+flags+" === "+superitem.$component.flags);
+  }
 
   // NOTE making a new level of class inheritance :
   // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
@@ -84,9 +87,13 @@ function construct(meta, parent, flags) {
 
   // means : created by Component.$createObject
   if (flags & QmlWeb.QMLComponent.Element) {
-    item.$classname = meta.$name;
-    item.$context = meta.context;
-    item.$component = meta.component;
+    if (meta !== component.meta || meta.$name!==component.$name  || meta.$id!==component.$id
+        || meta.context!==component.context || meta.component!==component) {
+      throw new Error("Invalid Element construct : "+item);
+    }
+    item.$classname = component.$name;
+    item.$context = component.context;
+    item.$component = component;
   } else if (flags & QmlWeb.QMLComponent.Super) {
     console.warn("custom Super construct (not Component.$createObject) : "+item);
   }
@@ -135,33 +142,32 @@ function construct(meta, parent, flags) {
     var isTop;
     if (component.flags & QmlWeb.QMLComponent.Root) {
        isTop = 1;
-    } else {
+    } else if (flags & QmlWeb.QMLComponent.Nested) {
+
+      isTop = 1;
 
       // This means : we are in the loader component directly, and not in a super QML of current nested (or root) element :
-      if (loaderComponent.context !== topctx) {
-        isTop = 1;
 
-        if (!(component.flags & QmlWeb.QMLComponent.Nested) || !loaderComponent) {
-          throw new Error("Assertion failed. The current component here should be the directly nested element still parsing in loader component, not its superclass QML document. Invalid component flags:"+component.flags+"  of  "+item);
-        }
+      if (loaderComponent.context === topctx) {
+        throw new Error("Assertion failed. The current component here should be the directly nested element still parsing in loader component, not its superclass QML document. Invalid context:"+loaderComponent.context.$info+" === "+topctx.$info);
+      }
 
-        if (loaderComponent.context !==  ctx.__proto__) {
-          throw new Error("Assertion failed. Directly nested component should inherit its context from loader context.");
-        }
+      if (loaderComponent.context !==  ctx.__proto__) {
+        throw new Error("Assertion failed. Directly nested component should inherit its context from loader context.");
+      }
 
-        if (loaderComponent.context.$elements[meta.id]) {
-          throw new Error("Duplicated element id:"+meta.id+" in "+loaderComponent);
-        }
-      } else {
-        isTop = 0;
+      if (loaderComponent.context.$elements[meta.id]) {
+        throw new Error("Duplicated element id:"+meta.id+" in "+loaderComponent);
+      }
+    } else {
+      isTop = 0;
 
-        var p;
-        if (item.$elements[meta.id]) {
-          if ((p=item.__proto__) && p.$elements && p[meta.id]) {
-            console.warn("Overriden element:"+meta.id+" in "+item+"  overrides "+p+"."+meta.id);
-          } else {
-            throw new Error("Duplicated element id:"+meta.id+" in "+item);
-          }
+      var p;
+      if (item.$elements[meta.id]) {
+        if ((p=item.__proto__) && p.$elements && p[meta.id]) {
+          console.warn("Overriden element:"+meta.id+" in "+item+"  overrides "+p+"."+meta.id);
+        } else {
+          throw new Error("Duplicated element id:"+meta.id+" in "+item);
         }
       }
     }
@@ -218,6 +224,7 @@ function constructSuperOrNested(meta, parent, flags) {
     if (!component) {
       throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);
     }
+
 
     // NOTE recursive call to initialize the container for supertype  ($createObject -> constuct -> $createObject -> constuct ...) :
     item = component.$createObject(parent);
