@@ -94,7 +94,7 @@ function construct(meta, parent, flags) {
     console.warn("custom Super construct (not Component.$createObject) : "+item);
   }
 
-  if (flags & QmlWeb.QMLComponent.Root) {
+  if ((flags & QmlWeb.QMLComponent.Root) || (component.topComponent.flags & QmlWeb.QMLComponent.Root)) {
     if (component.loaderComponent) throw new Error("component.loaderComponent should not be present here : "+item);
   } else if (!component.loaderComponent) {
     throw new Error("Assertion failed. No loader : "+component);
@@ -136,6 +136,8 @@ function construct(meta, parent, flags) {
   } else {
     console.warn("No id of item for self : "+item+"  ctx:"+ctx.$info);
   }
+
+  return item;
 }
 
 function constructSuperOrNested(meta, parent, flags) {
