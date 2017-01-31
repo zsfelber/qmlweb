@@ -136,6 +136,8 @@ See [Extending](docs/Extending.md).
 6. [@zsfelber/qmlweb](https://github.com/zsfelber/qmlweb).
 
 Intended to fix parse errors (like that of readonly property) and maybe another simple bugs which prevent my actual qml model to be compiled and used..
+As time has gone, I found the whole code needed a  serious refresh impulse which I did. These made my branch something might be called "QmlWeb2", in fact-
+I haven't yet given a name. Just enjoy despite these are my Anonymous Updates.
 
 Added:
 Understand my qmlweb-parser extensions:
@@ -159,20 +161,24 @@ After whole load cycle it attempts to resolve all of them subsequentially, from 
 It became more flexible and intelligent.
 
 JS Object oriented implementation of qml inheritance (_proto chain) for stacking the context, like this.$component, this._proto.$component, this._proto._proto.$component ...)
-1 single stack of loader components, Component's import cache variables, $context and 'this' object hirearchy (_protos) cover everything intuitively,
-the as - intended way. Main abstraction 1 is now "Component" that covers file loading stack, context inheritance (prototyping from top-to-bottom).
-Main 2 is classes.js/construct method which manages object inheritance (which now also deals with a prototype chain, but from bottom-to-top as for
-traversing the include graph from current type (QML) to the supertype (element tag QML) operation, thus starting this from the QObject supertype,
-as intended).
+1 single stack of loader components, Component's import cache variables, $context and 'this' object hirearchy (_protos) cover everything intuitively, the as - intended way.
+Main abstraction 1 is now "Component" that covers file loading stack, context inheritance (prototyping from top-to-bottom), and everything. Component
+has child Components, either "Root", "Super" or "Nested". A child Component created by "Component.$createObject" has also got the "Element" flag.
+Main abstraction 2 is classes.js/construct method which encapsulates object / container recursive creation looking more attractive than before.
+It now also deals with a prototype chain (makes _proto chain for created items), but from bottom-to-top versus top-to-bottom logic of context
+inheritance, indeed. It's traversing the include/contain graph from current type (QML) towards the supertype/deepest nested elements (element tag QML),
+and starting instantiation from the base type QObject of elements and root object inheritance hierarchy, as intended.
 
 
-Removed namespace objects, global executionContext, global $basePath stacks, componentScope+objectScope, importContextId or so.
+So, I removed namespace objects, global executionContext, global $basePath stacks, componentScope+objectScope, importContextId and so.
 These were too much complexity, source of a lot of experienced and possible bugs.I simplified it.
 Now using 1 single function parameter almost across whole api consequently :
 - current object passed as "this" func.call(obj,...), func.apply(obj,...), func.bind(obj,...) as possible
-- object.$context points to a shared QMLContext instance in every loaded top component, parent is engine.rootContext
-(!== but parent of rootObject.context : rootObject is alterable if loading multiple roots subsequently)
-- Actual object's Component (obj.$component) for the $basePath, and a couple of import cache container variables (no importContextId anymore)
+- object.$context points to a shared QMLContext instance in every loaded top component and its Supers, top parent is engine.rootContext.
+Nesting element Component always creates a new Context over prototype chain.
+( so rootContext !== anymore but is the parent of rootObject.context(s) : rootObject is alterable if loading multiple roots subsequently. )
+- We use actual object's Component (obj.$component) for the $basePath, import cache container variables (no importContextId anymore), and Component
+is now a central object to reach "everything".
 
 QMLProperty : new alias support codes goes here. Property get strategy changed to lazy, a new way of listening the evaluation tree is implemented.
 Connection cleanup strategy was not implemented here, I did it, too. So now, with deferring unnecessary tree evaluations as well as removing obsolete

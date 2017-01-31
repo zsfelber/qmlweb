@@ -208,6 +208,9 @@ function constructSuperOrNested(meta, parent, flags) {
     meta._constructor = clinfo.classConstructor;
     item = new clinfo.classConstructor(meta);
   } else {
+    if (meta.id) {
+      clinfo.id = meta.id;
+    }
 
     // NOTE class component from resolved superclass info:
     const component = QmlWeb.resolveComponent(clinfo, flags);
