@@ -74,9 +74,6 @@ function construct(meta, parent, flags) {
   }
 
   const superitem = constructSuperOrNested(meta, parent, flags);
-  if (flags !== superitem.$component.flags) {
-    throw new Error("Assertion failed. Flags should match. "+flags+" === "+superitem.$component.flags);
-  }
 
   // NOTE making a new level of class inheritance :
   // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
@@ -98,7 +95,7 @@ function construct(meta, parent, flags) {
     console.warn("custom Super construct (not Component.$createObject) : "+item);
   }
 
-  if (component.flags & QmlWeb.QMLComponent.Root) {
+  if (flags & QmlWeb.QMLComponent.Root) {
     if (loaderComponent) throw new Error("loaderComponent should not be present here : "+item);
     // root Component
     loaderComponent = component;
@@ -122,11 +119,16 @@ function construct(meta, parent, flags) {
   }
 
   var ctx = item.$context;
-
-  var currentTopComponent = ctx.component;
+  var currentTopComponent = ctx.topComponent;
   var topctx = currentTopComponent.context;
-  if (ctx !== topctx) throw new Error("Assertion failed. Each component should share the current top loader context.");
-
+  if (ctx !== topctx) {
+    if (ctx.component.topContext !== topctx) {
+      throw new Error("Assertion failed. Component integrity error.  "+item.$component);
+    }
+    if (!topctx.isPrototypeOf(ctx)) {
+      throw new Error("Assertion failed. Each component should fork from the current top loader context.");
+    }
+  }
 
   // id
   // see also Component.constructor
@@ -224,6 +226,12 @@ function constructSuperOrNested(meta, parent, flags) {
 
     // NOTE recursive call to initialize the container for supertype  ($createObject -> constuct -> $createObject -> constuct ...) :
     item = component.$createObject(parent);
+    if (component !== item.$component) {
+      throw new Error("Component mismatch : "+component+" vs "+item.$component);
+    }
+    if (component.flags !== flags) {
+      throw new Error("Component flags mismatch : "+flags+" vs "+component.flags);
+    }
 
     if (typeof item.dom !== "undefined") {
       item.dom.className += ` ${clinfo.path[clinfo.path.length - 1]}`;

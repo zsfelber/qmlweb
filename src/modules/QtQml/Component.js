@@ -35,19 +35,21 @@ class QMLComponent {
       }
 
       if (flags&QMLComponent.Super) {
-        this.parentComponent = (loaderComponent.parentComponent?loaderComponent.parentComponent:loaderComponent);
-        this.parentContext = this.parentComponent.context;
+        this.topComponent = (loaderComponent.topComponent?loaderComponent.topComponent:loaderComponent);
+        this.topContext = this.topComponent.context;
 
-        if (this.parentComponent.flags & QMLComponent.Super) {
-          throw new Error("Asserion failed. Parent Component should be Nested or Root. "+this.parentComponent+"  "+loaderComponent+" -> "+this)
+        if (this.topComponent.flags & QMLComponent.Super) {
+          throw new Error("Asserion failed. Parent Component should be Nested or Root. "+this.topComponent+"  "+loaderComponent+" -> "+this)
         }
 
-        this.meta.context = this.context = this.parentContext.createChild(this.parentComponent +
-                                            (loaderComponent.parentComponent?" ("+loaderComponent+")":"")  +" -> "+this);
+        this.meta.context = this.context = this.topContext.createChild(this.topComponent +
+                                            (loaderComponent.topComponent?" ("+loaderComponent+")":"")  +" -> "+this);
         this.context.component = this;
+        this.context.topComponent = this.topComponent;
       } else {
         this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this);
         this.context.component = this;
+        this.context.topComponent = this;
         this.context.nestedLevel = this.nestedLevel;
       }
 
