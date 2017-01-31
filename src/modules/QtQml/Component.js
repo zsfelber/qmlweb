@@ -35,14 +35,23 @@ class QMLComponent {
       }
 
       if (flags&QMLComponent.Super) {
-        this.meta.context = this.context = loaderComponent.context;
+        this.parentComponent = (loaderComponent.parentComponent?loaderComponent.parentComponent:loaderComponent);
+        this.parentContext = this.parentComponent.context;
+
+        if (this.parentComponent.flags & QMLComponent.Super) {
+          throw new Error("Asserion failed. Parent Component should be Nested or Root. "+this.parentComponent+"  "+loaderComponent+" -> "+this)
+        }
+
+        this.meta.context = this.context = this.parentContext.createChild(this.parentComponent +
+                                            (loaderComponent.parentComponent?" ("+loaderComponent+")":"")  +" -> "+this);
+        this.context.component = this;
       } else {
         this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this);
         this.context.component = this;
         this.context.nestedLevel = this.nestedLevel;
       }
 
-      console.warn("Component  "+loaderComponent+" -> "+this);
+      console.warn("Component  "+this.context.$info);
     } else {
       this.meta.context = this.context = engine.rootContext.createChild(this.toString());
       this.context.component = this;

@@ -139,14 +139,9 @@ function construct(meta, parent, flags) {
       console.warn("Context entry overriden by Element : "+meta.id+" object:"+item);
     }
 
-    var isTop;
-    if (component.flags & QmlWeb.QMLComponent.Root) {
-       isTop = 1;
-    } else if (flags & QmlWeb.QMLComponent.Nested) {
-
-      isTop = 1;
-
       // This means : we are in the loader component directly, and not in a super QML of current nested (or root) element :
+
+    if (flags & QmlWeb.QMLComponent.Nested) {
 
       if (loaderComponent.context === topctx) {
         throw new Error("Assertion failed. The current component here should be the directly nested element still parsing in loader component, not its superclass QML document. Invalid context:"+loaderComponent.context.$info+" === "+topctx.$info);
@@ -156,14 +151,15 @@ function construct(meta, parent, flags) {
         throw new Error("Assertion failed. Directly nested component should inherit its context from loader context.");
       }
 
-      if (loaderComponent.context.$elements[meta.id]) {
-        throw new Error("Duplicated element id:"+meta.id+" in "+loaderComponent);
-      }
+    if (ctx.$elements[meta.id]) {
+      throw new Error("Duplicated element id:"+meta.id+" in "+item.$component);
+    }
+
     } else {
       isTop = 0;
 
       var p;
-      if (item.$elements[meta.id]) {
+      if (ctx.$elements[meta.id]) {
         if ((p=item.__proto__) && p.$elements && p[meta.id]) {
           console.warn("Overriden element:"+meta.id+" in "+item+"  overrides "+p+"."+meta.id);
         } else {
