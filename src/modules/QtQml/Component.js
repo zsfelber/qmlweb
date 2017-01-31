@@ -26,30 +26,40 @@ class QMLComponent {
         throw new Error("Invalid root Component construction (a loader Component is found) : "+this);
       }
 
-      loaderComponent.next = this;
-
       if (flags&QMLComponent.Super) {
+
+        loaderComponent.next = this;
+
         this.loaderComponent = loaderComponent.loaderComponent;
-        this.topComponent = loaderComponent.topComponent;
+
+        if (loaderComponent.includeElementComponent) {
+          this.includeElementComponent = loaderComponent.includeElementComponent;
+          this.topComponent = loaderComponent.topComponent;
+        } else {
+          this.includeElementComponent = loaderComponent;
+          this.topComponent = this;
+        }
+
 
         if (this.loaderComponent) {
+
           this.meta.context = this.context = this.loaderComponent.context.createChild(
                                         this.loaderComponent +" -> .. " +this);
 
-          if (this.topComponent.flags & QMLComponent.Super) {
+          if (this.includeElementComponent.flags & QMLComponent.Super) {
             throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.context.$info)
           }
         } else {
 
-          if (this.topComponent !== loaderComponent) {
-            throw new Error("Assertion failed.  "+this.topComponent+" === "+loaderComponent);
+          if (this.includeElementComponent !== loaderComponent) {
+            throw new Error("Assertion failed.  "+this.includeElementComponent+" === "+loaderComponent);
           }
 
-          if (!this.topComponent || !(this.topComponent.flags&QMLComponent.Root)) {
+          if (!this.includeElementComponent || !(this.includeElementComponent.flags&QMLComponent.Root)) {
             throw new Error("Top Component should be a Root if no loader : "+this);
           }
 
-          this.meta.context = this.context = engine.rootContext.createChild(this.topComponent + " .. " +this);
+          this.meta.context = this.context = engine.rootContext.createChild(this.includeElementComponent + " .. " +this);
 
         }
       } else {
@@ -65,7 +75,6 @@ class QMLComponent {
 
       console.warn("Component  "+this.context.$info);
     } else {
-      this.loaderComponent = null;
       this.topComponent = this;
 
       this.meta.context = this.context = engine.rootContext.createChild(this.toString());
@@ -83,8 +92,9 @@ class QMLComponent {
     }
 
     this.context.component = this;
-    this.context.topContext = this.topComponent.context;
+    this.context.includeElementContext = this.includeElementComponent?this.includeElementComponent.context:null;
     this.context.loaderContext = this.loaderComponent?this.loaderComponent.context:null;
+    this.context.topContext = this.topComponent?this.topComponent.context:null;
 
     this.flags = flags;
 

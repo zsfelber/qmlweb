@@ -60,15 +60,23 @@ class QMLProperty {
           // (TODO ?indirect) this is the case and only case when default alias points to a nested item :
 
           // place the child Elements to top level (not to ItemBase where the 'data' property is :
-          QmlWeb.engine.$component = this.obj.$component.topComponent;
+          QmlWeb.engine.$component = this.obj.$component.includeElementComponent;
           correctObjProto = this.obj.$leaf;
-          if (!correctObjProto || correctObjProto.$component !== this.obj.$component.topComponent) {
+          if (!correctObjProto || correctObjProto.$component !== this.obj.$component.includeElementComponent) {
             throw new Error("Error in object prototype chain : "+this.obj+"  "+correctObjProto);
           }
 
           //  we setup a temporal import context here (which is relative to declaringItem's component) :
           prevImport = QmlWeb.engine.$component.boundImportComponent;
-          QmlWeb.engine.$component.bindImports(declaringItem.$component);
+
+          if (QmlWeb.engine.$component.flags & QmlWeb.QMLComponent.Nested) {
+            //  declaringItem.$component is the include element in a parent QML,
+            //  but we need .next : this is the topmost QML of included element hierarchy (the loaded QML file)
+            QmlWeb.engine.$component.bindImports(declaringItem.$component.next);
+          } else {
+            QmlWeb.engine.$component.bindImports(declaringItem.$component);
+          }
+
 
         } else {
           QmlWeb.engine.$component = declaringItem.$component;
