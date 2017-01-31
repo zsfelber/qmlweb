@@ -41,6 +41,18 @@ class QObject {
     return childObj;
   }
 
+  parentCreatedBy(component) {
+    var result;
+    if (this.$component === component) {
+      result = this;
+    } else if (__proto__.parentFor) {
+      result = __proto__.parentFor(component),
+    } else {
+      result = null;
+    }
+    return result;
+  }
+
   $delete() {
     if (this.$Component) {
       this.$Component.destruction();

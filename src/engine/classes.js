@@ -119,8 +119,8 @@ function construct(meta, parent, flags) {
   }
 
   var ctx = item.$context;
-  var currentTopComponent = ctx.topComponent;
-  var topctx = currentTopComponent.context;
+  var topcmp = ctx.topComponent;
+  var topctx = topcmp.context;
   if (ctx !== topctx) {
     if (ctx.component.topContext !== topctx) {
       throw new Error("Assertion failed. Component integrity error.  "+item.$component);
@@ -146,48 +146,47 @@ function construct(meta, parent, flags) {
     if (flags & QmlWeb.QMLComponent.Nested) {
 
       if (loaderComponent.context === topctx) {
-        throw new Error("Assertion failed. The current component here should be the directly nested element still parsing in loader component, not its superclass QML document. Invalid context:"+loaderComponent.context.$info+" === "+topctx.$info);
+        throw new Error("Assertion failed. Invalid context:"+loaderComponent.context.$info+" === "+topctx.$info);
       }
 
       if (loaderComponent.context !==  ctx.__proto__) {
         throw new Error("Assertion failed. Directly nested component should inherit its context from loader context.");
       }
 
-    if (ctx.$elements[meta.id]) {
-      throw new Error("Duplicated element id:"+meta.id+" in "+item.$component);
-    }
+      if (topctx.$elements[meta.id]) {
+        throw new Error("Duplicated element id:"+meta.id+" in "+item.$component);
+      }
+
+      QmlWeb.setupGetterSetter(
+        topctx, meta.id,
+        () => item,
+        () => {}
+      );
 
     } else {
-      isTop = 0;
-
-      var p;
-      if (ctx.$elements[meta.id]) {
-        if ((p=item.__proto__) && p.$elements && p[meta.id]) {
-          console.warn("Overriden element:"+meta.id+" in "+item+"  overrides "+p+"."+meta.id);
-        } else {
-          throw new Error("Duplicated element id:"+meta.id+" in "+item);
-        }
+      var chkparent = item.parentCreatedBy(topcmp);
+      if (parent !== chkparent) {
+        throw new Error("parent !== chkparent   "+parent+" !== "+chkparent);
       }
+
+      var p, pe = parent.$elements[meta.id];
+      if (pe && (p=parent.__proto__) && !(pe = p.$elements[meta.id])) {
+        throw new Error("Duplicated element id:"+meta.id+" in "+topcmp);
+      }
+
+      QmlWeb.setupGetterSetter(
+        topctx, meta.id,
+        () => item,
+        () => {}
+      );
     }
 
     if (isTop) {
-      QmlWeb.setupGetterSetter(
-        loaderComponent.context, meta.id,
-        () => item,
-        () => {}
-      );
-
-      loaderComponent.context.$elements[meta.id] = item;
 
     } else {
 
-      item.$elements[meta.id] = item;
+      item.parentCreatedBy(topcmp).$elements[meta.id] = item;
 
-      QmlWeb.setupGetterSetter(
-        ctx, meta.id,
-        () => item,
-        () => {}
-      );
     }
 
   }
