@@ -85,7 +85,7 @@ function createProperty(type, obj, propName, options) {
     // http://doc.qt.io/qt-4.8/propertybinding.html#property-aliases)
 
     var p = formatPath(path0);
-    var QMLBinding = QmlWeb.QMLBinding;
+    const QMLBinding = QmlWeb.QMLBinding;
     var binding = new QMLBinding(p, proplast, QMLBinding.ImplExpression|QMLBinding.Alias);
     prop.set(binding, QMLProperty.ReasonInitPrivileged);
 
@@ -222,6 +222,7 @@ function applyProperties(metaObject, item) {
 
 function applyProperty(item, i, value) {
   const QMLProperty = QmlWeb.QMLProperty;
+  const QMLBinding = QmlWeb.QMLBinding;
 
   if (value instanceof QmlWeb.QMLSignalDefinition) {
     item[i] = QmlWeb.Signal.signal(i, value.parameters);
@@ -257,6 +258,7 @@ function applyProperty(item, i, value) {
 }
 
 function connectSignal(item, signalName, value) {
+  const QMLBinding = QmlWeb.QMLBinding;
   const _signal = item[signalName];
 
   if (!_signal) {
@@ -267,12 +269,6 @@ function connectSignal(item, signalName, value) {
     return undefined;
   }
 
-  if (!value.compiled) {
-    if (value.flags&QMLBinding.ImplFunction) {
-      throw new Error("Invalid slot binding, it should not be a function : "+value.src);
-    }
-  }
-
   const params = [];
   for (const j in _signal.parameters) {
     params.push(_signal.parameters[j].name);
@@ -281,10 +277,17 @@ function connectSignal(item, signalName, value) {
   var ps = params.join(",");
   var connection;
 
-  if (!value.args || ps!==value.args) {
-    value.args = ps;
+  if (ps!==value.args) {
+    console.warn("connectSignal  Binding arguments  created or changed : "+value.args+" -> "+ps+"  signal:"+item+" . "+signalName)
 
     try {
+      if (value.flags&QMLBinding.ImplFunction) {
+        if (!value.compiled) {
+          throw new Error("Invalid slot binding, it should not be a function : "+value.src);
+        }
+      }
+      console.warn("connectSignal  convert Binding to function : "+ps);
+      value.args = ps;
       value.flags &= ~QMLBinding.ImplBlock;
       value.flags |= QMLBinding.ImplFunction;
       value.compile();

@@ -110,12 +110,12 @@ class QMLBinding {
 
   stripFunction(src, stripargs) {
     if (src) {
-      var match = /^function\s*(?:\w|\d|\$)*\((.*?)\)/m.exec(src);
-      if (match) {
+      var match = /^(?:function\s)?\s*(?:\w|\$)*\(((?:\w|\$|\,|\s)*)\)\s*\{/m.exec(src);
+      if (match && src[src.length-1]==='}') {
         if (!this.flags) {
-          throw new Error("Binding is effectively a function but declared to expression : "+(info?info:src));
+          throw new Error("Binding is effectively a function but declared to expression : "+(this.info?this.info:src));
         }
-        src = src.substring(match[0].length);
+        src = src.substring(match[0].length-1);
         if (!stripargs) {
           src = "("+match[1]+")"+src;
         }
@@ -125,7 +125,7 @@ class QMLBinding {
         this.flags |= QMLBinding.ImplFunction;
       } else {
         if (this.flags & QMLBinding.ImplFunction) {
-          throw new Error("Binding is effectively not a function but declared so : "+(info?info:src));
+          throw new Error("Binding is effectively not a function but declared so : "+(this.info?this.info:src));
         }
       }
     }
@@ -220,7 +220,7 @@ class QMLBinding {
     }
   }
 
-/**
+/**ile:///ubu64/free_storage/workspaces/greenzone-terminal/FirstTest/bin/qml.html
  * Compile binding. Afterwards you may call binding.eval/get/set to evaluate.
  */
   compile() {
@@ -230,7 +230,11 @@ class QMLBinding {
     this.src = _ubertrim(this.src);
     this.compiled = true;
     if (this.flags&QMLBinding.ImplFunction) {
-      this.stripFunction(src, true);
+      if (this.args!==undefined) {
+        if (this.src0===undefined) this.src0 = this.src;
+        this.src = "("+this.args+")"+this.src0;
+      }
+      this.stripFunction(this.src, true);
       this.implRun = this.bindRun();
     } else {
       this.implGet = this.bindGet();
@@ -257,7 +261,8 @@ class QMLBinding {
         throw new Error("Invalid Qt.binding call, no getterFunc: "+this);
       }
 
-      this.stripFunction(this.getterFunc.toString(), true);
+      this.src = _ubertrim(this.getterFunc.toString());
+      this.stripFunction(this.src, true);
       if (this.args) {
         throw new Error("Qt.Binding should have no arguments : "+this);
       }
@@ -315,14 +320,15 @@ class QMLBinding {
         throw new Error("Invalid bidirectional Qt.binding call, no setterFunc: "+this);
       }
 
-      this.stripFunction(this.setterFunc.toString(), true);
+      this.src = _ubertrim(this.setterFunc.toString());
+      this.stripFunction(this.src, true);
       if (this.args.split(",").length!==2) {
         throw new Error("Invalid Qt.binding setter function arguments, should be (value, flags)");
       }
 
-      return eval(`funcition (${this.args}) {
+      return eval(`(function noname(${this.args}) {
         ${vvith} ${this.src}
-      }`);
+      })`);
     } else {
       if (this.flags&(QMLBinding.ImplFunction|QMLBinding.ImplBlock)) {
         throw new Error("Invalid writable/bidirectional binding, it should be an expression : "+this);
@@ -405,14 +411,14 @@ class QMLBinding {
       throw new Error("Binding/run should be a function : " + this);
     }
 
-    return eval(`funcition (${this.args}) {
+    return eval(`(function noname(${this.args}) {
       ${vvith} ${this.src}
-    }`);
+    })`);
   }
 
 
   toString() {
-    return "Binding: flags:"+this.flags+" prop:"+QmlWeb.formatPath(this.property)+"  impl:"+this.args+"=>\n"+this.src;
+    return "Binding: flags:"+this.flags+" prop:"+QmlWeb.formatPath(this.property)+"  impl:("+this.args+")=>\n"+this.src;
   }
 }
 QMLBinding.ImplExpression = 0;
