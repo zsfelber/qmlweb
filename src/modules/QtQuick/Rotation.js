@@ -12,12 +12,12 @@ QmlWeb.registerQmlType({
 
     const createProperty = QmlWeb.createProperty;
 
-    this.axis = new QmlWeb.QObject(this);
+    this.axis = new QmlWeb.QObject(this, {attached:true, info:"axis"});
     createProperty("real", this.axis, "x");
     createProperty("real", this.axis, "y");
     createProperty("real", this.axis, "z", { initialValue: 1 });
 
-    this.origin = new QmlWeb.QObject(this);
+    this.origin = new QmlWeb.QObject(this, {attached:true, info:"rotation"});
     createProperty("real", this.origin, "x");
     createProperty("real", this.origin, "y");
 

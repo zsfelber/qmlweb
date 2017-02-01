@@ -12,7 +12,7 @@ QmlWeb.registerQmlType({
     QmlWeb.superAndInitMeta(this, meta);
 
     const createProperty = QmlWeb.createProperty;
-    this.border = new QmlWeb.QObject(this);
+    this.border = new QmlWeb.QObject(this, {attached:true, info:"border"});
     createProperty("color", this.border, "color", { initialValue: "black" });
     createProperty("int", this.border, "width", { initialValue: 1 });
     this.$borderActive = false;

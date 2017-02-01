@@ -29,14 +29,14 @@ function registerGlobalQmlType(name, type) {
   constructors[name] = type;
   modules.Main[name] = type;
 
-  const QMLBaseObject = QmlWeb.getConstructor("QtQml", "2.0", "QtObject");
+  const QtObject = QmlWeb.getConstructor("QtQml", "2.0", "QtObject");
 
   /*
     http://doc.qt.io/qt-5/qtqml-syntax-objectattributes.html#attached-properties-and-attached-signal-handlers
 
     Some object treated as Attached. For example, Component.
     In the cycle, we go via constructors and find such objects.
-    Then, we set property to object `QMLBaseObject.prototype` with name of
+    Then, we set property to object `QtObject.prototype` with name of
     that object, and with specific getter func.
     E.g., we create "someitem.Component" here.
     Later, if somebody will read that property, the getter will be invoked.
@@ -54,8 +54,8 @@ function registerGlobalQmlType(name, type) {
     At the same time, those signals are still pushed to
     `engine.completedSignals` by getAttachedObject.
   */
-  if (type.getAttachedObject && !QMLBaseObject.prototype.hasOwnProperty(name)) {
-    QmlWeb.setupGetter(QMLBaseObject.prototype, name, type.getAttachedObject);
+  if (type.getAttachedObject && !QtObject.prototype.hasOwnProperty(name)) {
+    QmlWeb.setupGetter(QtObject.prototype, name, type.getAttachedObject);
   }
 
 }

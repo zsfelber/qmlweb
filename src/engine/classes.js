@@ -250,7 +250,12 @@ function putElement(item, id, ctx) {
     () => {}
   );
   QmlWeb.setupGetterSetter(
-    ctx.$noalias, id,
+    ctx.$elements, id,
+    () => item,
+    () => {}
+  );
+  QmlWeb.setupGetterSetter(
+    ctx.$withelements, id,
     () => item,
     () => {}
   );

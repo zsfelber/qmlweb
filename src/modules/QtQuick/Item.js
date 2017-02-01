@@ -73,7 +73,7 @@ QmlWeb.registerQmlType({
     this.$isUsingImplicitWidth = true;
     this.$isUsingImplicitHeight = true;
 
-    this.anchors = new QmlWeb.QObject(this);
+    this.anchors = new QmlWeb.QObject(this, {attached:true, info:"anchors"});
     createProperty("var", this.anchors, "left");
     createProperty("var", this.anchors, "right");
     createProperty("var", this.anchors, "top");
@@ -105,7 +105,7 @@ QmlWeb.registerQmlType({
     this.anchors.marginsChanged.connect(this, this.$updateVGeometry);
 
     // childrenRect property
-    this.childrenRect = new QmlWeb.QObject(this);
+    this.childrenRect = new QmlWeb.QObject(this, {attached:true, info:"childrenRect"});
     createProperty("real", this.childrenRect, "x"); // TODO ro
     createProperty("real", this.childrenRect, "y"); // TODO ro
     createProperty("real", this.childrenRect, "width"); // TODO ro

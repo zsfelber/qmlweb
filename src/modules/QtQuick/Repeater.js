@@ -79,9 +79,9 @@ QmlWeb.registerQmlType({
   }
   $callOnCompleted(child) {
     child.Component.completed();
-    const QMLBaseObject = QmlWeb.getConstructor("QtQml", "2.0", "QtObject");
+    const QtObject = QmlWeb.getConstructor("QtQml", "2.0", "QtObject");
     for (let i = 0; i < child.$tidyupList.length; i++) {
-      if (child.$tidyupList[i] instanceof QMLBaseObject) {
+      if (child.$tidyupList[i] instanceof QtObject) {
         this.$callOnCompleted(child.$tidyupList[i]);
       }
     }

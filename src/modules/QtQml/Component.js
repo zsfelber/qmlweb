@@ -237,6 +237,10 @@ class QMLComponent {
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
       item = QmlWeb.construct(this.meta, parent, QMLComponent.Element);
+
+      // !!! see QMLBinding
+      this.context.$ownerObject = item;
+
       this.finalizeImports();
 
       for (var propname in properties) {
@@ -277,7 +281,7 @@ class QMLComponent {
   static getAttachedObject() {
     // see QMLEngine.js for explanation how it is used.
     if (!this.$Component) {
-      this.$Component = new QmlWeb.QObject(this);
+      this.$Component = new QmlWeb.QObject(this, {attached:true, info:"Component"});
       this.$Component.completed = QmlWeb.Signal.signal("completed", []);
       QmlWeb.engine.completedSignals.push(this.$Component.completed);
 

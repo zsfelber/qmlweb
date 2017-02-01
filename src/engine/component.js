@@ -16,16 +16,18 @@ class QMLContext {
     const childContext = Object.create(this);
     childContext.$info = info;
 
+    // see properties.createProperty /
+    // namespace setting in QMLBinding with(...) -s / QObject.$noalias.createChild / components.js.createChild :
+    // we use $withelements in evaluation, all the variable names are either in "this" or in parent context,
+    // except the elements in "this" : we merge them into $withelements
     if (!childContext.$elements) {
       childContext.$elements = {};
-      childContext.$noalias = {};
+      childContext.$withelements = {};
+      childContext.$ownerObject = null;
     } else {
       childContext.$elements = Object.create(this.$elements);
-      // NOTE see trick :
-      // $noalias is inherited not from $noalias but full context,
-      // because noalias only matters in context in this object's alias bindings to prevent to access
-      // it only this object' aliases : not the parent (or inherited/supertype) aliases (at least in my interpretation).
-      childContext.$noalias = Object.create(this/*!!!!! .$noalias*/);
+      childContext.$withelements = Object.create(this);
+      childContext.$ownerObject = null;
     }
 
     return childContext;

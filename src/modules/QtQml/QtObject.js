@@ -37,7 +37,7 @@ QmlWeb.registerQmlType({
 
     const Signal = QmlWeb.Signal;
 
-    this.Keys = new QmlWeb.QObject(this);
+    this.Keys = new QmlWeb.QObject(this, {attached:true, info:"Keys"});
     this.Keys.asteriskPresed = Signal.signal("asteriskPresed");
     this.Keys.backPressed = Signal.signal("backPressed");
     this.Keys.backtabPressed = Signal.signal("backtabPressed");

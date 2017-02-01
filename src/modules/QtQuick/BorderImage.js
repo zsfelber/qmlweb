@@ -24,7 +24,7 @@ QmlWeb.registerQmlType({
     QmlWeb.superAndInitMeta(this, meta);
 
     const createProperty = QmlWeb.createProperty;
-    this.border = new QmlWeb.QObject(this);
+    this.border = new QmlWeb.QObject(this, {attached:true, info:"border"});
     createProperty("int", this.border, "left");
     createProperty("int", this.border, "right");
     createProperty("int", this.border, "top");

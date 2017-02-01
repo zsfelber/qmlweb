@@ -118,16 +118,13 @@ function createProperty(type, obj, propName, options) {
 
   // current leaf nested element context (its own supertype hierarchy doesn't matter) :
   //
-  // NOTE QMLContext.create trick :
+  // NOTE :
   //
-  // see namespace setting in QMLBinding with(...) -s :  we also put alias here.
-  // $noalias is inherited not from $noalias but full context,
-  // because noalias only matters in context in this object's alias bindings to prevent to access
+  // see namespace setting in QMLBinding with(...) -s / QObject.$noalias.createChild / components.js.createChild :  we also put alias here.
+  // noalias only matters in context in this object's alias bindings to prevent it to access
+  // only this object' aliases : not the parent (or inherited/supertype) aliases (at least in my interpretation).
   //
   QmlWeb.setupGetterSetter(ctx, propName, getter, setter, prop);
-  if (type !== "alias") {
-    QmlWeb.setupGetterSetter(ctx.$noalias, propName, getter, setter, prop);
-  }
 }
 
 /**
@@ -285,7 +282,13 @@ function connectSignal(item, signalName, value) {
         if (!value.compiled) {
           throw new Error("Invalid slot binding, it should not be a function : "+value.src);
         }
+      } else {
+        if (value.compiled) {
+          throw new Error("Invalid compiled slot binding, it should be a function : "+value.src);
+        }
+        value.src = "{" + value.src + "}";
       }
+
       console.warn("connectSignal  convert Binding to function : "+ps);
       value.args = ps;
       value.flags &= ~QMLBinding.ImplBlock;

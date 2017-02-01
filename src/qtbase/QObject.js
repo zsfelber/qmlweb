@@ -3,10 +3,24 @@ let objectIds = 0;
 class QObject {
   constructor(parent, meta) {
     this.$parent = parent;
+    this.$base = this;
     if (meta) {
-      this.$context = meta.context;
-      this.$component = meta.component;
-      this.$base = this;
+      this.$meta = meta;
+      if (meta.component||meta.context) {
+        this.$component = meta.component;
+        this.$context = meta.context;
+      }
+    }
+
+    if (meta && meta.attached) {
+      if (!parent) {
+        throw new Error("Object attached to null : "+this);
+      }
+      if (!this.$component && !this.$context) {
+        // context for attached properties like "Component", "anchors" and so
+        this.$component = parent.$component;
+        this.$context = parent.$context;
+      }
     }
 
     if (parent && parent.$tidyupList) {
@@ -31,6 +45,10 @@ class QObject {
     childObj.$base = this.$base;
     childObj.$properties = Object.create(this.$properties);
     childObj.$properties_noalias = Object.create(this.$properties_noalias);
+    // see properties.createProperty /
+    // namespace setting in QMLBinding with(...) -s / QObject.$noalias.createChild / components.js.createChild :
+    // noalias only matters in context in this object's alias bindings to prevent it to access
+    // only this object' aliases : not the parent (or inherited/supertype) aliases (at least in my interpretation).
     childObj.$noalias = Object.create(this.$noalias);
     childObj.$signals = Object.create(this.$signals);
 
