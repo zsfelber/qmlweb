@@ -91,6 +91,10 @@ function construct(meta, parent, flags) {
     item.$classname = component.$name;
     item.$context = component.context;
     item.$component = component;
+
+    // !!! see QMLBinding
+    item.$context.$ownerObject = item;
+
   } else if (flags & QmlWeb.QMLComponent.Super) {
     console.warn("custom Super construct (not Component.$createObject) : "+item);
   }
