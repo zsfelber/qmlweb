@@ -75,8 +75,8 @@ class QMLProperty {
           if (!(QmlWeb.engine.$component.flags & QmlWeb.QMLComponent.Nested)) {
             throw new Error("In object : "+this.obj+"  Error, it should be nested:"+QmlWeb.engine.$component);
           }
-          if (!declaringItem.$component.next || !(declaringItem.$component.next.flags & QmlWeb.QMLComponent.Nested)) {
-            throw new Error("In delcaringItem : "+declaringItem+"  of "+declaringItem.$component+"  Error, its next Component should be nested:"+declaringItem.$component.next);
+          if (!declaringItem.$component.next || !(declaringItem.$component.next.flags & QmlWeb.QMLComponent.Super)) {
+            throw new Error("In delcaringItem : "+declaringItem+"  of "+declaringItem.$component+"  Error, its next Component should be a Super:"+declaringItem.$component.next);
           }
 
 

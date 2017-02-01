@@ -35,11 +35,13 @@ class QMLComponent {
           this.loaderComponent = loaderComponent.loaderComponent;
           this.topComponent = loaderComponent.topComponent;
 
-        } else if (loaderComponent.flags & QMLComponent.Nested) {
+        } else if (loaderComponent.flags & (QMLComponent.Root|QMLComponent.Nested)) {
 
           this.loaderComponent = loaderComponent;
           this.topComponent = this;
 
+        } else {
+          throw new Error("Invalid loader Component flags of Super : "+this+"  loader:"+loaderComponent);
         }
 
 

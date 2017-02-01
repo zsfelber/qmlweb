@@ -216,20 +216,22 @@ function registerElementInParent(item, id) {
   if (!topcmp || topcmp.context !== topctx) {
     throw new Error("Assertion failed. Component integrity error.  "+cmp+"  "+ctx);
   }
+  if (!(topcmp.flags & cmp.flags & (QmlWeb.QMLComponent.Nested|QmlWeb.QMLComponent.Root|QmlWeb.QMLComponent.Super))) {
+    throw new Error("Assertion failed. Component and its top should be same kind of R/N/S.  "+topcmp+"  vs  "+tmp);
+  }
+  if (topctx.__proto__ !== ctx.__proto__ || ctx.__proto__!== (ctx.loaderContext?ctx.loaderContext:QmlWeb.engine.rootContext)) {
+    throw new Error("Assertion failed. Component and its top context should fork from the loader context.");
+  }
+  if (topctx.loaderContext !== ctx.loaderContext) {
+    throw new Error("Assertion failed. Invalid context:"+(topctx.loaderContext?topctx.loaderContext.$info:"<null>")+" === "+(ctx.loaderContext?ctx.loaderContext.$info:"<null>"));
+  }
 
   if (cmp.flags & (QmlWeb.QMLComponent.Nested|QmlWeb.QMLComponent.Root)) {
 
     // This means : we are in the loader component directly, and not in a super QML of current nested (or root) element :
 
-    if (ctx !== topctx) {
-      throw new Error("Assertion failed. Invalid context:"+ctx.$info+" === "+(topctx?topctx.$info:"<null>"));
-    }
-  } else {
-    if (ctx === topctx) {
-      throw new Error("Assertion failed. Invalid context:"+ctx.$info+" !== "+(topctx?topctx.$info:"<null>"));
-    }
-    if (!topctx || topctx.__proto__ !== ctx.__proto__) {
-      throw new Error("Assertion failed. Each component should fork from the current top loader context.");
+    if (topctx !== ctx) {
+      throw new Error("Assertion failed. Invalid context:"+topctx.$info+" === "+ctx.$info);
     }
   }
 
