@@ -128,14 +128,17 @@ function construct(meta, parent, flags) {
   // (Bindings won't get evaluated, yet)
   QmlWeb.applyProperties(meta, item);
 
-  // always put self into context, by internal id :
+  // otherwise it duplicates :
+  if (item.id && (flags & QmlWeb.QMLComponent.Super) ) {
+    // always put self into context, by internal id :
 
-  if (item.id) {
+    //if (item.id) {
 
-    putElement(item, item.id, ctx);
+      putElement(item, item.id, ctx);
 
-  //} else {
-    //console.warn("No id of item for self : "+item+"  ctx:"+ctx.$info);
+    //} else {
+      //console.warn("No id of item for self : "+item+"  ctx:"+ctx.$info);
+    //}
   }
 
   return item;

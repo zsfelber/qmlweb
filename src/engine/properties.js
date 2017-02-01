@@ -286,10 +286,10 @@ function connectSignal(item, signalName, value) {
         if (value.compiled) {
           throw new Error("Invalid compiled slot binding, it should be a function : "+value.src);
         }
+        console.warn("connectSignal  convert Binding to function : "+ps);
         value.src = "{" + value.src + "}";
       }
 
-      console.warn("connectSignal  convert Binding to function : "+ps);
       value.args = ps;
       value.flags &= ~QMLBinding.ImplBlock;
       value.flags |= QMLBinding.ImplFunction;
