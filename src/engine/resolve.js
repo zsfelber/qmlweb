@@ -231,8 +231,10 @@ function resolveComponent(imp, flags) {
     $file: imp.file
   }, flags);
 
-  // TODO gz  undefined -> component.$basePath  from createQmlObject
-  QmlWeb.loadImports(imp.clazz.$imports, component);
+  if (!(flags & QmlWeb.QMLComponent.Nested)) {
+    // TODO gz  undefined -> component.$basePath  from createQmlObject
+    QmlWeb.loadImports(imp.clazz.$imports, component);
+  }
 
   return component;
 }
