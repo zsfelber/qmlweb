@@ -247,6 +247,8 @@ class QMLBinding {
   bindGet() {
 
     var vvith;
+    // NOTE necessary to use $context.$ownerObject instead of 'this' directly because of attached objects
+    // see QObject() QMLComponent.getAttachedObject()
     if (this.flags & QMLBinding.Alias) {
       vvith = "with(QmlWeb) with(this.$context.$withelements) with(this.$context.$ownerObject.$noalias)";
     } else {
@@ -304,6 +306,8 @@ class QMLBinding {
   bindSet() {
 
     var props, vvith;
+    // NOTE necessary to use $context.$ownerObject instead of 'this' directly because of attached objects
+    // see QObject() QMLComponent.getAttachedObject()
     if (this.flags & QMLBinding.Alias) {
       props = "$properties_noalias";
       vvith = "with(QmlWeb) with(this.$context.$withelements) with(this.$context.$ownerObject.$noalias)";
@@ -401,6 +405,8 @@ class QMLBinding {
   bindRun() {
 
     var vvith;
+    // NOTE necessary to use $context.$ownerObject instead of 'this' directly because of attached objects
+    // see QObject() QMLComponent.getAttachedObject()
     if (this.flags & QMLBinding.Alias) {
       vvith = "with(QmlWeb) with(this.$context.$withelements) with(this.$context.$ownerObject.$noalias)";
     } else {

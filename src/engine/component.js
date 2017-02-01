@@ -25,7 +25,7 @@ class QMLContext {
       childContext.$withelements = {};
       childContext.$ownerObject = null;
     } else {
-      childContext.$elements = Object.create(this.$elements);
+      childContext.$elements = {};
       childContext.$withelements = Object.create(this);
       childContext.$ownerObject = null;
     }
