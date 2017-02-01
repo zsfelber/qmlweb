@@ -75,9 +75,6 @@ class QMLProperty {
           if (!(QmlWeb.engine.$component.flags & QmlWeb.QMLComponent.Nested)) {
             throw new Error("In object : "+this.obj+"  Error, it should be nested:"+QmlWeb.engine.$component);
           }
-          if (!declaringItem.$component.next || !(declaringItem.$component.next.flags & QmlWeb.QMLComponent.Super)) {
-            throw new Error("In delcaringItem : "+declaringItem+"  of "+declaringItem.$component+"  Error, its next Component should be a Super:"+declaringItem.$component.next);
-          }
 
 
           //  we setup a temporal import context here (which is relative to declaringItem's component) :
@@ -85,7 +82,7 @@ class QMLProperty {
 
           //  declaringItem.$component is the include element in a parent QML,
           //  but we need .next : this is the topmost QML of included element hierarchy (the loaded QML file)
-          QmlWeb.engine.$component.bindImports(declaringItem.$component.next);
+          QmlWeb.engine.$component.bindImports(declaringItem.$component);
 
         } else {
           QmlWeb.engine.$component = declaringItem.$component;

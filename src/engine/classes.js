@@ -73,17 +73,6 @@ function construct(meta, parent, flags) {
     flags |= QmlWeb.QMLComponent.Super;
   }
 
-  //if ( (flags & QmlWeb.QMLComonent.Element) && (component.flags & QmlWeb.QMLComponent.Nested) ) {
-
-  //  meta = QmlWeb.helpers.mergeObjects(meta);
-
-    // NOTE on the top of a Nested Component's loader hierarchy, we have to insert 1 extra level of Components into
-    // chains, changing $class from the "superclass" to the current again (but with Super flag):
-    // No infinite loop, because component.flags is not Nested the next time  :
-  //  meta.$superclass = meta.$class;
-  //  delete meta.$class;
-  //}
-
   const superitem = constructSuperOrNested(meta, parent, flags);
 
   // NOTE making a new level of class inheritance :

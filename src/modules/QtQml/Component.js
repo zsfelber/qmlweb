@@ -1,6 +1,6 @@
 class QMLComponent {
   constructor(meta, flags) {
-    this.copyMeta(meta);
+    this.copyMeta(meta, flags);
     // no component = is import root
     const engine = QmlWeb.engine;
     const loaderComponent = QmlWeb.engine.$component;
@@ -120,7 +120,7 @@ class QMLComponent {
     QmlWeb.preloadImports(this, moduleImports);
   }
 
-  copyMeta(meta) {
+  copyMeta(meta, flags) {
     this.meta = {component:this};
     if (meta.$file !== meta.clazz.$file) {
       throw new Error("Assertion failed. $file-s in Component and class differ :  meta.$file:"+meta.$file+" === meta.clazz.$file:"+meta.clazz.$file);
@@ -136,6 +136,16 @@ class QMLComponent {
         }
         QmlWeb.helpers.copy(this.meta, metaObject[0]);
       }
+    }
+
+    if ( flags & QmlWeb.QMLComponent.Nested ) {
+
+      // NOTE on the top of a Nested Component's loader hierarchy, we have to insert 1 extra level of Components into
+      // chains, changing $class from the "superclass" to the current again (but with Super Component flag):
+      // No infinite loop, because component.flags is not Nested the next time  :
+      var cl = /(^.*?)\.qml/.exec(this.meta.$name)[1];
+      console.log("Nested Element top Component inserted  $class =  superclass:"+this.meta.$class+" -> actual:"+cl);
+      this.$class = this.meta.$class = cl;
     }
 
     this.$id = this.meta.$id;
