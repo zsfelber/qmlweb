@@ -16,7 +16,7 @@ function superAndInitMeta(self, meta) {
   var constructor = meta._constructor;
   meta._constructor = self.constructor;
   self.constructor.call(self, meta);
-  if (!self.$context) throw new Error("Instantiantion error, no context !");
+  if (meta.context && !self.$context) throw new Error("Instantiantion error, no context !");
   initMeta(self, meta, constructor);
 }
 

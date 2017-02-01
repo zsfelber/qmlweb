@@ -110,7 +110,7 @@ class QMLBinding {
 
   stripFunction(src, stripargs) {
     if (src) {
-      var match = /^(?:function\s)?\s*(?:\w|\$)*\(((?:\w|\$|\,|\s)*)\)\s*\{/m.exec(src);
+      var match = /^(?:function\s)?\s*(?:\w|\$)*\(((?:(?:\w|\$)*\s*\,\s*)*(?:\w|\$)*)\)\s*\{/m.exec(src);
       if (match && src[src.length-1]==='}') {
         if (!this.flags) {
           throw new Error("Binding is effectively a function but declared to expression : "+(this.info?this.info:src));
