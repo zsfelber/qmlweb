@@ -32,6 +32,10 @@ class QMLContext {
 
     return childContext;
   }
+
+  toString() {
+    return this.$info;
+  }
 }
 
 

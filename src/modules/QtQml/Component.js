@@ -47,8 +47,17 @@ class QMLComponent {
 
         if (this.loaderComponent) {
 
-          this.meta.context = this.context = this.loaderComponent.context.createChild(
-                                        this.loaderComponent +" -> .. " +this);
+          if (loaderComponent === this.loaderComponent) {
+            if (loaderComponent.$file !== this.$file) {
+              throw new Error("Loader Component $file mismatch : "+loaderComponent.$file+" !== "+this.$file);
+            }
+
+            this.meta.context = this.context = this.loaderComponent.context.createChild(
+                                          this.loaderComponent +" -> " +this.toString("..."));
+          } else {
+            this.meta.context = this.context = this.loaderComponent.context.createChild(
+                                          this.loaderComponent +" -> .. " +this);
+          }
 
           if (this.loaderComponent.flags & QMLComponent.Super) {
             throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.context.$info)
@@ -69,13 +78,13 @@ class QMLComponent {
         this.bindImports(loaderComponent);
       }
 
-      console.warn("Component  "+this.context.$info);
+      //console.warn("Component  "+this.context.$info);
     } else {
       this.topComponent = this;
 
       this.meta.context = this.context = engine.rootContext.createChild(this.toString());
 
-      console.warn("Component  "+this);
+      //console.warn("Component  "+this);
       if (flags&QMLComponent.Nested) {
         throw new Error("Component is nested but no loader Component.");
       }
@@ -144,7 +153,7 @@ class QMLComponent {
       // chains, changing $class from the "superclass" to the current again (but with Super Component flag):
       // No infinite loop, because component.flags is not Nested the next time  :
       var cl = /(^.*?)\.qml/.exec(this.meta.$name)[1];
-      console.log("Nested Element top Component inserted  $class =  superclass:"+this.meta.$class+" -> actual:"+cl);
+      //console.log("Nested Element top Component inserted  $class =  superclass:"+this.meta.$class+" -> actual:"+cl);
       this.$class = this.meta.$class = cl;
     }
 
@@ -180,9 +189,9 @@ class QMLComponent {
   }
 
   bindImports(sourceComponent) {
-    console.warn("bindImports : binding imports...  "+this+"  ==> "+sourceComponent);
+    //console.warn("bindImports : binding imports...  "+this+"  ==> "+sourceComponent);
     if (this.boundImportComponent) {
-      console.warn("bindImports : rebind imports from "+this.boundImportComponent);
+      console.warn("bindImports : rebind imports from   "+this+"  ==> "+sourceComponent + "   (2nd) ~~~ to ~~>   " +this.boundImportComponent);
     }
     if (this.boundImportComponent === sourceComponent) {
       return ;
@@ -263,7 +272,8 @@ class QMLComponent {
 
     return item;
   }
-  toString() {
+  toString(ovrrdfil) {
+    if (!ovrdfil) ovrrdfil = this.$file;
     var c = "";
     var f = "";
     var fn = this.flags;
@@ -275,7 +285,7 @@ class QMLComponent {
       else break;
     }
 
-    return c+"["+this.$file+(this.flags?" "+f:"")+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
+    return c+"["+ovrdfil+(this.flags?" "+f:"")+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
   }
 
   static getAttachedObject() {

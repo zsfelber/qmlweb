@@ -180,7 +180,7 @@ class Signal {
           fun:desc.slot,
           thisObj:desc.thisObj,
           args:args,
-          info:"Pending signal (waiting to initialization).",
+          info:"Pending signal (waiting to initialization) : "+desc.signal.obj+" . "+desc.signal.$name+" -> "+desc.thisObj,
           connection:desc,
           reason:err
         });

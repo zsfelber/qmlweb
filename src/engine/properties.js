@@ -146,7 +146,7 @@ function applyProperties(metaObject, item) {
             metaObject.$children, QMLProperty.ReasonInitPrivileged|QMLProperty.SetChildren, item
           );
       } else {
-        throw new Error("Cannot assign to unexistant default property");
+        throw new Error("Cannot assign to unexistant default property  "+item);
       }
     }
 
@@ -197,14 +197,14 @@ function applyProperties(metaObject, item) {
           item.$setCustomData(i, value);
         } else if (!trivialProperties[i] && !/^\$/.test(i)) {
           console.warn(
-            `Cannot assign to non-existent property "${i}". Ignoring assignment.`
+            `Cannot assign to non-existent property  ${item} [ "${i}" ]. Ignoring assignment.  Context:${item.$context}`
           );
         }
       } catch (err) {
         if (err.ctType === "PendingEvaluation") {
           //console.warn("PendingEvaluation : Cannot apply property bindings (reevaluating at startup) :" + i + "  item:" + item);
         } else {
-          console.warn("Cannot apply property bindings  :" + i + "  item:" + item+"  "+err);
+          console.warn("Cannot apply property bindings : "+item+" . "+i+"  Context:"+item.$context+"  "+err);
         }
 
         if (QmlWeb.engine.operationState === QmlWeb.QMLOperationState.Idle) {
@@ -275,7 +275,10 @@ function connectSignal(item, signalName, value) {
   var connection;
 
   if (ps!==value.args) {
-    console.warn("connectSignal  Binding arguments  created or changed : "+value.args+" -> "+ps+"  signal:"+item+" . "+signalName)
+    //console.warn("connectSignal  Binding arguments  created or changed : "+value.args+" -> "+ps+"  signal:"+item+" . "+signalName)
+    if (value.args) {
+      console.warn("connectSignal  Binding arguments  changed : "+value.args+" -> "+ps+"  signal:"+item+" . "+signalName);
+    }
 
     try {
       if (value.flags&QMLBinding.ImplFunction) {
@@ -286,7 +289,7 @@ function connectSignal(item, signalName, value) {
         if (value.compiled) {
           throw new Error("Invalid compiled slot binding, it should be a function : "+value.src);
         }
-        console.warn("connectSignal  convert Binding to function : "+ps);
+        //console.warn("connectSignal  convert Binding to function : "+ps);
         value.src = "{" + value.src + "}";
       }
 
