@@ -47,7 +47,7 @@ class QMLComponent {
 
         if (this.loaderComponent) {
 
-          if (loaderComponent === this.loaderComponent) {
+          if (loaderComponent.flags & QMLComponent.Nested) {
             if (loaderComponent.$file !== this.$file) {
               throw new Error("Loader Component $file mismatch : "+loaderComponent.$file+" !== "+this.$file);
             }
@@ -273,7 +273,7 @@ class QMLComponent {
     return item;
   }
   toString(ovrrdfil) {
-    if (!ovrdfil) ovrrdfil = this.$file;
+    if (!ovrrdfil) ovrrdfil = this.$file;
     var c = "";
     var f = "";
     var fn = this.flags;
@@ -285,7 +285,7 @@ class QMLComponent {
       else break;
     }
 
-    return c+"["+ovrdfil+(this.flags?" "+f:"")+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
+    return c+"["+ovrrdfil+(this.flags?" "+f:"")+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
   }
 
   static getAttachedObject() {
