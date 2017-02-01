@@ -108,23 +108,31 @@ function createProperty(type, obj, propName, options) {
 
   var ctx = obj.$context;
 
-  // put property to context
-  // ctx is the $component's current loader context (the current QML)
-  // (this.proto is superclass, context.proto is containing document's context)
-  // see also Component.constructor
-  // see also QObject.createChild()->Object.create() in classes.construct
-  // see also Object.create in QMLContext.createChild
-  // see also classes.construct where $context.$elements come from
+  // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
+  // (It's true. We may use QMLBinding.OmitContext flag to omit context lookup in compilation in the related cases.
+  //  Usually we call javascript functions from custom module js classes -> connect(...) codes directly, so this
+  //  flag was not used so far. )
 
-  // current leaf nested element context (its own supertype hierarchy doesn't matter) :
-  //
-  // NOTE :
-  //
-  // see namespace setting in QMLBinding with(...) -s / QObject.$noalias.createChild / components.js.createChild :  we also put alias here.
-  // noalias only matters in context in this object's alias bindings to prevent it to access
-  // only this object' aliases : not the parent (or inherited/supertype) aliases (at least in my interpretation).
-  //
-  QmlWeb.setupGetterSetter(ctx, propName, getter, setter, prop);
+  if (ctx) {
+
+    // put property to context
+    // ctx is the $component's current loader context (the current QML)
+    // (this.proto is superclass, context.proto is containing document's context)
+    // see also Component.constructor
+    // see also QObject.createChild()->Object.create() in classes.construct
+    // see also Object.create in QMLContext.createChild
+    // see also classes.construct where $context.$elements come from
+
+    // current leaf nested element context (its own supertype hierarchy doesn't matter) :
+    //
+    // NOTE :
+    //
+    // see namespace setting in QMLBinding with(...) -s / QObject.$noalias.createChild / components.js.createChild :  we also put alias here.
+    // noalias only matters in context in this object's alias bindings to prevent it to access
+    // only this object' aliases : not the parent (or inherited/supertype) aliases (at least in my interpretation).
+    //
+    QmlWeb.setupGetterSetter(ctx, propName, getter, setter, prop);
+  }
 }
 
 /**

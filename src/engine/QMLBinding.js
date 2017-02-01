@@ -244,16 +244,31 @@ class QMLBinding {
     }
   }
 
+  namespace() {
+    var vvith;
+    if (this.flags & QMLBinding.OmitContext) {
+      if (this.flags & QMLBinding.Alias) {
+        vvith = "with(QmlWeb) with(this.$noalias)";
+      } else {
+        vvith = "with(QmlWeb) with(this)";
+      }
+    } else {
+
+      // NOTE necessary to use $context.$ownerObject instead of 'this' directly because of attached objects
+      // see QObject() QMLComponent.getAttachedObject()
+
+      if (this.flags & QMLBinding.Alias) {
+        vvith = "with(QmlWeb) with(this.$context.$withelements) with(this.$context.$ownerObject.$noalias)";
+      } else {
+        vvith = "with(QmlWeb) with(this.$context.$withelements) with(this.$context.$ownerObject)";
+      }
+    }
+    return vvith;
+  }
+
   bindGet() {
 
-    var vvith;
-    // NOTE necessary to use $context.$ownerObject instead of 'this' directly because of attached objects
-    // see QObject() QMLComponent.getAttachedObject()
-    if (this.flags & QMLBinding.Alias) {
-      vvith = "with(QmlWeb) with(this.$context.$withelements) with(this.$context.$ownerObject.$noalias)";
-    } else {
-      vvith = "with(QmlWeb) with(this.$context.$withelements) with(this.$context.$ownerObject)";
-    }
+    const vvith = this.namespace();
 
     if (this.flags & QMLBinding.User) {
       if ((this.flags&QMLBinding.ImplBlock) || !(this.flags&QMLBinding.ImplFunction)) {
@@ -305,15 +320,12 @@ class QMLBinding {
 
   bindSet() {
 
-    var props, vvith;
-    // NOTE necessary to use $context.$ownerObject instead of 'this' directly because of attached objects
-    // see QObject() QMLComponent.getAttachedObject()
+    const vvith = this.namespace();
+    var props;
     if (this.flags & QMLBinding.Alias) {
       props = "$properties_noalias";
-      vvith = "with(QmlWeb) with(this.$context.$withelements) with(this.$context.$ownerObject.$noalias)";
     } else {
       props = "$properties";
-      vvith = "with(QmlWeb) with(this.$context.$withelements) with(this.$context.$ownerObject)";
     }
 
     if (this.flags & QMLBinding.User) {
@@ -404,14 +416,7 @@ class QMLBinding {
 
   bindRun() {
 
-    var vvith;
-    // NOTE necessary to use $context.$ownerObject instead of 'this' directly because of attached objects
-    // see QObject() QMLComponent.getAttachedObject()
-    if (this.flags & QMLBinding.Alias) {
-      vvith = "with(QmlWeb) with(this.$context.$withelements) with(this.$context.$ownerObject.$noalias)";
-    } else {
-      vvith = "with(QmlWeb) with(this.$context.$withelements) with(this.$context.$ownerObject)";
-    }
+    const vvith = this.namespace();
 
     if (!this.flags&QMLBinding.ImplFunction) {
       throw new Error("Binding/run should be a function : " + this);
@@ -434,5 +439,6 @@ QMLBinding.Bidirectional = 4;
 QMLBinding._Alias = 8;
 QMLBinding.Alias = 12; // always bidirectional
 QMLBinding.User = 16;
+QMLBinding.OmitContext = 32;
 
 QmlWeb.QMLBinding = QMLBinding;
