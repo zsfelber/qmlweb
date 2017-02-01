@@ -119,12 +119,17 @@ function construct(meta, parent, flags) {
 
   var ctx = item.$context;
 
+
   // each element into parent context, by id :
-  if (flags & QmlWeb.QMLComponent.Nested) {
-    if (meta.id) {
-      registerElementInParent(item, meta.id);
-    } else {
-      console.warn("No element id for item  : "+item+"  ctx:"+ctx.$info);
+  // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
+  // (see properties.createProperty. )
+  if (ctx) {
+    if (flags & QmlWeb.QMLComponent.Nested) {
+      if (meta.id) {
+        registerElementInParent(item, meta.id);
+      } else {
+        console.warn("No element id for item  : "+item+"  ctx:"+ctx);
+      }
     }
   }
 
@@ -133,7 +138,9 @@ function construct(meta, parent, flags) {
   QmlWeb.applyProperties(meta, item);
 
   // otherwise it duplicates :
-  if (item.id && (flags & QmlWeb.QMLComponent.Super) ) {
+  // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
+  // (see properties.createProperty. )
+  if (item.id && ctx && (flags & QmlWeb.QMLComponent.Super) ) {
     // always put self into context, by internal id :
 
     //if (item.id) {
