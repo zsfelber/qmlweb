@@ -132,10 +132,10 @@ function construct(meta, parent, flags) {
 
   if (item.id) {
 
-    putElement(item, item.id, ctx);;
+    putElement(item, item.id, ctx);
 
-  } else {
-    console.warn("No id of item for self : "+item+"  ctx:"+ctx.$info);
+  //} else {
+    //console.warn("No id of item for self : "+item+"  ctx:"+ctx.$info);
   }
 
   return item;
