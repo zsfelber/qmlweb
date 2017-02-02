@@ -309,11 +309,6 @@ function putElement(item, id, ctx) {
     () => item,
     () => {}
   );
-  QmlWeb.setupGetterSetter(
-    ctx.$withelements, id,
-    () => item,
-    () => {}
-  );
 }
 
 
