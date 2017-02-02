@@ -68,15 +68,14 @@ function initMeta(self, meta, constructor) {
 function construct(meta, parent, flags) {
   const component = QmlWeb.engine.$component;
 
-  if (flags & (QmlWeb.QMLComponent.Nested|QmlWeb.QMLComponent.Root)) {
+  if (flags & QmlWeb.QMLComponent.Root) {
     throw new Error("Invalid flags in construct : "+flags);
   } else {
+    // undefined -> 0
     flags |= QmlWeb.QMLComponent.Super;
   }
 
-  let superitem = constructSuper(meta, parent, flags);
-
-  let item;
+  let superitem = constructSuper(meta, parent);
 
   // means : created by Component.$createObject
   if (flags & QmlWeb.QMLComponent.Element) {
@@ -85,7 +84,7 @@ function construct(meta, parent, flags) {
       throw new Error("Invalid Element construct : "+item);
     }
   } else {
-    console.warn("custom Super construct (not Component.$createObject) : "+item);
+    console.warn("custom  construct (not Component.$createObject) : "+item);
   }
 
   // NOTE making a new level of class inheritance :
@@ -93,19 +92,20 @@ function construct(meta, parent, flags) {
   // NOTE gz  object is prototyped from bottom to top, in terms of [type]->[supertype] relationship
   // see also Component.constructor
   // see also Object.create in QMLContext.createChild
-  item = superitem.createChild();
+  const item = superitem.createChild();
 
-  item.$classname = component.$name;
+  if (flags & QmlWeb.QMLComponent.Nested) {
+    item.$classname = "["+component.$name+"]";
+  } else {
+    item.$classname = component.$name;
+  }
+
   item.$context = component.context;
   item.$component = component;
-
   // !!! see QMLBinding
   item.$context.$ownerObject = item;
 
-
-  if ((flags & QmlWeb.QMLComponent.Root) || (component.topComponent.flags & QmlWeb.QMLComponent.Root)) {
-    if (component.loaderComponent) throw new Error("component.loaderComponent should not be present here : "+item);
-  } else if (!component.loaderComponent) {
+  if (!component.loaderComponent) {
     throw new Error("Assertion failed. No loader : "+component);
   }
 
@@ -120,17 +120,18 @@ function construct(meta, parent, flags) {
 
   var ctx = item.$context;
 
+  if (!ctx) {
+    throw new Error("No context : "+item);
+  }
 
   // each element into parent context, by id :
   // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
   // (see properties.createProperty. )
-  if (ctx) {
-    if (flags & QmlWeb.QMLComponent.Nested) {
-      if (meta.id) {
-        registerElementInParent(item, meta.id);
-      } else {
-        console.warn("No element id for item  : "+item+"  ctx:"+ctx);
-      }
+  if (flags & QmlWeb.QMLComponent.Nested) {
+    if (meta.id) {
+      registerElementInParent(item, meta.id);
+    } else {
+      console.warn("No element id for item  : "+item+"  ctx:"+ctx);
     }
   }
 
@@ -141,7 +142,7 @@ function construct(meta, parent, flags) {
   // otherwise it duplicates :
   // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
   // (see properties.createProperty. )
-  if (item.id && ctx && (flags & QmlWeb.QMLComponent.Super) ) {
+  if (item.id && (flags & QmlWeb.QMLComponent.Super) ) {
     // always put self into context, by internal id :
 
     //if (item.id) {
@@ -156,7 +157,7 @@ function construct(meta, parent, flags) {
   return item;
 }
 
-function constructSuper(meta, parent, flags) {
+function constructSuper(meta, parent) {
 
   let item;
 
@@ -174,7 +175,7 @@ function constructSuper(meta, parent, flags) {
     }
 
     // always super here:
-    loadSuperOrNested(clinfo, parent, flags);
+    loadSuperOrNested(clinfo, parent, QMLComponent.Super);
 
     if (typeof item.dom !== "undefined") {
       item.dom.className += ` ${clinfo.$path[clinfo.$path.length - 1]}`;

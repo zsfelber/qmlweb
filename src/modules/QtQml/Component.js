@@ -168,6 +168,7 @@ class QMLComponent {
     this.$id = this.meta.$id;
     this.$name = this.meta.$name;
     this.$file = this.meta.$file;
+    this.createFlags = flags & (QMLComponent.Nested|QMLComponent.Super);
     //this.$imports = this.meta.$imports; // for later use
     if (this.$file) {
       this.$basePath = QmlWeb.extractBasePath(this.$file);
@@ -253,7 +254,7 @@ class QMLComponent {
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
-      item = QmlWeb.construct(this.meta, parent, QMLComponent.Element);
+      item = QmlWeb.construct(this.meta, parent, QMLComponent.Element|this.createFlags);
 
       // !!! see QMLBinding
       this.context.$ownerObject = item;
