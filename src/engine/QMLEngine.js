@@ -192,7 +192,7 @@ class QMLEngine {
 
       this.callCompletedSignals();
 
-      return component;
+      return this.rootObject.$component;
 
     } finally {
       this.operationState = prevState;

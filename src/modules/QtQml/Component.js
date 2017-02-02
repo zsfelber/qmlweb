@@ -48,8 +48,8 @@ class QMLComponent {
         if (this.loaderComponent) {
 
           if (loaderComponent.flags & QMLComponent.Nested) {
-            if (loaderComponent.$file !== this.$file) {
-              throw new Error("Loader Component $file mismatch : "+loaderComponent.$file+" !== "+this.$file);
+            if (loaderComponent.$file) {
+              throw new Error("Loader Component $file mismatch (should not be set) : "+loaderComponent.$file+" vs "+this.$file);
             }
 
             this.meta.context = this.context = this.loaderComponent.context.createChild(
@@ -67,6 +67,11 @@ class QMLComponent {
           this.meta.context = this.context = engine.rootContext.createChild(this.loaderComponent + " .. " +this);
 
         }
+
+        if (!this.$file) {
+          throw new Error("No component file");
+        }
+
       } else {
         this.loaderComponent = loaderComponent;
         this.topComponent = this;
@@ -94,6 +99,9 @@ class QMLComponent {
       if (!(flags&QMLComponent.Root)) {
         throw new Error("Component has no loader but Root flag is not set : "+this);
       }
+      if (!this.$file) {
+        throw new Error("No component file");
+      }
     }
 
     this.context.component = this;
@@ -107,9 +115,6 @@ class QMLComponent {
     }
     if (!this.context) {
       throw new Error("No component context");
-    }
-    if (!this.$file) {
-      throw new Error("No component file");
     }
 
     const moduleImports = [];
@@ -151,7 +156,7 @@ class QMLComponent {
       var metaObject = meta.clazz.$children;
       if (metaObject instanceof Array) {
         if (metaObject.length !== 1) {
-          throw new Errror("Component should define 1 element : "+meta.clazz.$name+" "+meta.clazz.id);
+          throw new Errror("Component should define 1 element : "+meta.clazz.$name+"("+meta.clazz.$class+") "+meta.clazz.id);
         }
         QmlWeb.helpers.copy(this.meta, metaObject[0]);
       }
@@ -162,9 +167,15 @@ class QMLComponent {
       // NOTE on the top of a Nested Component's loader hierarchy, we have to insert 1 extra level of Components into
       // chains, changing $class from the "superclass" to the current again (but with Super Component flag):
       // No infinite loop, because component.flags is not Nested the next time  :
-      var cl = /(^.*?)\.qml/.exec(this.meta.$name)[1];
+
+      if (this.meta.$name && this.meta.$name !== this.meta.$class+".qml") {
+        throw new Error("Nested Component meta should not define a superclass other than (meta.$name : "+this.meta.$name+")  super: meta.$class:"+this.meta.$class);
+      }
+
+      //var cl = /(^.*?)\.qml/.exec(this.meta.$name)[1];
+      //var cl = this.meta.$class;
       //console.log("Nested Element top Component inserted  $class =  superclass:"+this.meta.$class+" -> actual:"+cl);
-      this.$class = this.meta.$class = cl;
+      //this.$class = this.meta.$class = cl;
     }
 
     this.$id = this.meta.$id;
