@@ -1,5 +1,6 @@
-class QMLComponent {
+class QMLComponent extends QmlWeb.QObject {
   constructor(meta, flags) {
+    super();
     QmlWeb.superAndInitMeta(this, {});
 
     this.copyMeta(meta, flags);
@@ -387,7 +388,6 @@ QmlWeb.registerQmlType({
   module: "QtQml",
   name: "Component",
   versions: /.*/,
-  baseClass: "QObject",
   enums: {
     Component: {
       Null: 1, Ready: 2, Loading: 3, Error: 4

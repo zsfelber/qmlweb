@@ -14,9 +14,11 @@ const path = require("path");
 
 const qtcoreSources = [
   "src/QmlWeb.js",
-  "src/qtbase/QObject.js",
   "src/qtbase/*.js",
+  "src/engine/modules.js",
   "src/modules/QtQml/Qt.js",
+  "src/modules/QtQml/QtObject.js",
+  "src/modules/QtQml/Component.js",
   "src/engine/QML*.js",
   "src/engine/*.js",
   "src/modules/**/*.js"
