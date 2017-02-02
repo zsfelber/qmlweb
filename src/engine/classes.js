@@ -14,8 +14,13 @@ function superAndInitMeta(self, meta) {
   // self.constructor : superclass
 
   var constructor = meta._constructor;
-  meta._constructor = self.constructor;
-  self.constructor.call(self, meta);
+  if (self.constructor !== constructor) {
+    meta._constructor = self.constructor;
+    self.constructor.call(self, meta);
+  } else {
+    throw new Error("meta._constructor === self.constructor");
+    //delete meta._constructor;
+  }
   if (meta.context && !self.$context) throw new Error("Instantiantion error, no context !");
   initMeta(self, meta, constructor);
 }

@@ -263,9 +263,9 @@ class QMLBinding {
       // see QObject() QMLComponent.getAttachedObject()
 
       if (this.flags & QMLBinding.Alias) {
-        vvith = "var c=this.$context,ld,o,lf; with(QmlWeb) with((ld=c.loaderContext)?ld:{}) with((lf=(o=c.$ownerObject).$base.$leaf)!==o?lf.$noalias:{}) with(c.$elements) with(o.$noalias)";
+        vvith = "var c=this.$context,o,lf; with(QmlWeb) with(c.loaderContext) with((lf=(o=c.$ownerObject).$base.$leaf)!==o?lf.$noalias:{}) with(c.$elements) with(o.$noalias)";
       } else {
-        vvith = "var c=this.$context,ld,o,lf; with(QmlWeb) with((ld=c.loaderContext)?ld:{}) with((lf=(o=c.$ownerObject).$base.$leaf)!==o?lf:{})          with(c.$elements) with(o)";
+        vvith = "var c=this.$context,o,lf; with(QmlWeb) with(c.loaderContext) with((lf=(o=c.$ownerObject).$base.$leaf)!==o?lf:{})          with(c.$elements) with(o)";
       }
     }
     return vvith;

@@ -101,8 +101,8 @@ class QMLComponent {
     }
 
     this.context.component = this;
-    this.context.loaderContext = this.loaderComponent?this.loaderComponent.context:null;
-    this.context.topContext = this.topComponent?this.topComponent.context:null;
+    this.context.loaderContext = this.loaderComponent ? this.loaderComponent.context : engine.rootContext;
+    this.context.topContext = this.topComponent ? this.topComponent.context : null;
 
     this.flags = flags;
 
