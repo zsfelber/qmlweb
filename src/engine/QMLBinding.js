@@ -434,7 +434,7 @@ class QMLBinding {
 
 
   toString() {
-    return "Binding: flags:"+this.flags+" prop:"+QmlWeb.formatPath(this.property)+"  impl:("+this.args+")=>\n"+this.src;
+    return "Binding#"+this.$bindingId+": flags:"+this.flags+" prop:"+QmlWeb.formatPath(this.property)+"  impl:("+this.args+")=>\n"+this.src;
   }
 }
 QMLBinding.ImplExpression = 0;

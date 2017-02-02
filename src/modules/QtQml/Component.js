@@ -351,6 +351,9 @@ QmlWeb.registerQmlType({
   constructor: QMLComponent
 });
 
+// determine automatically whether Nested or Root (Super is not possible)
+QMLComponent.Lazy = 0;
+
 QMLComponent.Super = 1;
 QMLComponent.Nested = 2;
 QMLComponent.Root = 4;

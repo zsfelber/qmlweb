@@ -65,7 +65,7 @@ QmlWeb.registerQmlType({
                    $file: clazz.$file
                            };
 
-    const qmlComponent = QmlWeb.createComponent(meta, QmlWeb.QMLComponent.Root | QmlWeb.QMLComponent.LoadImports);
+    const qmlComponent = QmlWeb.createComponent(meta, QmlWeb.QMLComponent.LoadImports);
 
     const loadedComponent = this.$createComponentObject(qmlComponent, this);
     this.sourceComponent = loadedComponent;
