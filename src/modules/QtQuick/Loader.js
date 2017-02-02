@@ -57,16 +57,15 @@ QmlWeb.registerQmlType({
     let clazz;
     clazz = QmlWeb.resolveClass(fileName);
 
-    QmlWeb.helpers.copy(this, QmlWeb.engine.rootContext);
+    // TODO something
+    //QmlWeb.helpers.copy(this, QmlWeb.engine.rootContext);
 
     const meta = { clazz: clazz,
                    context: this,//TODO gz   ignored.  gz uses loaderComponent.context or rootContext
                    $file: clazz.$file
                            };
 
-    const qmlComponent = QmlWeb.createComponent(meta, QmlWeb.QMLComponent.Nested);
-
-    QmlWeb.loadImports(clazz.$imports, qmlComponent);
+    const qmlComponent = QmlWeb.createComponent(meta, QmlWeb.QMLComponent.Root | QmlWeb.QMLComponent.LoadImports);
 
     const loadedComponent = this.$createComponentObject(qmlComponent, this);
     this.sourceComponent = loadedComponent;

@@ -158,7 +158,7 @@ function resolveImport(name) {
     }
   }
 
-  return {clazz, file};
+  return {clazz, $file:file};
 }
 
 function resolveClassImport(name) {
@@ -211,32 +211,12 @@ function resolveClassImport(name) {
     // 1) through $resolvePath(name);
     let imp = resolveImport(filePath);
 
-    imp.path=path;
+    imp.$path=path;
 
     return imp;
   } else {
     throw new Error("Could not resolve object import dirs with no loader component (no registered global type found) : "+name);
   }
-}
-
-function resolveComponent(imp, flags) {
-  const engine = QmlWeb.engine;
-
-  if (!imp.clazz) {
-    return undefined;
-  }
-
-  const component = createComponent({
-    clazz: imp.clazz,
-    $file: imp.file
-  }, flags);
-
-  if (!(flags & QmlWeb.QMLComponent.Nested)) {
-    // TODO gz  undefined -> component.$basePath  from createQmlObject
-    QmlWeb.loadImports(imp.clazz.$imports, component);
-  }
-
-  return component;
 }
 
 // This parses the full URL into scheme and path

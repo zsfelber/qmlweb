@@ -19,7 +19,7 @@ const Qt = {
   createComponent: name => {
     let imp = QmlWeb.resolveImport(name);
 
-    return QmlWeb.resolveComponent(imp, QmlWeb.engine.$component);
+    return QmlWeb.createComponent(imp, QmlWeb.QMLComponent.LoadImports);
   },
 
   createQmlObject: (src, parent, file) => {

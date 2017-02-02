@@ -121,12 +121,20 @@ class QMLComponent {
       }
     }
 
-    if (meta.clazz.$imports) {
-      for (let i = 0; i < meta.clazz.$imports.length; ++i) {
-        _add_imp(meta.clazz.$imports[i]);
+    if (this.$imports) {
+      for (let i = 0; i < this.$imports.length; ++i) {
+        _add_imp(this.$imports[i]);
       }
     }
-    QmlWeb.preloadImports(this, moduleImports);
+
+    if (flags & (QMLComponent.Super|QMLComponent.Root)) {
+      QmlWeb.preloadImports(this, moduleImports);
+
+      if (flags & QMLComponent.LoadImports) {
+        // TODO gz  undefined -> component.$basePath  from createQmlObject
+        QmlWeb.loadImports(this.$imports, component);
+      }
+    }
   }
 
   copyMeta(meta, flags) {
@@ -314,4 +322,5 @@ QMLComponent.Super = 1;
 QMLComponent.Nested = 2;
 QMLComponent.Root = 4;
 QMLComponent.Element = 8;
+QMLComponent.LoadImports = 16;
 QmlWeb.QMLComponent = QMLComponent;

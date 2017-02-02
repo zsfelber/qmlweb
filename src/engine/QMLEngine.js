@@ -167,13 +167,11 @@ class QMLEngine {
 
     try {
       // Create and initialize objects
+      // TODO gz undefined->component.$basePath
       const component = QmlWeb.createComponent({
         clazz: clazz,
         $file: file
-      }, QmlWeb.QMLComponent.Root);
-
-      // TODO gz undefined->component.$basePath
-      QmlWeb.loadImports(clazz.$imports, component);
+      }, QmlWeb.QMLComponent.Root | QmlWeb.QMLComponent.LoadImports);
 
       this.rootObject = component.$createObject(parent);
       if (this.rootObject.dom) {

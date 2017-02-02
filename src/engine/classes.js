@@ -75,29 +75,37 @@ function construct(meta, parent, flags) {
 
   const superitem = constructSuperOrNested(meta, parent, flags);
 
-  // NOTE making a new level of class inheritance :
-  // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
-  // NOTE gz  object is prototyped from bottom to top, in terms of [type]->[supertype] relationship
-  // see also Component.constructor
-  // see also Object.create in QMLContext.createChild
-  const item = superitem.createChild();
+  let item;
 
   // means : created by Component.$createObject
-  if (flags & QmlWeb.QMLComponent.Element) {
-    if (meta !== component.meta || meta.$name!==component.$name  || meta.$id!==component.$id
-        || meta.context!==component.context || meta.component!==component) {
-      throw new Error("Invalid Element construct : "+item);
+  if (flags & QmlWeb.QMLComponent.Super) {
+    if (flags & QmlWeb.QMLComponent.Element) {
+      if (meta !== component.meta || meta.$name!==component.$name  || meta.$id!==component.$id
+          || meta.context!==component.context || meta.component!==component) {
+        throw new Error("Invalid Element construct : "+item);
+      }
+    } else {
+      console.warn("custom Super construct (not Component.$createObject) : "+item);
     }
+
+    // NOTE making a new level of class inheritance :
+    // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
+    // NOTE gz  object is prototyped from bottom to top, in terms of [type]->[supertype] relationship
+    // see also Component.constructor
+    // see also Object.create in QMLContext.createChild
+    item = superitem.createChild();
+
     item.$classname = component.$name;
     item.$context = component.context;
     item.$component = component;
 
     // !!! see QMLBinding
     item.$context.$ownerObject = item;
-
-  } else if (flags & QmlWeb.QMLComponent.Super) {
-    console.warn("custom Super construct (not Component.$createObject) : "+item);
+  } else {
+    // just forwarding, Component has already done the job
+    item = superitem;
   }
+
 
   if ((flags & QmlWeb.QMLComponent.Root) || (component.topComponent.flags & QmlWeb.QMLComponent.Root)) {
     if (component.loaderComponent) throw new Error("component.loaderComponent should not be present here : "+item);
@@ -173,7 +181,7 @@ function constructSuperOrNested(meta, parent, flags) {
     }
 
     // NOTE class component from resolved superclass info:
-    const component = QmlWeb.resolveComponent(clinfo, flags);
+    const component = QmlWeb.createComponent(clinfo, flags | QmlWeb.QMLComponent.LoadImports);
 
     if (!component) {
       throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);
@@ -190,7 +198,7 @@ function constructSuperOrNested(meta, parent, flags) {
     }
 
     if (typeof item.dom !== "undefined") {
-      item.dom.className += ` ${clinfo.path[clinfo.path.length - 1]}`;
+      item.dom.className += ` ${clinfo.$path[clinfo.$path.length - 1]}`;
     }
     // Handle default properties
   }
@@ -290,7 +298,7 @@ function createQmlObject(src, parent, file) {
   var resolvedUrl = QmlWeb.$resolvePath;
   file = file || /*Qt.*/resolvedUrl("createQmlObject_function");
 
-  var component = QmlWeb.resolveComponent({clazz, parent, file}, parent?parent.$component:null, QmlWeb.QMLComponent.Nested);
+  var component = QmlWeb.createComponent({clazz, parent, $file:file}, QmlWeb.QMLComponent.Nested | QmlWeb.QMLComponent.LoadImports);
 
   const obj = component.createObject(parent);
 
