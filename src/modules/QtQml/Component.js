@@ -13,7 +13,8 @@ class QMLComponent {
     // see also QObject.createChild()->Object.create() in classes.construct
     // see also Object.create in QMLContext.createChild
     if (loaderComponent) {
-      if (!(flags&QMLComponent.Super)===!(flags&QMLComponent.Nested)) throw new Error("Assertion failed : either meta.nested or meta.super  It is "+((flags&QMLComponent.Super)?"both":"neither")+" "+this);
+      if (!(flags&QMLComponent.Super)===!(flags&QMLComponent.Nested))
+        throw new Error("Assertion failed : either meta.nested or meta.super  It is "+((flags&QMLComponent.Super)?"both":"neither")+" "+this);
 
       if (flags&QMLComponent.Nested) {
         this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
