@@ -72,7 +72,7 @@ class QMLComponent {
         this.loaderComponent = loaderComponent;
         this.topComponent = this;
 
-        this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this);
+        this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this, true);
         this.context.nestedLevel = this.nestedLevel;
 
         // Nested item top level uses loader Component imports:

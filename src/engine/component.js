@@ -12,7 +12,7 @@ class QMLContext {
     return undefined;
   }
 
-  createChild(info) {
+  createChild(info, nested) {
     const childContext = Object.create(this);
     childContext.$info = info;
 
@@ -22,9 +22,11 @@ class QMLContext {
     // are either in "this" or in parent context,
     if (!childContext.$elements) {
       childContext.$elements = {};
+      childContext.$pageElements = {};
       childContext.$ownerObject = null;
     } else {
       childContext.$elements = {};
+      childContext.$pageElements = nested ? this.$pageElements : Object.create(this.$pageElements);
       childContext.$ownerObject = null;
     }
 
