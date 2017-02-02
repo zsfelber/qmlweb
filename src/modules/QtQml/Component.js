@@ -171,7 +171,7 @@ class QMLComponent {
     this.$name = this.meta.$name;
     this.$file = this.meta.$file;
     this.createFlags = flags & (QMLComponent.Nested|QMLComponent.Super);
-    //this.$imports = this.meta.$imports; // for later use
+    this.$imports = this.meta.$imports;
     if (this.$file) {
       this.$basePath = QmlWeb.extractBasePath(this.$file);
     }

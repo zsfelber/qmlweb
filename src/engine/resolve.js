@@ -325,8 +325,6 @@ QmlWeb.resolveImport = resolveImport;
 
 QmlWeb.resolveClassImport = resolveClassImport;
 
-QmlWeb.resolveComponent = resolveComponent;
-
 // This parses the full URL into scheme and path
 QmlWeb.$parseURI = $parseURI;
 
