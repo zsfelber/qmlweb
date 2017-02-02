@@ -96,12 +96,10 @@ function construct(meta, parent, flags) {
     item.$classname = component.$name;
   }
 
-  item.$context = component.context;
+  var ctx = item.$context = component.context;
   item.$component = component;
   // !!! see QMLBinding
-  item.$context.$ownerObject = item;
-
-  var ctx = item.$context;
+  ctx.$ownerObject = item;
 
   if (!component.loaderComponent===!(flags & QmlWeb.QMLComponent.Root)) {
     throw new Error("Assertion failed. No Loader + Root or Root + Loader : "+component+"  ctx:"+ctx);
@@ -119,35 +117,18 @@ function construct(meta, parent, flags) {
     throw new Error("No context : "+item);
   }
 
-  // each element into parent context, by id :
+  // each element into all parent context's elements on the page, by id :
   // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
   // (see properties.createProperty. )
-  if (flags & QmlWeb.QMLComponent.Nested) {
-    if (meta.id) {
-      registerElementInParent(item, meta.id);
-    } else {
-      console.warn("No element id for item  : "+item+"  ctx:"+ctx);
-    }
+  if (meta.id) {
+    addElementToPageContexts(item, meta.id, ctx);
+  } else if (flags & QmlWeb.QMLComponent.Nested) {
+    console.warn("No element id for item  : "+item+"  ctx:"+ctx);
   }
 
   // Apply properties according to this metatype info
   // (Bindings won't get evaluated, yet)
   QmlWeb.applyProperties(meta, item);
-
-  //// otherwise it duplicates :
-  // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
-  // (see properties.createProperty. )
-  if (item.id /*&& (flags & QmlWeb.QMLComponent.Super)*/ ) {
-    // always put self into context, by internal id :
-
-    //if (item.id) {
-
-      putElement(item, item.id, ctx);
-
-    //} else {
-      //console.warn("No id of item for self : "+item+"  ctx:"+ctx.$info);
-    //}
-  }
 
   return item;
 }
@@ -238,53 +219,10 @@ function createQmlObject(src, parent, file) {
 
 
 
-function registerElementInParent(item, id) {
-  var ctx = item.$context.loaderContext;
-  var cmp = item.$component.loaderComponent;
-  if (cmp.context !== ctx) {
-    throw new Error("Assertion failed. Component integrity error.  "+cmp);
-  }
+function addElementToPageContexts(item, id, ctx) {
 
-  var chkctx = item.$parent.$context;
-  var chkcmp = item.$parent.$component;
-  if (chkctx !== ctx || chkcmp !== cmp) {
-    throw new Error("Assertion failed. Component context integrity error.  "+ctx);
-  }
+  // register Elements by id in all of parent contexts of the current page
 
-  var topctx = ctx.topContext;
-  var topcmp = cmp.topComponent;
-  if (!topctx || topctx.component !== topcmp) {
-    throw new Error("Assertion failed. Component integrity error.  "+cmp+"  "+ctx);
-  }
-  if (!topcmp || topcmp.context !== topctx) {
-    throw new Error("Assertion failed. Component integrity error.  "+cmp+"  "+ctx);
-  }
-  if (!(topcmp.flags & cmp.flags & (QmlWeb.QMLComponent.Nested|QmlWeb.QMLComponent.Root|QmlWeb.QMLComponent.Super))) {
-    throw new Error("Assertion failed. Component and its top should be same kind of R/N/S.  "+topcmp+"  vs  "+tmp);
-  }
-  if (topctx.__proto__ !== ctx.__proto__ || ctx.__proto__!== (ctx.loaderContext?ctx.loaderContext:QmlWeb.engine.rootContext)) {
-    throw new Error("Assertion failed. Component and its top context should fork from the loader context.");
-  }
-  if (topctx.loaderContext !== ctx.loaderContext) {
-    throw new Error("Assertion failed. Invalid context:"+(topctx.loaderContext?topctx.loaderContext.$info:"<null>")+" === "+(ctx.loaderContext?ctx.loaderContext.$info:"<null>"));
-  }
-
-  if (cmp.flags & (QmlWeb.QMLComponent.Nested|QmlWeb.QMLComponent.Root)) {
-
-    // This means : we are in the loader component directly, and not in a super QML of current nested (or root) element :
-
-    if (topctx !== ctx) {
-      throw new Error("Assertion failed. Invalid context:"+topctx.$info+" === "+ctx.$info);
-    }
-  }
-
-  putElement(item, id, ctx);
-}
-
-
-function putElement(item, id, ctx) {
-
-  // id
   // see also Component.constructor
   // see also QObject.createChild()->Object.create() in classes.construct
   // see also Object.create in QMLContext.createChild
@@ -295,25 +233,33 @@ function putElement(item, id, ctx) {
     console.warn("Context entry overriden by Element : "+id+" object:"+item);
   }
 
-  if (ctx.$elements[id]) {
-    throw new Error("Duplicated element id:"+id+" in "+ctx.$info);
-  }
-
+  // always put nothing but self to inheritable context :
   QmlWeb.setupGetterSetter(
     ctx, id,
     () => item,
     () => {}
   );
-  QmlWeb.setupGetterSetter(
-    ctx.$elements, id,
-    () => item,
-    () => {}
-  );
-  QmlWeb.setupGetterSetter(
-    ctx.$pageElements, id,
-    () => item,
-    () => {}
-  );
+
+  // put it into context.$elements of :
+  // - this QML page or element
+  // - through all nested parent
+  // - until current page top  :
+  for (var ectx = ctx; ; ectx=ectx.loaderContext) {
+    if (ectx.$elements[id]) {
+      throw new Error("Duplicated element id:"+id+" in "+ectx.$info);
+    }
+
+    QmlWeb.setupGetterSetter(
+      ectx.$elements, id,
+      () => item,
+      () => {}
+    );
+
+    // ectx is current Page top : exit
+    if (!(ectx.component.flags&QmlWeb.QMLComponent.Nested)) {
+      break;
+    }
+  }
 }
 
 
