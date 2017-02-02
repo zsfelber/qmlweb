@@ -133,6 +133,8 @@ function createProperty(type, obj, propName, options) {
     //
     QmlWeb.setupGetterSetter(ctx, propName, getter, setter, prop);
   }
+
+
 }
 
 /**
@@ -179,35 +181,8 @@ function applyProperties(metaObject, item) {
           continue;
         }
 
-        // slots
-        if (i.indexOf("on") === 0 && i.length > 2 && /[A-Z]/.test(i[2])) {
-          // TODO binding when whithin group ??
-          const signalName = i[2].toLowerCase() + i.slice(3);
-          if (item.$setCustomSlot) {
-            item.$setCustomSlot(signalName, value);
-            continue;
-          } else if (connectSignal.call(item, item, signalName, value)) {
-            continue;
-          }
-        }
+        applyProperty(item, i, value);
 
-        if (value instanceof Object) {
-          if (applyProperty(item, i, value)) {
-            continue;
-          }
-        }
-
-        if (item.$properties && i in item.$properties) {
-          item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged);
-        } else if (i in item) {
-          item[i] = value;
-        } else if (item.$setCustomData) {
-          item.$setCustomData(i, value);
-        } else if (!trivialProperties[i]) {
-          console.warn(
-            `Cannot assign to non-existent property  ${item} [ "${i}" ]. Ignoring assignment.  Context:${item.$context}`
-          );
-        }
       } catch (err) {
         if (err.ctType === "PendingEvaluation") {
           //console.warn("PendingEvaluation : Cannot apply property bindings (reevaluating at startup) :" + i + "  item:" + item);
@@ -229,34 +204,59 @@ function applyProperty(item, i, value) {
   const QMLProperty = QmlWeb.QMLProperty;
   const QMLBinding = QmlWeb.QMLBinding;
 
-  if (value instanceof QmlWeb.QMLSignalDefinition) {
-    item[i] = QmlWeb.Signal.signal(i, value.parameters);
-    if (!item.$parent) {
-      item.$context[i] = item[i];
+  // slots
+  if (i.indexOf("on") === 0 && i.length > 2 && /[A-Z]/.test(i[2])) {
+    // TODO binding when whithin group ??
+    const signalName = i[2].toLowerCase() + i.slice(3);
+    if (item.$setCustomSlot) {
+      item.$setCustomSlot(signalName, value);
+      return true;
+    } else if (connectSignal.call(item, item, signalName, value)) {
+      return true;
     }
-    return true;
-  } else if (value instanceof QmlWeb.QMLMethod) {
-    if (!value.flags&QMLBinding.ImplFunction) {
-      throw new Error("Binding/run should be a function : " + value);
-    }
-    value.compile();
-    item[i] = value.run.bind({binding:value, bindingObj:item});
-    if (!item.$parent) {
-      item.$context[i] = item[i];
-    }
-    return true;
-  } else if (value instanceof QmlWeb.QMLAliasDefinition) {
-    createProperty("alias", item, i, {path:value.path, readOnly:value.readonly});
-    // NOTE getter/setter/target moved to inside createProperty
+  }
 
+  if (value instanceof Object) {
+    if (value instanceof QmlWeb.QMLSignalDefinition) {
+      item[i] = QmlWeb.Signal.signal(i, value.parameters);
+      item.$context[i] = item[i];
+      return true;
+    } else if (value instanceof QmlWeb.QMLMethod) {
+      if (!value.flags&QMLBinding.ImplFunction) {
+        throw new Error("Binding/run should be a function : " + value);
+      }
+      value.compile();
+      item[i] = value.run.bind({binding:value, bindingObj:item});
+      item.$context[i] = item[i];
+      return true;
+    } else if (value instanceof QmlWeb.QMLAliasDefinition) {
+      createProperty("alias", item, i, {path:value.path, readOnly:value.readonly});
+      // NOTE getter/setter/target moved to inside createProperty
+
+      return true;
+    } else if (value instanceof QmlWeb.QMLPropertyDefinition) {
+      createProperty(value.type, item, i, {readOnly:value.readonly, initialValue:value.value});
+      return true;
+    } else if (item[i] && value instanceof QmlWeb.QMLMetaPropertyGroup) {
+      // Apply properties one by one, otherwise apply at once
+      applyProperties(value, item[i]);
+      return true;
+    }
+  }
+
+  if (item.$properties && i in item.$properties) {
+    item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged);
     return true;
-  } else if (value instanceof QmlWeb.QMLPropertyDefinition) {
-    createProperty(value.type, item, i, {readOnly:value.readonly, initialValue:value.value});
+  } else if (i in item) {
+    item[i] = value;
     return true;
-  } else if (item[i] && value instanceof QmlWeb.QMLMetaPropertyGroup) {
-    // Apply properties one by one, otherwise apply at once
-    applyProperties(value, item[i]);
+  } else if (item.$setCustomData) {
+    item.$setCustomData(i, value);
     return true;
+  } else if (!trivialProperties[i]) {
+    console.warn(
+      `Cannot assign to non-existent property  ${item} [ "${i}" ]. Ignoring assignment.  Context:${item.$context}`
+    );
   }
 
   return false;
