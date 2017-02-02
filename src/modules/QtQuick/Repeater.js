@@ -16,7 +16,7 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.superAndInitMeta(this, meta);
 
-    this.parent = meta.parent;
+    //this.parent = meta.parent;
     // TODO: some (all ?) of the components including Repeater needs to know own
     // parent at creation time. Please consider this major change.
 
