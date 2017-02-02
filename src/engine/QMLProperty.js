@@ -177,7 +177,7 @@ class QMLProperty {
 
 
     } catch (e) {
-      console.warn("QMLProperty.update binding error #"+this.$propertyId, e);
+      console.warn("QMLProperty.update binding error "+this, e);
       throw e;
     } finally {
       if (pushed) {
@@ -349,7 +349,7 @@ class QMLProperty {
   }
 
   toString() {
-    return this.obj+" . prop:"+this.name+" u:"+this.needsUpdate+" "+(this.binding?"b:"+this.binding.flags:"")+" "+(this.val?"v:"+this.val:"");
+    return this.obj+" . prop:"+this.name+"#"+this.$propertyId+" u:"+this.needsUpdate+" "+(this.binding?"b:"+this.binding.flags:"")+" "+(this.val?"v:"+this.val:"");
   }
 
   static pushEvalStack() {
