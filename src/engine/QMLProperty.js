@@ -111,7 +111,7 @@ class QMLProperty {
           // all the other ones just forward these
           // Call to here comes from
           // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
-          this.val = QmlWeb.loadSuperOrNested(val, correctObjProto, QmlWeb.QMLComponent.Nested);
+          this.val = QmlWeb.createComponentAndElement({clazz:val}, correctObjProto, QmlWeb.QMLComponent.Nested);
         }
       } else if (val instanceof Object || val === undefined || val === null) {
         this.val = val;

@@ -174,8 +174,8 @@ function applyProperties(metaObject, item) {
           continue;
         }
 
-        // skip global id's and internal values
-        if (i === "id" || i[0] === "$") { // TODO: what? See above.
+        // skip internal values
+        if (i[0] === "$") { // TODO: what? See above.
           continue;
         }
 
@@ -203,7 +203,7 @@ function applyProperties(metaObject, item) {
           item[i] = value;
         } else if (item.$setCustomData) {
           item.$setCustomData(i, value);
-        } else if (!trivialProperties[i] && !/^\$/.test(i)) {
+        } else if (!trivialProperties[i]) {
           console.warn(
             `Cannot assign to non-existent property  ${item} [ "${i}" ]. Ignoring assignment.  Context:${item.$context}`
           );

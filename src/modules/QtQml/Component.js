@@ -139,7 +139,9 @@ class QMLComponent {
 
   copyMeta(meta, flags) {
     this.meta = {component:this};
-    if (meta.$file !== meta.clazz.$file) {
+    if (meta.$file === undefined) {
+      meta.$file = meta.clazz.$file;
+    } else if (meta.$file !== meta.clazz.$file) {
       throw new Error("Assertion failed. $file-s in Component and class differ :  meta.$file:"+meta.$file+" === meta.clazz.$file:"+meta.clazz.$file);
     }
 

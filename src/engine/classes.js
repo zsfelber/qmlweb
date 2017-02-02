@@ -139,10 +139,10 @@ function construct(meta, parent, flags) {
   // (Bindings won't get evaluated, yet)
   QmlWeb.applyProperties(meta, item);
 
-  // otherwise it duplicates :
+  //// otherwise it duplicates :
   // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
   // (see properties.createProperty. )
-  if (item.id && (flags & QmlWeb.QMLComponent.Super) ) {
+  if (item.id /*&& (flags & QmlWeb.QMLComponent.Super)*/ ) {
     // always put self into context, by internal id :
 
     //if (item.id) {
@@ -175,7 +175,7 @@ function constructSuper(meta, parent) {
     }
 
     // always super here:
-    loadSuperOrNested(clinfo, parent, QMLComponent.Super);
+    createComponentAndElement(clinfo, parent, QMLComponent.Super);
 
     if (typeof item.dom !== "undefined") {
       item.dom.className += ` ${clinfo.$path[clinfo.$path.length - 1]}`;
@@ -184,9 +184,11 @@ function constructSuper(meta, parent) {
   return item;
 }
 
-function loadSuperOrNested(meta, parent, flags) {
+function createComponentAndElement(meta, parent, flags) {
 
-  // NOTE class component from resolved superclass info:
+  // NOTE 1 : class component from meta. meta may be resolved superclass info (Super: from resolveClassImport)
+  // or QMLElement directly (Nested : in form {clazz:element_meta}):
+  // NOTE 2 : LoadImports only works for Super and not for Nested
   const component = QmlWeb.createComponent(meta, flags | QmlWeb.QMLComponent.LoadImports);
 
   if (!component) {
@@ -203,6 +205,39 @@ function loadSuperOrNested(meta, parent, flags) {
     throw new Error("Component flags mismatch : "+flags+" vs "+component.flags);
   }
 }
+
+
+
+function createQmlObject(src, parent, file) {
+
+  const engine = QmlWeb.engine;
+
+  // Returns url resolved relative to the URL of the caller.
+  // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
+  // in QMLUrl.js
+  //var resolvedUrl = url => QmlWeb.qmlUrl(url),
+
+  const clazz = QmlWeb.parseQML(src, file);
+  var resolvedUrl = QmlWeb.$resolvePath;
+  file = file || /*Qt.*/resolvedUrl("createQmlObject_function");
+
+  var component = QmlWeb.createComponent({clazz, parent, $file:file}, QmlWeb.QMLComponent.Root | QmlWeb.QMLComponent.LoadImports);
+
+  const obj = component.createObject(parent);
+
+  const QMLOperationState = QmlWeb.QMLOperationState;
+  if (engine.operationState !== QMLOperationState.Init &&
+      engine.operationState !== QMLOperationState.Idle) {
+    // We don't call those on first creation, as they will be called
+    // by the regular creation-procedures at the right time.
+    engine.$initializePropertyBindings();
+
+    engine.callCompletedSignals();
+  }
+
+  return obj;
+}
+
 
 
 function registerElementInParent(item, id) {
@@ -248,6 +283,7 @@ function registerElementInParent(item, id) {
   putElement(item, id, ctx);
 }
 
+
 function putElement(item, id, ctx) {
 
   // id
@@ -283,40 +319,9 @@ function putElement(item, id, ctx) {
 }
 
 
-
-function createQmlObject(src, parent, file) {
-
-  const engine = QmlWeb.engine;
-
-  // Returns url resolved relative to the URL of the caller.
-  // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
-  // in QMLUrl.js
-  //var resolvedUrl = url => QmlWeb.qmlUrl(url),
-
-  const clazz = QmlWeb.parseQML(src, file);
-  var resolvedUrl = QmlWeb.$resolvePath;
-  file = file || /*Qt.*/resolvedUrl("createQmlObject_function");
-
-  var component = QmlWeb.createComponent({clazz, parent, $file:file}, QmlWeb.QMLComponent.Nested | QmlWeb.QMLComponent.LoadImports);
-
-  const obj = component.createObject(parent);
-
-  const QMLOperationState = QmlWeb.QMLOperationState;
-  if (engine.operationState !== QMLOperationState.Init &&
-      engine.operationState !== QMLOperationState.Idle) {
-    // We don't call those on first creation, as they will be called
-    // by the regular creation-procedures at the right time.
-    engine.$initializePropertyBindings();
-
-    engine.callCompletedSignals();
-  }
-
-  return obj;
-}
-
 QmlWeb.inherit = inherit;
 QmlWeb.superAndInitMeta = superAndInitMeta;
 QmlWeb.initMeta = initMeta;
 QmlWeb.construct = construct;
-QmlWeb.loadSuperOrNested = loadSuperOrNested;
+QmlWeb.createComponentAndElement = createComponentAndElement;
 QmlWeb.createQmlObject = createQmlObject;
