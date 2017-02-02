@@ -17,7 +17,7 @@ class QMLComponent {
     // see also QObject.createChild()->Object.create() in classes.construct
     // see also Object.create in QMLContext.createChild
     if (loaderComponent) {
-      if (!(flags&QMLComponent.Super)===!(flags&QMLComponent.Nested)) throw new Error("Assertion failed : either meta.nested or meta.super  It is "+((flags&QMLComponent.Super)?"both":"neither"));
+      if (!(flags&QMLComponent.Super)===!(flags&QMLComponent.Nested)) throw new Error("Assertion failed : either meta.nested or meta.super  It is "+((flags&QMLComponent.Super)?"both":"neither")+" "+this);
 
       if (flags&QMLComponent.Nested) {
         this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
@@ -49,22 +49,18 @@ class QMLComponent {
 
           if (loaderComponent.flags & QMLComponent.Nested) {
             if (loaderComponent.$file) {
-              throw new Error("Loader Component $file mismatch (should not be set) : "+loaderComponent.$file+" vs "+this.$file);
+              throw new Error("Loader Component $file mismatch (should not be set in loader of Nested but) : "+loaderComponent.$file+" vs "+this.$file);
             }
-
-            this.meta.context = this.context = this.loaderComponent.context.createChild(
-                                          this.loaderComponent +" -> " +this.toString("..."));
-          } else {
-            this.meta.context = this.context = this.loaderComponent.context.createChild(
-                                          this.loaderComponent +" -> .. " +this);
           }
+          this.meta.context = this.context = this.loaderComponent.context.createChild(
+                                        this.loaderComponent +" -> " +this);
 
           if (this.loaderComponent.flags & QMLComponent.Super) {
             throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.context.$info)
           }
         } else {
 
-          this.meta.context = this.context = engine.rootContext.createChild(this.loaderComponent + " .. " +this);
+          this.meta.context = this.context = engine.rootContext.createChild(loaderComponent + " .. " +this);
 
         }
 
@@ -171,6 +167,7 @@ class QMLComponent {
       if (this.meta.$name && this.meta.$name !== this.meta.$class+".qml") {
         throw new Error("Nested Component meta should not define a superclass other than (meta.$name : "+this.meta.$name+")  super: meta.$class:"+this.meta.$class);
       }
+      this.meta.$name = this.meta.$class + ".qml";
 
       //var cl = /(^.*?)\.qml/.exec(this.meta.$name)[1];
       //var cl = this.meta.$class;
@@ -294,20 +291,23 @@ class QMLComponent {
 
     return item;
   }
-  toString(ovrrdfil) {
-    if (!ovrrdfil) ovrrdfil = this.$file;
+  toString(name) {
+    if (!name) name = this.$file;
+    if (!name) name = this.$name;
+    if (this.$id) name += ":"+this.$id;
     var c = "";
     var f = "";
     var fn = this.flags;
     for (;;) {
-      if (fn>=QMLComponent.Element) { f+="e";    fn-=QMLComponent.Element; }
+      if (fn>=QMLComponent.LoadImports) { f+="i";    fn-=QMLComponent.LoadImports; }
+      else if (fn>=QMLComponent.Element) { f+="e";    fn-=QMLComponent.Element; }
       else if (fn>=QMLComponent.Root) { c+="R";  fn-=QMLComponent.Root; }
       else if (fn>=QMLComponent.Nested) { c+="N";fn-=QMLComponent.Nested; }
       else if (fn>=QMLComponent.Super) { c+="S"; fn-=QMLComponent.Super; }
       else break;
     }
 
-    return c+"["+ovrrdfil+(this.flags?" "+f:"")+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
+    return c+"["+name+(this.flags?" "+f:"")+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
   }
 
   static getAttachedObject() {
