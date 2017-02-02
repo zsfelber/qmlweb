@@ -13,14 +13,17 @@ function superAndInitMeta(self, meta) {
   // meta._constructor : this class
   // self.constructor : superclass
 
-  var constructor = meta._constructor;
-  if (self.constructor !== constructor) {
-    meta._constructor = self.constructor;
-    self.constructor.call(self, meta);
-  } else {
-    throw new Error("meta._constructor === self.constructor");
-    //delete meta._constructor;
+  const constructor = meta._constructor;
+  const csontsructor = constructor.prototype.constructor;
+
+  if (csontsructor === Object.prototype) {
+    throw new Error("csontsructor === Object.prototype");
   }
+
+  meta._constructor = csontsructor;
+
+  csontsructor.call(self, meta);
+
   if (meta.context && !self.$context) throw new Error("Instantiantion error, no context !");
   initMeta(self, meta, constructor);
 }

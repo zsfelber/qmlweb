@@ -5,10 +5,6 @@ class QMLComponent {
     const engine = QmlWeb.engine;
     const loaderComponent = QmlWeb.engine.$component;
 
-    this.$jsImports = [];
-    this.moduleConstructors = {};
-    this.ctxQmldirs = {}; // resulting components lookup table
-    this.componentImportPaths = {};
     this.flags = flags;
 
     // NOTE making a new level of $context inheritance :
@@ -75,8 +71,6 @@ class QMLComponent {
         this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this, true);
         this.context.nestedLevel = this.nestedLevel;
 
-        // Nested item top level uses loader Component imports:
-        this.bindImports(loaderComponent);
       }
 
       //console.warn("Component  "+this.context.$info);
@@ -106,36 +100,31 @@ class QMLComponent {
 
     this.flags = flags;
 
-    if (!this.$basePath) {
-      throw new Error("No component basePath present");
-    }
     if (!this.context) {
       throw new Error("No component context");
     }
 
-    const moduleImports = [];
-    function _add_imp(importDesc) {
-      if (/\.js$/.test(importDesc[1])) {
-        this.$jsImports.push(importDesc);
-      } else {
-        moduleImports.push(importDesc);
+    if (flags & QMLComponent.Nested) {
+
+      // Nested item top level uses loader Component imports:
+      this.bindImports(loaderComponent);
+
+    } else {
+
+      if (this.moduleConstructors) {
+        throw new Error("Assertion failed. Super/Root Component : imports filled.  "+this+"  "+this.context);
       }
+
+      this.initImports();
     }
 
-    if (this.$imports) {
-      for (let i = 0; i < this.$imports.length; ++i) {
-        _add_imp(this.$imports[i]);
-      }
+    if (!this.$basePath) {
+      throw new Error("Assertion failed. No component basePath present.  "+this+"  "+this.context);
+    }
+    if (!this.moduleConstructors) {
+      throw new Error("Assertion failed. Component : no imports.  "+this+"  "+this.context);
     }
 
-    if (flags & (QMLComponent.Super|QMLComponent.Root)) {
-      QmlWeb.preloadImports(this, moduleImports);
-
-      if (flags & QMLComponent.LoadImports) {
-        // TODO gz  undefined -> component.$basePath  from createQmlObject
-        QmlWeb.loadImports(this, this.$imports);
-      }
-    }
   }
 
   copyMeta(meta, flags) {
@@ -204,6 +193,35 @@ class QMLComponent {
       } else {
         QmlWeb.importJavascriptInContext(js, this.$object.$conteximpt);
       }
+    }
+  }
+
+  initImports() {
+    this.$jsImports = [];
+    this.moduleConstructors = Object.create(QmlWeb.constructors);
+    this.ctxQmldirs = {}; // resulting components lookup table
+    this.componentImportPaths = {};
+
+    const moduleImports = [];
+    function _add_imp(importDesc) {
+      if (/\.js$/.test(importDesc[1])) {
+        this.$jsImports.push(importDesc);
+      } else {
+        moduleImports.push(importDesc);
+      }
+    }
+
+    if (this.$imports) {
+      for (let i = 0; i < this.$imports.length; ++i) {
+        _add_imp(this.$imports[i]);
+      }
+    }
+
+    QmlWeb.preloadImports(this, moduleImports);
+
+    if (this.flags & QMLComponent.LoadImports) {
+      // TODO gz  undefined -> component.$basePath  from createQmlObject
+      QmlWeb.loadImports(this, this.$imports);
     }
   }
 
