@@ -51,8 +51,8 @@ QmlWeb.registerQmlType({
     this.propertyChanged.connect(this, this.$redoProperties);
     this.propertiesChanged.connect(this, this.$redoProperties);
 
-    if (meta.clazz.$on !== undefined) {
-      this.property = meta.clazz.$on;
+    if (meta.$on !== undefined) {
+      this.property = meta.$on;
       this.target = this.$parent;
     }
   }

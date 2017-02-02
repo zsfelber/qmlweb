@@ -175,7 +175,7 @@ class Signal {
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
       if (err.ctType === "PendingEvaluation") {
-        //console.warn("PendingEvaluation : Signal :" + desc.signal.$name + "  slotObj:" + desc.slotObj+" thisObj:"+connection.thisObj  pending operation:", err.message);
+        //console.warn("PendingEvaluation : Signal :" + desc.signal.$name + "  slotObj:" + desc.slotObj+" thisObj:"+desc.thisObj  pending operation:", err.message);
         QmlWeb.engine.pendingOperations.push({
           fun:desc.slot,
           thisObj:desc.thisObj,
@@ -186,9 +186,9 @@ class Signal {
         });
       } else {
         if (desc.binding) {
-          console.warn("Signal :" + desc.signal.$name + "  slotObj:" + desc.slotObj+" thisObj:"+connection.thisObj+"  slot(autobound) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.binding.toString());
+          console.warn("Signal :" + desc.signal.$name + "  slotObj:" + desc.slotObj+" thisObj:"+desc.thisObj+"  slot(autobound) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.binding.toString());
         } else {
-          console.warn("Signal :" + desc.signal.$name + "  slotObj:" + desc.slotObj+" thisObj:"+connection.thisObj+"  slot(user function) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.slot.toString());
+          console.warn("Signal :" + desc.signal.$name + "  slotObj:" + desc.slotObj+" thisObj:"+desc.thisObj+"  slot(user function) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.slot.toString());
         }
       }
       err.srcdumpok = 1;

@@ -8,7 +8,7 @@ QmlWeb.registerQmlType({
   }
 }, class {
   constructor(meta) {
-    meta.tagName = meta.clazz.tagName;
+    meta.tagName = meta.tagName;
     QmlWeb.superAndInitMeta(this, meta);
 
     // TODO: support properties, styles, perhaps changing the tagName

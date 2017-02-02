@@ -11,7 +11,7 @@ QmlWeb.registerQmlType({
 }, class {
   constructor(meta) {
     QmlWeb.superAndInitMeta(this, meta);
-    this.$on = meta.clazz.$on;
+    this.$on = meta.$on;
 
     this.animationChanged.connect(this, this.$onAnimationChanged);
     this.enabledChanged.connect(this, this.$onEnabledChanged);
