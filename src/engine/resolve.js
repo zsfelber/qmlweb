@@ -133,7 +133,7 @@ function resolveClass(file) {
 
 function resolveImport(name) {
   const engine = QmlWeb.engine;
-  const loaderComponent = QmlWeb.engine.$component;
+  const loaderComponent = engine.$component;
 
   let file = $resolvePath(name);
 
@@ -156,6 +156,10 @@ function resolveImport(name) {
         if (clazz) break;
       }
     }
+  }
+
+  if (!clazz) {
+    console.warn("Class not found : "+name+"  resolved to:"+file+"  in context:"+(loaderComponent?loaderComponent.context:"<null>"));
   }
 
   return {clazz, $file:file};

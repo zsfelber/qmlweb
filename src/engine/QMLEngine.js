@@ -168,12 +168,11 @@ class QMLEngine {
     try {
       // Create and initialize objects
       // TODO gz undefined->component.$basePath
-      const component = QmlWeb.createComponent({
-        clazz: clazz,
-        $file: file
-      }, QmlWeb.QMLComponent.Root | QmlWeb.QMLComponent.LoadImports);
 
-      this.rootObject = component.$createObject(parent);
+      this.rootObject = QmlWeb.createComponentAndElement(
+                    {clazz: clazz, $file: file}, parent,
+                    QmlWeb.QMLComponent.Root | QmlWeb.QMLComponent.LoadImports);
+
 
       if (this.rootObject.dom) {
         console.log(clazz.$name+" : DOM element FOUND ! Added to engine screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);

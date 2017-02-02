@@ -93,7 +93,7 @@ function preloadImports(component, imports) {
 }
 
 
-function loadImports(importsArray, component) {
+function loadImports(component, importsArray) {
 
   if (!component) {
     throw new Error("loadImports   No component:"+component);

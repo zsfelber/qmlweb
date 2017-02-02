@@ -68,12 +68,8 @@ function initMeta(self, meta, constructor) {
 function construct(meta, parent, flags) {
   const component = QmlWeb.engine.$component;
 
-  if (flags & QmlWeb.QMLComponent.Root) {
-    throw new Error("Invalid flags in construct : "+flags);
-  } else {
-    // undefined -> 0
-    flags |= QmlWeb.QMLComponent.Super;
-  }
+  // undefined -> 0
+  flags |= 0;
 
   let superitem = constructSuper(meta, parent);
 
@@ -105,10 +101,11 @@ function construct(meta, parent, flags) {
   // !!! see QMLBinding
   item.$context.$ownerObject = item;
 
-  if (!component.loaderComponent) {
-    throw new Error("Assertion failed. No loader : "+component);
-  }
+  var ctx = item.$context;
 
+  if (!component.loaderComponent===!(flags & QmlWeb.QMLComponent.Root)) {
+    throw new Error("Assertion failed. No Loader + Root or Root + Loader : "+component+"  ctx:"+ctx);
+  }
 
   // Finalize instantiation over supertype item :
 
@@ -117,8 +114,6 @@ function construct(meta, parent, flags) {
       item.dom.className += `  ${meta.id}`;
     }
   }
-
-  var ctx = item.$context;
 
   if (!ctx) {
     throw new Error("No context : "+item);
@@ -175,12 +170,13 @@ function constructSuper(meta, parent) {
     }
 
     // always super here:
-    createComponentAndElement(clinfo, parent, QMLComponent.Super);
+    item = createComponentAndElement(clinfo, parent, QMLComponent.Super);
 
     if (typeof item.dom !== "undefined") {
       item.dom.className += ` ${clinfo.$path[clinfo.$path.length - 1]}`;
     }
   }
+
   return item;
 }
 
@@ -189,7 +185,7 @@ function createComponentAndElement(meta, parent, flags) {
   // NOTE 1 : class component from meta. meta may be resolved superclass info (Super: from resolveClassImport)
   // or QMLElement directly (Nested : in form {clazz:element_meta}):
   // NOTE 2 : LoadImports only works for Super and not for Nested
-  const component = QmlWeb.createComponent(meta, flags | QmlWeb.QMLComponent.LoadImports);
+  const component = QmlWeb.createComponent(meta, flags |= QmlWeb.QMLComponent.LoadImports);
 
   if (!component) {
     throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);
@@ -204,6 +200,8 @@ function createComponentAndElement(meta, parent, flags) {
   if (component.flags !== flags) {
     throw new Error("Component flags mismatch : "+flags+" vs "+component.flags);
   }
+
+  return item;
 }
 
 

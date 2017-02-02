@@ -132,7 +132,7 @@ class QMLComponent {
 
       if (flags & QMLComponent.LoadImports) {
         // TODO gz  undefined -> component.$basePath  from createQmlObject
-        QmlWeb.loadImports(this.$imports, component);
+        QmlWeb.loadImports(this, this.$imports);
       }
     }
   }
@@ -170,7 +170,7 @@ class QMLComponent {
     this.$id = this.meta.$id;
     this.$name = this.meta.$name;
     this.$file = this.meta.$file;
-    this.createFlags = flags & (QMLComponent.Nested|QMLComponent.Super);
+    this.createFlags = flags & (QMLComponent.Root|QMLComponent.Nested|QMLComponent.Super);
     this.$imports = this.meta.$imports;
     if (this.$file) {
       this.$basePath = QmlWeb.extractBasePath(this.$file);
