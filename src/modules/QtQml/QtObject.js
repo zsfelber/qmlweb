@@ -18,11 +18,6 @@ QmlWeb.registerQmlType({
        { type: "QtObject", name: "element" }
      ]
   },
-  enums: {
-    Component: {
-      Null: 1, Ready: 2, Loading: 3, Error: 4
-    }
-  },
 }, class QtObject0 extends QmlWeb.QObject {
   constructor(meta) {
     super(meta.parent, meta);

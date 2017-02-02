@@ -156,9 +156,10 @@ function registerModuleClassDescriptor(descriptor) {
 }
 
 function getConstructor(moduleName, version, name) {
-  if (typeof modules[moduleName] !== "undefined") {
-    for (let i = 0; i < modules[moduleName].length; ++i) {
-      const type = modules[moduleName][i];
+  var ms = modules[moduleName];
+  if (typeof ms !== "undefined") {
+    for (let i = 0; i < ms.length; ++i) {
+      const type = ms[i];
       if (type.name === name && type.versions.test(version)) {
         return type.constructor;
       }
@@ -168,8 +169,9 @@ function getConstructor(moduleName, version, name) {
 }
 
 function getModuleConstructors(moduleName, version) {
+  var ms = modules[moduleName];
   const constructors = {};
-  if (typeof modules[moduleName] === "undefined") {
+  if (typeof ms === "undefined") {
     if (!notfound[moduleName]) {
       console.warn(`module "${moduleName}" not found`);
       notfound[moduleName] = 1;
@@ -177,8 +179,8 @@ function getModuleConstructors(moduleName, version) {
 
     return constructors;
   }
-  for (let i = 0; i < modules[moduleName].length; ++i) {
-    const module = modules[moduleName][i];
+  for (let i = 0; i < ms.length; ++i) {
+    const module = ms[i];
     if (module.versions.test(version)) {
       constructors[module.name] = module.constructor;
     }

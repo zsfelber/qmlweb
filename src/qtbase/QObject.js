@@ -70,8 +70,8 @@ class QObject {
   }
 
   $delete() {
-    if (this.$Component) {
-      this.$Component.destruction();
+    if (this.Component) {
+      this.Component.destruction();
     }
 
     while (this.$tidyupList.length > 0) {

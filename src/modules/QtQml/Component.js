@@ -1,8 +1,8 @@
 class QMLComponent {
   constructor(meta, flags) {
+    QmlWeb.superAndInitMeta(this, {});
+
     this.copyMeta(meta, flags);
-    // no component = is import root
-    const loaderComponent = QmlWeb.engine.$component;
 
     this.flags = flags;
     this.createFlags = this.flags & (QMLComponent.Root|QMLComponent.Nested|QMLComponent.Super);
@@ -10,8 +10,12 @@ class QMLComponent {
     this.completed = QmlWeb.Signal.signal("completed", []);
     this.destruction = QmlWeb.Signal.signal("destruction", []);
 
+    createProperty("enum", this, "status", {initialValue: this.Component.Null});
+
     // init now, otherwise it's Lazy
     if (this.createFlags) {
+      // no component = is import root
+      const loaderComponent = QmlWeb.engine.$component;
       init(loaderComponent);
     }
 
@@ -284,28 +288,31 @@ class QMLComponent {
   $createObject(parent, properties = {}) {
     const engine = QmlWeb.engine;
 
-    const oldCreateFlags = this.createFlags;
-    // Lazy init :
-    if (!this.createFlags) {
-      let loaderComponent;
-      if (parent) {
-        this.createFlags = QMLComponent.Nested;
-        loaderComponent = parent.$component;
-      } else {
-        this.createFlags = QMLComponent.Root;
-      }
-      this.flags |= this.createFlags;
-      init(loaderComponent);
-    }
-
-    // change base path to current component base path
-    const oldState = engine.operationState;
-    var prevComponent = QmlWeb.engine.$component;
-    engine.operationState = QmlWeb.QMLOperationState.Init;
-    QmlWeb.engine.$component = this;
-
-    let item;
     try {
+      const oldCreateFlags = this.createFlags;
+      // change base path to current component base path
+      const oldState = engine.operationState;
+      var prevComponent = engine.$component;
+
+      this.status = this.Component.Loading;
+
+      // Lazy init :
+      if (!this.createFlags) {
+        let loaderComponent;
+        if (parent) {
+          this.createFlags = QMLComponent.Nested;
+          loaderComponent = parent.$component;
+        } else {
+          this.createFlags = QMLComponent.Root;
+        }
+        this.flags |= this.createFlags;
+        init(loaderComponent);
+      }
+
+      engine.operationState = QmlWeb.QMLOperationState.Init;
+      engine.$component = this;
+
+      let item;
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
@@ -317,8 +324,17 @@ class QMLComponent {
 
       this.finalizeImports();
 
+      this.status = this.Component.Ready;
+
+      if (item.Component) {
+        item.Component.completed();
+      }
+
+    } catch (err) {
+      this.status = this.Component.Error;
+      throw err;
     } finally {
-      QmlWeb.engine.$component = prevComponent;
+      engine.$component = prevComponent;
       engine.operationState = oldState;
       this.createFlags = oldCreateFlags;
     }
@@ -356,15 +372,11 @@ class QMLComponent {
   static getAttachedObject() {
     // see QMLEngine.js for explanation how it is used.
     if (!this.$Component) {
-      // super : QmlWeb.QObject is not enough, at least QtQml.QtObject is required
-      // so Component.Error, Component.Ready ... are valid :
-      // not good: this.$Component = new QmlWeb.QObject(this, {attached:true, info:"Component"});
-
-      // but this simple one is ok (completed/destruction signals added) :
+      // (completed/destruction signals added to Component) :
       this.$Component = this.$component;
 
       // moved to $createObject:
-      //QmlWeb.engine.completedSignals.push(this.$component.completed);
+      // QmlWeb.engine.completedSignals.push(this.$component.completed);
     }
     return this.$Component;
   }
@@ -375,7 +387,12 @@ QmlWeb.registerQmlType({
   module: "QtQml",
   name: "Component",
   versions: /.*/,
-  baseClass: "QtObject",
+  baseClass: "QObject",
+  enums: {
+    Component: {
+      Null: 1, Ready: 2, Loading: 3, Error: 4
+    }
+  },
   constructor: QMLComponent
 });
 
