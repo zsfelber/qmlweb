@@ -174,6 +174,7 @@ class QMLEngine {
       }, QmlWeb.QMLComponent.Root | QmlWeb.QMLComponent.LoadImports);
 
       this.rootObject = component.$createObject(parent);
+
       if (this.rootObject.dom) {
         console.log(clazz.$name+" : DOM element FOUND ! Added to engine screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
         this.domTarget.appendChild(this.rootObject.dom);
