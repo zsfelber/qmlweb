@@ -305,6 +305,26 @@ function $resolveImageURL(fileURL) {
   return fileURL;
 }
 
+function $instanceOf(o, typestring, component) {
+  if (!component) {
+    throw new Error("QmlWeb.$instanceOf : Class : "+typestring+" Argument error, missing Component");
+  }
+
+  var clinfo = QmlWeb.resolveClassImport(typestring, component);
+  let f;
+  if (clinfo.constructor) {
+    return o instanceof clinfo.constructor;
+  } else if (f=clinfo.$file) {
+    for (let c = o.$component; c; c=c.loaderComponent) {
+      if (c.$file===f) {
+        return true;
+      }
+    }
+    return false;
+  } else {
+    throw new Error("QmlWeb.$instanceOf : Class not found : "+typestring+" in context of "+component.context);
+  }
+}
 
 
 
@@ -343,3 +363,4 @@ QmlWeb.$resolvePath = $resolvePath;
 // Return a DOM-valid path to load the image (fileURL is an already-resolved
 // URL)
 QmlWeb.$resolveImageURL = $resolveImageURL;
+QmlWeb.$instanceOf = $instanceOf;
