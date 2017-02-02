@@ -205,8 +205,7 @@ function createQmlObject(src, parent, file) {
   //var resolvedUrl = url => QmlWeb.qmlUrl(url),
 
   const clazz = QmlWeb.parseQML(src, file);
-  var resolvedUrl = QmlWeb.$resolvePath;
-  file = file || /*Qt.*/resolvedUrl("createQmlObject_function");
+  file = file || QmlWeb.$resolvePath("createQmlObject_function");
 
   var component = QmlWeb.createComponent({clazz, parent, $file:file}, QmlWeb.QMLComponent.Root | QmlWeb.QMLComponent.LoadImports);
 

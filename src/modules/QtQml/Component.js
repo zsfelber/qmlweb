@@ -234,10 +234,10 @@ class QMLComponent {
       return ;
     }
 
-    if (this.$jsImports.length ||
-        Object.keys(this.moduleConstructors).length ||
-        Object.keys(this.ctxQmldirs).length ||
-        Object.keys(this.componentImportPaths).length  ) {
+    if (this.$jsImports&&this.$jsImports.length ||
+        this.moduleConstructors&&Object.keys(this.moduleConstructors).length ||
+        this.ctxQmldirs&&Object.keys(this.ctxQmldirs).length ||
+        this.componentImportPaths&&Object.keys(this.componentImportPaths).length  ) {
       console.warn("bindImports : imports already loaded, of : "+this+", now rebinding imports to another Component");
     }
 
