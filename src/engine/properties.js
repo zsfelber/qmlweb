@@ -149,13 +149,30 @@ function applyProperties(metaObject, item) {
   var prevComponent = QmlWeb.engine.$component;
   QmlWeb.engine.$component = item.$component;
 
+  function _hand_err(err, i) {
+    if (err.ctType === "PendingEvaluation") {
+      //console.warn("PendingEvaluation : Cannot apply property bindings (reevaluating at startup) :" + i + "  item:" + item);
+    } else {
+      console.warn("Cannot apply property bindings : "+item+" . "+i+"  Context:"+item.$context+"  "+err);
+    }
+
+    if (QmlWeb.engine.operationState === QmlWeb.QMLOperationState.Idle) {
+      throw err;
+    }
+  }
+
   try {
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     if (metaObject.$children && metaObject.$children.length !== 0 && !(item instanceof QMLComponent)) {
       if (item.$defaultProperty) {
-        item.$properties[item.$defaultProperty].set(
-            metaObject.$children, QMLProperty.ReasonInitPrivileged|QMLProperty.SetChildren, item
-          );
+        try {
+          item.$properties[item.$defaultProperty].set(
+              metaObject.$children, QMLProperty.ReasonInitPrivileged|QMLProperty.SetChildren, item
+            );
+
+        } catch (err) {
+          _hand_err(err, "default:"+item.$defaultProperty);
+        }
       } else {
         throw new Error("Cannot assign to unexistant default property  "+item);
       }
@@ -185,15 +202,7 @@ function applyProperties(metaObject, item) {
         applyProperty(item, i, value);
 
       } catch (err) {
-        if (err.ctType === "PendingEvaluation") {
-          //console.warn("PendingEvaluation : Cannot apply property bindings (reevaluating at startup) :" + i + "  item:" + item);
-        } else {
-          console.warn("Cannot apply property bindings : "+item+" . "+i+"  Context:"+item.$context+"  "+err);
-        }
-
-        if (QmlWeb.engine.operationState === QmlWeb.QMLOperationState.Idle) {
-          throw err;
-        }
+        _hand_err(err, i);
       }
     }
   } finally {
