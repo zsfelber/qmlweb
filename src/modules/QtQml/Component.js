@@ -1,7 +1,8 @@
-class QMLComponent extends QmlWeb.QObject {
+class QMLComponent {
   constructor(meta, flags) {
-    super();
-    QmlWeb.superAndInitMeta(this, {});
+
+    this.$properties = {};
+    QmlWeb.initMeta(this, {}, QMLComponent);
 
     this.copyMeta(meta, flags);
 
@@ -11,13 +12,11 @@ class QMLComponent extends QmlWeb.QObject {
     this.completed = QmlWeb.Signal.signal("completed", []);
     this.destruction = QmlWeb.Signal.signal("destruction", []);
 
-    createProperty("enum", this, "status", {initialValue: this.Component.Null});
-
     // init now, otherwise it's Lazy
     if (this.createFlags) {
       // no component = is import root
       const loaderComponent = QmlWeb.engine.$component;
-      init(loaderComponent);
+      this.init(loaderComponent);
     }
 
   }
@@ -307,7 +306,7 @@ class QMLComponent extends QmlWeb.QObject {
           this.createFlags = QMLComponent.Root;
         }
         this.flags |= this.createFlags;
-        init(loaderComponent);
+        this.init(loaderComponent);
       }
 
       engine.operationState = QmlWeb.QMLOperationState.Init;
@@ -392,6 +391,9 @@ QmlWeb.registerQmlType({
     Component: {
       Null: 1, Ready: 2, Loading: 3, Error: 4
     }
+  },
+  properties: {
+    status: { type:"enum", initialValue: 1}
   },
   constructor: QMLComponent
 });
