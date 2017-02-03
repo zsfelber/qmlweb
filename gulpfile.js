@@ -13,15 +13,33 @@ const istanbul = require("gulp-istanbul");
 const path = require("path");
 
 const qtcoreSources = [
-  "src/QmlWeb.js",
+  "src/*.js",
   "src/qtbase/*.js",
-  "src/engine/modules.js",
+  "src/modules/*.js",
   "src/modules/QtQml/Qt.js",
-  "src/modules/QtQml/QtObject.js",
-  "src/modules/QtQml/Component.js",
-  "src/engine/QML*.js",
   "src/engine/*.js",
-  "src/modules/**/*.js"
+  "src/modules/QtQml/QtObject.js",
+  "src/modules/QtQml/Timer.js",
+  "src/modules/QtQml/Connections.js",
+  "src/modules/QtQml/Binding.js",
+  "src/modules/QtQml/Component.js",
+  "src/modules/QtQuick.Dialogs/*.js",
+  "src/modules/QtNfc/*.js",
+  "src/modules/QmlWeb/*.js",
+  "src/modules/QmlWeb.Dom/*.js",
+  "src/modules/QtQuick/*.js",
+  "src/modules/QtMobility/*.js",
+  "src/modules/QtQuick.Window/*.js",
+  "src/modules/QtWebSockets/*.js",
+  "src/modules/QtBluetooth/*.js",
+  "src/modules/QtQml.Models/*.js",
+  "src/modules/QtWebView/*.js",
+  "src/modules/QtWebEngine/*.js",
+  "src/modules/QtQuick.Controls.2/*.js",
+  "src/modules/QtGraphicalEffects/*.js",
+  "src/modules/Qt.labs.settings/*.js",
+  "src/modules/QtMultimedia/*.js",
+  "src/modules/QtQuick.Controls/*.js"
 ];
 
 const parserSources = [
