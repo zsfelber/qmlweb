@@ -251,7 +251,7 @@ function addElementToPageContexts(item, id, ctx) {
   // - until current page top  :
   for (var ectx = ctx; ; ectx=ectx.loaderContext) {
     if (ectx.$elements[id]) {
-      throw new Error("Duplicated element id:"+id+" in "+ectx.$info);
+      throw new Error("Duplicated element id:"+id+" in "+ectx);
     }
 
     QmlWeb.setupGetterSetter(

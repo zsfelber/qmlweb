@@ -313,12 +313,12 @@ class QMLEngine {
     // Perform pending operations. Now we use it only to fire signals to slots
     // again, if pending evaluation error occured during an init-time event invocation.
     //
+    // onCompleted signals : included, recorded the same way in pending signal/slots
+    //
     // TODO Important! We are using 1 single queue for all the pending bound properties
     // and pending signals and register every event immediately when it's just occured.
     // So we keep the order as was when they initially occurred and now we're evaluating it
-    // sequentially. We hope, this evaluation algorithm can reproduce the same evaluation
-    // graph exactly, but I think, this logic have complex consequences.
-    // Not very easy intellectual task to check that throroughly, for a later time...
+    // sequentially.
 
     console.log("processPendingOperations : "+this.pendingOperations.length);
 

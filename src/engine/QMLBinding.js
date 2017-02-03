@@ -1,7 +1,8 @@
 let bindingIds = 0;
 
 function _ubertrim(str) {
-  if (str === "") {
+  if (!str) {
+    str = "";
   } else if (str && str.replace) {
     str = str.replace(/^(?:\s|[;,])*/g, "");
     str = str.replace(/(?:\s|[;,])*$/g, "");
@@ -226,26 +227,38 @@ class QMLBinding {
     }
   }
 
-/**ile:///ubu64/free_storage/workspaces/greenzone-terminal/FirstTest/bin/qml.html
- * Compile binding. Afterwards you may call binding.eval/get/set to evaluate.
- */
+  /**
+   * Compile binding. Afterwards you may call binding.eval/get/set/run to evaluate.
+   */
   compile() {
     if (!this.$bindingId) {
       this.$bindingId = ++bindingIds;
     }
-    this.src = _ubertrim(this.src);
+
     this.compiled = true;
-    if (this.flags&QMLBinding.ImplFunction) {
-      if (this.args!==undefined) {
-        if (this.src0===undefined) this.src0 = this.src;
-        this.src = "("+this.args+")"+this.src0;
-      }
-      this.stripFunction(this.src, true);
-      this.implRun = this.bindRun();
-    } else {
+
+    if (this.flags & QMLBinding.User) {
       this.implGet = this.bindGet();
       if (this.flags & QMLBinding.Bidirectional) {
         this.implSet = this.bindSet();
+      }
+
+    } else {
+
+      this.src = _ubertrim(this.src);
+
+      if (this.flags&QMLBinding.ImplFunction) {
+        if (this.args!==undefined) {
+          if (this.src0===undefined) this.src0 = this.src;
+          this.src = "("+this.args+")"+this.src0;
+        }
+        this.stripFunction(this.src, true);
+        this.implRun = this.bindRun();
+      } else {
+        this.implGet = this.bindGet();
+        if (this.flags & QMLBinding.Bidirectional) {
+          this.implSet = this.bindSet();
+        }
       }
     }
   }
@@ -274,8 +287,6 @@ class QMLBinding {
 
   bindGet() {
 
-    const vvith = this.namespace();
-
     if (this.flags & QMLBinding.User) {
       if ((this.flags&QMLBinding.ImplBlock) || !(this.flags&QMLBinding.ImplFunction)) {
         throw new Error("Invalid Qt.Binding flags : "+this.flags," Valid flags:User,ImplFunction,Bidirectional,Alias");
@@ -284,17 +295,12 @@ class QMLBinding {
         throw new Error("Invalid Qt.binding call, no getterFunc: "+this);
       }
 
-      this.src = _ubertrim(this.getterFunc.toString());
-      this.stripFunction(this.src, true);
-      if (this.args) {
-        throw new Error("Qt.Binding should have no arguments : "+this);
-      }
-
-      return new Function(`
-        ${vvith} ${this.src}
-      `);
+      return this.getterFunc;
 
     } else {
+
+      const vvith = this.namespace();
+
       var src = this.src;
       if (this.property) {
         var fp = QmlWeb.formatPath(this.property);
@@ -342,15 +348,8 @@ class QMLBinding {
         throw new Error("Invalid bidirectional Qt.binding call, no setterFunc: "+this);
       }
 
-      this.src = _ubertrim(this.setterFunc.toString());
-      this.stripFunction(this.src, true);
-      if (this.args.split(",").length!==2) {
-        throw new Error("Invalid Qt.binding setter function arguments, should be (value, flags)");
-      }
+      return this.setterFunc;
 
-      return eval(`(function noname(${this.args}) {
-        ${vvith} ${this.src}
-      })`);
     } else {
       if (this.flags&(QMLBinding.ImplFunction|QMLBinding.ImplBlock)) {
         throw new Error("Invalid writable/bidirectional binding, it should be an expression : "+this);
