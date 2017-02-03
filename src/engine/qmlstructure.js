@@ -428,17 +428,17 @@ convertToEngine.walkers = {
 
     return a;
   },
-  block: (blocks) => {
-    blocks.forEach(function(stat) {
-
-    });
-  },
-  binary: (op, a, b) => {
-    if (op === "instanceof") {
-
-    }
-    return convertToEngine.bindout(tree, src, name);
-  },
+  //block: (blocks) => {
+  //  blocks.forEach(function(stat) {
+  //
+  //  });
+  //},
+  //binary: (op, a, b) => {
+  //  if (op === "instanceof") {
+  //
+  //  }
+  //  return convertToEngine.bindout(tree, src, name);
+  //},
 };
 
 convertToEngine.walk = function(tree) {
@@ -457,12 +457,12 @@ convertToEngine.bindout = function(statement, binding, info) {
   // (but still handle the case, we get the content directly)
   const tree = statement[0] === "stat" ? statement[1] : statement;
 
-  //const type = tree[0];
-  //const walker = convertToEngine.walkers[type];
-  //if (walker) {
-  //  return walker.apply(type, tree.slice(1));
-  //}
-  convertToEngine.walk(tree);
+  const type = tree[0];
+  const walker = convertToEngine.walkers[type];
+  if (walker) {
+    return walker.apply(type, tree.slice(1));
+  }
+  //convertToEngine.walk(tree);
 
   return new QmlWeb.QMLBinding(binding, tree, undefined, undefined, info);
 };
