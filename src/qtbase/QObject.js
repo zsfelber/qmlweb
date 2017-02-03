@@ -17,7 +17,8 @@ class QObject {
         throw new Error("Object attached to null : "+this);
       }
       if (!this.$component && !this.$context) {
-        // context for attached properties like "Component", "anchors" and so
+        // context for attached properties like "anchors" and so
+        // see also $ownerObject
         this.$component = parent.$component;
         this.$context = parent.$context;
       }

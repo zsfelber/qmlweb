@@ -23,6 +23,7 @@ class QMLComponent {
 
 
   init(loaderComponent) {
+    const engine = QmlWeb.engine;
 
     if ( this.flags & QmlWeb.QMLComponent.Nested ) {
 
@@ -134,6 +135,10 @@ class QMLComponent {
     this.context.component = this;
     this.context.loaderContext = this.loaderComponent ? this.loaderComponent.context : engine.rootContext;
     this.context.topContext = this.topComponent ? this.topComponent.context : null;
+
+    // !!! see QMLBinding
+    this.$context = this.context;
+    this.$component = this;
 
     if (!this.context) {
       throw new Error("No component context");
@@ -287,12 +292,12 @@ class QMLComponent {
 
   $createObject(parent, properties = {}) {
     const engine = QmlWeb.engine;
+    const oldCreateFlags = this.createFlags;
+    // change base path to current component base path
+    const oldState = engine.operationState;
+    const prevComponent = engine.$component;
 
     try {
-      const oldCreateFlags = this.createFlags;
-      // change base path to current component base path
-      const oldState = engine.operationState;
-      var prevComponent = engine.$component;
 
       this.status = this.Component.Loading;
 

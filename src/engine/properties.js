@@ -92,17 +92,18 @@ function createProperty(type, obj, propName, options) {
     _set_prop(propName, prop, QMLProperty.ReasonInit);
 
     obj.$properties[propName] = prop;
-
     QmlWeb.setupGetterSetter(obj, propName, getter, setter, prop);
 
   } else {
     _set_prop(propName, prop, QMLProperty.ReasonInitPrivileged);
 
     obj.$properties[propName] = prop;
-    obj.$properties_noalias[propName] = prop;
-
     QmlWeb.setupGetterSetter(obj, propName, getter, setter, prop);
-    QmlWeb.setupGetterSetter(obj.$noalias, propName, getter, setter, prop);
+
+    if (obj.$noalias) {
+      obj.$properties_noalias[propName] = prop;
+      QmlWeb.setupGetterSetter(obj.$noalias, propName, getter, setter, prop);
+    }
   }
 
 
