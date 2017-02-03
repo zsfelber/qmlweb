@@ -162,10 +162,6 @@ function applyProperties(metaObject, item) {
   }
 
   try {
-    if (metaObject.$defaultProperty) {
-      item.$defaultProperty = metaObject.$defaultProperty;
-    }
-
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     if (metaObject.$children && metaObject.$children.length !== 0 && !(item instanceof QMLComponent)) {
       if (item.$defaultProperty) {
@@ -182,7 +178,12 @@ function applyProperties(metaObject, item) {
       }
     }
 
-
+    // We purposefully set the default property AFTER using it, in order to only
+    // have it applied for instantiations of this component, but not for its supertypes
+    // or internals (eg not putting default Element into itself)
+    if (metaObject.$defaultProperty) {
+      item.$defaultProperty = metaObject.$defaultProperty;
+    }
 
     for (const i in metaObject) {
       let _task;

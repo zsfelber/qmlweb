@@ -95,8 +95,11 @@ class QMLProperty {
 
       const constructors = this.obj.$component ? this.obj.$component.moduleConstructors : QmlWeb.constructors;
       if (constructors[this.type] === QmlWeb.qmlList) {
-        // NOTcomponentE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
-        this.val = QmlWeb.qmlList(val, correctObjProto, QmlWeb.QMLComponent.Nested);
+        // NOTE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
+        // TODO workaround  despite it's "setVal" we may merge all child class items into val,
+        // its behavior is like "appendVal" now
+        this.val = [];
+        var tmp = QmlWeb.qmlList(val, correctObjProto, QmlWeb.QMLComponent.Nested);
       } else if (val instanceof QmlWeb.QMLMetaElement) {
         // Root element or nested Component element ?
         if (constructors[val.$class] === QMLComponent ||
