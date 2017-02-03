@@ -184,13 +184,11 @@ class QMLEngine {
 
       this.operationState = QmlWeb.QMLOperationState.Idle;
 
-      this.$initializePendingOps();
+      this.processPendingOperations();
 
       this.start();
 
       this.updateGeometry();
-
-      this.callCompletedSignals();
 
       return this.rootObject.$component;
 
@@ -307,9 +305,9 @@ class QMLEngine {
     }
   }
 
-  $initializePendingOps() {
+  processPendingOperations() {
     // Initialize property bindings
-    // we use `while`, because $initializePendingOps may be called
+    // we use `while`, because processPendingOperations may be called
     // recursive (because of Loader and/or createQmlObject )
     // +
     // Perform pending operations. Now we use it only to fire signals to slots
@@ -322,7 +320,7 @@ class QMLEngine {
     // graph exactly, but I think, this logic have complex consequences.
     // Not very easy intellectual task to check that throroughly, for a later time...
 
-    console.log("$initializePendingOps : "+this.pendingOperations.length);
+    console.log("processPendingOperations : "+this.pendingOperations.length);
 
     var i=0,a=0,a1=0,a2=0,a3=0,b=0,e=0;
     while (this.pendingOperations.length > 0) {
@@ -370,19 +368,10 @@ class QMLEngine {
       i++;
     }
 
-    console.log("$initializePendingOps : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+a3)+") functions:"+b+" errors:"+e);
+    console.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+a3)+") functions:"+b+" errors:"+e);
   }
 
 
-  callCompletedSignals() {
-    // the while loop is better than for..in loop, because completedSignals
-    // array might change dynamically when some completed signal handlers will
-    // create objects dynamically via createQmlObject or Loader
-    while (this.completedSignals.length > 0) {
-      const handler = this.completedSignals.shift();
-      handler();
-    }
-  }
 }
 
 QmlWeb.QMLEngine = QMLEngine;

@@ -216,9 +216,7 @@ function createQmlObject(src, parent, file) {
       engine.operationState !== QMLOperationState.Idle) {
     // We don't call those on first creation, as they will be called
     // by the regular creation-procedures at the right time.
-    engine.$initializePropertyBindings();
-
-    engine.callCompletedSignals();
+    engine.processPendingOperations();
   }
 
   return obj;

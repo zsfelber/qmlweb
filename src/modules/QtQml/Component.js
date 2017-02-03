@@ -297,6 +297,7 @@ class QMLComponent {
     const oldState = engine.operationState;
     const prevComponent = engine.$component;
 
+    let item;
     try {
 
       this.status = this.Component.Loading;
@@ -317,7 +318,6 @@ class QMLComponent {
       engine.operationState = QmlWeb.QMLOperationState.Init;
       engine.$component = this;
 
-      let item;
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
@@ -332,10 +332,19 @@ class QMLComponent {
       this.status = this.Component.Ready;
 
       if (item.Component) {
-        item.Component.completed();
+        try {
+          item.Component.completed();
+        } catch (err) {
+          if (err.ctType === "PendingEvaluation") {
+            //console.warn("PendingEvaluation : Cannot call Component.completed : parent:"+parent+"  ctx:"+this.context);
+          } else {
+            throw err;
+          }
+        }
       }
 
     } catch (err) {
+      console.warn("Cannot create Object : parent:"+parent+"  ctx:"+this.context+"  "+err.message);
       this.status = this.Component.Error;
       throw err;
     } finally {

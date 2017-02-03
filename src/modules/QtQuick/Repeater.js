@@ -213,7 +213,7 @@ QmlWeb.registerQmlType({
     if (QmlWeb.engine.operationState !== QMLOperationState.Init) {
       // We don't call those on first creation, as they will be called
       // by the regular creation-procedures at the right time.
-      QmlWeb.engine.$initializePropertyBindings();
+      QmlWeb.engine.processPendingOperations();
     }
 
     if (index > 0) {
