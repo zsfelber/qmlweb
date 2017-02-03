@@ -344,7 +344,7 @@ class QMLComponent {
       }
 
     } catch (err) {
-      console.warn("Cannot create Object : parent:"+parent+"  ctx:"+this.context+"  "+err.message);
+      //console.warn("Cannot create Object : parent:"+parent+"  ctx:"+this.context+"  "+err.message);
       this.status = this.Component.Error;
       throw err;
     } finally {

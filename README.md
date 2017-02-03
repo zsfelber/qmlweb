@@ -189,5 +189,5 @@ evaluation tree connections, this step gives major performance bonus.
 Minor coding style changes, simplifications eg:
 - using 1 flag variable in QMLBinding(ImplFunction/ImplBlock/.../Bidrection/Alias), QMLProperty(reasons,priviligezed/break readonly, break bidirectional binding at set)
 instead of several global boolean properties
-- using 1 interface and 1 queue for engine.pendingOperations (instead of 'engine.bindedProperties' + engine.pendingOperations and 2 queues at startup finish)
+- using 1 interface and 1 queue for engine.pendingOperations (instead of 'engine.bindedProperties' + engine.pendingOperations + Component.completed and 3 queues at startup finish)
 - relocated a couple of compile time functions to resolve.js, load.js, import.js, classes.js

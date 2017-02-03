@@ -1,11 +1,12 @@
 let bindingIds = 0;
 
 function _ubertrim(str) {
-  if (str.replace) {
+  if (str === "") {
+  } else if (str && str.replace) {
     str = str.replace(/^(?:\s|[;,])*/g, "");
     str = str.replace(/(?:\s|[;,])*$/g, "");
   } else {
-    console.warn("_ubertrim not possible : what's this?!:"+str+" "+(typeof str)+" "+JSON.stringify(str));
+    console.warn("_ubertrim not possible : "+str+" "+(typeof str)+" "+JSON.stringify(str));
   }
 
   return str;

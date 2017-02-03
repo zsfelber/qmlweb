@@ -91,7 +91,7 @@ function addModulePath(moduleName, dirPath) {
   const engine = QmlWeb.engine;
   // Keep the mapping. It will be used in loadImports() function.
   // Remove trailing slash as it required for `readQmlDir`.
-  engine.userAddedModulePaths[moduleName] = dirPath.replace(/\/$/, "");
+  engine.userAddedModulePaths[moduleName] = dirPath?dirPath.replace(/\/$/, ""):null;
 }
 
 /*registerProperty(obj, propName) {
