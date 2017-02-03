@@ -398,7 +398,7 @@ convertToEngine.walkers = {
       // TODO: is this needed? kept for compat with ==
       return src;
     }
-    return new QmlWeb.QMLBinding(src, ["name", src]);
+    return new QmlWeb.QMLBinding(src);
   },
   num: src => +src,
   string: src => String(src),
@@ -427,14 +427,25 @@ convertToEngine.walkers = {
     }
 
     return a;
-  }
+  },
+  block: (blocks) => {
+    blocks.forEach(function(stat) {
+
+    });
+  },
+  binary: (op, a, b) => {
+    if (op === "instanceof") {
+
+    }
+    return convertToEngine.bindout(tree, src, name);
+  },
 };
 
 convertToEngine.walk = function(tree) {
   const type = tree[0];
   const walker = convertToEngine.walkers[type];
   if (!walker) {
-    console.log(`No walker for ${type}`);
+    console.warn(`No walker for ${type}`);
     return undefined;
   }
   return walker.apply(type, tree.slice(1));
@@ -446,11 +457,13 @@ convertToEngine.bindout = function(statement, binding, info) {
   // (but still handle the case, we get the content directly)
   const tree = statement[0] === "stat" ? statement[1] : statement;
 
-  const type = tree[0];
-  const walker = convertToEngine.walkers[type];
-  if (walker) {
-    return walker.apply(type, tree.slice(1));
-  }
+  //const type = tree[0];
+  //const walker = convertToEngine.walkers[type];
+  //if (walker) {
+  //  return walker.apply(type, tree.slice(1));
+  //}
+  convertToEngine.walk(tree);
+
   return new QmlWeb.QMLBinding(binding, tree, undefined, undefined, info);
 };
 

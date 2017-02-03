@@ -8,27 +8,29 @@ class ItemBase {
     this.elementRemove.connect(this, this.$onElementRemove);
   }
   $onElementAdd(element) {
-
+    var leafElement = element.$base.$leaf;
     element.$index = this.data.length;
-    this.data.push(element);
-    if (element instanceof ItemBase) {
+    this.data.push(leafElement);
+    if (leafElement instanceof ItemBase) {
       element.$childIndex = this.children.length;
-      this.children.push(element);
+      this.children.push(leafElement);
       this.childrenChanged();
     } else {
       element.$resourceIndex = this.resources.length;
-      this.resources.push(element);
+      this.resources.push(leafElement);
       this.resourcesChanged();
     }
     if (this.dom) this.dom.appendChild(element.dom);
   }
+
   $onElementRemove(element) {
+    var leafElement = element.$base.$leaf;
 
     this.data.splice(element.$index, 1);
     for (var i = element.$index; i < this.data.length; ++i) {
       this.data[i].$index=i;
     }
-    if (element instanceof ItemBase) {
+    if (leafElement instanceof ItemBase) {
       this.children.splice(element.$childIndex, 1);
       for (var i = element.$childIndex; i < this.children.length; ++i) {
         this.children[i].$childIndex=i;

@@ -310,6 +310,31 @@ function $instanceOf(o, typestring, component) {
     throw new Error("QmlWeb.$instanceOf : Class : "+typestring+" Argument error, missing Component");
   }
 
+  switch (typestring) {
+  case "Function":
+  case "function":
+    return o instanceof Function;
+  case "Array":
+  case "array":
+    return o instanceof Array;
+  case "Object":
+  case "object":
+  case "var":
+    return o instanceof Object;
+  case "String":
+  case "string":
+    return typeof(o) === "string";
+  case "Number":
+  case "number":
+  case "int":
+  case "real":
+  case "double":
+  case "float":
+    return typeof(o) === "number";
+  }
+
+  if (o && o.$base) o = o.$base.$leaf;
+
   var clinfo = QmlWeb.resolveClassImport(typestring, component);
   let f;
   if (clinfo.constructor) {
