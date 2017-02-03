@@ -334,7 +334,7 @@ class QMLComponent {
       if (item.Component) {
         try {
           item.Component.completed();
-          console.log("Completed : "+this);
+          console.log("Completed : "+this+" : "+item);
         } catch (err) {
           if (err.ctType === "PendingEvaluation") {
             //console.warn("PendingEvaluation : Cannot call Component.completed : parent:"+parent+"  ctx:"+this.context);
@@ -343,7 +343,7 @@ class QMLComponent {
           }
         }
       } else {
-        console.log("Completed : "+this);
+        console.log("Completed : "+this+" : "+item);
       }
 
     } catch (err) {
