@@ -29,7 +29,7 @@ function registerGlobalQmlType(name, type) {
   constructors[name] = type;
   modules.Main[name] = type;
 
-  const QtObject = QmlWeb.getConstructor("QtQml", "2.0", "QtObject");
+  const QtObject = QmlWeb.QtObject;
 
   /*
     http://doc.qt.io/qt-5/qtqml-syntax-objectattributes.html#attached-properties-and-attached-signal-handlers

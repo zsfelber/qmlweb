@@ -83,7 +83,7 @@ QmlWeb.registerQmlType({
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     let qmlComponent = newItem;
     if (newItem instanceof QMLComponent) {
-      qmlComponent = newItem.$createObject(this, {}/*, this*/);
+      qmlComponent = newItem.$createObject(this, /*{}, this*/);
     }
     qmlComponent.parent = this;
     this.item = qmlComponent;
@@ -105,7 +105,7 @@ QmlWeb.registerQmlType({
   }
   $callOnCompleted(child) {
     child.Component.completed();
-    const QtObject = QmlWeb.getConstructor("QtQml", "2.0", "QtObject");
+    const QtObject = QmlWeb.QtObject;
     for (let i = 0; i < child.$tidyupList.length; i++) {
       if (child.$tidyupList[i] instanceof QtObject) {
         this.$callOnCompleted(child.$tidyupList[i]);

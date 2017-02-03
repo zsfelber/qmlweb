@@ -181,7 +181,7 @@ function createComponentAndElement(meta, parent, flags) {
   }
 
   // NOTE recursive call to initialize the container for supertype  ($createObject -> constuct -> $createObject -> constuct ...) :
-  item = component.$createObject(parent);
+  item = component.createObject(parent);
 
   if (component !== item.$component) {
     throw new Error("Component mismatch : "+component+" vs "+item.$component);

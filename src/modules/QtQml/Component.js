@@ -359,10 +359,11 @@ class QMLComponent {
   }
   createObject(parent, properties = {}) {
     const item = this.$createObject(parent, properties);
-    const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "Item");
 
-    if (item instanceof QMLItem) {
+    if (item instanceof QmlWeb.ItemBase) {
       item.$properties.parent.set(parent, QmlWeb.QMLProperty.ReasonInitPrivileged);
+    } else if (item instanceof QmlWeb.QtObject) {
+      item.$properties.container.set(parent, QmlWeb.QMLProperty.ReasonInitPrivileged);
     }
 
     return item;

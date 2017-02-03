@@ -1,27 +1,9 @@
 // Base object for all qml elements
 
-QmlWeb.registerQmlType({
-  module: "QtQml",
-  name: "QtObject",
-  versions: /.*/,
-  properties : {
-     container: "QtObject",
-     $index: { type: "int", bound:true },
-     $resourceIndex: { type: "int", bound:true },
-     objectName: "string"
-  },
-  signals: {
-     elementAdd: [
-       { type: "QtObject", name: "element" }
-     ],
-     elementRemove: [
-       { type: "QtObject", name: "element" }
-     ]
-  },
-}, class QtObject0 extends QmlWeb.QObject {
+class QtObject extends QmlWeb.QObject {
   constructor(meta) {
     super(meta.parent, meta);
-    QmlWeb.initMeta(this, meta, QtObject0);
+    QmlWeb.initMeta(this, meta, QtObject);
 
     // Component get own properties
     this.$attributes = [];
@@ -75,4 +57,27 @@ QmlWeb.registerQmlType({
   getAttributes() {
     return this.$attributes;
   }
+};
+
+QmlWeb.registerQmlType({
+  module: "QtQml",
+  name: "QtObject",
+  versions: /.*/,
+  properties : {
+     container: "QtObject",
+     $index: { type: "int", bound:true },
+     $resourceIndex: { type: "int", bound:true },
+     objectName: "string"
+  },
+  signals: {
+     elementAdd: [
+       { type: "QtObject", name: "element" }
+     ],
+     elementRemove: [
+       { type: "QtObject", name: "element" }
+     ]
+  },
+  constructor: QtObject
 });
+
+QmlWeb.QtObject = QtObject;

@@ -1,17 +1,4 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "ItemBase",
-  versions: /.*/,
-  baseClass: "QtQml.QtObject",
-  properties: {
-    parent: { type: "alias", path:["container"], overrideType: "ItemBase" },
-    data: { type: "list", bound:true },
-    children: { type: "list", bound:true },
-    resources: { type: "list", bound:true },
-    $childIndex: { type: "int", bound:true },
-  },
-  defaultProperty: "data"
-}, class {
+class ItemBase {
   constructor(meta) {
     QmlWeb.superAndInitMeta(this, meta);
 
@@ -21,10 +8,10 @@ QmlWeb.registerQmlType({
     this.elementRemove.connect(this, this.$onElementRemove);
   }
   $onElementAdd(element) {
-    const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "ItemBase");
+
     element.$index = this.data.length;
     this.data.push(element);
-    if (element instanceof QMLItem) {
+    if (element instanceof ItemBase) {
       element.$childIndex = this.children.length;
       this.children.push(element);
       this.childrenChanged();
@@ -36,12 +23,12 @@ QmlWeb.registerQmlType({
     if (this.dom) this.dom.appendChild(element.dom);
   }
   $onElementRemove(element) {
-    const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "ItemBase");
+
     this.data.splice(element.$index, 1);
     for (var i = element.$index; i < this.data.length; ++i) {
       this.data[i].$index=i;
     }
-    if (element instanceof QMLItem) {
+    if (element instanceof ItemBase) {
       this.children.splice(element.$childIndex, 1);
       for (var i = element.$childIndex; i < this.children.length; ++i) {
         this.children[i].$childIndex=i;
@@ -58,10 +45,10 @@ QmlWeb.registerQmlType({
   }
   $onDataChanged(newData) {
     if (this.$defaultProperty==="data") {
-       const QMLItem = QmlWeb.getConstructor("QtQuick", "2.0", "ItemBase");
+
        for (const i in newData) {
          const child = newData[i];
-         if (child instanceof QMLItem) {
+         if (child instanceof ItemBase) {
            child.parent = this; // This will also add it to children.
          }
        }
@@ -69,4 +56,23 @@ QmlWeb.registerQmlType({
   }
 
 
+};
+
+QmlWeb.registerQmlType({
+  module: "QtQuick",
+  name: "ItemBase",
+  versions: /.*/,
+  baseClass: "QtQml.QtObject",
+  properties: {
+    parent: { type: "alias", path:["container"], overrideType: "ItemBase" },
+    data: { type: "list", bound:true },
+    children: { type: "list", bound:true },
+    resources: { type: "list", bound:true },
+    $childIndex: { type: "int", bound:true },
+  },
+  defaultProperty: "data",
+  constructor: ItemBase
 });
+
+QmlWeb.ItemBase = ItemBase;
+

@@ -1,36 +1,4 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Item",
-  versions: /.*/,
-  baseClass: "ItemBase",
-  properties: {
-    $opacity: { type: "real", initialValue: 1 },
-    state: "string",
-    states: "list",
-    transitions: "list",
-    transform: "list",
-    x: "real",
-    y: "real",
-    z: "real",
-    width: "real",
-    height: "real",
-    implicitWidth: "real",
-    implicitHeight: "real",
-    left: "real",
-    right: "real",
-    top: "real",
-    bottom: "real",
-    horizontalCenter: "real",
-    verticalCenter: "real",
-    rotation: "real",
-    scale: { type: "real", initialValue: 1 },
-    opacity: { type: "real", initialValue: 1 },
-    visible: { type: "bool", initialValue: true },
-    clip: "bool",
-    focus: "bool"
-  },
-  defaultProperty: "data"
-}, class {
+class Item {
   constructor(meta) {
     QmlWeb.superAndInitMeta(this, meta);
 
@@ -595,4 +563,41 @@ QmlWeb.registerQmlType({
     component.childrenRect.width = maxWidth;
     component.childrenRect.height = maxHeight;
   }
+};
+
+QmlWeb.registerQmlType({
+  module: "QtQuick",
+  name: "Item",
+  versions: /.*/,
+  baseClass: "ItemBase",
+  properties: {
+    $opacity: { type: "real", initialValue: 1 },
+    state: "string",
+    states: "list",
+    transitions: "list",
+    transform: "list",
+    x: "real",
+    y: "real",
+    z: "real",
+    width: "real",
+    height: "real",
+    implicitWidth: "real",
+    implicitHeight: "real",
+    left: "real",
+    right: "real",
+    top: "real",
+    bottom: "real",
+    horizontalCenter: "real",
+    verticalCenter: "real",
+    rotation: "real",
+    scale: { type: "real", initialValue: 1 },
+    opacity: { type: "real", initialValue: 1 },
+    visible: { type: "bool", initialValue: true },
+    clip: "bool",
+    focus: "bool"
+  },
+  defaultProperty: "data",
+  constructor: Item
 });
+
+QmlWeb.Item = Item;
