@@ -120,6 +120,24 @@ class QMLProperty {
       } else {
         this.val = new constructors[this.type](val);
       }
+
+      if (!(flags & QMLProperty.SetChildren)) {
+
+        // Not doing this for initial SetChildren, this is what triggers $onElementAdd-s when replacing "data"
+        // or default property:
+
+        if (this.obj.$defaultProperty===this.name && this.val) {
+           for (const i in this.val) {
+             const child = this.val[i];
+             if (child instanceof QmlWeb.ItemBase) {
+               child.$properties.parent.set(this.obj, QmlWeb.QMLProperty.ReasonInitPrivileged);
+             } else if (child instanceof QmlWeb.QtObject) {
+               child.$properties.container.set(this.obj, QmlWeb.QMLProperty.ReasonInitPrivileged);
+             }
+           }
+        }
+      }
+
     } finally {
       if (prevImport) {
         QmlWeb.engine.$component.bindImports(prevImport);

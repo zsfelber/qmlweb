@@ -2,11 +2,10 @@ class ItemBase {
   constructor(meta) {
     QmlWeb.superAndInitMeta(this, meta);
 
-    this.dataChanged.connect(this, this.$onDataChanged);
-
     this.elementAdd.connect(this, this.$onElementAdd);
     this.elementRemove.connect(this, this.$onElementRemove);
   }
+
   $onElementAdd(element) {
     var leafElement = element.$base.$leaf;
     element.$index = this.data.length;
@@ -44,17 +43,6 @@ class ItemBase {
       this.resourcesChanged();
     }
     if (this.dom) this.dom.appendChild(element.dom);
-  }
-  $onDataChanged(newData) {
-    if (this.$defaultProperty==="data") {
-
-       for (const i in newData) {
-         const child = newData[i];
-         if (child instanceof ItemBase) {
-           child.parent = this; // This will also add it to children.
-         }
-       }
-    }
   }
 
 
