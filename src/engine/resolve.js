@@ -310,45 +310,59 @@ function $instanceOf(o, typestring, component) {
     throw new Error("QmlWeb.$instanceOf : Class : "+typestring+" Argument error, missing Component");
   }
 
-  switch (typestring) {
-  case "Function":
-  case "function":
-    return o instanceof Function;
-  case "Array":
-  case "array":
-    return o instanceof Array;
-  case "Object":
-  case "object":
-  case "var":
-    return o instanceof Object;
-  case "String":
-  case "string":
-    return typeof(o) === "string";
-  case "Number":
-  case "number":
-  case "int":
-  case "real":
-  case "double":
-  case "float":
-    return typeof(o) === "number";
-  }
+  if (o && o.$base) {
 
-  if (o && o.$base) o = o.$base.$leaf;
+    o = o.$base.$leaf;
 
-  var clinfo = QmlWeb.resolveClassImport(typestring, component);
-  let f;
-  if (clinfo.constructor) {
-    return o instanceof clinfo.constructor;
-  } else if (f=clinfo.$file) {
-    for (let c = o.$component; c; c=c.loaderComponent) {
-      if (c.$file===f) {
-        return true;
+    var clinfo = QmlWeb.resolveClassImport(typestring, component);
+    let f;
+    if (clinfo.constructor) {
+      return o instanceof clinfo.constructor;
+    } else if (f=clinfo.$file) {
+      for (let c = o.$component; c; c=c.loaderComponent) {
+        if (c.$file===f) {
+          return true;
+        }
       }
+      return false;
+    } else {
+      throw new Error("QmlWeb.$instanceOf : Class not found : "+typestring+" in context of "+component.context);
     }
-    return false;
   } else {
-    throw new Error("QmlWeb.$instanceOf : Class not found : "+typestring+" in context of "+component.context);
+
+    switch (typestring) {
+    case "Function":
+    case "function":
+      return o instanceof Function;
+    case "Array":
+    case "array":
+      return o instanceof Array;
+    case "Object":
+    case "object":
+    case "var":
+      return o instanceof Object;
+    case "String":
+    case "string":
+      return typeof(o) === "string";
+    case "Number":
+    case "number":
+    case "int":
+    case "real":
+    case "double":
+    case "float":
+      return typeof(o) === "number";
+    case "Date":
+    case "date":
+    case "datetime":
+    case "time":
+      return typeof(o) === "date";
+    case "url":
+      return typeof(o) === "string" ? $parseURI(o) : false;
+    case "RegExp":
+      return o instanceof RegExp;
+    }
   }
+
 }
 
 

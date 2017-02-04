@@ -270,35 +270,27 @@ class QMLProperty {
 
     // If this call to the getter is due to a property that is dependant on this
     // one, we need it to take track of changes
-    // if (QMLProperty.evaluatingProperty) {
-      ////console.log(this,QMLProperty.evaluatingProperties.slice(0),this.val);
-      //this.changed.connect(
-      //  QMLProperty.evaluatingProperty,
-      //  QMLProperty.prototype.update,
-      //  QmlWeb.Signal.UniqueConnection
-      //);
 
-      QMLProperty.evaluatingProperties.stack.forEach(function (parent) {
-        var con = parent.obsoleteConnections[this.$propertyId];
-        if (con) {
-          delete parent.obsoleteConnections[this.$propertyId];
-          // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
-          // so now we DON't put former dependency input "con" of parent to parent.evalTreeConnections
-          // but mark this connection obsolete and remove / cleanup it after current cycle
-        } else {
-          // New property dependency detected :
-          con = this.changed.connect(
-            parent,
-            QMLProperty.prototype.updateLater,
-            QmlWeb.Signal.UniqueConnection
-          );
-          parent.evalTreeConnections[this.$propertyId] = con;
-          con.signalOwner = this;
-          this.childEvalTreeConnections++;
-        }
-      }, this);
+    QMLProperty.evaluatingProperties.stack.forEach(function (parent) {
+      var con = parent.obsoleteConnections[this.$propertyId];
+      if (con) {
+        delete parent.obsoleteConnections[this.$propertyId];
+        // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
+        // so now we DON't put former dependency input "con" of parent to parent.evalTreeConnections
+        // but mark this connection obsolete and remove / cleanup it after current cycle
+      } else {
+        // New property dependency detected :
+        con = this.changed.connect(
+          parent,
+          QMLProperty.prototype.updateLater,
+          QmlWeb.Signal.UniqueConnection
+        );
+        parent.evalTreeConnections[this.$propertyId] = con;
+        con.signalOwner = this;
+        this.childEvalTreeConnections++;
+      }
+    }, this);
 
-    // }
 
     if (this.val && this.val.$get) {
       return this.val.$get();
