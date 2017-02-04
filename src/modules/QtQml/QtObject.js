@@ -65,8 +65,8 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   properties : {
      container: "QtObject",
-     $index: { type: "int", pendingInit:true },
-     $resourceIndex: { type: "int", pendingInit:true },
+     $index: { type: "int", pendingInit:true, readOnly:true },
+     $resourceIndex: { type: "int", pendingInit:true, readOnly:true },
      objectName: "string"
   },
   signals: {

@@ -8,14 +8,14 @@ class ItemBase {
 
   $onElementAdd(element) {
     var leafElement = element.$base.$leaf;
-    element.$index = this.data.length;
+    element.$properties.$index.set(this, this.data.length, QmlWeb.QMLProperty.ReasonInitPrivileged);
     this.data.push(leafElement);
     if (leafElement instanceof ItemBase) {
-      element.$childIndex = this.children.length;
+      element.$properties.$childIndex.set(this, this.children.length, QmlWeb.QMLProperty.ReasonInitPrivileged);
       this.children.push(leafElement);
       this.childrenChanged();
     } else {
-      element.$resourceIndex = this.resources.length;
+      element.$properties.$resourceIndex.set(this, this.resources.length, QmlWeb.QMLProperty.ReasonInitPrivileged);
       this.resources.push(leafElement);
       this.resourcesChanged();
     }
@@ -27,18 +27,18 @@ class ItemBase {
 
     this.data.splice(element.$index, 1);
     for (var i = element.$index; i < this.data.length; ++i) {
-      this.data[i].$index=i;
+      this.data[i].$properties.$index.set(this, i, QmlWeb.QMLProperty.ReasonInitPrivileged);
     }
     if (leafElement instanceof ItemBase) {
       this.children.splice(element.$childIndex, 1);
       for (var i = element.$childIndex; i < this.children.length; ++i) {
-        this.children[i].$childIndex=i;
+        this.children[i].$properties.$childIndex.set(this, i, QmlWeb.QMLProperty.ReasonInitPrivileged);
       }
       this.childrenChanged();
     } else {
       this.resources.splice(element.$resourceIndex, 1);
       for (var i = element.$resourceIndex; i < this.resources.length; ++i) {
-        this.resources[i].$resourceIndex=i;
+        this.resources[i].$properties.$resourceIndex.set(this, i, QmlWeb.QMLProperty.ReasonInitPrivileged);
       }
       this.resourcesChanged();
     }
