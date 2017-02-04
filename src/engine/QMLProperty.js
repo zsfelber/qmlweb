@@ -1,8 +1,9 @@
 let propertyIds = 0;
 
 class PendingEvaluation extends Error {
-  constructor(txt, prop) {
-    super(txt);
+  constructor() {
+    super(arguments);
+    const prop = arguments[1];
     this.property = prop;
     this.ctType = "PendingEvaluation";
   }
@@ -42,7 +43,7 @@ class QMLProperty {
   $setVal(val, flags, declaringItem) {
     var prevComponent = QmlWeb.engine.$component;
     var prevImport = 0;
-    var correctObjProto;
+    var parentObj;
 
     try {
       if (flags & QMLProperty.SetChildren) {
@@ -55,42 +56,12 @@ class QMLProperty {
         if (!declaringItem) {
           throw new Error("declaringItem not specified with SetChildren flag : "+this.obj);
         }
-        if (flags & QMLProperty.ThroughBinding) {
-          // This means : it is coming through a QMLBinding.
-          // (TODO ?indirect) this is the case and only case when default alias points to a nested item :
-
-          // place the child Elements to top level (not to ItemBase where the 'data' property is :
-          if (this.obj.$component.flags & QmlWeb.QMLComponent.Nested) {
-            // the include element in parent QML, it is self:
-            QmlWeb.engine.$component = this.obj.$component;
-            correctObjProto = this.obj;
-          } else {
-            // the include element in parent QML:
-            QmlWeb.engine.$component = this.obj.$component.loaderComponent;
-            correctObjProto = this.obj.$leaf;
-          }
-          if (!correctObjProto || correctObjProto.$component !== QmlWeb.engine.$component) {
-            throw new Error("Error in object prototype chain : "+this.obj+"  "+correctObjProto);
-          }
-          if (!(QmlWeb.engine.$component.flags & QmlWeb.QMLComponent.Nested)) {
-            throw new Error("In object : "+this.obj+"  Error, it should be nested:"+QmlWeb.engine.$component);
-          }
-
-
-          //  we setup a temporal import context here (which is relative to declaringItem's component) :
-          prevImport = QmlWeb.engine.$component.boundImportComponent;
-
-          //  declaringItem.$component is the include element in a parent QML,
-          //  but we need .next : this is the topmost QML of included element hierarchy (the loaded QML file)
-          QmlWeb.engine.$component.bindImports(declaringItem.$component);
-
-        } else {
-          QmlWeb.engine.$component = declaringItem.$component;
-          correctObjProto = declaringItem;
-        }
+        // childObj.loaderComponent should be declaringItem.$component
+        QmlWeb.engine.$component = declaringItem.$component;
+        parentObj = declaringItem;
       } else {
         QmlWeb.engine.$component = this.obj.$component;
-        correctObjProto = this.obj;
+        parentObj = this.obj;
       }
 
       const constructors = this.obj.$component ? this.obj.$component.moduleConstructors : QmlWeb.constructors;
@@ -99,8 +70,9 @@ class QMLProperty {
         // TODO workaround  despite it's "setVal" we may merge all child class items into val,
         // its behavior is like "appendVal" at Init time now (all supertype Elements need to be merged in "data" "children" and "resources",
         // not only those of top level type)
-        var tmp = QmlWeb.qmlList(val, correctObjProto, QmlWeb.QMLComponent.Nested);
+        var tmp = QmlWeb.qmlList(val, parentObj, QmlWeb.QMLComponent.Nested);
         if (!this.val || QmlWeb.engine.operationState === QmlWeb.QMLOperationState.Running) {
+          // TODO cleanup ! (?)
           this.val = tmp;
         } else {
           this.val = this.val.concat(tmp);
@@ -119,7 +91,7 @@ class QMLProperty {
           // all the other ones just forward these
           // Call to here comes from
           // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
-          this.val = QmlWeb.createComponentAndElement({clazz:val}, correctObjProto, QmlWeb.QMLComponent.Nested);
+          this.val = QmlWeb.createComponentAndElement({clazz:val}, parentObj, QmlWeb.QMLComponent.Nested);
         }
       } else if (val instanceof Object || val === undefined || val === null) {
         this.val = val;
@@ -223,7 +195,15 @@ class QMLProperty {
       if (this.animation) {
         this.resetAnimation();
       }
-      this.changed(this.val, oldVal, this.name);
+      try {
+        this.changed(this.val, oldVal, this.name);
+      } catch (e) {
+        // Not necessary to reevaluate and even rethrow it here in this case,
+        // changed/Signal.$execute is reevaluated already !
+        if (e.ctType !== "PendingEvaluation") {
+          throw e;
+        }
+      }
     }
   }
 
@@ -258,11 +238,13 @@ class QMLProperty {
   // Define getter
   get() {
     if (this.updateState & QMLProperty.StateUpdating) {
-      QmlWeb.engine.pendingOperations.push({
-         property:this,
-         info:"Pending property get/binding initialization (secondary binding loop) : "+this,
-         });
-      throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property.`, this);
+      // This get is not valid, so throwing PendingEvaluation.
+      // However, not registering this to engine.pendingOperations, as
+      // this property is being updated anyway, and we can trust that outside process
+      // takes care of it
+      throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property.`,
+                                         "Stacks:"+QMLProperty.evaluatingPropertyStackOfStacks,
+                                         "stack:", QMLProperty.evaluatingProperties.stack);
     }
 
     if (this.updateState &&
@@ -404,11 +386,11 @@ class QMLProperty {
     }
     var s = QMLProperty.evaluatingPropertyStackOfStacks.pop();
     QMLProperty.evaluatingProperties = s;
-    const prop = s.stack.length ? s.stack[s.length - 1] : undefined;
+    const prop = s.stack.length ? s.stack[s.stack.length - 1] : undefined;
     QMLProperty.evaluatingProperty = prop;
-    if (!prop) {
-      console.warn("Evaluating Stack (of stacks) error : popped item is empty.");
-    }
+    //if (!prop) {
+    //  console.warn("Evaluating Stack (of stacks) error : popped item is empty.");
+    //}
   }
 
   static pushEvaluatingProperty(prop) {
@@ -416,10 +398,7 @@ class QMLProperty {
     // TODO say warnings if already on stack. This means primary binding loop.
     // NOTE secondary binding loop is possible when dependencies has hidden in "stack of stacks"
     if (s.map[prop.$propertyId]) {
-      console.error("(Primary) property binding loop detected for property",
-        prop.name,
-        [prop].slice(0)
-      );
+      console.error("(Primary) property binding loop detected for property", s.stack.slice(0));
       return false;
     }
     QMLProperty.evaluatingProperty = prop;
@@ -446,11 +425,11 @@ class QMLProperty {
       throw new Error("Evaluating Stack has corrupted. These should all be the same but: "+prop+" "+chkprop0+" "+chkprop);
     }
 
-    const prop2 = s.stack.length ? s.stack[s.length - 1] : undefined;
+    const prop2 = s.stack.length ? s.stack[s.stack.length - 1] : undefined;
     QMLProperty.evaluatingProperty = prop2;
-    if (!prop2) {
-      throw new Error("Evaluating Stack error : popped item is empty.");
-    }
+    //if (!prop2) {
+    //  console.warn("Evaluating Stack error : popped item is empty.");
+    //}
   }
 }
 

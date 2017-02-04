@@ -7,7 +7,7 @@ class ItemBase {
   }
 
   $onElementAdd(element) {
-    var leafElement = element.$base.$leaf;
+    var leafElement = element.$leaf;
     element.$properties.$index.set(this.data.length, QmlWeb.QMLProperty.ReasonInitPrivileged);
     this.data.push(leafElement);
     if (leafElement instanceof ItemBase) {
@@ -23,7 +23,7 @@ class ItemBase {
   }
 
   $onElementRemove(element) {
-    var leafElement = element.$base.$leaf;
+    var leafElement = element.$leaf;
 
     this.data.splice(element.$index, 1);
     for (var i = element.$index; i < this.data.length; ++i) {

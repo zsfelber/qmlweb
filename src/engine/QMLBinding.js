@@ -267,9 +267,9 @@ class QMLBinding {
     var vvith;
     if (this.flags & QMLBinding.OmitContext) {
       if (this.flags & QMLBinding.Alias) {
-        vvith = "with(QmlWeb) with(this.$base.$leaf!==this?this.$base.$leaf.$noalias:{}) with(this.$noalias)";
+        vvith = "with(QmlWeb) with(this.$leaf!==this?this.$leaf.$noalias:{}) with(this.$noalias)";
       } else {
-        vvith = "with(QmlWeb) with(this.$base.$leaf!==this?this.$base.$leaf:{})          with(this)";
+        vvith = "with(QmlWeb) with(this.$leaf!==this?this.$leaf:{})          with(this)";
       }
     } else {
 
@@ -277,9 +277,9 @@ class QMLBinding {
       // see QObject() QMLComponent.getAttachedObject()
 
       if (this.flags & QMLBinding.Alias) {
-        vvith = "var c=this.$context,o,lf; with(QmlWeb) with(c.loaderContext) with((lf=(o=c.$ownerObject).$base.$leaf)!==o?lf.$noalias:{}) with(c.$elements) with(o.$noalias)";
+        vvith = "var c=this.$context,o,lf; with(QmlWeb) with(c.loaderContext) with((lf=(o=c.$ownerObject).$leaf)!==o?lf.$noalias:{}) with(c.$elements) with(o.$noalias)";
       } else {
-        vvith = "var c=this.$context,o,lf; with(QmlWeb) with(c.loaderContext) with((lf=(o=c.$ownerObject).$base.$leaf)!==o?lf:{})          with(c.$elements) with(o)";
+        vvith = "var c=this.$context,o,lf; with(QmlWeb) with(c.loaderContext) with((lf=(o=c.$ownerObject).$leaf)!==o?lf:{})          with(c.$elements) with(o)";
       }
     }
     return vvith;

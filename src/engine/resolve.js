@@ -312,7 +312,7 @@ function $instanceOf(o, typestring, component) {
 
   if (o && o.$base) {
 
-    o = o.$base.$leaf;
+    o = o.$leaf;
 
     var clinfo = QmlWeb.resolveClassImport(typestring, component);
     let f;

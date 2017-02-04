@@ -130,8 +130,8 @@ function construct(meta, parent, flags) {
   // (see properties.createProperty. )
   if (meta.id) {
     addElementToPageContexts(item, meta.id, ctx);
-  } else if (flags & QmlWeb.QMLComponent.Nested) {
-    console.warn("No element id for item  : "+item+"  ctx:"+ctx);
+  //} else if (flags & QmlWeb.QMLComponent.Nested) {
+  //  console.warn("No element id for item  : "+item+"  ctx:"+ctx);
   }
 
   // Apply properties according to this metatype info
