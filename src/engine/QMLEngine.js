@@ -117,7 +117,7 @@ class QMLEngine {
     QmlWeb.engine = this;
     const QMLOperationState = QmlWeb.QMLOperationState;
     if (this.operationState !== QMLOperationState.Running) {
-      this.operationState = QMLOperationState.Running;
+      this.operationState |= QMLOperationState.Running;
       //this._tickerId = setInterval(this._tick.bind(this), this.$interval);
       //this._tickers.forEach(ticker => ticker(now, elapsed));
       this._whenStart.forEach(callback => callback());
@@ -131,7 +131,7 @@ class QMLEngine {
     if (this.operationState === QMLOperationState.Running) {
       //clearInterval(this._tickerId);
       this._tickers.forEach(ticker => $stopTicker(ticker));
-      this.operationState = QMLOperationState.Idle;
+      this.operationState &= ~QMLOperationState.Running;
       this._whenStop.forEach(callback => callback());
     }
   }
@@ -163,7 +163,7 @@ class QMLEngine {
   loadQMLTree(clazz, parent = null, file = undefined) {
     QmlWeb.engine = this;
     var prevState = this.operationState;
-    this.operationState = QmlWeb.QMLOperationState.Init;
+    this.operationState |= QmlWeb.QMLOperationState.Init;
 
     try {
       // Create and initialize objects
@@ -182,7 +182,7 @@ class QMLEngine {
       }
 
 
-      this.operationState = QmlWeb.QMLOperationState.Idle;
+      this.operationState |= QmlWeb.QMLOperationState.FinishInit;
 
       this.processPendingOperations();
 
