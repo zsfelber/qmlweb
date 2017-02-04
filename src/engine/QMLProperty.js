@@ -404,7 +404,11 @@ class QMLProperty {
     }
     var s = QMLProperty.evaluatingPropertyStackOfStacks.pop();
     QMLProperty.evaluatingProperties = s;
-    QMLProperty.evaluatingProperty = s.stack.length ? s.stack[s.length - 1] : undefined;
+    const prop = s.stack.length ? s.stack[s.length - 1] : undefined;
+    QMLProperty.evaluatingProperty = prop;
+    if (!prop) {
+      console.warn("Evaluating Stack (of stacks) error : popped item is empty.");
+    }
   }
 
   static pushEvaluatingProperty(prop) {
@@ -442,7 +446,11 @@ class QMLProperty {
       throw new Error("Evaluating Stack has corrupted. These should all be the same but: "+prop+" "+chkprop0+" "+chkprop);
     }
 
-    QMLProperty.evaluatingProperty = s.stack.length ? s.stack[s.length - 1] : undefined;
+    const prop2 = s.stack.length ? s.stack[s.length - 1] : undefined;
+    QMLProperty.evaluatingProperty = prop2;
+    if (!prop2) {
+      throw new Error("Evaluating Stack error : popped item is empty.");
+    }
   }
 }
 
