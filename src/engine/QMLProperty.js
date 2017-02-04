@@ -372,7 +372,8 @@ class QMLProperty {
   }
 
   toString(detail) {
-    return this.obj.toString(detail)+" . prop:"+this.name+(detail?"#"+this.$propertyId:"")+
+    // $base because to avoid infinite loops for overriden toString:
+    return (this.obj.$base?this.obj.$base.toString(detail):this.obj.toString(detail))+" . prop:"+this.name+(detail?"#"+this.$propertyId:"")+
       (detail?" "+(this.updateState?this.updateState&QMLProperty.StateNeedsUpdate?"needsUpdate":"updating":"ok")+" "+(this.binding?"b:"+this.binding.flags:""):"")+
        " "+(this.val?"v:"+this.val:"");
   }

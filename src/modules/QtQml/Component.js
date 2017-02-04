@@ -165,6 +165,8 @@ class QMLComponent {
       throw new Error("Assertion failed. Component : no imports.  "+this+"  "+this.context);
     }
 
+    console.log(this.context.toString());
+
   }
 
   copyMeta(meta) {
