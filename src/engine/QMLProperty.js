@@ -242,9 +242,7 @@ class QMLProperty {
       // However, not registering this to engine.pendingOperations, as
       // this property is being updated anyway, and we can trust that outside process
       // takes care of it
-      throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property.`,
-                                         "Stacks:"+QMLProperty.evaluatingPropertyStackOfStacks,
-                                         "stack:", QMLProperty.evaluatingProperties.stack);
+      throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property.\n${this.stacksToString()}`);
     }
 
     if (this.updateState &&
@@ -367,8 +365,31 @@ class QMLProperty {
     }
   }
 
-  toString() {
-    return this.obj+" . prop:"+this.name+"#"+this.$propertyId+" "+(this.updateState?this.updateState&QMLProperty.StateNeedsUpdate?"needsUpdate":"updating":"ok")+" "+(this.binding?"b:"+this.binding.flags:"")+" "+(this.val?"v:"+this.val:"");
+  toString(detail) {
+    return this.obj.toString(detail)+" . prop:"+this.name+(detail?"#"+this.$propertyId:"")+
+      (detail?" "+(this.updateState?this.updateState&QMLProperty.StateNeedsUpdate?"needsUpdate":"updating":"ok")+" "+(this.binding?"b:"+this.binding.flags:""):"")+
+       " "+(this.val?"v:"+this.val:"");
+  }
+
+  stackToString(stack) {
+    var result = "";
+    if (!stack) stack = QMLProperty.evaluatingProperties.stack;
+    stack.forEach(function (item) {
+      result += "  "+item.toString(true)+"\n";
+    });
+  }
+
+  stacksToString() {
+    var result = "Stacks:\n";
+    var i = 1;
+    QMLProperty.evaluatingPropertyStackOfStacks.forEach(function (s) {
+      result += i+":\n";
+      result += stackToString(s.stack);
+      ++i;
+    });
+    result += "Current:\n";
+    result += stackToString();
+    return result;
   }
 
   static pushEvalStack() {
@@ -398,7 +419,7 @@ class QMLProperty {
     // TODO say warnings if already on stack. This means primary binding loop.
     // NOTE secondary binding loop is possible when dependencies has hidden in "stack of stacks"
     if (s.map[prop.$propertyId]) {
-      console.error("(Primary) property binding loop detected for property", s.stack.slice(0));
+      console.error(`(Primary) property binding loop detected for property.\n${this.stackToString()}`);
       return false;
     }
     QMLProperty.evaluatingProperty = prop;
