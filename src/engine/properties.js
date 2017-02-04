@@ -156,7 +156,7 @@ function applyProperties(metaObject, item) {
       console.warn("Cannot apply property bindings : "+item+" . "+i+"  Context:"+item.$context+"  "+err);
     }
 
-    if (QmlWeb.engine.operationState === QmlWeb.QMLOperationState.Idle) {
+    if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
       throw err;
     }
   }
@@ -316,15 +316,11 @@ function connectSignal(item, signalName, value) {
       value.flags |= QMLBinding.ImplFunction;
       value.compile();
     } catch (err) {
-      if ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.StartOrRun) || !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
-        console.warn("connectSignal/slot compile error : "+
-                     (err.srcdumpok?" . signal:"+signalName+" :":" :")+err.message+" "+
-                     (err.srcdumpok?"srcdump:ok":""+connection));
-      }
+      console.warn("connectSignal/slot compile error : "+
+                   (err.srcdumpok?" . signal:"+signalName+" :":" :")+err.message+" "+
+                   (err.srcdumpok?"srcdump:ok":""+connection));
       err.srcdumpok = 1;
-      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.StartOrInit) {
-        throw err;
-      }
+      throw err;
     }
   }
   connection = _signal.connect(item, value.run);

@@ -114,7 +114,7 @@ QmlWeb.registerQmlType({
   }
   $createComponentObject(qmlComponent, parent) {
     const newComponent = qmlComponent.createObject(parent);
-    if ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.StartOrRun) || !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
+    if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
       // We don't call those on first creation, as they will be called
       // by the regular creation-procedures at the right time.
       QmlWeb.engine.processPendingOperations();

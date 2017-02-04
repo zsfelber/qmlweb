@@ -167,13 +167,9 @@ class QMLBinding {
       }
       return this.implGet.call(obj);
     } catch (err) {
-      if ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.StartOrRun) || !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
-        console.warn("Binding/get error : "+err.message+" this:"+obj+(err.srcdumpok?" srcdump:ok":" "+this));
-      }
+      console.warn("Binding/get error : "+err.message+" this:"+obj+(err.srcdumpok?" srcdump:ok":" "+this));
       err.srcdumpok = 1;
-      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.StartOrInit) {
-        throw err;
-      }
+      throw err;
     } finally {
       QmlWeb.engine.$component = prevComponent;
     }
@@ -191,13 +187,9 @@ class QMLBinding {
       }
       this.implSet.call(obj, value, flags, declaringItem);
     } catch (err) {
-      if ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.StartOrRun) || !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
-        console.warn("Binding/set error : "+err.message+" this:"+obj+" value:"+value+" flags:"+flags+(err.srcdumpok?" srcdump:ok":" "+this));
-      }
+      console.warn("Binding/set error : "+err.message+" this:"+obj+" value:"+value+" flags:"+flags+(err.srcdumpok?" srcdump:ok":" "+this));
       err.srcdumpok = 1;
-      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.StartOrInit) {
-        throw err;
-      }
+      throw err;
     } finally {
       QmlWeb.engine.$component = prevComponent;
     }
@@ -215,13 +207,9 @@ class QMLBinding {
       }
       this.binding.implRun.apply(this.bindingObj, arguments);
     } catch (err) {
-      if ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.StartOrRun) || !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
-        console.warn("Binding/run error : "+err.message+" this:"+this.bindingObj + (err.srcdumpok?" srcdump:ok":" "+this.binding));
-      }
+      console.warn("Binding/run error : "+err.message+" this:"+this.bindingObj + (err.srcdumpok?" srcdump:ok":" "+this.binding));
       err.srcdumpok = 1;
-      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.StartOrInit) {
-        throw err;
-      }
+      throw err;
     } finally {
       QmlWeb.engine.$component = prevComponent;
     }

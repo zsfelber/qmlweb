@@ -37,7 +37,7 @@ class QMLEngine {
     this.completedSignals = [];
 
     // Current operation state of the engine (Idle, init, etc.)
-    this.operationState = QmlWeb.QMLOperationState.Init;
+    this.operationState = QmlWeb.QMLOperationState.Idle;
 
     // List of properties whose values are bindings. For internal use only.
     // +
@@ -116,7 +116,7 @@ class QMLEngine {
   start() {
     QmlWeb.engine = this;
     const QMLOperationState = QmlWeb.QMLOperationState;
-    if (this.operationState !== QMLOperationState.Running) {
+    if (!(this.operationState & QMLOperationState.Running)) {
       this.operationState |= QMLOperationState.Running;
       //this._tickerId = setInterval(this._tick.bind(this), this.$interval);
       //this._tickers.forEach(ticker => ticker(now, elapsed));
@@ -128,7 +128,7 @@ class QMLEngine {
   // Stop the engine
   stop() {
     const QMLOperationState = QmlWeb.QMLOperationState;
-    if (this.operationState === QMLOperationState.Running) {
+    if (this.operationState & QMLOperationState.Running) {
       //clearInterval(this._tickerId);
       this._tickers.forEach(ticker => $stopTicker(ticker));
       this.operationState &= ~QMLOperationState.Running;
@@ -162,8 +162,10 @@ class QMLEngine {
 
   loadQMLTree(clazz, parent = null, file = undefined) {
     QmlWeb.engine = this;
+    // default is 0 : Idle
     var prevState = this.operationState;
-    this.operationState |= QmlWeb.QMLOperationState.Init;
+
+    this.operationState |= QmlWeb.QMLOperationState.SystemInit;
 
     try {
       // Create and initialize objects
@@ -182,7 +184,8 @@ class QMLEngine {
       }
 
 
-      this.operationState |= QmlWeb.QMLOperationState.FinishInit;
+      this.operationState &= ~QmlWeb.QMLOperationState.Init;
+      this.operationState |= QmlWeb.QMLOperationState.Starting;
 
       this.processPendingOperations();
 
@@ -193,6 +196,7 @@ class QMLEngine {
       return this.rootObject.$component;
 
     } finally {
+      // reset to initial state : this intended to remove "System" flag (usually but stacking logic should work)
       this.operationState = prevState;
     }
   }
@@ -271,7 +275,7 @@ class QMLEngine {
   $addTicker(t) {
     this._tickers.push(t);
 
-    if (this.operationState === QMLOperationState.Running) {
+    if (this.operationState & QMLOperationState.Running) {
       $startTicker(t);
     }
   }
@@ -281,7 +285,7 @@ class QMLEngine {
     if (index !== -1) {
       this._tickers.splice(index, 1);
     }
-    if (this.operationState === QMLOperationState.Running) {
+    if (this.operationState & QMLOperationState.Running) {
       $stopTicker(t);
     }
   }

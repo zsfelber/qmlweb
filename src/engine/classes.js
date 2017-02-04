@@ -212,8 +212,7 @@ function createQmlObject(src, parent, file) {
   const obj = component.createObject(parent);
 
   const QMLOperationState = QmlWeb.QMLOperationState;
-  if (engine.operationState !== QMLOperationState.Init &&
-      engine.operationState !== QMLOperationState.Idle) {
+  if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
     // We don't call those on first creation, as they will be called
     // by the regular creation-procedures at the right time.
     engine.processPendingOperations();

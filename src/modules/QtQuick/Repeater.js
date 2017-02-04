@@ -197,20 +197,20 @@ QmlWeb.registerQmlType({
       this.$items.splice(index, 0, newItem);
 
       // parent must be set after the roles have been added to newItem scope in
-      // case we are outside of QMLOperationState.Init and parentChanged has
+      // case we are outside of QMLOperationState.System and parentChanged has
       // any side effects that result in those roleNames being referenced.
       newItem.parent = this.parent;
 
-      // TODO debug this. Without check to Init, Completed sometimes called
+      // TODO debug this. Without check to System, Completed sometimes called
       // twice.. But is this check correct?
-      if (QmlWeb.engine.operationState !== QMLOperationState.Init &&
-          QmlWeb.engine.operationState !== QMLOperationState.Idle) {
+      // TODO gz
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.System)) {
         // We don't call those on first creation, as they will be called
         // by the regular creation-procedures at the right time.
         this.$callOnCompleted(newItem);
       }
     }
-    if (QmlWeb.engine.operationState !== QMLOperationState.Init) {
+    if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
       // We don't call those on first creation, as they will be called
       // by the regular creation-procedures at the right time.
       QmlWeb.engine.processPendingOperations();

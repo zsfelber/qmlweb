@@ -71,7 +71,7 @@ class QMLProperty {
         // its behavior is like "appendVal" at Init time now (all supertype Elements need to be merged in "data" "children" and "resources",
         // not only those of top level type)
         var tmp = QmlWeb.qmlList(val, parentObj, QmlWeb.QMLComponent.Nested);
-        if (!this.val || QmlWeb.engine.operationState === QmlWeb.QMLOperationState.Running) {
+        if (!this.val || !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
           // TODO cleanup ! (?)
           this.val = tmp;
         } else {
@@ -248,7 +248,7 @@ class QMLProperty {
     }
 
     if (this.updateState &&
-        (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.StartOrRun) || !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
+        !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
       this.update();
     }
 
@@ -304,7 +304,7 @@ class QMLProperty {
     if (val instanceof QmlWeb.QMLBinding) {
       this.binding = val;
 
-      if ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.StartOrRun) || !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
         this.update(true, flags);
       } else {
         QmlWeb.engine.pendingOperations.push({
@@ -353,7 +353,7 @@ class QMLProperty {
           }
         }
       }
-      if ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.StartOrRun) || !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
         _changed_init.call(this);
       } else {
         QmlWeb.engine.pendingOperations.push({

@@ -1,10 +1,11 @@
 const QMLOperationState = {
   Idle: 0,
   Running: 1,
-  Init: 2,
+  System: 2,
   Starting: 4,
-  StartOrRun: 5,
-  StartOrInit: 6
+  Init: 8,
+  SystemInit: 10,
+  BeforeStart: 12
 };
 
 QmlWeb.QMLOperationState = QMLOperationState;

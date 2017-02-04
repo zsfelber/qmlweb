@@ -195,9 +195,7 @@ class Signal {
         }
       }
       err.srcdumpok = 1;
-      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.StartOrInit) {
-        throw err;
-      }
+      throw err;
     }
   }
 

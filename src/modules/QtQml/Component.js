@@ -315,7 +315,7 @@ class QMLComponent {
         this.init(loaderComponent);
       }
 
-      engine.operationState |= QmlWeb.QMLOperationState.Init;
+      engine.operationState |= QmlWeb.QMLOperationState.System;
       engine.$component = this;
 
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
