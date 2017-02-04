@@ -99,10 +99,12 @@ class QMLProperty {
         // TODO workaround  despite it's "setVal" we may merge all child class items into val,
         // its behavior is like "appendVal" at Init time now (all supertype Elements need to be merged in "data" "children" and "resources",
         // not only those of top level type)
-        if (QmlWeb.engine.operationState === QmlWeb.QMLOperationState.Running) {
-          this.val = [];
-        }
         var tmp = QmlWeb.qmlList(val, correctObjProto, QmlWeb.QMLComponent.Nested);
+        if (!this.val || QmlWeb.engine.operationState === QmlWeb.QMLOperationState.Running) {
+          this.val = tmp;
+        } else {
+          this.val = this.val.concat(tmp);
+        }
       } else if (val instanceof QmlWeb.QMLMetaElement) {
         // Root element or nested Component element ?
         if (constructors[val.$class] === QMLComponent ||
