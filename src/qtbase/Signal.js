@@ -22,16 +22,19 @@ class Signal {
   }
   execute(...args) {
     QmlWeb.QMLProperty.pushEvalStack();
-    for (const i in this.connectedSlots) {
-      const desc = this.connectedSlots[i];
-      var args2 = args.slice(0);
-      if (desc.type & Signal.QueuedConnection) {
-        Signal.$addQueued(desc, args2);
-      } else {
-        Signal.$execute(desc, args2);
+    try {
+      for (const i in this.connectedSlots) {
+        const desc = this.connectedSlots[i];
+        var args2 = args.slice(0);
+        if (desc.type & Signal.QueuedConnection) {
+          Signal.$addQueued(desc, args2);
+        } else {
+          Signal.$execute(desc, args2);
+        }
       }
+    } finally {
+      QmlWeb.QMLProperty.popEvalStack();
     }
-    QmlWeb.QMLProperty.popEvalStack();
   }
   connect(...args) {
     let type = Signal.AutoConnection;
@@ -214,10 +217,13 @@ class Signal {
     Signal.$queued = [];
 
     QmlWeb.QMLProperty.pushEvalStack();
-    for (const i in queued) {
-      Signal.$execute(...queued[i]);
+    try {
+      for (const i in queued) {
+        Signal.$execute(...queued[i]);
+      }
+    } finally {
+      QmlWeb.QMLProperty.popEvalStack();
     }
-    QmlWeb.QMLProperty.popEvalStack();
   }
 }
 

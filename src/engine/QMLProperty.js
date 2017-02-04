@@ -17,13 +17,13 @@ class QMLProperty {
     this.obj = obj;
     this.name = name;
     this.readOnly = options.readOnly;
-    this.bound = options.bound;
+    this.pendingInit = options.pendingInit;
     this.changed = QmlWeb.Signal.signal("changed", [{name:"val"}, {name:"oldVal"}, {name:"name"}], { obj });
     this.binding = null;
     this.value = undefined;
     this.type = type;
     this.animation = null;
-    this.needsUpdate = true;
+    this.updateState = QMLProperty.StateNeedsUpdate;
     this.get.$owner = this;
     this.set.$owner = this;
 
@@ -164,11 +164,13 @@ class QMLProperty {
   // Updater recalculates the value of a property if one of the dependencies
   // changed
   update(preventhacks, flags, declaringItem) {
-    this.needsUpdate = false;
 
     if (!this.binding) {
+      this.updateState = QMLProperty.StateValid;
       return;
     }
+
+    this.updateState = QMLProperty.StateUpdating;
 
     const oldVal = this.val;
 
@@ -181,11 +183,14 @@ class QMLProperty {
 
       try {
         this.obsoleteConnections = QmlWeb.helpers.mergeObjects(this.evalTreeConnections);
+        // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
         this.evalTreeConnections = {};
 
         var val = this.binding.get(this.obj);
 
         this.$setVal(val, flags, declaringItem);
+
+        this.updateState = QMLProperty.StateValid;
 
       } finally {
         for (var i in this.obsoleteConnections) {
@@ -199,6 +204,9 @@ class QMLProperty {
 
     } catch (e) {
       console.warn("QMLProperty.update binding error "+this, e);
+      if (this.updateState !== QMLProperty.StateValid) {
+        this.updateState = QMLProperty.StateNeedsUpdate;
+      }
       throw e;
     } finally {
       if (pushed) {
@@ -219,7 +227,7 @@ class QMLProperty {
       if (this.animation || (this.changed.connectedSlots && this.changed.connectedSlots.length>this.childEvalTreeConnections)) {
         this.update();
       } else {
-        this.needsUpdate = true;
+        this.updateState = QMLProperty.StateNeedsUpdate;
       }
 
       // nothing to do with bidirectional binding here,
@@ -238,14 +246,21 @@ class QMLProperty {
       // }
 
     } else  {
-      this.needsUpdate = true;
+      this.updateState = QMLProperty.StateNeedsUpdate;
     }
   }
 
   // Define getter
   get() {
-    //if (this.needsUpdate && !QMLProperty.evaluatingPropertyPaused) {
-    if (this.needsUpdate &&
+    if (this.updateState & QMLProperty.StateUpdating) {
+      QmlWeb.engine.pendingOperations.push({
+         property:this,
+         info:"Pending property get/binding initialization (secondary binding loop) : "+this,
+         });
+      throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property.`, this);
+    }
+
+    if (this.updateState &&
         QmlWeb.engine.operationState !== QmlWeb.QMLOperationState.Init) {
       this.update();
     }
@@ -261,10 +276,14 @@ class QMLProperty {
       //);
 
       QMLProperty.evaluatingProperties.stack.forEach(function (parent) {
-        var con = parent.evalTreeConnections[this.$propertyId];
+        var con = parent.obsoleteConnections[this.$propertyId];
         if (con) {
           delete parent.obsoleteConnections[this.$propertyId];
+          // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
+          // so now we DON't put former dependency input "con" of parent to parent.evalTreeConnections
+          // but mark this connection obsolete and remove / cleanup it after current cycle
         } else {
+          // New property dependency detected :
           con = this.changed.connect(
             parent,
             QMLProperty.prototype.updateLater,
@@ -282,7 +301,7 @@ class QMLProperty {
       return this.val.$get();
     }
 
-    if (this.needsUpdate && (this.bound || this.binding)) {
+    if (this.updateState && (this.pendingInit || this.binding)) {
       QmlWeb.engine.pendingOperations.push({
          property:this,
          info:"Pending property get/binding initialization : "+this,
@@ -370,7 +389,7 @@ class QMLProperty {
   }
 
   toString() {
-    return this.obj+" . prop:"+this.name+"#"+this.$propertyId+" u:"+this.needsUpdate+" "+(this.binding?"b:"+this.binding.flags:"")+" "+(this.val?"v:"+this.val:"");
+    return this.obj+" . prop:"+this.name+"#"+this.$propertyId+" "+(this.updateState?this.updateState&QMLProperty.StateNeedsUpdate?"needsUpdate":"updating":"ok")+" "+(this.binding?"b:"+this.binding.flags:"")+" "+(this.val?"v:"+this.val:"");
   }
 
   static pushEvalStack() {
@@ -383,37 +402,50 @@ class QMLProperty {
   }
 
   static popEvalStack() {
-    QMLProperty.evaluatingProperties =
-      QMLProperty.evaluatingPropertyStackOfStacks.pop() || {stack:[], map:{}};
-    QMLProperty.evaluatingProperty =
-      QMLProperty.evaluatingProperties.stack[
-        QMLProperty.evaluatingProperties.stack.length - 1
-      ];
+    if (!QMLProperty.evaluatingPropertyStackOfStacks.length) {
+      throw new Error("Evaluating Stack (of stacks) error : pop called from empty stack.");
+    }
+    var s = QMLProperty.evaluatingPropertyStackOfStacks.pop();
+    QMLProperty.evaluatingProperties = s;
+    QMLProperty.evaluatingProperty = s.stack.length ? s.stack[s.length - 1] : undefined;
   }
 
   static pushEvaluatingProperty(prop) {
-    // TODO say warnings if already on stack. This means binding loop.
-    // BTW actually we do not loop because needsUpdate flag is reset before
-    // entering update again.
-    if (QMLProperty.evaluatingProperties.map[prop.$propertyId]) {
-      console.error("Property binding loop detected for property",
+    var s = QMLProperty.evaluatingProperties;
+    // TODO say warnings if already on stack. This means primary binding loop.
+    // NOTE secondary binding loop is possible when dependencies has hidden in "stack of stacks"
+    if (s.map[prop.$propertyId]) {
+      console.error("(Primary) property binding loop detected for property",
         prop.name,
         [prop].slice(0)
       );
       return false;
     }
     QMLProperty.evaluatingProperty = prop;
-    QMLProperty.evaluatingProperties.map[prop.$propertyId] = prop;
-    QMLProperty.evaluatingProperties.stack.push(prop); //keep stack of props
+    s.map[prop.$propertyId] = prop;
+    s.stack.push(prop); //keep stack of props
     return true;
   }
 
   static popEvaluatingProperty() {
-    delete QMLProperty.evaluatingProperties.map[QMLProperty.evaluatingProperty.$propertyId];
-    QMLProperty.evaluatingProperty = QMLProperty.evaluatingProperties.stack.pop();
-    //QMLProperty.evaluatingProperty = QMLProperty.evaluatingProperties.stack[
-    //  QMLProperty.evaluatingProperties.length - 1
-    //];
+    var s = QMLProperty.evaluatingProperties;
+    if (!s.stack.length) {
+      throw new Error("Evaluating Stack error : pop called from empty stack.");
+    }
+
+    const prop = QMLProperty.evaluatingProperty;
+    if (!prop) {
+      throw new Error("Evaluating Stack error : pop called but element is not present in top pointer.");
+    }
+
+    const chkprop0 = s.map[prop.$propertyId];
+    delete s.map[prop.$propertyId];
+    const chkprop = s.stack.pop();
+    if (prop !== chkprop0 || prop !== chkprop) {
+      throw new Error("Evaluating Stack has corrupted. These should all be the same but: "+prop+" "+chkprop0+" "+chkprop);
+    }
+
+    QMLProperty.evaluatingProperty = s.stack.length ? s.stack[s.length - 1] : undefined;
   }
 }
 
@@ -444,6 +476,10 @@ QMLProperty.RemoveBidirectionalBinding = 8;
 QMLProperty.SetChildren = 16;
 QMLProperty.ThroughBinding = 32;
 QMLProperty.ReasonInitPrivileged = QMLProperty.ReasonInit | QMLProperty.Privileged;
+
+QMLProperty.StateValid = 0;
+QMLProperty.StateNeedsUpdate = 1;
+QMLProperty.StateUpdating = 2;
 
 QmlWeb.QMLProperty = QMLProperty;
 QmlWeb.PendingEvaluation = PendingEvaluation;

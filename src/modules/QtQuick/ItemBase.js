@@ -55,10 +55,10 @@ QmlWeb.registerQmlType({
   baseClass: "QtQml.QtObject",
   properties: {
     parent: { type: "alias", path:["container"], overrideType: "ItemBase" },
-    data: { type: "list", bound:true },
-    children: { type: "list", bound:true },
-    resources: { type: "list", bound:true },
-    $childIndex: { type: "int", bound:true },
+    data: { type: "list", pendingInit:true, readOnly:true },
+    children: { type: "list", pendingInit:true, readOnly:true },
+    resources: { type: "list", pendingInit:true, readOnly:true },
+    $childIndex: { type: "int", pendingInit:true, readOnly:true },
   },
   defaultProperty: "data",
   constructor: ItemBase

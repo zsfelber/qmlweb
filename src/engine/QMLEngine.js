@@ -333,10 +333,10 @@ class QMLEngine {
           if (!property.binding) {
             // Probably, the binding was overwritten by an explicit value. Ignore.
             a1++;
-            continue;
-          }
-
-          if (property.needsUpdate) {
+          } else if (property.updateState & QmlWeb.QMLProperty.StateUpdating) {
+            a1++;
+            console.error("Property state is invalid : update has not finished : "+prop);
+          } else if (property.updateState & QmlWeb.QMLProperty.StateNeedsUpdate) {
             a2++;
             property.update(false, op.flags, op.declaringItem);
           } else if (geometryProperties.indexOf(property.name) >= 0) {
