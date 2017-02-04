@@ -377,11 +377,7 @@ class QMLBinding {
               prop = obj.$properties${fp};
 
             if (prop) {
-              if (prop.readOnly) {
-                throw new Error("Writable/Bidirectional binding write error : target property '${this.src} ${fp}' is read-only.");
-              } else {
-                prop.set($$__value, $$__flags | QmlWeb.QMLProperty.ThroughBinding, $$__declaringItem);
-              }
+              prop.set($$__value, $$__flags | QmlWeb.QMLProperty.ThroughBinding, $$__declaringItem);
             } else {
               if (obj.$context.$elements${fp}) {
                 throw new Error("Writable/Bidirectional binding write error : target property '${this.src} ${fp}' is an element, considered readonly.");
