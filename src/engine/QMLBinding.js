@@ -167,7 +167,7 @@ class QMLBinding {
       }
       return this.implGet.call(obj);
     } catch (err) {
-      console.warn("Binding/get error : "+err.message+" this:"+obj+(err.srcdumpok?" srcdump:ok":" "+this));
+      QmlWeb.dumpEvalError("Binding/get error : "+err.message+" this:"+obj+(err.srcdumpok?" srcdump:ok":" "+this), err);
       err.srcdumpok = 1;
       throw err;
     } finally {
@@ -187,7 +187,7 @@ class QMLBinding {
       }
       this.implSet.call(obj, value, flags, declaringItem);
     } catch (err) {
-      console.warn("Binding/set error : "+err.message+" this:"+obj+" value:"+value+" flags:"+flags+(err.srcdumpok?" srcdump:ok":" "+this));
+      QmlWeb.dumpEvalError("Binding/set error : "+err.message+" this:"+obj+" value:"+value+" flags:"+flags+(err.srcdumpok?" srcdump:ok":" "+this), err);
       err.srcdumpok = 1;
       throw err;
     } finally {
@@ -207,7 +207,7 @@ class QMLBinding {
       }
       this.binding.implRun.apply(this.bindingObj, arguments);
     } catch (err) {
-      console.warn("Binding/run error : "+err.message+" this:"+this.bindingObj + (err.srcdumpok?" srcdump:ok":" "+this.binding));
+      QmlWeb.dumpEvalError("Binding/run error : "+err.message+" this:"+this.bindingObj + (err.srcdumpok?" srcdump:ok":" "+this.binding), err);
       err.srcdumpok = 1;
       throw err;
     } finally {

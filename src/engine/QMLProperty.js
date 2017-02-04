@@ -1,11 +1,17 @@
 let propertyIds = 0;
 
 class PendingEvaluation extends Error {
-  constructor() {
-    super(arguments);
-    const prop = arguments[1];
+  constructor(...args) {
+    super(...args);
+    const prop = args[1];
     this.property = prop;
     this.ctType = "PendingEvaluation";
+  }
+}
+
+function dumpEvalError(msg, err) {
+  if (!err.ctType) {
+    console.warn(msg);
   }
 }
 
@@ -242,7 +248,7 @@ class QMLProperty {
       // However, not registering this to engine.pendingOperations, as
       // this property is being updated anyway, and we can trust that outside process
       // takes care of it
-      throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property.\n${this.stacksToString()}`);
+      throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property.\n${this.stacksToString()}`, this);
     }
 
     if (this.updateState &&
@@ -377,6 +383,7 @@ class QMLProperty {
     stack.forEach(function (item) {
       result += "  "+item.toString(true)+"\n";
     });
+    return result;
   }
 
   stacksToString() {
@@ -488,3 +495,5 @@ QMLProperty.StateUpdating = 2;
 
 QmlWeb.QMLProperty = QMLProperty;
 QmlWeb.PendingEvaluation = PendingEvaluation;
+QmlWeb.dumpEvalError = dumpEvalError;
+
