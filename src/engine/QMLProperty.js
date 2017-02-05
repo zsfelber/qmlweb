@@ -17,23 +17,30 @@ function dumpEvalError(msg, err) {
 
 const toStrCalls = {};
 function objToStringSafe(obj, detail) {
-  var os;
+  var os = "";
   try {
     if (obj && obj.$objectId) {
       if (toStrCalls[obj.$objectId]) {
+        os = "toString loop:";
         try {
-          return "inf:"+(obj.$base?obj.$base.toString():obj.$objectId);
+          os+=(obj.$base?obj.$base.toString():obj.$objectId);
         } catch (err) {
-          return (err.ctType?err.ctType+":":"invalid:")+"inf:"+obj.$objectId;
+          os+=(err.ctType?err.ctType+":":"invalid:")+obj.$objectId;
         }
+      } else {
+        toStrCalls[obj.$objectId] = 1;
+        os = obj?obj.toString(detail):obj;
       }
+    } else {
+      os = obj?obj.toString(detail):obj;
     }
-    os = obj?obj.toString(detail):obj;
   } catch (err) {
     try {
-      return (err.ctType?err.ctType+":":"invalid:")+(obj.$base?obj.$base.toString():(obj.$objectId?obj.$objectId:"object"));
+      os += (err.ctType?err.ctType+":":"invalid:");
+      os += (obj.$base?obj.$base.toString():(obj.$objectId?obj.$objectId:"object"));
     } catch (err2) {
-      return (err2.ctType?err2.ctType+":":"invalid:")+(err.ctType?err.ctType+":":"invalid:")+(obj.$objectId?obj.$objectId:"object");
+      os += (err2.ctType?err2.ctType+":":"invalid:");
+      os += (obj.$objectId?obj.$objectId:"object");
     }
   } finally {
     if (obj && obj.$objectId) {
@@ -267,9 +274,6 @@ class QMLProperty {
       // takes care of it
       throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property.\n${this.stacksToString()}`, this);
     }
-    if (this.obj && this.obj.$objectId && toStrCalls[this.obj.$objectId]) {
-      throw new {ctType:"toString loop"};
-    }
 
     if (this.updateState &&
         !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
@@ -320,9 +324,6 @@ class QMLProperty {
     flags = flags || QMLProperty.ReasonUser;
     if (this.readOnly && !(flags & QMLProperty.Privileged)) {
       throw new Error(`property '${this.name}' has read only access`);
-    }
-    if (this.obj && this.obj.$objectId && toStrCalls[this.obj.$objectId]) {
-      throw new {ctType:"toString loop"};
     }
 
     const oldVal = this.val;
