@@ -43,10 +43,11 @@ class QMLMethod extends QmlWeb.QMLBinding {
  * @return {Object} Object representing the defintion
  */
 class QMLPropertyDefinition {
-  constructor(type, value, readonly) {
+  constructor(type, value, readonly, templ) {
     this.type = type;
     this.value = value;
     this.readonly = readonly;
+    this.templ = templ;
     Object.defineProperty(this, "serializedTypeId", {
       value: "p",
       configurable: false,
@@ -375,17 +376,22 @@ convertToEngine.walkers = {
   },
   qmlmethod: (name, tree, src) =>
              new QMLMethod(src),
-  qmlpropdef: (name, type, tree, src) =>
-              new QMLPropertyDefinition(
+  qmlpropdef:   (name, type, tree, src) => {
+              const listTemplate = type=="list"&&typeof(tree)==="string";
+              return new QMLPropertyDefinition(
                 type,
-                tree ? convertToEngine.bindout(tree, src, type+" "+name) : undefined
-                ),
-  qmlpropdefro: (name, type, tree, src) =>
-                new QMLPropertyDefinition(
+                (tree&&!listTemplate ? convertToEngine.bindout(tree, src, type+" "+name) : undefined),
+                false, listTemplate? tree : undefined
+                );
+  },
+  qmlpropdefro: (name, type, tree, src) => {
+              const listTemplate = type=="list"&&typeof(tree)==="string";
+              return new QMLPropertyDefinition(
                   type,
-                  tree ? convertToEngine.bindout(tree, src, type+" "+name) : undefined,
-                         true
-                  ),
+                  (tree&&!listTemplate ? convertToEngine.bindout(tree, src, type+" "+name) : undefined),
+                  true, listTemplate? tree : undefined
+                  );
+  },
   qmlaliasdef: function() { return new QMLAliasDefinition(slice(arguments, 1)); },
   qmlaliasdefro:function() { return new QMLAliasDefinition(slice(arguments, 1), true); },
   qmlsignaldef: (name, params) =>
@@ -464,7 +470,12 @@ convertToEngine.bindout = function(statement, binding, info) {
   }
   //convertToEngine.walk(tree);
 
-  return new QmlWeb.QMLBinding(binding, tree, undefined, undefined, info);
+  const b = new QmlWeb.QMLBinding(binding, tree, undefined, undefined, info);
+  if (!b.src && !b.property) {
+    return null;
+  } else {
+    return b;
+  }
 };
 
 // Help logger

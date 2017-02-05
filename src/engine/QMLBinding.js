@@ -435,5 +435,6 @@ QMLBinding._Alias = 8;
 QMLBinding.Alias = 12; // always bidirectional
 QMLBinding.User = 16;
 QMLBinding.OmitContext = 32;
+QMLBinding.ListTemplate = 64;
 
 QmlWeb.QMLBinding = QMLBinding;
