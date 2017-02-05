@@ -165,7 +165,7 @@ class QMLProperty {
   }
 
   // TODO move to Animation (binding it to a 'changed' slot)
-  resetAnimation() {
+  resetAnimation(oldVal) {
     this.animation.running = false;
     this.animation.$actions = [{
       target: this.animation.target || this.obj,
@@ -231,7 +231,7 @@ class QMLProperty {
 
     if (!preventhacks && this.val !== oldVal) {
       if (this.animation) {
-        this.resetAnimation();
+        this.resetAnimation(oldVal);
       }
       try {
         this.changed(this.val, oldVal, this.name);
@@ -378,7 +378,7 @@ class QMLProperty {
           this.changed(this.val, oldVal, this.name);
         } else {
           if (this.animation) {
-            this.resetAnimation();
+            this.resetAnimation(oldVal);
           }
           // TODO gz   $syncPropertyToRemote !!!!!!!!!!!!
           if (this.obj.$syncPropertyToRemote instanceof Function) {
