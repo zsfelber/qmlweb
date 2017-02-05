@@ -334,7 +334,13 @@ class QMLComponent {
       this.finalizeImports();
 
       // NOTE one level of supertype hierarchy, QObject's component first (recursively) :
-      this.complete();
+      // NOTE not possible even trying to emit 'completed' right now, because we are before "applyProperties"
+      // and so unable to determine whether a called property exists and not yet initialiazed or it doesn't exist at all.
+      QmlWeb.engine.pendingOperations.push({
+        fun:QMLComponent.complete,
+        thisObj:this,
+        info:"Pending component.complete (waiting to initialization) : "+this
+      });
 
     } catch (err) {
       //console.warn("Cannot create Object : parent:"+parent+"  ctx:"+this.context+"  "+err.message);
@@ -360,7 +366,26 @@ class QMLComponent {
     return item;
   }
 
-  complete() {
+  toString(name) {
+    if (!name) name = this.$file;
+    if (!name) name = this.$name;
+    if (this.$id) name += ":"+this.$id;
+    var c = "";
+    var f = "";
+    var fn = this.flags;
+    for (;;) {
+      if (fn>=QMLComponent.LoadImports) { f+="i";    fn-=QMLComponent.LoadImports; }
+      else if (fn>=QMLComponent.Element) { f+="e";    fn-=QMLComponent.Element; }
+      else if (fn>=QMLComponent.Root) { c+="R";  fn-=QMLComponent.Root; }
+      else if (fn>=QMLComponent.Nested) { c+="N";fn-=QMLComponent.Nested; }
+      else if (fn>=QMLComponent.Super) { c+="S"; fn-=QMLComponent.Super; }
+      else break;
+    }
+
+    return c+"["+name+(this.flags?" "+f:"")+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
+  }
+
+  static complete() {
 
     if (this.status === QmlWeb.Component.Ready) {
       throw new Error("Component status already Ready in complete()  "+this);
@@ -381,25 +406,6 @@ class QMLComponent {
         }
       }
     }
-  }
-
-  toString(name) {
-    if (!name) name = this.$file;
-    if (!name) name = this.$name;
-    if (this.$id) name += ":"+this.$id;
-    var c = "";
-    var f = "";
-    var fn = this.flags;
-    for (;;) {
-      if (fn>=QMLComponent.LoadImports) { f+="i";    fn-=QMLComponent.LoadImports; }
-      else if (fn>=QMLComponent.Element) { f+="e";    fn-=QMLComponent.Element; }
-      else if (fn>=QMLComponent.Root) { c+="R";  fn-=QMLComponent.Root; }
-      else if (fn>=QMLComponent.Nested) { c+="N";fn-=QMLComponent.Nested; }
-      else if (fn>=QMLComponent.Super) { c+="S"; fn-=QMLComponent.Super; }
-      else break;
-    }
-
-    return c+"["+name+(this.flags?" "+f:"")+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
   }
 
   static getAttachedObject() {
