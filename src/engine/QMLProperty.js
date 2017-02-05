@@ -218,7 +218,7 @@ class QMLProperty {
 
 
     } catch (e) {
-      console.warn("QMLProperty.update binding error "+this, e);
+      console.warn("QMLProperty.update binding error "+this.toString(true), e);
       if (this.updateState !== QMLProperty.StateValid) {
         this.updateState = QMLProperty.StateNeedsUpdate;
       }
@@ -280,7 +280,7 @@ class QMLProperty {
       // However, not registering this to engine.pendingOperations, as
       // this property is being updated anyway, and we can trust that outside process
       // takes care of it
-      throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property.\n${this.stacksToString()}`, this);
+      throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}\n${this.stacksToString()}`, this);
     }
 
     if (this.updateState &&
@@ -461,7 +461,7 @@ class QMLProperty {
     // TODO say warnings if already on stack. This means primary binding loop.
     // NOTE secondary binding loop is possible when dependencies has hidden in "stack of stacks"
     if (s.map[prop.$propertyId]) {
-      console.error(`(Primary) property binding loop detected for property.\n${this.stackToString()}`);
+      console.error(`(Primary) property binding loop detected for property : ${prop.toString(true)}\n${this.stackToString()}`);
       return false;
     }
     QMLProperty.evaluatingProperty = prop;
