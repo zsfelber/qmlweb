@@ -9,9 +9,6 @@ class QMLComponent {
     this.flags = flags;
     this.createFlags = this.flags & (QMLComponent.Root|QMLComponent.Nested|QMLComponent.Super);
 
-    this.completed = QmlWeb.Signal.signal("completed", []);
-    this.destruction = QmlWeb.Signal.signal("destruction", []);
-
     // init now, otherwise it's Lazy
     if (this.createFlags) {
       // no component = is import root
@@ -61,7 +58,8 @@ class QMLComponent {
 
       if (this.flags&QMLComponent.Super) {
 
-        loaderComponent.next = this;
+        loaderComponent.$base = this;
+        this.$leaf = loaderComponent.$leaf;
 
         if (loaderComponent.flags & QMLComponent.Super) {
 
@@ -104,6 +102,8 @@ class QMLComponent {
       } else {
         this.loaderComponent = loaderComponent;
         this.topComponent = this;
+        this.$base = this;
+        this.$leaf = this;
 
         this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this, true);
         this.context.nestedLevel = this.nestedLevel;
@@ -114,6 +114,8 @@ class QMLComponent {
     } else {
       this.loaderComponent = null;
       this.topComponent = this;
+      this.$base = this;
+      this.$leaf = this;
 
       this.meta.context = this.context = engine.rootContext.createChild(this.toString());
 
@@ -302,7 +304,7 @@ class QMLComponent {
     let item;
     try {
 
-      this.status = this.Component.Loading;
+      this.status = QmlWeb.Component.Loading;
 
       // Lazy init :
       if (!this.createFlags) {
@@ -331,26 +333,12 @@ class QMLComponent {
 
       this.finalizeImports();
 
-      this.status = this.Component.Ready;
-
-      if (item.Component) {
-        try {
-          item.Component.completed();
-          console.log("Completed : "+this+" : "+item);
-        } catch (err) {
-          if (err.ctType === "PendingEvaluation") {
-            //console.warn("PendingEvaluation : Cannot call Component.completed : parent:"+parent+"  ctx:"+this.context);
-          } else {
-            throw err;
-          }
-        }
-      } else {
-        console.log("Completed : "+this+" : "+item);
-      }
+      // NOTE one level of supertype hierarchy, QObject's component first (recursively) :
+      this.complete();
 
     } catch (err) {
       //console.warn("Cannot create Object : parent:"+parent+"  ctx:"+this.context+"  "+err.message);
-      this.status = this.Component.Error;
+      this.status = QmlWeb.Component.Error;
       throw err;
     } finally {
       engine.$component = prevComponent;
@@ -359,6 +347,7 @@ class QMLComponent {
     }
     return item;
   }
+
   createObject(parent, properties = {}) {
     const item = this.$createObject(parent, properties);
 
@@ -370,6 +359,30 @@ class QMLComponent {
 
     return item;
   }
+
+  complete() {
+
+    if (this.status === QmlWeb.Component.Ready) {
+      throw new Error("Component status already Ready in complete()  "+this);
+    } else {
+      // This is the standard status exposed to QML, and its
+      // Ready state should not depend on signal/slots (we use
+      // engine.operationState/QMLOperationState internally):
+      this.status = QmlWeb.Component.Ready;
+
+      try {
+        this.completed();
+        console.log("Completed : "+this+" : "+item);
+      } catch (err) {
+        if (err.ctType === "PendingEvaluation") {
+          //console.warn("PendingEvaluation : Cannot call Component.completed : parent:"+parent+"  ctx:"+this.context);
+        } else {
+          throw err;
+        }
+      }
+    }
+  }
+
   toString(name) {
     if (!name) name = this.$file;
     if (!name) name = this.$name;
@@ -390,16 +403,9 @@ class QMLComponent {
   }
 
   static getAttachedObject() {
-    // see QMLEngine.js for explanation how it is used.
-    if (!this.$Component) {
-      // (completed/destruction signals added to Component) :
-      this.$Component = this.$component;
-
-      // moved to $createObject:
-      // QmlWeb.engine.completedSignals.push(this.$component.completed);
-    }
-    return this.$Component;
+    return this.$component;
   }
+
 }
 
 QmlWeb.registerQmlType({
@@ -407,13 +413,12 @@ QmlWeb.registerQmlType({
   module: "QtQml",
   name: "Component",
   versions: /.*/,
-  enums: {
-    Component: {
-      Null: 1, Ready: 2, Loading: 3, Error: 4
-    }
+  signals: {
+    completed: [],
+    destruction: []
   },
   properties: {
-    status: { type:"enum", initialValue: 1}
+    status: { type:"enum", initialValue: QmlWeb.Component.Null}
   },
   constructor: QMLComponent
 });

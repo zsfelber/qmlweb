@@ -19,20 +19,28 @@ const toStrCalls = {};
 function objToStringSafe(obj, detail) {
   var os = "";
   try {
-    if (obj && obj.$objectId) {
-      if (toStrCalls[obj.$objectId]) {
-        os = "toString loop:";
-        try {
-          os+=(obj.$base?obj.$base.toString():obj.$objectId);
-        } catch (err) {
-          os+=(err.ctType?err.ctType+":":"invalid:")+obj.$objectId;
-        }
-      } else {
-        toStrCalls[obj.$objectId] = 1;
-        os = obj?obj.toString(detail):obj;
-      }
+    if (!obj) {
+      os = obj;
     } else {
-      os = obj?obj.toString(detail):obj;
+      if (obj.$objectId) {
+        if (toStrCalls[obj.$objectId]) {
+          os = "toString loop:";
+          try {
+            os+=(obj.$base?obj.$base.toString():obj.$objectId);
+          } catch (err) {
+            os+=(err.ctType?err.ctType+":":"invalid:")+obj.$objectId;
+          }
+          return os;
+        } else {
+          toStrCalls[obj.$objectId] = 1;
+        }
+      }
+
+      if (engine.operationState & QmlWeb.QMLOperationState.BeforeStart) {
+        os = (obj.$base?obj.$base.toString():(obj.$objectId?obj.$objectId:"object"));
+      } else {
+        os = obj.toString(detail);
+      }
     }
   } catch (err) {
     try {

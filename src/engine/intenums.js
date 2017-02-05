@@ -8,4 +8,9 @@ const QMLOperationState = {
   BeforeStart: 12
 };
 
+const Component = {
+  Null: 1, Ready: 2, Loading: 3, Error: 4
+};
+
 QmlWeb.QMLOperationState = QMLOperationState;
+QmlWeb.Component = Component;
