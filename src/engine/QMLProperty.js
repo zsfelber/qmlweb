@@ -15,13 +15,32 @@ function dumpEvalError(msg, err) {
   }
 }
 
+const toStrCalls = {};
 function objToStringSafe(obj, detail) {
   var os;
   try {
+    if (obj && obj.$objectId) {
+      if (toStrCalls[obj.$objectId]) {
+        try {
+          return "inf:"+(obj.$base?obj.$base.toString():obj.$objectId);
+        } catch (err) {
+          return (err.ctType?err.ctType+":":"invalid:")+"inf:"+obj.$objectId;
+        }
+      }
+    }
     os = obj?obj.toString(detail):obj;
   } catch (err) {
-    return "invalid:"+(obj.$base?obj.$base.toString():"object");
+    try {
+      return (err.ctType?err.ctType+":":"invalid:")+(obj.$base?obj.$base.toString():(obj.$objectId?obj.$objectId:"object"));
+    } catch (err2) {
+      return (err2.ctType?err2.ctType+":":"invalid:")+(err.ctType?err.ctType+":":"invalid:")+(obj.$objectId?obj.$objectId:"object");
+    }
+  } finally {
+    if (obj && obj.$objectId) {
+      delete toStrCalls[obj.$objectId];
+    }
   }
+
   return os;
 }
 

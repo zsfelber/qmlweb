@@ -117,7 +117,7 @@ class QObject {
   }
 
   toString(detail) {
-    return (detail&&this.$context?this.$context.$info:this.$classname)+(this.$leaf.id?":"+this.$leaf.id:"")+(detail?":"+this.$objectId:"");
+    return (detail&&this.$context?this.$context.$info:this.$classname)+(this.$leaf?this.$leaf.id?":"+this.$leaf.id:"":(this.id?":"+this.id:""))+(detail?":"+this.$objectId:"");
   }
 }
 
