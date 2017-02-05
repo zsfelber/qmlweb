@@ -267,6 +267,9 @@ class QMLProperty {
       // takes care of it
       throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property.\n${this.stacksToString()}`, this);
     }
+    if (this.obj && this.obj.$objectId && toStrCalls[this.obj.$objectId]) {
+      throw new {ctType:"toString loop"};
+    }
 
     if (this.updateState &&
         !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
@@ -317,6 +320,9 @@ class QMLProperty {
     flags = flags || QMLProperty.ReasonUser;
     if (this.readOnly && !(flags & QMLProperty.Privileged)) {
       throw new Error(`property '${this.name}' has read only access`);
+    }
+    if (this.obj && this.obj.$objectId && toStrCalls[this.obj.$objectId]) {
+      throw new {ctType:"toString loop"};
     }
 
     const oldVal = this.val;
