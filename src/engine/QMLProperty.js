@@ -426,11 +426,11 @@ class QMLProperty {
     var i = 1;
     QMLProperty.evaluatingPropertyStackOfStacks.forEach(function (s) {
       result += i+":\n";
-      result += stackToString(s.stack);
+      result += this.stackToString(s.stack);
       ++i;
     });
     result += "Current:\n";
-    result += stackToString();
+    result += this.stackToString();
     return result;
   }
 
