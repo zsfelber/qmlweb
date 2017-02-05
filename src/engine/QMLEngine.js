@@ -327,6 +327,7 @@ class QMLEngine {
     console.log("processPendingOperations : "+this.pendingOperations.length);
 
     var i=0,a=0,a1=0,a2=0,a3=0,b=0,e=0;
+    let info = {};
     while (this.pendingOperations.length > 0) {
       const op = this.pendingOperations.shift();
 
@@ -337,6 +338,7 @@ class QMLEngine {
           if (!property.binding) {
             // Probably, the binding was overwritten by an explicit value. Ignore.
             a1++;
+            console.warning("Property binding has been removed : "+prop);
           } else if (property.updateState & QmlWeb.QMLProperty.StateUpdating) {
             a1++;
             console.error("Property state is invalid : update has not finished : "+prop);
@@ -364,15 +366,16 @@ class QMLEngine {
           op.fun.apply(op.thisObj, op.args);
           b++;
         }
+        info["#"+i+":"+op.info] = op;
       } catch (err) {
         e++;
-        console.warn("pendingOperation #"+i+":"+op.info+"  err:"+err);
+        info["#"+i+":ERR:"+err.message] = op;
       }
 
       i++;
     }
 
-    console.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+a3)+") functions:"+b+" errors:"+e);
+    console.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+a3)+") functions:"+b+" errors:"+e, info);
   }
 
 

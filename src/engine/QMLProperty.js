@@ -15,6 +15,17 @@ function dumpEvalError(msg, err) {
   }
 }
 
+function objToStringSafe(obj, detail) {
+  var os;
+  try {
+    os = obj?obj.toString(detail):obj;
+  } catch (err) {
+    return "invalid:"+(obj.$base?obj.$base.toString():"object");
+  }
+  return os;
+}
+
+
 class QMLProperty {
   constructor(type, obj, name, options) {
     if (!obj) {
@@ -52,7 +63,8 @@ class QMLProperty {
     var parentObj;
 
     try {
-      if (flags & QMLProperty.SetChildren) {
+      const isch = flags & QMLProperty.SetChildren;
+      if (isch) {
 
         // NOTE declaringItem is passed only along with SetChildren
         // declaringItem !== this.obj.$component
@@ -72,12 +84,18 @@ class QMLProperty {
 
       const constructors = this.obj.$component ? this.obj.$component.moduleConstructors : QmlWeb.constructors;
       if (constructors[this.type] === QmlWeb.qmlList) {
+        // SetChildren that is in init mode : we merge the subclasses items and don't clear it every time
+        // otherwise : clear it, most important when this is the default property, otherwise it just appends new entries
+        if (!isch) {
+          // TODO cleanup (garbage collector now, but is it enough?). when isch/!isch?
+          this.val = [];
+        }
+
         // NOTE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
         var tmp = QmlWeb.qmlList(val, parentObj, QmlWeb.QMLComponent.Nested);
 
         // Otherwise, we trust containerChanged/onAddElement
-        if (!(flags & QMLProperty.SetChildren)) {
-          // TODO cleanup ! (?)
+        if (!isch) {
           this.val = tmp;
         }
       } else if (val instanceof QmlWeb.QMLMetaElement) {
@@ -102,23 +120,6 @@ class QMLProperty {
         this.val = constructors[this.type](val);
       } else {
         this.val = new constructors[this.type](val);
-      }
-
-      if (!(flags & QMLProperty.SetChildren)) {
-
-        // Not doing this for initial SetChildren, this is what triggers $onElementAdd-s when replacing "data"
-        // or default property:
-
-        if (this.obj.$defaultProperty===this.name && this.val) {
-           for (const i in this.val) {
-             const child = this.val[i];
-             if (child instanceof QmlWeb.ItemBase) {
-               child.$properties.parent.set(this.obj, QmlWeb.QMLProperty.ReasonInitPrivileged);
-             } else if (child instanceof QmlWeb.QtObject) {
-               child.$properties.container.set(this.obj, QmlWeb.QMLProperty.ReasonInitPrivileged);
-             }
-           }
-        }
       }
 
     } finally {
@@ -369,8 +370,10 @@ class QMLProperty {
   }
 
   toString(detail) {
+    var os = objToStringSafe(this.obj);
+
     // $base because to avoid infinite loops for overriden toString:
-    return (this.obj.$base?this.obj.$base.toString(detail):this.obj.toString(detail))+" . prop:"+this.name+(detail?"#"+this.$propertyId:"")+
+    return os+" . prop:"+this.name+(detail?"#"+this.$propertyId:"")+
       (detail?" "+(this.updateState?this.updateState&QMLProperty.StateNeedsUpdate?"needsUpdate":"updating":"ok")+" "+(this.binding?"b:"+this.binding.flags:""):"")+
        " "+(this.val?"v:"+this.val:"");
   }
@@ -494,4 +497,4 @@ QMLProperty.StateUpdating = 2;
 QmlWeb.QMLProperty = QMLProperty;
 QmlWeb.PendingEvaluation = PendingEvaluation;
 QmlWeb.dumpEvalError = dumpEvalError;
-
+QmlWeb.objToStringSafe = objToStringSafe;
