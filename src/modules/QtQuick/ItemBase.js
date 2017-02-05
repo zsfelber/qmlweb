@@ -8,8 +8,21 @@ class ItemBase {
 
   $onElementAdd(element) {
     var leafElement = element.$leaf;
-    element.$properties.$index.set(this.data.length, QmlWeb.QMLProperty.ReasonInitPrivileged);
-    this.data.push(leafElement);
+
+    if (this.$defaultProperty) {
+      var prop = this.$properties[this.$defaultProperty];
+      if (prop.type === "list") {
+        var parr = prop.get();
+        element.$properties.$index.set(parr.length, QmlWeb.QMLProperty.ReasonInitPrivileged);
+        parr.push(leafElement);
+      } else {
+        element.$properties.$index.set(0, QmlWeb.QMLProperty.ReasonInitPrivileged);
+        prop.set(leafElement);
+      }
+    } else {
+      throw new Error("ItemBase.$onElementAdd : No default property : "+this+"/"+this.$leaf);
+    }
+
     if (leafElement instanceof ItemBase) {
       element.$properties.$childIndex.set(this.children.length, QmlWeb.QMLProperty.ReasonInitPrivileged);
       this.children.push(leafElement);
@@ -25,10 +38,21 @@ class ItemBase {
   $onElementRemove(element) {
     var leafElement = element.$leaf;
 
-    this.data.splice(element.$index, 1);
-    for (var i = element.$index; i < this.data.length; ++i) {
-      this.data[i].$properties.$index.set(i, QmlWeb.QMLProperty.ReasonInitPrivileged);
+    if (this.$defaultProperty) {
+      var prop = this.$properties[this.$defaultProperty];
+      if (prop.type === "list") {
+        var parr = prop.get();
+        parr.splice(element.$index, 1);
+        for (var i = element.$index; i < parr.length; ++i) {
+          parr[i].$properties.$index.set(i, QmlWeb.QMLProperty.ReasonInitPrivileged);
+        }
+      } else {
+        prop.set(null);
+      }
+    } else {
+      throw new Error("ItemBase.$onElementRemove : No default property : "+this+"/"+this.$leaf);
     }
+
     if (leafElement instanceof ItemBase) {
       this.children.splice(element.$childIndex, 1);
       for (var i = element.$childIndex; i < this.children.length; ++i) {

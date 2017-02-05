@@ -73,15 +73,12 @@ class QMLProperty {
       const constructors = this.obj.$component ? this.obj.$component.moduleConstructors : QmlWeb.constructors;
       if (constructors[this.type] === QmlWeb.qmlList) {
         // NOTE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
-        // TODO workaround  despite it's "setVal" we may merge all child class items into val,
-        // its behavior is like "appendVal" at Init time now (all supertype Elements need to be merged in "data" "children" and "resources",
-        // not only those of top level type)
         var tmp = QmlWeb.qmlList(val, parentObj, QmlWeb.QMLComponent.Nested);
-        if (!this.val || !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+
+        // Otherwise, we trust containerChanged/onAddElement
+        if (!(flags & QMLProperty.SetChildren)) {
           // TODO cleanup ! (?)
           this.val = tmp;
-        } else {
-          this.val = this.val.concat(tmp);
         }
       } else if (val instanceof QmlWeb.QMLMetaElement) {
         // Root element or nested Component element ?
