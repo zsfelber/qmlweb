@@ -149,7 +149,8 @@ class QMLEngine {
     this.$basePath = this.$basePathA.href;
     const fileName = extractFileName(file);
     // TODO gz resolveClass  += engine.containers[...]
-    const clazz = QmlWeb.resolveClass(QmlWeb.$resolvePath(fileName, this.$basePathA.href));
+    const respath = QmlWeb.$resolvePath(fileName, this.$basePathA.href);
+    const clazz = QmlWeb.resolveClass(respath);
     const component = this.loadQMLTree(clazz, parent, file);
     console.log("loadFile success. LOADED : "+file);
     return component;

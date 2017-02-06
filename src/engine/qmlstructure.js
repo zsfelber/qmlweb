@@ -492,60 +492,6 @@ function serialize(tree) {
   return s;
 }
 
-function serializeParserInit() {
-  function b(init) {
-    var result = new QmlWeb.QMLBinding();
-    QmlWeb.helpers.copy(result, init);
-    return result;
-  }
-
-  function m(init) {
-    var result = new QmlWeb.QMLMethod();
-    QmlWeb.helpers.copy(result, init);
-    return result;
-  }
-
-  function p(init) {
-    var result = new QmlWeb.QMLPropertyDefinition();
-    QmlWeb.helpers.copy(result, init);
-    return result;
-  }
-
-  function a(init) {
-    var result = new QmlWeb.QMLAliasDefinition();
-    QmlWeb.helpers.copy(result, init);
-    return result;
-  }
-
-  function s(init) {
-    var result = new QmlWeb.QMLSignalDefinition();
-    QmlWeb.helpers.copy(result, init);
-    return result;
-  }
-
-  function g(init) {
-    var result = new QmlWeb.QMLMetaPropertyGroup();
-    QmlWeb.helpers.copy(result, init);
-    return result;
-  }
-
-  function e(init) {
-    var result = new QmlWeb.QMLMetaElement();
-    QmlWeb.helpers.copy(result, init);
-    return result;
-  }
-
-  var result = "";
-  result += "var _;\n";
-  result += b.toString();
-  result += m.toString();
-  result += p.toString();
-  result += a.toString();
-  result += s.toString();
-  result += g.toString();
-  result += e.toString();
-  return result;
-}
 
 
 function loadParser() {
@@ -589,7 +535,6 @@ QmlWeb.QMLSignalDefinition = QMLSignalDefinition;
 QmlWeb.QMLMetaPropertyGroup = QMLMetaPropertyGroup;
 QmlWeb.QMLMetaElement = QMLMetaElement;
 QmlWeb.serialize = serialize;
-QmlWeb.serializeParserInit = serializeParserInit;
 QmlWeb.convertToEngine = convertToEngine;
 QmlWeb.loadParser = loadParser;
 QmlWeb.parseQML = parseQML;
