@@ -140,18 +140,46 @@ class QMLEngine {
 
 
   // Load file, parse and construct (.qml or .qml.js)
-  loadFile(file, parent = null) {
+  loadFile(file, parent = null, operationFlags = 0, serverWsAddress) {
     // Create an anchor element to get the absolute path from the DOM
     if (!this.$basePathA) {
       this.$basePathA = document.createElement("a");
     }
+    var wsUrl, webSocket;
+    if (operationFlags & QmlWeb.QMLOperationState.Remote) {
+      if (serverWsAddress) {
+        if (/^\d+$/.test(serverWsAddress)) {
+          var uri = QmlWeb.$parseURIwPort(window.location.href);
+          if (serverWsAddress) {
+            wsUrl = "ws://"+uri.host+":"+serverWsAddress;
+          } else {
+            wsUrl = "ws://"+uri.host+":"+serverWsAddress;
+          }
+        } else {
+          if (/^ws:[/]/.test(serverWsAddress)) {
+            wsUrl = serverWsAddress;
+          }
+        }
+        if (!wsUrl) {
+          console.error("Invalid server websockets address : "+serverWsAddress+". Should be a ws port or 'ws:/...' url.")
+        }
+      }
+
+      if (wsUrl) {
+        webSocket = new WebSocket(wsUrl);
+        webSocket.onopen = function(evt) { console.log(wsUrl+" : Connection open ..."); };
+        webSocket.onmessage = function(evt) { console.log( wsUrl+" : Received Message: " + evt.data); };
+        webSocket.onclose = function(evt) { console.log(wsUrl+" : Connection closed."); };
+      }
+    }
+
     this.$basePathA.href = QmlWeb.extractBasePath(file);
     this.$basePath = this.$basePathA.href;
     const fileName = extractFileName(file);
     // TODO gz resolveClass  += engine.containers[...]
     const respath = QmlWeb.$resolvePath(fileName, this.$basePathA.href);
     const clazz = QmlWeb.resolveClass(respath);
-    const component = this.loadQMLTree(clazz, parent, file);
+    const component = this.loadQMLTree(clazz, parent, file, operationFlags, serverWsAddress, webSocket);
     console.log("loadFile success. LOADED : "+file);
     return component;
   }
@@ -159,16 +187,16 @@ class QMLEngine {
   // parse and construct qml
   // file is not required; only for debug purposes
   // This function is only used by the QmlWeb tests
-  loadQML(src, parent = null, file = undefined) {
-    return this.loadQMLTree(QmlWeb.parseQML(src, file), parent, file);
+  loadQML(src, parent = null, file = undefined, operationFlags = 0, serverWsAddress, webSocket) {
+    return this.loadQMLTree(QmlWeb.parseQML(src, file), parent, file, operationFlags, serverWsAddress, webSocket);
   }
 
-  loadQMLTree(clazz, parent = null, file = undefined) {
+  loadQMLTree(clazz, parent = null, file = undefined, operationFlags = 0, serverWsAddress, webSocket) {
     QmlWeb.engine = this;
     // default is 0 : Idle
     var prevState = this.operationState;
 
-    this.operationState |= QmlWeb.QMLOperationState.SystemInit;
+    this.operationState |= operationFlags | QmlWeb.QMLOperationState.SystemInit;
 
     try {
       // Create and initialize objects
@@ -177,6 +205,9 @@ class QMLEngine {
       this.rootObject = QmlWeb.createComponentAndElement(
                     {clazz: clazz, $file: file}, parent,
                     QmlWeb.QMLComponent.Root | QmlWeb.QMLComponent.LoadImports);
+
+      this.rootObject.$component.serverWsAddress = serverWsAddress;
+      this.rootObject.$component.webSocket = webSocket;
 
 
       if (this.dom) {

@@ -5,7 +5,8 @@ const QMLOperationState = {
   Starting: 4,
   Init: 8,
   SystemInit: 10,
-  BeforeStart: 12
+  BeforeStart: 12,
+  Remote: 16
 };
 
 const Component = {

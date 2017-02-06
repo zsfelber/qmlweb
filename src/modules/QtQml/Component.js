@@ -60,6 +60,7 @@ class QMLComponent {
 
         loaderComponent.$base = this;
         this.$leaf = loaderComponent.$leaf;
+        this.$root = loaderComponent.$root;
 
         if (loaderComponent.flags & QMLComponent.Super) {
 
@@ -104,6 +105,7 @@ class QMLComponent {
         this.topComponent = this;
         this.$base = this;
         this.$leaf = this;
+        this.$root = loaderComponent.$root;
 
         this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this, true);
         this.context.nestedLevel = this.nestedLevel;
@@ -116,6 +118,7 @@ class QMLComponent {
       this.topComponent = this;
       this.$base = this;
       this.$leaf = this;
+      this.$root = this;
 
       this.meta.context = this.context = engine.rootContext.createChild(this.toString());
 
@@ -139,7 +142,7 @@ class QMLComponent {
     this.context.topContext = this.topComponent ? this.topComponent.context : null;
 
     // !!! see QMLBinding
-    this.$context = this.context;
+    this.$context = this.context;QWebChannel
     this.$component = this;
 
     if (!this.context) {

@@ -261,6 +261,20 @@ function $parseURIlong(uri) {
   return undefined;
 }
 
+function $parseURIwPort(uri) {
+  const match = uri.match(/^([^/]*?:\/)(.*?:(\d+))?(.*)$/);
+  if (match) {
+    return {
+      scheme: match[1],
+      host: match[2],
+      port: match[3],
+      path: match[4],
+      authority: "",
+    };
+  }
+  return undefined;
+}
+
 // Return a path to load the file
 function $resolvePath(file, basePath) {
   if (!basePath) {

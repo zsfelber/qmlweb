@@ -22,6 +22,7 @@ function objToStringSafe(obj, detail) {
     if (!obj) {
       os = obj;
     } else {
+      this.$rootComponent = obj.$component.$root;
       if (obj.$objectId) {
         if (toStrCalls[obj.$objectId]) {
           os = "toString loop:";
@@ -380,18 +381,17 @@ class QMLProperty {
           if (this.animation) {
             this.resetAnimation(oldVal);
           }
+          this.changed(this.val, oldVal, this.name);
+
           // TODO gz   $syncPropertyToRemote !!!!!!!!!!!!
-          if (this.obj.$syncPropertyToRemote instanceof Function) {
-            // is a remote object from e.g. a QWebChannel
-            this.obj.$syncPropertyToRemote(this.name, val);
-          } else {
-            this.changed(this.val, oldVal, this.name);
+          if (this.$rootComponent.webSocket) {
+            QmlWeb.$syncPropertyToRemote(this.$rootComponent, this);
           }
         }
       }
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
         _changed_init.call(this);
-      } else {
+      } else if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote)) {
         QmlWeb.engine.pendingOperations.push({
           fun:_changed_init,
           thisObj:this,
