@@ -24,15 +24,15 @@ QmlWeb.registerQmlType({
   }
   Component$onCompleted() {
     const Qt = QmlWeb.Qt;
-    this.desktopAvailableHeight = widow.outerHeight;
-    this.desktopAvailableWidth = widow.outerWidth;
-    this.devicePixelRatio = widow.devicePixelRatio;
-    this.height = widow.innerHeight;
+    this.desktopAvailableHeight = window.outerHeight;
+    this.desktopAvailableWidth = window.outerWidth;
+    this.devicePixelRatio = window.devicePixelRatio;
+    this.height = window.innerHeight;
     this.name = this.name;
     this.orientation = Qt.PrimaryOrientation;
     this.orientationUpdateMask = 0;
     this.pixelDensity = 100.0;  // TODO
     this.primaryOrientation = Qt.PrimaryOrientation;
-    this.width = widow.innerWidth;
+    this.width = window.innerWidth;
   }
 });

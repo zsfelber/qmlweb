@@ -1,15 +1,20 @@
-var widow;
 if (typeof window === 'undefined') {
   console.log("window object doesn't exist : server context")
-  widow = { addEventListener:function(){} };
+  window = { addEventListener:function(){} };
 } else {
   console.log("window object exists : client context")
-  widow = window;
 }
 
 var UglifyJS;
 if (typeof require !== 'undefined') {
   UglifyJS = require("uglify-js");
+  if (UglifyJS) {
+    console.log("UglifyJS was found")
+  } else {
+    console.log("UglifyJS was not found")
+  }
+} else {
+  console.log("require/UglifyJS was not found")
 }
 
 

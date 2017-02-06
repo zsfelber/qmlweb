@@ -10,7 +10,7 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.superAndInitMeta(this, meta);
 
-    if (typeof widow.localStorage === "undefined") {
+    if (typeof window.localStorage === "undefined") {
       return;
     }
 

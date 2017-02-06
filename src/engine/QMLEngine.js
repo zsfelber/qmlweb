@@ -23,7 +23,7 @@ class QMLEngine {
 
     // Target for the DOM children
     this.domTarget = this.dom;
-    if (QmlWeb.useShadowDom && this.dom.attachShadow) {
+    if (this.dom && QmlWeb.useShadowDom && this.dom.attachShadow) {
       this.domTarget = this.dom.attachShadow({ mode: "open" });
     }
 
@@ -72,20 +72,22 @@ class QMLEngine {
 
     //----------Construct----------
 
-    // No QML stuff should stand out the root element
-    this.dom.style.overflow = "hidden";
+    if (this.dom) {
+      // No QML stuff should stand out the root element
+      this.dom.style.overflow = "hidden";
 
-    // Needed to make absolute positioning work
-    if (!this.dom.style.position) {
-      const style = widow.getComputedStyle(this.dom);
-      if (style.getPropertyValue("position") === "static") {
-        this.dom.style.position = "relative";
-        this.dom.style.top = "0";
-        this.dom.style.left = "0";
+      // Needed to make absolute positioning work
+      if (!this.dom.style.position) {
+        const style = window.getComputedStyle(this.dom);
+        if (style.getPropertyValue("position") === "static") {
+          this.dom.style.position = "relative";
+          this.dom.style.top = "0";
+          this.dom.style.left = "0";
+        }
       }
     }
 
-    widow.addEventListener("resize", () => this.updateGeometry());
+    window.addEventListener("resize", () => this.updateGeometry());
   }
 
   //---------- Public Methods ----------
@@ -97,10 +99,10 @@ class QMLEngine {
     let width;
     let height;
     if (this.dom === document.body) {
-      width = widow.innerWidth;
-      height = widow.innerHeight;
+      width = window.innerWidth;
+      height = window.innerHeight;
     } else {
-      const style = widow.getComputedStyle(this.dom);
+      const style = window.getComputedStyle(this.dom);
       width = parseFloat(style.getPropertyValue("width"), 10);
       height = parseFloat(style.getPropertyValue("height"), 10);
     }
@@ -176,13 +178,14 @@ class QMLEngine {
                     QmlWeb.QMLComponent.Root | QmlWeb.QMLComponent.LoadImports);
 
 
-      if (this.rootObject.dom) {
-        console.log(clazz.$name+" : DOM element FOUND ! Added to engine screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
-        this.domTarget.appendChild(this.rootObject.dom);
-      } else {
-        console.warn(clazz.$name+" : No DOM, it's a pure model object. Not added to screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
+      if (this.dom) {
+        if (this.rootObject.dom) {
+          console.log(clazz.$name+" : DOM element FOUND ! Added to engine screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
+          this.domTarget.appendChild(this.rootObject.dom);
+        } else {
+          console.warn(clazz.$name+" : No DOM, it's a pure model object. Not added to screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
+        }
       }
-
 
       this.operationState &= ~QmlWeb.QMLOperationState.Init;
       this.operationState |= QmlWeb.QMLOperationState.Starting;
@@ -219,7 +222,7 @@ class QMLEngine {
   $initKeyboard() {
     document.onkeypress = e => {
       let focusedElement = this.focusedElement();
-      const event = QmlWeb.eventToKeyboard(e || widow.event);
+      const event = QmlWeb.eventToKeyboard(e || window.event);
       const eventName = QmlWeb.keyboardSignals[event.key];
 
       while (focusedElement && !event.accepted) {
@@ -240,7 +243,7 @@ class QMLEngine {
 
     document.onkeyup = e => {
       let focusedElement = this.focusedElement();
-      const event = QmlWeb.eventToKeyboard(e || widow.event);
+      const event = QmlWeb.eventToKeyboard(e || window.event);
 
       while (focusedElement && !event.accepted) {
         const backup = focusedElement.$context.event;

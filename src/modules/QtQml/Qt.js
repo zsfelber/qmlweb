@@ -12,7 +12,7 @@ const Qt = {
     return `hsla(${inth},${ints}%,${intl}%,${a})`;
   },
   openUrlExternally: url => {
-    const page = widow.open(url, "_blank");
+    const page = window.open(url, "_blank");
     page.focus();
   },
   // Load file, parse and construct as Component (.qml)
