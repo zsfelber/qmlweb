@@ -193,6 +193,11 @@ class QMLProperty {
     var pushed;
     try {
       pushed = QMLProperty.pushEvaluatingProperty(this);
+
+      if (this.binding instanceof QmlWeb.QtBindingDefinition) {
+        this.binding = Qt.binding(this.binding.get, this.binding.set, this.binding.flags);
+      }
+
       if (!this.binding.compiled) {
         this.binding.compile();
       }
@@ -340,7 +345,7 @@ class QMLProperty {
     const oldVal = this.val;
 
     let val = newVal;
-    if (val instanceof QmlWeb.QMLBinding) {
+    if (val instanceof QmlWeb.QMLBinding || val instanceof QmlWeb.QtBindingDefinition) {
       this.binding = val;
 
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
