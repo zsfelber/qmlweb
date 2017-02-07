@@ -69,6 +69,79 @@ class ItemBase {
     if (this.dom) this.dom.appendChild(element.dom);
   }
 
+  bindTo(that) {
+    // does nothing by default, see GzItem
+  }
+
+  treeBindTo(that, suffix, path) {
+    if (!suffix) suffix = "Model";
+    var sr = new RegExp("("+suffix+")$");
+    if (!path) path = [];
+
+    if (this.id !== that.id+suffix){
+      if (this.id === that.id){
+        if (this.id) {
+          console.warn("treeBindTo  id pair anti-pattern-matches : "+path+" super:  model:"+this+" control:"+that);
+        } else {
+          console.warn("treeBindTo  no ids : "+path+" super:  model:"+this+" control:"+that);
+        }
+      } else {
+        console.warn("treeBindTo  id pair doesn't match : "+path+" super:  model:"+this+" control:"+that);
+      }
+    }
+    if (this.$class !== that.$class+suffix) {
+      if (this.$class === that.$class) {
+        if (this.$class) {
+          console.warn("treeBindTo  superclass pair anti-pattern-matches : "+path+" super:  model:"+this+" control:"+that);
+        } else {
+          console.warn("treeBindTo  missing $class info : "+path+" super:  model:"+this+" control:"+that);
+          return false;
+        }
+      } else {
+        console.warn("treeBindTo  superclass pair doesn't match : "+path+" super:  model:"+this+" control:"+that);
+      }
+    } else {
+      return false;
+    }
+
+    path.push("S"+this.id);
+    for (var thisprop in this) {
+      var m = sr.exec(thisprop);
+      var thatprop;
+      if (m) {
+        thatprop = m[1];
+      } else {
+        thatprop = thisprop;
+        console.warn("treeBindTo  Anti pattern property name : "+path+" . "+thatprop);
+      }
+
+      path.push(thatprop);
+
+      var thisval = this[thisprop];
+      var thatval = that[thatprop];
+      if (!thisval || !thatval) {
+        console.warn("treeBindTo  property->null : "+path+"   model:"+this+" . "+thisprop+":"+thisval+"   control:"+that+" . "+thatprop+":"+thatval);
+      } else {
+        thisval.bindTo(thatval);
+        thisval.treeBindTo(thatval, suffix, path);
+      }
+
+      path.pop();
+    }
+    path.pop();
+
+    var pthis = this.__proto__;
+    var pthat = that.__proto__;
+    if (pthis && pthat && pthis.treeBindTo && pthat.treeBindTo) {
+      if (pthis.constructor !== ItemBase) {
+        pthis.treeBindTo(pthat, suffix, path);
+      }
+    } else if (pthis instanceof ItemBase) {
+      console.warn("treeBindTo  ?? bad super  : "+pthis+"   "+pthat);
+    }
+
+    return true;
+  }
 
 };
 
