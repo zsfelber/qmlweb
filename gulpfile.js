@@ -53,6 +53,10 @@ const licenseSources = [
   "node_modules/qmlweb-parser/LICENSE"
 ];
 
+const qrcSources = [
+  "./lib/qmlwebqrc.js"
+];
+
 // This is required because other values confuse PhantomJS, and are sometimes
 // set by default by the system.
 process.env.QT_QPA_PLATFORM = "";
@@ -67,6 +71,16 @@ gulp.task("license", () =>
 
 gulp.task("parser", () =>
   gulp.src(parserSources)
+    .pipe(gulp.dest("./lib"))
+);
+
+gulp.task("qrc", [], () =>
+  gulp.src("./lib/qmlwebqrc.js")
+    .pipe(rename("qmlwebqrc.min.js"))
+    .pipe(changed("./lib"))
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(uglify())
+    .pipe(sourcemaps.write("./"))
     .pipe(gulp.dest("./lib"))
 );
 
@@ -129,19 +143,21 @@ gulp.task("qmlweb", ["qmlweb-dev"], () =>
 
 gulp.task("build-covered", ["parser-covered", "qmlweb-covered"]);
 
-gulp.task("build-dev", ["qmlweb-dev", "parser", "license"]);
+gulp.task("build-dev", ["qmlweb-dev", "parser", "qrc", "license"]);
 
-gulp.task("build", ["qmlweb", "parser", "license"]);
+gulp.task("build", ["qmlweb", "parser", "qrc", "license"]);
 
 gulp.task("watch", ["build"], () => {
   gulp.watch(qtcoreSources, ["qmlweb"]);
   gulp.watch(parserSources, ["parser"]);
+  gulp.watch(qrcSources, ["qrc"]);
   gulp.watch(licenseSources, ["license"]);
 });
 
 gulp.task("watch-dev", ["build-dev"], () => {
   gulp.watch(qtcoreSources, ["qmlweb-dev"]);
   gulp.watch(parserSources, ["parser"]);
+  gulp.watch(qrcSources, ["qrc"]);
   gulp.watch(licenseSources, ["license"]);
 });
 
