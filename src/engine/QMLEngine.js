@@ -147,14 +147,10 @@ class QMLEngine {
     }
     var wsUrl, webSocket;
     if (operationFlags & QmlWeb.QMLOperationState.Remote) {
-      if (serverWsAddress) {
+      if (serverWsAddress !== undefined) {
         if (/^\d+$/.test(serverWsAddress)) {
           var uri = QmlWeb.$parseURIwPort(window.location.href);
-          if (serverWsAddress) {
-            wsUrl = "ws://"+uri.host+":"+serverWsAddress;
-          } else {
-            wsUrl = "ws://"+uri.host+":"+serverWsAddress;
-          }
+          wsUrl = "ws://"+uri.host+":"+(serverWsAddress?serverWsAddress:uri.port);
         } else {
           if (/^ws:[/]/.test(serverWsAddress)) {
             wsUrl = serverWsAddress;
@@ -168,13 +164,15 @@ class QMLEngine {
       if (wsUrl) {
         console.log("Connecting to ws server : "+wsUrl);
         webSocket = new WebSocket(wsUrl);
-        webSocket.onopen = function(evt) { console.log(wsUrl+" : Connection open ..."); };
+        webSocket.onopen = function(evt) {
+          console.log(wsUrl+" : Connection open ...");
+          webSocket.send(JSON.stringify({init:"hello UULord 012"}));
+        };
         webSocket.onmessage = function(evt) {
           var data = JSON.parse(event.data);
           console.log( wsUrl+" : Received Message: " + evt.data);
         };
         webSocket.onclose = function(evt) { console.log(wsUrl+" : Connection closed."); };
-        webSocket.send("hello UULord 012");
       }
     }
 

@@ -262,7 +262,7 @@ function $parseURIlong(uri) {
 }
 
 function $parseURIwPort(uri) {
-  const match = uri.match(/^([^/]*?:\/)(.*?:(\d+))?(.*)$/);
+  const match = uri.match(/^([^/]*?:\/)(?:(.*?):(\d+))?(.*)$/);
   if (match) {
     return {
       scheme: match[1],
@@ -416,6 +416,8 @@ QmlWeb.$parseURI = $parseURI;
 QmlWeb.$parseURIwAuth = $parseURIwAuth;
 
 QmlWeb.$parseURIlong = $parseURIlong;
+
+QmlWeb.$parseURIwPort = $parseURIwPort;
 
 // Return a path to load the file
 QmlWeb.$resolvePath = $resolvePath;
