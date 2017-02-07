@@ -75,7 +75,7 @@ class ItemBase {
 
   treeBindTo(that, tbflags = QmlWeb.TBelements, suffix, path) {
     if (!suffix) suffix = "Model";
-    var sr = new RegExp("("+suffix+")$");
+    var sr = new RegExp("(.*)"+suffix+"$");
     if (!path) path = [];
 
     path.push("S"+this.id);
@@ -159,7 +159,7 @@ class ItemBase {
     var pthis = this.__proto__;
     var pthat = that.__proto__;
     const n1val = ""+pthis+(pthis?":"+pthis.id:"");
-    const n2val = ""+pthis+(pthis?":"+pthis.id:"");
+    const n2val = ""+pthat+(pthat?":"+pthat.id:"");
     if (!pthis || !pthat) {
       console.warn("treeBindTo  "+path+"  "+n1val+"  <-no super->  "+n2val);
     } else if (!pthis.treeBindTo && !pthat.treeBindTo) {
