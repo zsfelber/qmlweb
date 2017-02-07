@@ -170,9 +170,11 @@ class QMLEngine {
         };
         webSocket.onmessage = function(evt) {
           var data = JSON.parse(event.data);
-          console.log( wsUrl+" : Received Message: " + evt.data);
+          console.log( wsUrl+" : Received Message: ", data);
         };
-        webSocket.onclose = function(evt) { console.log(wsUrl+" : Connection closed."); };
+        webSocket.onclose = function(evt) {
+          console.log(wsUrl+" : Connection closed.");
+        };
       }
     }
 
