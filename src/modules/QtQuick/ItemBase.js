@@ -99,7 +99,7 @@ class ItemBase {
     }
 
 
-    if (tbflags & QmlWeb.TBelements && !(tbflags & QmlWeb._TBthiselems)) {
+    if (tbflags & QmlWeb.TBelements && that.$context && !(tbflags & QmlWeb._TBthiselems)) {
       for (var thiselem in this.$context.$elements) {
         var m = sr.exec(thiselem);
         var thatelem;
@@ -113,8 +113,8 @@ class ItemBase {
 
         var thisval = this.$context.$elements[thiselem];
         var thatval = that.$context.$elements[thatelem];
-        const n1val = ""+thisval+(thisval?":"+thisval.id:"");
-        const n2val = ""+thatval+(thatval?":"+thatval.id:"");
+        const n1val = ""+thisval+":"+thiselem;
+        const n2val = ""+thatval+":"+thatelem;
         if (!thisval || !thatval) {
           console.warn("treeBindTo  "+path+"  "+n1val+"  <-null->  "+n2val);
         } else if (thisval === this || thatval === that) {
@@ -140,8 +140,8 @@ class ItemBase {
 
         path.push(thatprop);
 
-        var thisval = this.$properties[thisprop];
-        var thatval = that.$properties[thatprop];
+        var thisval = this.$properties?this.$properties[thisprop]:null;
+        var thatval = that.$properties?that.$properties[thatprop]:null;
         if (!thisval || !thatval || !thisval.val || !thatval.val) {
           const n1val = ""+thisval+(thisval&&thisval.val?":"+thisval.id:"");
           const n2val = ""+thatval+(thatval&&thatval.val?":"+thatval.id:"");
