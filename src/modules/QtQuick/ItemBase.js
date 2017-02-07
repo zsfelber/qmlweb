@@ -81,49 +81,51 @@ class ItemBase {
     if (this.id !== that.id+suffix){
       if (this.id === that.id){
         if (this.id) {
-          console.warn("treeBindTo  id pair anti-pattern-matches : "+path+" super:  model:"+this+" control:"+that);
+          console.warn("treeBindTo  "+path+"  id pair anti-pattern-matches : super:  model:"+this+" control:"+that);
         } else {
-          console.warn("treeBindTo  no ids : "+path+" super:  model:"+this+" control:"+that);
+          console.warn("treeBindTo  "+path+"  no ids : super:  model:"+this+" control:"+that);
         }
       } else {
-        console.warn("treeBindTo  id pair doesn't match : "+path+" super:  model:"+this+" control:"+that);
+        console.warn("treeBindTo  "+path+"  id pair doesn't match : super:  model:"+this+" control:"+that);
       }
     }
     if (this.$class !== that.$class+suffix) {
       if (this.$class === that.$class) {
         if (this.$class) {
-          console.warn("treeBindTo  superclass pair anti-pattern-matches : "+path+" super:  model:"+this+" control:"+that);
+          console.warn("treeBindTo  "+path+"  superclass pair anti-pattern-matches : super:  model:"+this+" control:"+that);
         } else {
-          console.warn("treeBindTo  missing $class info : "+path+" super:  model:"+this+" control:"+that);
+          console.warn("treeBindTo  "+path+"  missing $class info : super:  model:"+this+" control:"+that);
           return false;
         }
       } else {
-        console.warn("treeBindTo  superclass pair doesn't match : "+path+" super:  model:"+this+" control:"+that);
+        console.warn("treeBindTo  "+path+"  superclass pair doesn't match : super:  model:"+this+" control:"+that);
+        return false;
       }
     }
 
     path.push("S"+this.id);
     console.warn("treeBindTo  "+path);
 
-    if (tbflags & QmlWeb.TBelements) {
-      for (var thiselem in this.$elements) {
+    if (tbflags & QmlWeb.TBelements && !(tbflags & QmlWeb._TBthiselems)) {
+      for (var thiselem in this.$context.$elements) {
         var m = sr.exec(thiselem);
         var thatelem;
         if (m) {
           thatelem = m[1];
         } else {
           thatelem = thiselem;
-          console.warn("treeBindTo  Anti pattern element name : "+path+" . "+thatelem);
+          console.warn("treeBindTo  "+path+"  Anti pattern element name : . "+thatelem);
         }
 
         path.push(thatelem);
 
-        var thisval = this.$elements[thiselem];
-        var thatval = that.$elements[thatelem];
+        var thisval = this.$context.$elements[thiselem];
+        var thatval = that.$context.$elements[thatelem];
         if (!thisval || !thatval) {
-          console.warn("treeBindTo  element->null : "+path+"   model:"+this+" . "+thiselem+":"+thisval+"   control:"+that+" . "+thatelem+":"+thatval);
+          console.warn("treeBindTo  "+path+"  element->null :   model:"+this+" . "+thiselem+":"+thisval+"   control:"+that+" . "+thatelem+":"+thatval);
         } else {
-          thisval.treeBindTo(thatval, tbflags, suffix, path);
+          // This flag serves to prevent duplications, all child elements are also in this.$context.$elements :
+          thisval.treeBindTo(thatval, tbflags | QmlWeb._TBthiselems, suffix, path);
         }
 
         path.pop();
@@ -138,7 +140,7 @@ class ItemBase {
           thatprop = m[1];
         } else {
           thatprop = thisprop;
-          console.warn("treeBindTo  Anti pattern property name : "+path+" . "+thatprop);
+          console.warn("treeBindTo  "+path+"  Anti pattern property name : . "+thatprop);
         }
 
         path.push(thatprop);
@@ -146,9 +148,9 @@ class ItemBase {
         var thisval = this.$properties[thisprop];
         var thatval = that.$properties[thatprop];
         if (!thisval || !thatval || !thisval.val || !thatval.val) {
-          console.warn("treeBindTo  property->null : "+path+"   model:"+thisprop+":"+thisval+"   control:"+thatprop+":"+thatval);
+          console.warn("treeBindTo  "+path+"  property->null :   model:"+thisprop+":"+thisval+"   control:"+thatprop+":"+thatval);
         } else {
-          thisval.val.treeBindTo(thatval.val, tbflags, suffix, path);
+          thisval.val.treeBindTo(thatval.val, tbflags & ~QmlWeb._TBthiselems, suffix, path);
         }
 
         path.pop();
@@ -161,10 +163,10 @@ class ItemBase {
     var pthat = that.__proto__;
     if (pthis && pthat && pthis.treeBindTo && pthat.treeBindTo) {
       if (pthis.constructor !== ItemBase) {
-        pthis.treeBindTo(pthat, tbflags, suffix, path);
+        pthis.treeBindTo(pthat, tbflags & ~QmlWeb._TBthiselems, suffix, path);
       }
     } else if (pthis instanceof ItemBase) {
-      console.warn("treeBindTo  ?? bad super  : "+pthis+"   "+pthat);
+      console.warn("treeBindTo  "+path+"  ?? bad super  : "+pthis+"   "+pthat);
     }
 
     return true;
@@ -192,3 +194,4 @@ QmlWeb.ItemBase = ItemBase;
 
 QmlWeb.TBproperties = 1;
 QmlWeb.TBelements = 2;
+QmlWeb._TBthiselems = 4;

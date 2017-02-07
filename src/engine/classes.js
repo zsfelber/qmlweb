@@ -248,7 +248,7 @@ function addElementToPageContexts(item, id, ctx) {
   QmlWeb.setupGetterSetter(
     ctx, id,
     () => item,
-    () => {}
+    () => {}, item
   );
 
   // put it into context.$elements of :
@@ -263,7 +263,8 @@ function addElementToPageContexts(item, id, ctx) {
     QmlWeb.setupGetterSetter(
       ectx.$elements, id,
       () => item,
-      () => {}
+      () => {},
+      item, true
     );
 
     // ectx is current Page top : exit

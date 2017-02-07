@@ -18,13 +18,13 @@ function setupSetter(obj, propName, func, owner) {
   });
 }
 
-function setupGetterSetter(obj, propName, getter, setter, owner) {
+function setupGetterSetter(obj, propName, getter, setter, owner, enumerable=false) {
   Object.defineProperty(obj, propName, {
     get: getter,
     set: setter,
     owner: owner,
     configurable: true,
-    enumerable: false
+    enumerable
   });
 }
 
