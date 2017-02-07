@@ -181,7 +181,7 @@ class Signal {
       var to = QmlWeb.objToStringSafe(desc.thisObj);
       if (err.ctType === "PendingEvaluation") {
         //console.warn("PendingEvaluation : Signal :" + desc.signal.$name + "  slotObj:" + so +" thisObj:" + to  pending operation:", err.message);
-        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) || this.$rootComponent.serverWsAddress) {
+        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) || (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
           QmlWeb.engine.pendingOperations.push({
             fun:desc.slot,
             thisObj:desc.thisObj,

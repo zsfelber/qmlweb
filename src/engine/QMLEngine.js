@@ -140,7 +140,7 @@ class QMLEngine {
 
 
   // Load file, parse and construct (.qml or .qml.js)
-  loadFile(file, parent = null, operationFlags = 0, serverWsAddress) {
+  loadFile(file, parent = null, operationFlags = 0, serverWsAddress, isClientSide) {
     // Create an anchor element to get the absolute path from the DOM
     if (!this.$basePathA) {
       this.$basePathA = document.createElement("a");
@@ -184,7 +184,7 @@ class QMLEngine {
     // TODO gz resolveClass  += engine.containers[...]
     const respath = QmlWeb.$resolvePath(fileName, this.$basePathA.href);
     const clazz = QmlWeb.resolveClass(respath);
-    const component = this.loadQMLTree(clazz, parent, file, operationFlags, serverWsAddress, webSocket);
+    const component = this.loadQMLTree(clazz, parent, file, operationFlags, serverWsAddress, isClientSide, webSocket);
     console.log("loadFile success. LOADED : "+file);
     return component;
   }
@@ -192,11 +192,11 @@ class QMLEngine {
   // parse and construct qml
   // file is not required; only for debug purposes
   // This function is only used by the QmlWeb tests
-  loadQML(src, parent = null, file = undefined, operationFlags = 0, serverWsAddress, webSocket) {
-    return this.loadQMLTree(QmlWeb.parseQML(src, file), parent, file, operationFlags, serverWsAddress, webSocket);
+  loadQML(src, parent = null, file = undefined, operationFlags = 0, serverWsAddress, isClientSide, webSocket) {
+    return this.loadQMLTree(QmlWeb.parseQML(src, file), parent, file, operationFlags, serverWsAddress, isClientSide, webSocket);
   }
 
-  loadQMLTree(clazz, parent = null, file = undefined, operationFlags = 0, serverWsAddress, webSocket) {
+  loadQMLTree(clazz, parent = null, file = undefined, operationFlags = 0, serverWsAddress, isClientSide, webSocket) {
     QmlWeb.engine = this;
     // default is 0 : Idle
     var prevState = this.operationState;
@@ -212,6 +212,7 @@ class QMLEngine {
                     QmlWeb.QMLComponent.Root | QmlWeb.QMLComponent.LoadImports);
 
       this.rootObject.$component.serverWsAddress = serverWsAddress;
+      this.rootObject.$component.isClientSide = isClientSide;
       this.rootObject.$component.webSocket = webSocket;
 
 

@@ -323,7 +323,7 @@ class QMLProperty {
     }
 
     if (this.updateState && (this.pendingInit || this.binding)) {
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) || this.$rootComponent.serverWsAddress) {
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) || (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
         QmlWeb.engine.pendingOperations.push({
            property:this,
            info:"Pending property get/binding initialization : "+this,
@@ -351,7 +351,7 @@ class QMLProperty {
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
         this.update(true, flags);
       } else {
-        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) || this.$rootComponent.serverWsAddress) {
+        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) || (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
           QmlWeb.engine.pendingOperations.push({
              property:this,
              info:"Pending property set/binding initialization : "+this,
@@ -400,7 +400,7 @@ class QMLProperty {
       }
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
         _changed_init.call(this);
-      } else if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) || this.$rootComponent.serverWsAddress) {
+      } else if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) || (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
         QmlWeb.engine.pendingOperations.push({
           fun:_changed_init,
           thisObj:this,
