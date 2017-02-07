@@ -98,10 +98,17 @@ function construct(meta, parent, flags) {
   // see also Object.create in QMLContext.createChild
   const item = superitem.createChild();
 
+  let nm = component.$name;
+  if (/\.qml$/.test(nm)) {
+    nm = nm.substring(0, nm.length-4);
+  }
+
+  item.$superclass = item.$class;
+  item.$class = nm;
   if (flags & QmlWeb.QMLComponent.Nested) {
-    item.$classname = "["+component.$name+"]";
+    item.$classname = "["+nm+"]";
   } else {
-    item.$classname = component.$name;
+    item.$classname = nm;
   }
 
   var ctx = item.$context = component.context;
