@@ -36,6 +36,20 @@ class QMLMethod extends QmlWeb.QMLBinding {
   }
 }
 
+class QtBindingDefinition {
+  constructor(get, set, flags) {
+    this.get = get;
+    this.set = set;
+    this.flags = flags;
+    Object.defineProperty(this, "serializedTypeId", {
+      value: "q",
+      configurable: false,
+      enumerable: false,
+      writable: false
+    });
+  }
+}
+
 /**
  * Create an object representing a QML property definition.
  * @param {String} type The type of the property
@@ -468,13 +482,40 @@ convertToEngine.bindout = function(statement, binding, info) {
   if (walker) {
     return walker.apply(type, tree.slice(1));
   }
-  //convertToEngine.walk(tree);
+  // ["call", ["dot", ["name", "Qt"], "binding"]
+  if (type === "call" && tree[1] && tree[1][0] && tree[1][0]==="dot" && tree[1][2] && tree[1][2]==="binding" &&
+      tree[1][1] && tree[1][1][0] && tree[1][1][0]==="name" && tree[1][1][1] && tree[1][1][1]==="Qt") {
 
-  const b = new QmlWeb.QMLBinding(binding, tree, undefined, undefined, info);
-  if (!b.src && !b.property) {
-    return null;
+    impl = QmlWeb._ubertrim(binding);
+    impl = impl.replace(/^Qt\.binding/, "new QtBindingDefinition");
+    var qtdef = eval(impl);
+    if (qtdef.get && typeof qtdef.get !== "string" && !(qtdef.get instanceof Function) ) {
+      throw new Error("Qt.binding  Argument 1 should be string or function :"+binding);
+    }
+    if (qtdef.set && typeof qtdef.set !== "string" && !(qtdef.set instanceof Function) ) {
+      throw new Error("Qt.binding  Argument 2 should be string or function :"+binding);
+    }
+    if (qtdef.flags && typeof qtdef.flags !== "number" ) {
+      throw new Error("Qt.binding  Argument 3 (flags) should be a number :"+binding);
+    }
+
+    if (qtdef.get instanceof Function) {
+      qtdef.get = QmlWeb.compressImpl(qtdef.get);
+    }
+    if (qtdef.set instanceof Function) {
+      qtdef.set = QmlWeb.compressImpl(qtdef.set);
+    }
+    return qtdef;
+
   } else {
-    return b;
+    //convertToEngine.walk(tree);
+
+    const b = new QmlWeb.QMLBinding(binding, tree, undefined, undefined, info);
+    if (!b.src && !b.property) {
+      return null;
+    } else {
+      return b;
+    }
   }
 };
 
@@ -529,6 +570,7 @@ function parseQML(src, file) {
 }
 
 QmlWeb.QMLMethod = QMLMethod;
+QmlWeb.QtBindingDefinition = QtBindingDefinition;
 QmlWeb.QMLPropertyDefinition = QMLPropertyDefinition;
 QmlWeb.QMLAliasDefinition = QMLAliasDefinition;
 QmlWeb.QMLSignalDefinition = QMLSignalDefinition;
