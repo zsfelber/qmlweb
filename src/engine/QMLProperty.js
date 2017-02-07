@@ -22,7 +22,6 @@ function objToStringSafe(obj, detail) {
     if (!obj) {
       os = obj;
     } else {
-      this.$rootComponent = obj.$component.$root;
       if (obj.$objectId) {
         if (toStrCalls[obj.$objectId]) {
           os = "toString loop:";
@@ -68,6 +67,7 @@ class QMLProperty {
     }
 
     this.obj = obj;
+    this.$rootComponent = obj.$component ? obj.$component.$root : {};
     this.name = name;
     this.readOnly = options.readOnly;
     this.pendingInit = options.pendingInit;
@@ -318,10 +318,12 @@ class QMLProperty {
     }
 
     if (this.updateState && (this.pendingInit || this.binding)) {
-      QmlWeb.engine.pendingOperations.push({
-         property:this,
-         info:"Pending property get/binding initialization : "+this,
-         });
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) || this.$rootComponent.serverWsAddress) {
+        QmlWeb.engine.pendingOperations.push({
+           property:this,
+           info:"Pending property get/binding initialization : "+this,
+           });
+      }
       throw new QmlWeb.PendingEvaluation(`Binding not yet initialized.`, this);
     }
 
@@ -344,11 +346,13 @@ class QMLProperty {
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
         this.update(true, flags);
       } else {
-        QmlWeb.engine.pendingOperations.push({
-           property:this,
-           info:"Pending property set/binding initialization : "+this,
-           flags, declaringItem
-           });
+        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) || this.$rootComponent.serverWsAddress) {
+          QmlWeb.engine.pendingOperations.push({
+             property:this,
+             info:"Pending property set/binding initialization : "+this,
+             flags, declaringItem
+             });
+        }
         //console.warn("PendingEvaluation : Pending property set/binding :" + this.name + "  obj:" + this.obj);
         return;
       }
@@ -391,7 +395,7 @@ class QMLProperty {
       }
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
         _changed_init.call(this);
-      } else if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote)) {
+      } else if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) || this.$rootComponent.serverWsAddress) {
         QmlWeb.engine.pendingOperations.push({
           fun:_changed_init,
           thisObj:this,

@@ -320,6 +320,44 @@ function $resolveImageURL(fileURL) {
 }
 
 function $instanceOf(o, typestring, component) {
+
+  switch (typestring) {
+  case "Function":
+  case "function":
+    return o instanceof Function;
+  case "Array":
+  case "array":
+    return o instanceof Array;
+  case "Object":
+  case "object":
+  case "var":
+    return o instanceof Object;
+  case "String":
+  case "string":
+    return typeof(o) === "string";
+  case "Number":
+    if (typeof(o) === "number") return true;
+    else break;
+  case "number":
+  case "int":
+  case "real":
+  case "double":
+  case "float":
+    return typeof(o) === "number";
+  case "Date":
+    if (typeof(o) === "date") return true;
+    else break;
+  case "date":
+  case "datetime":
+  case "time":
+    return typeof(o) === "date";
+  case "url":
+    return typeof(o) === "string" ? $parseURI(o) : false;
+  case "RegExp":
+    if (o instanceof RegExp) return true;
+    else break;
+  }
+
   if (!component) {
     throw new Error("QmlWeb.$instanceOf : Class : "+typestring+" Argument error, missing Component");
   }
@@ -344,37 +382,6 @@ function $instanceOf(o, typestring, component) {
     }
   } else {
 
-    switch (typestring) {
-    case "Function":
-    case "function":
-      return o instanceof Function;
-    case "Array":
-    case "array":
-      return o instanceof Array;
-    case "Object":
-    case "object":
-    case "var":
-      return o instanceof Object;
-    case "String":
-    case "string":
-      return typeof(o) === "string";
-    case "Number":
-    case "number":
-    case "int":
-    case "real":
-    case "double":
-    case "float":
-      return typeof(o) === "number";
-    case "Date":
-    case "date":
-    case "datetime":
-    case "time":
-      return typeof(o) === "date";
-    case "url":
-      return typeof(o) === "string" ? $parseURI(o) : false;
-    case "RegExp":
-      return o instanceof RegExp;
-    }
   }
 
 }

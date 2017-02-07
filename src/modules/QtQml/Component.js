@@ -142,7 +142,7 @@ class QMLComponent {
     this.context.topContext = this.topComponent ? this.topComponent.context : null;
 
     // !!! see QMLBinding
-    this.$context = this.context;QWebChannel
+    this.$context = this.context;
     this.$component = this;
 
     if (!this.context) {

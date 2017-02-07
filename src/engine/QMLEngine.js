@@ -166,10 +166,15 @@ class QMLEngine {
       }
 
       if (wsUrl) {
+        console.log("Connecting to ws server : "+wsUrl);
         webSocket = new WebSocket(wsUrl);
         webSocket.onopen = function(evt) { console.log(wsUrl+" : Connection open ..."); };
-        webSocket.onmessage = function(evt) { console.log( wsUrl+" : Received Message: " + evt.data); };
+        webSocket.onmessage = function(evt) {
+          var data = JSON.parse(event.data);
+          console.log( wsUrl+" : Received Message: " + evt.data);
+        };
         webSocket.onclose = function(evt) { console.log(wsUrl+" : Connection closed."); };
+        webSocket.send("hello UULord 012");
       }
     }
 
