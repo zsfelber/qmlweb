@@ -100,8 +100,6 @@ class ItemBase {
       } else {
         console.warn("treeBindTo  superclass pair doesn't match : "+path+" super:  model:"+this+" control:"+that);
       }
-    } else {
-      return false;
     }
 
     path.push("S"+this.id);
