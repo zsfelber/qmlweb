@@ -73,7 +73,7 @@ class ItemBase {
     // does nothing by default, see GzItem
   }
 
-  treeBindTo(that, suffix, path) {
+  treeBindTo(that, tbflags = QmlWeb.TBelements, suffix, path) {
     if (!suffix) suffix = "Model";
     var sr = new RegExp("("+suffix+")$");
     if (!path) path = [];
@@ -103,36 +103,65 @@ class ItemBase {
     }
 
     path.push("S"+this.id);
-    for (var thisprop in this) {
-      var m = sr.exec(thisprop);
-      var thatprop;
-      if (m) {
-        thatprop = m[1];
-      } else {
-        thatprop = thisprop;
-        console.warn("treeBindTo  Anti pattern property name : "+path+" . "+thatprop);
+    console.warn("treeBindTo  "+path);
+
+    if (tbflags & QmlWeb.TBelements) {
+      for (var thiselem in this.$elements) {
+        var m = sr.exec(thiselem);
+        var thatelem;
+        if (m) {
+          thatelem = m[1];
+        } else {
+          thatelem = thiselem;
+          console.warn("treeBindTo  Anti pattern element name : "+path+" . "+thatelem);
+        }
+
+        path.push(thatelem);
+
+        var thisval = this.$elements[thiselem];
+        var thatval = that.$elements[thatelem];
+        if (!thisval || !thatval) {
+          console.warn("treeBindTo  element->null : "+path+"   model:"+this+" . "+thiselem+":"+thisval+"   control:"+that+" . "+thatelem+":"+thatval);
+        } else {
+          thisval.treeBindTo(thatval, tbflags, suffix, path);
+        }
+
+        path.pop();
       }
-
-      path.push(thatprop);
-
-      var thisval = this[thisprop];
-      var thatval = that[thatprop];
-      if (!thisval || !thatval) {
-        console.warn("treeBindTo  property->null : "+path+"   model:"+this+" . "+thisprop+":"+thisval+"   control:"+that+" . "+thatprop+":"+thatval);
-      } else {
-        thisval.bindTo(thatval);
-        thisval.treeBindTo(thatval, suffix, path);
-      }
-
-      path.pop();
     }
+
+    if (tbflags & QmlWeb.TBproperties) {
+      for (var thisprop in this.$properties) {
+        var m = sr.exec(thisprop);
+        var thatprop;
+        if (m) {
+          thatprop = m[1];
+        } else {
+          thatprop = thisprop;
+          console.warn("treeBindTo  Anti pattern property name : "+path+" . "+thatprop);
+        }
+
+        path.push(thatprop);
+
+        var thisval = this.$properties[thisprop];
+        var thatval = that.$properties[thatprop];
+        if (!thisval || !thatval || !thisval.val || !thatval.val) {
+          console.warn("treeBindTo  property->null : "+path+"   model:"+thisprop+":"+thisval+"   control:"+thatprop+":"+thatval);
+        } else {
+          thisval.val.treeBindTo(thatval.val, tbflags, suffix, path);
+        }
+
+        path.pop();
+      }
+    }
+
     path.pop();
 
     var pthis = this.__proto__;
     var pthat = that.__proto__;
     if (pthis && pthat && pthis.treeBindTo && pthat.treeBindTo) {
       if (pthis.constructor !== ItemBase) {
-        pthis.treeBindTo(pthat, suffix, path);
+        pthis.treeBindTo(pthat, tbflags, suffix, path);
       }
     } else if (pthis instanceof ItemBase) {
       console.warn("treeBindTo  ?? bad super  : "+pthis+"   "+pthat);
@@ -161,3 +190,5 @@ QmlWeb.registerQmlType({
 
 QmlWeb.ItemBase = ItemBase;
 
+QmlWeb.TBproperties = 1;
+QmlWeb.TBelements = 2;
