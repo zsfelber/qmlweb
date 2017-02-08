@@ -69,108 +69,106 @@ class ItemBase {
     if (this.dom) this.dom.appendChild(element.dom);
   }
 
-  bindTo(that) {
-    // does nothing by default, see GzItem
-  }
-
-  treeBindTo(that, tbflags = QmlWeb.TBelements, suffix, path) {
+  treeBindTo(that, tbflags = QmlWeb.TBall, suffix, path, dump, isfirstsup) {
     if (!suffix) suffix = "Model";
     var sr = new RegExp("(.*)"+suffix+"$");
-    if (!path) path = [];
+    const top = !path;
+    if (!path) {
+      path = [];
+      dump = [];
+    }
 
-    path.push("S"+this.id);
+    try {
+      if (isfirstsup) {
+        path.push(path[path.length-1]===this.id ? "-s->" : "-s->"+this.id);
+      } else {
+        path.push(this.id);
+      }
 
-    const n1 = this+":"+this.id;
-    const n2 = that+":"+that.id;
+      const n1 = this+" "+this.id;
+      const n2 = that+" "+that.id;
 
 
-    if (this.id !== that.id+suffix){
-      if (this.id === that.id){
-        if (this.id) {
-          console.warn("treeBindTo  "+path+"  "+n1+"  <-id:match->  "+n2);
+      if (this.id !== that.id+suffix){
+        if (this.id === that.id){
+          if (this.id) {
+            (dump[path] = {n1, info:"<-id:match->", n2});
+          } else {
+            (dump[path+" ?"] = {n1, info:"<-id:null->", n2});
+          }
         } else {
-          console.warn("treeBindTo  "+path+"  "+n1+"  <-id:null->  "+n2);
+          (dump[path+" ?"] = {n1, info:"<-id:!match!->", n2});
         }
       } else {
-        console.warn("treeBindTo  "+path+"  "+n1+"  <-id:!match!->  "+n2);
+        (dump[path] = {n1,info:"<-id:ok->", n2});
       }
-    } else {
-      console.warn("treeBindTo  "+path+"      "+n1+"  vs  "+n2);
-    }
 
+      if (this.bindTo) {
+        this.bindTo(that);
+        (dump[path+".b"] = {n1,info:"<-bound:ok->", n2});
+      } else {
+        (dump["X "+path+".b"] = {n1,info:"<-!bindTo->", n2});
+      }
 
-    if (tbflags & QmlWeb.TBelements && that.$context && !(tbflags & QmlWeb._TBthiselems)) {
-      for (var thiselem in this.$context.$elements) {
-        var m = sr.exec(thiselem);
-        var thatelem;
-        if (m) {
-          thatelem = m[1];
-        } else {
-          thatelem = thiselem;
+      if (tbflags & QmlWeb.TBelements && that.$context && !(tbflags & QmlWeb._TBthiselems)) {
+        for (var thiselem in this.$context.$elements) {
+          var m = sr.exec(thiselem);
+          var thatelem;
+          if (m) {
+            thatelem = m[1];
+          } else {
+            thatelem = thiselem;
+          }
+
+          var thisval = this.$context.$elements[thiselem];
+          var thatval = that.$context.$elements[thatelem];
+          const n1val = ""+thisval+" "+thiselem;
+          const n2val = ""+thatval+" "+thatelem;
+          if (!thisval || !thatval) {
+            (dump["X "+path+"."+thiselem] = {n1val, info:"<-null->", n2val});
+          } else if (thisval === this || thatval === that) {
+            (dump["X "+path+"."+thiselem] = {n1val, info:"<-this->", n2val});
+          } else {
+            // This flag serves to prevent duplications, all child elements are also in this.$context.$elements :
+            thisval.treeBindTo(thatval, tbflags | QmlWeb._TBthiselems, suffix, path, dump);
+          }
         }
+      }
 
-        path.push(thatelem);
+      if (tbflags & QmlWeb.TBproperties) {
+        var thisprop = this.$properties[this.id+suffix];
 
-        var thisval = this.$context.$elements[thiselem];
-        var thatval = that.$context.$elements[thatelem];
-        const n1val = ""+thisval+":"+thiselem;
-        const n2val = ""+thatval+":"+thatelem;
-        if (!thisval || !thatval) {
-          console.warn("treeBindTo  "+path+"  "+n1val+"  <-null->  "+n2val);
-        } else if (thisval === this || thatval === that) {
-          console.warn("treeBindTo  "+path+"  "+n1val+"  <-this->  "+n2val);
+        if (thisprop) {
+          (dump[path+".m"] = {n1val, info:"<-Model:ok->", n2val});
+          thisprop.readOnly = true;
+          thisprop.set(that, QmlWeb.QMLProperty.ReasonInitPrivileged);
         } else {
-          // This flag serves to prevent duplications, all child elements are also in this.$context.$elements :
-          thisval.treeBindTo(thatval, tbflags | QmlWeb._TBthiselems, suffix, path);
+          (dump["X "+path+".m"] = {n1val, info:"<-!ModelProp->", n2val});
         }
+      }
 
-        path.pop();
+      var pthis = this.__proto__;
+      var pthat = that.__proto__;
+      const n1val = ""+pthis+(pthis?" "+pthis.id:"");
+      const n2val = ""+pthat+(pthat?" "+pthat.id:"");
+      if (!pthis || !pthat) {
+        (dump["X "+path+".-s->"] = {n1val, info:"<-no super->", n2val});
+      } else if (!pthis.treeBindTo && !pthat.treeBindTo) {
+        (dump["X "+path+".-s->"] = {n1val, info:"<-bad super->", n2val});
+      } else if (!pthis.id && !pthat.id) {
+        (dump["X "+path+".-s->"] = {n1val, info:"<-no super id->", n2val});
+      } else {
+        pthis.treeBindTo(pthat, tbflags & ~QmlWeb._TBthiselems, suffix, path, dump, tbflags & QmlWeb._TBthiselems);
+      }
+
+      path.pop();
+
+      return true;
+    } finally {
+      if (top) {
+        console.log("treeBindTo : ", dump);
       }
     }
-
-    if (tbflags & QmlWeb.TBproperties) {
-      for (var thisprop in this.$properties) {
-        var m = sr.exec(thisprop);
-        var thatprop;
-        if (m) {
-          thatprop = m[1];
-        } else {
-          thatprop = thisprop;
-        }
-
-        path.push(thatprop);
-
-        var thisval = this.$properties?this.$properties[thisprop]:null;
-        var thatval = that.$properties?that.$properties[thatprop]:null;
-        if (!thisval || !thatval || !thisval.val || !thatval.val) {
-          const n1val = ""+thisval+(thisval&&thisval.val?":"+thisval.id:"");
-          const n2val = ""+thatval+(thatval&&thatval.val?":"+thatval.id:"");
-          console.warn("treeBindTo  "+path+"  "+n1val+"  <-null->  "+n2val);
-        } else {
-          thisval.val.treeBindTo(thatval.val, tbflags & ~QmlWeb._TBthiselems, suffix, path);
-        }
-
-        path.pop();
-      }
-    }
-
-    path.pop();
-
-    var pthis = this.__proto__;
-    var pthat = that.__proto__;
-    const n1val = ""+pthis+(pthis?":"+pthis.id:"");
-    const n2val = ""+pthat+(pthat?":"+pthat.id:"");
-    if (!pthis || !pthat) {
-      console.warn("treeBindTo  "+path+"  "+n1val+"  <-no super->  "+n2val);
-    } else if (!pthis.treeBindTo && !pthat.treeBindTo) {
-      console.warn("treeBindTo  "+path+"  "+n1val+"  <-bad super->  "+n2val);
-    } else if (!pthis.id && !pthat.id) {
-      console.warn("treeBindTo  "+path+"  "+n1val+"  <-no super id->  "+n2val);
-    } else {
-      pthis.treeBindTo(pthat, tbflags & ~QmlWeb._TBthiselems, suffix, path);
-    }
-
-    return true;
   }
 
 };
@@ -195,4 +193,5 @@ QmlWeb.ItemBase = ItemBase;
 
 QmlWeb.TBproperties = 1;
 QmlWeb.TBelements = 2;
+QmlWeb.TBall = 3;
 QmlWeb._TBthiselems = 4;

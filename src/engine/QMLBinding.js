@@ -243,7 +243,9 @@ class QMLBinding {
 
     } else {
 
-      this.src = _ubertrim(this.src);
+      if (typeof (this.src) === "string") {
+        this.src = _ubertrim(this.src);
+      }
 
       if (this.flags&QMLBinding.ImplFunction) {
         if (this.args!==undefined) {
@@ -295,7 +297,7 @@ class QMLBinding {
 
       return this.getterFunc;
 
-    } else {
+    } else if (!this.src || typeof (this.src) === "string") {
 
       const vvith = this.namespace();
 
@@ -325,6 +327,20 @@ class QMLBinding {
           ${ (this.flags&QMLBinding.ImplFunction) ? "return function"+src+";" : (this.flags&QMLBinding.ImplBlock) ? src : "return "+src+";"}
         }
       `);
+    } else if (this.src instanceof Object) {
+      var thisObj = this.src;
+      if (this.property) {
+        var fp = QmlWeb.formatPath(this.property);
+        return function() {
+          return thisObj[fp];
+        };
+      } else {
+        return function() {
+          return thisObj;
+        };
+      }
+    } else {
+      throw new Error("Invalid Binding.src type : "+(typeof this.src));
     }
   }
 
@@ -359,53 +375,77 @@ class QMLBinding {
       // NOTE validate first
       var fp = QmlWeb.formatPath(this.property, this.property);
 
-      if (this.src) {
+      if (!this.src || typeof (this.src) === "string") {
 
-        return new Function("$$__value", "$$__flags", "$$__declaringItem", `
-          ${vvith} {
-            var obj = ${this.src};
-            if (!obj) {
-              console.error("Writable/Bidirectional binding write error : target property '${this.src}' is null. Cannot set '${fp}' on null.");
-              return;
-            }
-            var prop;
-            if (obj === this)
-              prop = obj.${props}${fp};
-            else
-              prop = obj.$properties${fp};
+        if (this.src) {
 
-            if (prop) {
-              prop.set($$__value, $$__flags | QmlWeb.QMLProperty.ThroughBinding, $$__declaringItem);
-            } else {
-              if (obj.$context.$elements${fp}) {
-                throw new Error("Writable/Bidirectional binding write error : target property '${this.src} ${fp}' is an element, considered readonly.");
-              } else {
-                throw new Error("Writable/Bidirectional binding write error : target property '${this.src} ${fp}' not found, cannot write to null.");
+          return new Function("$$__value", "$$__flags", "$$__declaringItem", `
+            ${vvith} {
+              var obj = ${this.src};
+              if (!obj) {
+                console.error("Writable/Bidirectional binding write error : target property '${this.src}' is null. Cannot set '${fp}' on null.");
+                return;
               }
-            }
-          }
-        `);
-      } else {
+              var prop;
+              if (obj === this)
+                prop = obj.${props}${fp};
+              else
+                prop = obj.$properties${fp};
 
-        return new Function("$$__value", "$$__flags", "$$__declaringItem", `
-          ${vvith} {
-            var prop = this.${props}${fp};
-
-            if (prop) {
-              if (prop.readOnly) {
-                throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is read-only.");
-              } else {
+              if (prop) {
                 prop.set($$__value, $$__flags | QmlWeb.QMLProperty.ThroughBinding, $$__declaringItem);
-              }
-            } else {
-              if (this.$context.$elements${fp}) {
-                throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is an element, considered readonly.");
               } else {
-                throw new Error("Writable/Bidirectional binding write error : target property '${fp}' not found, cannot write to null.");
+                if (obj.$context.$elements${fp}) {
+                  throw new Error("Writable/Bidirectional binding write error : target property '${this.src} ${fp}' is an element, considered readonly.");
+                } else {
+                  throw new Error("Writable/Bidirectional binding write error : target property '${this.src} ${fp}' not found, cannot write to null.");
+                }
               }
             }
+          `);
+        } else {
+
+          return new Function("$$__value", "$$__flags", "$$__declaringItem", `
+            ${vvith} {
+              var prop = this.${props}${fp};
+
+              if (prop) {
+                if (prop.readOnly) {
+                  throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is read-only.");
+                } else {
+                  prop.set($$__value, $$__flags | QmlWeb.QMLProperty.ThroughBinding, $$__declaringItem);
+                }
+              } else {
+                if (this.$context.$elements${fp}) {
+                  throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is an element, considered readonly.");
+                } else {
+                  throw new Error("Writable/Bidirectional binding write error : target property '${fp}' not found, cannot write to null.");
+                }
+              }
+            }
+          `);
+        }
+      } else if (this.src instanceof Object) {
+        var thisObj = this.src;
+        return function($$__value, $$__flags, $$__declaringItem) {
+          var prop = thisObj[fp];
+
+          if (prop) {
+            if (prop.readOnly) {
+              throw new Error("Writable/Bidirectional binding write error : target property '"+fp+"' is read-only.");
+            } else {
+              prop.set($$__value, $$__flags | QmlWeb.QMLProperty.ThroughBinding, $$__declaringItem);
+            }
+          } else {
+            if (this.$context.$elements[fp]) {
+              throw new Error("Writable/Bidirectional binding write error : target property '"+fp+"' is an element, considered readonly.");
+            } else {
+              throw new Error("Writable/Bidirectional binding write error : target property '"+fp+"' not found, cannot write to null.");
+            }
           }
-        `);
+        };
+      } else {
+        throw new Error("Invalid Binding.src type : "+(typeof this.src));
       }
     }
 

@@ -91,7 +91,7 @@ const Qt = {
         if (!setterFunction) {
           throw new Error("Qt.binding() binding uses Bidirectional flag but property isn't specified in argument 2 .", setterFunction);
         }
-        b.property = setterFunc;
+        b.property = setterFunction;
       }
     }
 
