@@ -91,59 +91,67 @@ function construct(meta, parent, flags) {
     console.warn("custom  construct (not Component.$createObject) : "+item);
   }
 
+  let item;
   // NOTE making a new level of class inheritance :
   // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
   // NOTE gz  object is prototyped from bottom to top, in terms of [type]->[supertype] relationship
   // see also Component.constructor
   // see also Object.create in QMLContext.createChild
-  const item = superitem.createChild();
+  if (superitem instanceof QmlWeb.QObject) {
+    item = superitem.createChild();
 
-  let nm = component.$name;
-  if (/\.qml$/.test(nm)) {
-    nm = nm.substring(0, nm.length-4);
-  }
-
-  item.$superclass = item.$class;
-  item.$class = nm;
-  if (flags & QmlWeb.QMLComponent.Nested) {
-    item.$classname = "["+nm+"]";
-  } else {
-    item.$classname = nm;
-  }
-
-  var ctx = item.$context = component.context;
-  item.$component = component;
-  // !!! see QMLBinding
-  ctx.$ownerObject = item;
-
-  if (!component.loaderComponent===!(flags & QmlWeb.QMLComponent.Root)) {
-    throw new Error("Assertion failed. No Loader + Root or Root + Loader : "+component+"  ctx:"+ctx);
-  }
-
-  // Finalize instantiation over supertype item :
-
-  if (typeof item.dom !== "undefined") {
-    if (meta.id) {
-      item.dom.className += `  ${meta.id}`;
+    let nm = component.$name;
+    if (/\.qml$/.test(nm)) {
+      nm = nm.substring(0, nm.length-4);
     }
-  }
 
-  if (!ctx) {
-    throw new Error("No context : "+item);
-  }
+    item.$superclass = item.$class;
+    item.$class = nm;
+    if (flags & QmlWeb.QMLComponent.Nested) {
+      item.$classname = "["+nm+"]";
+    } else {
+      item.$classname = nm;
+    }
 
-  // each element into all parent context's elements on the page, by id :
-  // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
-  // (see properties.createProperty. )
-  if (meta.id) {
-    addElementToPageContexts(item, meta.id, ctx);
-  //} else if (flags & QmlWeb.QMLComponent.Nested) {
-  //  console.warn("No element id for item  : "+item+"  ctx:"+ctx);
-  }
+    var ctx = item.$context = component.context;
+    item.$component = component;
+    // !!! see QMLBinding
+    ctx.$ownerObject = item;
 
-  // Apply properties according to this metatype info
-  // (Bindings won't get evaluated, yet)
-  QmlWeb.applyProperties(meta, item);
+    if (!component.loaderComponent===!(flags & QmlWeb.QMLComponent.Root)) {
+      throw new Error("Assertion failed. No Loader + Root or Root + Loader : "+component+"  ctx:"+ctx);
+    }
+
+    // Finalize instantiation over supertype item :
+
+    if (typeof item.dom !== "undefined") {
+      if (meta.id) {
+        item.dom.className += `  ${meta.id}`;
+      }
+    }
+
+    if (!ctx) {
+      throw new Error("No context : "+item);
+    }
+
+    // each element into all parent context's elements on the page, by id :
+    // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
+    // (see properties.createProperty. )
+    if (meta.id) {
+      addElementToPageContexts(item, meta.id, ctx);
+    //} else if (flags & QmlWeb.QMLComponent.Nested) {
+    //  console.warn("No element id for item  : "+item+"  ctx:"+ctx);
+    }
+
+    // Apply properties according to this metatype info
+    // (Bindings won't get evaluated, yet)
+    QmlWeb.applyProperties(meta, item);
+
+  } else if (superitem instanceof QmlWeb.QMLComponent){
+    item = superitem;
+  } else {
+    throw new Error("construct : Invalid type . "+typeof(superitem));
+  }
 
   return item;
 }
