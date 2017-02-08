@@ -4,6 +4,7 @@ class ItemBase {
 
     this.elementAdd.connect(this, this.$onElementAdd);
     this.elementRemove.connect(this, this.$onElementRemove);
+    this.hoveredChanged.connect(this, this.$onHoveredChanged);
   }
 
   $onElementAdd(element) {
@@ -69,7 +70,17 @@ class ItemBase {
     if (this.dom) this.dom.appendChild(element.dom);
   }
 
-  treeBindTo(that, tbflags = QmlWeb.TBall, suffix, path, dump, isfirstsup, dumplen) {
+  $onHoveredChanged() {
+    if (this.parent) {
+      if (this.hovered) {
+          this.parent.hoverIndex = this.$childIndex;
+      } else {
+          this.parent.hoverIndex = -1;
+      }
+    }
+  }
+
+  treeBindTo(that, tbflags = QmlWeb.TBall, suffix, path, dump, dumplen) {
     if (!suffix) suffix = "Model";
     var sr = new RegExp("(.*)"+suffix+"$");
     const top = !path;
@@ -80,7 +91,7 @@ class ItemBase {
     }
 
     try {
-      if (isfirstsup) {
+      if (!(tbflags & QmlWeb._TBthiselems)) {
         path.push(path[path.length-1]===this.id ? "-s->" : "-s->"+this.id);
       } else {
         path.push(this.id);
@@ -131,24 +142,32 @@ class ItemBase {
             (dump["X "+path+"."+thiselem] = dump[(++dumplen[0])+" X "+path+"."+thiselem] = {n1val, info:"<-null->", n2val});
           } else {
             // This flag serves to prevent duplications, all child elements are also in this.$context.$elements :
-            thisval.treeBindTo(thatval, tbflags | QmlWeb._TBthiselems, suffix, path, dump, 0, dumplen);
+            thisval.treeBindTo(thatval, tbflags | QmlWeb._TBthiselems, suffix, path, dump, dumplen);
           }
         }
       }
 
       if (tbflags & QmlWeb.TBproperties) {
-        if ((tbflags & QmlWeb.TBproperties) && that.$properties) {
-          var thatprop = that.$properties[this.id+suffix];
+        if ((tbflags & QmlWeb.TBproperties) && that.$properties && that.id) {
+          let thatprop;
+          if (this.modelProperty) {
+            thatprop = that.$properties[this.modelProperty];
+          } else {
+            thatprop = that.$properties[that.id+suffix];
+            if (!thatprop) {
+              thatprop = that.$properties["model"];
+            }
+          }
 
           if (thatprop) {
-            (dump[path+".m"] = dump[(++dumplen[0])+" "+path+".m"] = {n1, info:"<-Model:ok->", n2});
+            (dump[path+".m"] = dump[(++dumplen[0])+" "+path+".m"] = {n1, info:"<-Model:ok->", n2, modelprop:thatprop});
             thatprop.readOnly = true;
             thatprop.set(this, QmlWeb.QMLProperty.ReasonInitPrivileged);
           } else {
             (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = {n1, info:"<-!ModelProp->", n2});
           }
         } else {
-          (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = {n1, info:"<-!that.$prop->", n2});
+          (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = {n1, info:"<-!that.$prop/id->", n2});
         }
       }
 
@@ -163,7 +182,7 @@ class ItemBase {
       } else if (!pthis.id && !pthat.id) {
         (dump["X "+path+".-s->"] = dump[(++dumplen[0])+" X "+path+".-s->"] = {n1val, info:"<-no super id->", n2val});
       } else {
-        pthis.treeBindTo(pthat, tbflags & ~QmlWeb._TBthiselems, suffix, path, dump, tbflags & QmlWeb._TBthiselems, dumplen);
+        pthis.treeBindTo(pthat, tbflags & ~QmlWeb._TBthiselems, suffix, path, dump, dumplen);
       }
 
       path.pop();
@@ -189,6 +208,9 @@ QmlWeb.registerQmlType({
     children: { type: "list", pendingInit:true, readOnly:true },
     resources: { type: "list", pendingInit:true, readOnly:true },
     $childIndex: { type: "int", pendingInit:true, readOnly:true },
+    modelProperty: { type: "string", readOnly:true },
+    hovered: { type: "bool", readOnly:true },
+    hoverIndex: { type: "int", readOnly:true }
   },
   defaultProperty: "data",
   constructor: ItemBase

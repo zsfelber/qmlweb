@@ -7,6 +7,7 @@ QmlWeb.registerQmlType({
     count: "int",
     currentIndex: "int",
     currentText: "string",
+    textRole: "string",
     menu: { type: "array", initialValue: [] },
     model: { type: "array", initialValue: [] },
     pressed: "bool"
@@ -54,7 +55,10 @@ QmlWeb.registerQmlType({
       //        html += "<option>" + elt[j] + "</option>";
       //}
       //else
-      entries.push(`<option>${elt}</option>`);
+      if (textRole)
+        entries.push(`<option>${elt[textRole]}</option>`);
+      else
+        entries.push(`<option>${elt}</option>`);
     }
     // TODO: remove innerHTML, port to DOM
     this.dom.innerHTML = `<select>${entries.join("")}</select>`;
