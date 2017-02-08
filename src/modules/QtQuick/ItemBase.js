@@ -107,15 +107,15 @@ class ItemBase {
       if (this.id !== that.id+suffix){
         if (this.id === that.id){
           if (this.id) {
-            (dump[path] = dump[(++dumplen[0])+" "+path] = {n1, info:"<-id:match->", n2});
+            (dump[path] = dump[(++dumplen[0])+" "+path] = {n1, info:"<-id:match->", n2, that, this});
           } else {
-            (dump[path+" ?"] = dump[(++dumplen[0])+" "+path+" ?"] = {n1, info:"<-id:null->", n2});
+            (dump[path+" ?"] = dump[(++dumplen[0])+" "+path+" ?"] = {n1, info:"<-id:null->", n2, that, this});
           }
         } else {
-          (dump[path+" ?"] = dump[(++dumplen[0])+" "+path+" ?"] = {n1, info:"<-id:!match!->", n2});
+          (dump[path+" ?"] = dump[(++dumplen[0])+" "+path+" ?"] = {n1, info:"<-id:!match!->", n2, that, this});
         }
       } else {index
-        (dump[path] = dump[(++dumplen[0])+" "+path] = {n1,info:"<-id:ok->", n2});
+        (dump[path] = dump[(++dumplen[0])+" "+path] = {n1,info:"<-id:ok->", n2, that, this});
       }
 
       if (this.bindTo) {
@@ -152,6 +152,7 @@ class ItemBase {
 
       if (tbflags & QmlWeb.TBproperties) {
         if ((tbflags & QmlWeb.TBproperties) && that.$properties && that.id) {
+          let tpdone = 0;
           let thatprop;
           if (this.modelProperty) {
             thatprop = that.$properties[this.modelProperty];
@@ -159,15 +160,25 @@ class ItemBase {
             thatprop = that.$properties[that.id+suffix];
             if (!thatprop) {
               thatprop = that.$properties["model"];
+              if (thatprop && thatprop.obj !== that) {
+                var inf = {n1, info:"<-!super!Model->", n2};
+                inf[thatprop.toString(true)]=thatprop;
+                (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = inf);
+                tpdone = 1;
+              }
             }
           }
 
-          if (thatprop) {
-            (dump[path+".m"] = dump[(++dumplen[0])+" "+path+".m"] = {n1, info:"<-Model:ok->", n2, modelprop:thatprop});
-            thatprop.readOnly = true;
-            thatprop.set(this, QmlWeb.QMLProperty.ReasonInitPrivileged);
-          } else {
-            (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = {n1, info:"<-!ModelProp->", n2});
+          if (!tpdone) {
+            if (thatprop) {
+              var inf = {n1, info:"<-Model:ok->", n2};
+              inf[thatprop.toString(true)]=thatprop;
+              (dump[path+".m"] = dump[(++dumplen[0])+" "+path+".m"] = inf);
+              thatprop.readOnly = true;
+              thatprop.set(this, QmlWeb.QMLProperty.ReasonInitPrivileged);
+            } else {
+              (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = {n1, info:"<-!ModelProp->", n2});
+            }
           }
         } else {
           (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = {n1, info:"<-!that.$prop/id->", n2});
