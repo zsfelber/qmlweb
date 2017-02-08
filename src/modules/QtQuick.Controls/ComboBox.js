@@ -42,20 +42,16 @@ QmlWeb.registerQmlType({
     });
   }
   find(text) {
-    else
-      return this.model.indexOf(text);
+    if (this.model.find)
+      return this.model.find(text);
+    var textRole = this.textRole;
+    return this.model.find(function(){
+      if (textRole)
+        return this[textRole] === text;
+      else
+        return this === text;
+    });
   }
- function find(text) {
-   if (this.model.find)
-     return this.model.find(text);
-   var textRole = this.textRole;
-   return this.model.find(function(){
-     if (textRole)
-       return this[textRole] === text;
-     else
-       return this === text;
-   });
- }
   selectAll() {
     // TODO
   }
