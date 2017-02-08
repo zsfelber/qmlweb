@@ -73,7 +73,10 @@ class ItemBase {
   $onHoveredChanged() {
     if (this.parent) {
       if (this.hovered) {
-          this.parent.hoverIndex = this.$childIndex;
+        if (this.hoverChildIndex)
+          this.parent.hoverIndex = this.hoverChildIndex;
+        else
+        this.parent.hoverIndex = this.$childIndex;
       } else {
           this.parent.hoverIndex = -1;
       }
@@ -111,7 +114,7 @@ class ItemBase {
         } else {
           (dump[path+" ?"] = dump[(++dumplen[0])+" "+path+" ?"] = {n1, info:"<-id:!match!->", n2});
         }
-      } else {
+      } else {index
         (dump[path] = dump[(++dumplen[0])+" "+path] = {n1,info:"<-id:ok->", n2});
       }
 

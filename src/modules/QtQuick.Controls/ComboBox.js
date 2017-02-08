@@ -8,9 +8,11 @@ QmlWeb.registerQmlType({
     currentIndex: "int",
     currentText: "string",
     textRole: "string",
+    indexRole: "string",
     menu: { type: "array", initialValue: [] },
     model: { type: "array", initialValue: [] },
-    pressed: "bool"
+    pressed: "bool",
+    popupVisible: "bool"
   },
   signals: {
     accepted: [],
@@ -33,16 +35,37 @@ QmlWeb.registerQmlType({
       this.accepted();
       this.activated(index);
     };
+    this.popupVisibleChanged.connect(this, function() {
+      if (this.dom && this.popupVisible) {
+        this.dom.focus();
+      }
+    });
   }
   find(text) {
-    return this.model.indexOf(text);
+    else
+      return this.model.indexOf(text);
   }
+ function find(text) {
+   if (this.model.find)
+     return this.model.find(text);
+   var textRole = this.textRole;
+   return this.model.find(function(){
+     if (textRole)
+       return this[textRole] === text;
+     else
+       return this === text;
+   });
+ }
   selectAll() {
     // TODO
   }
   textAt(index) {
-    return this.model[index];
+    var v = this.model[index];
+    if (this.textRole)
+      v = v[this.textRole];
+    return v;
   }
+
   $updateImpl() {
     this.currentIndex = 0;
     this.count = this.model.length;
