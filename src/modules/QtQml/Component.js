@@ -175,20 +175,31 @@ class QMLComponent {
   }
 
   copyMeta(meta) {
+    var cons;
     this.meta = {component:this};
-    if (meta.$file === undefined) {
-      meta.$file = meta.clazz.$file;
-    } else if (meta.$file !== meta.clazz.$file) {
-      throw new Error("Assertion failed. $file-s in Component and class differ :  meta.$file:"+meta.$file+" === meta.clazz.$file:"+meta.clazz.$file);
+    if (meta.clazz) {
+      if (meta.$file === undefined) {
+          meta.$file = meta.clazz.$file;
+      }
+      if (meta.$file !== meta.clazz.$file) {
+        throw new Error("Assertion failed. $file-s in Component and class differ :  meta.$file:"+meta.$file+" === meta.clazz.$file:"+meta.clazz.$file);
+      }
+
+      QmlWeb.helpers.copy(this.meta, meta.clazz);
+      cons = QmlWeb.constructors[this.meta.$class];
+    } else {
+      QmlWeb.helpers.copy(this.meta, meta);
+      if (this.meta.$class !== "Component" || this.meta._constructor !== QMLComponent) {
+        throw new Error("Assertion failed. Component element $class:"+meta.$class+" !== 'Component' || QMLComponent !== "+(this.meta._constructor?this.meta._constructor.name:"<null>"));
+      }
+      cons = this.meta._constructor;
     }
 
-    QmlWeb.helpers.copy(this.meta, meta.clazz);
-
-    if (QmlWeb.constructors[meta.clazz.$class] === QMLComponent) {
-      var metaObject = meta.clazz.$children;
+    if (cons === QMLComponent) {
+      var metaObject = this.meta.$children;
       if (metaObject instanceof Array) {
         if (metaObject.length !== 1) {
-          throw new Errror("Component should define 1 element : "+meta.clazz.$name+"("+meta.clazz.$class+") "+meta.clazz.id);
+          throw new Errror("Component should define 1 element : "+this.meta.$name+"("+this.meta.$class+") "+this.meta.id);
         }
         QmlWeb.helpers.copy(this.meta, metaObject[0]);
       }
