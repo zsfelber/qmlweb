@@ -74,11 +74,11 @@ class ItemBase {
     if (this.parent) {
       if (this.hovered) {
         if (this.hoverChildIndex)
-          this.parent.hoverIndex = this.hoverChildIndex;
+          this.parent.$properties.hoverIndex.set(this.hoverChildIndex, QmlWeb.QMLProperty.ReasonInitPrivileged);
         else
-        this.parent.hoverIndex = this.$childIndex;
+          this.parent.$properties.hoverIndex.set(this.$childIndex, QmlWeb.QMLProperty.ReasonInitPrivileged);
       } else {
-          this.parent.hoverIndex = -1;
+        this.parent.$properties.hoverIndex.set(-1, QmlWeb.QMLProperty.ReasonInitPrivileged);
       }
     }
   }
@@ -114,7 +114,7 @@ class ItemBase {
         } else {
           (dump[path+" ?"] = dump[(++dumplen[0])+" "+path+" ?"] = {n1, info:"<-id:!match!->", n2, that, this});
         }
-      } else {index
+      } else {
         (dump[path] = dump[(++dumplen[0])+" "+path] = {n1,info:"<-id:ok->", n2, that, this});
       }
 

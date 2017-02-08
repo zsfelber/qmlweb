@@ -375,6 +375,8 @@ class QMLComponent {
       item.$properties.parent.set(parent, QmlWeb.QMLProperty.ReasonInitPrivileged);
     } else if (item instanceof QmlWeb.QtObject) {
       item.$properties.container.set(parent, QmlWeb.QMLProperty.ReasonInitPrivileged);
+    } else if (item instanceof QMLComponent) {
+      item.$component = this;
     }
 
     return item;
