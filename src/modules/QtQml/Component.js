@@ -345,16 +345,23 @@ class QMLComponent {
       // !!! see QMLBinding
       this.context.$ownerObject = item;
 
+      item.$elements = this.context.$elements;
+      item.$info = this.context.$info;
+
       this.finalizeImports();
 
-      // NOTE one level of supertype hierarchy, QObject's component first (recursively) :
-      // NOTE not possible even trying to emit 'completed' right now, because we are before "applyProperties"
-      // and so unable to determine whether a called property exists and not yet initialiazed or it doesn't exist at all.
-      QmlWeb.engine.pendingOperations.push({
-        fun:QMLComponent.complete,
-        thisObj:this,
-        info:"Pending component.complete (waiting to initialization) : "+(this.context?this.context:this)
-      });
+      if (item.isComponentAttached) {
+        // NOTE one level of supertype hierarchy, QObject's component first (recursively) :
+        // NOTE not possible even trying to emit 'completed' right now, because we are before "applyProperties"
+        // and so unable to determine whether a called property exists and not yet initialiazed or it doesn't exist at all.
+        QmlWeb.engine.pendingOperations.push({
+          fun:QMLComponent.complete,
+          thisObj:this,
+          info:"Pending component.complete (waiting to initialization) : "+(this.context?this.context:this)
+        });
+      } else {
+        this.status = QmlWeb.Component.Ready;
+      }
 
     } catch (err) {
       //console.warn("Cannot create Object : parent:"+parent+"  ctx:"+this.context+"  "+err.message);
@@ -425,6 +432,9 @@ class QMLComponent {
   }
 
   static getAttachedObject() {
+    if (!this.isComponentAttached) {
+      this.isComponentAttached = true;
+    }
     return this.$component;
   }
 

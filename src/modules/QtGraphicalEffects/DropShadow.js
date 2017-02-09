@@ -16,7 +16,7 @@ QmlWeb.registerQmlType({
    this.radiusChanged.connect(this, this.$update);
    this.colorChanged.connect(this, this.$update);
    this.horizontalOffsetChanged.connect(this, this.$update);
-   this.vericalOffsetChanged.connect(this, this.$update);
+   this.verticalOffsetChanged.connect(this, this.$update);
   }
   $updateFilterObject() {
     this.$filterObject = {
