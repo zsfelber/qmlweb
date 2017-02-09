@@ -353,7 +353,7 @@ class QMLComponent {
       QmlWeb.engine.pendingOperations.push({
         fun:QMLComponent.complete,
         thisObj:this,
-        info:"Pending component.complete (waiting to initialization) : "+this
+        info:"Pending component.complete (waiting to initialization) : "+(this.context?this.context:this)
       });
 
     } catch (err) {

@@ -368,7 +368,7 @@ class QMLEngine {
     console.log("processPendingOperations : "+this.pendingOperations.length);
 
     var i=0,a=0,a1=0,a2=0,a3=0,b=0,e=0;
-    let info = {};
+    let info = {}, errors = {};
     while (this.pendingOperations.length > 0) {
       const op = this.pendingOperations.shift();
 
@@ -410,17 +410,20 @@ class QMLEngine {
         info["#"+i+":"+op.info] = op;
       } catch (err) {
         e++;
-        info["#ERR:#"+i+err.message] = op;
-        op.err = err;
+        errors["#ERR:#"+i+":"+op.info+":"+err.message] = op;
+        op.dumpErr = QMLEngine.dumpErr.bind(err);
       }
 
       i++;
     }
 
-    console.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+a3)+") functions:"+b+" errors:"+e, info);
+    console.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+a3)+") functions:"+b+" errors:"+e, "Info:",info, "Errors:",errors);
   }
 
-
+  static dumpErr() {
+    console.warn(this.message);
+    console.warn(this.stack);
+  }
 }
 
 QmlWeb.QMLEngine = QMLEngine;

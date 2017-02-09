@@ -439,7 +439,7 @@ class QMLProperty {
       result += i+":\n";
       result += this.stackToString(s.stack);
       ++i;
-    });
+    }, this);
     result += "Current:\n";
     result += this.stackToString();
     return result;

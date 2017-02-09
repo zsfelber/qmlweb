@@ -153,7 +153,7 @@ function applyProperties(metaObject, item) {
     if (err.ctType === "PendingEvaluation") {
       //console.warn("PendingEvaluation : Cannot apply property bindings (reevaluating at startup) :" + i + "  item:" + item);
     } else {
-      console.warn("Cannot apply property bindings : "+item+" . "+i+"  Context:"+item.$context+"  "+err.message);
+      console.warn("Cannot apply property bindings : "+item+" . "+i+"  Context:"+item.$context+"  "+err.message+"  opstate:"+QmlWeb.engine.operationState);
     }
 
     if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
