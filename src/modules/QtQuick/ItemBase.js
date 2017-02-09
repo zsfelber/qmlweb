@@ -94,7 +94,7 @@ class ItemBase {
     }
 
     try {
-      if (!(tbflags & QmlWeb._TBthiselems)) {
+      if (!(tbflags & (QmlWeb._TBthiselems|QmlWeb.TBtop))) {
         path.push(path[path.length-1]===this.id ? "-s->" : "-s->"+this.id);
       } else {
         path.push(this.id);
@@ -102,6 +102,20 @@ class ItemBase {
 
       const n1 = this+" "+this.id;
       const n2 = that+" "+that.id;
+
+      if (!that) {
+        (dump["X "+path+".-s->"] = dump[(++dumplen[0])+" X "+path+".-s->"] = {n1, info:"  no that->", n2});
+        return false;
+      }
+      if (!this.$properties || !that.$properties) {
+        (dump["X "+path+".-s->"] = dump[(++dumplen[0])+" X "+path+".-s->"] = {n1, info:"<-bad type/$prop->", n2});
+        return false;
+      }
+      if (!this.treeBindTo || !that.treeBindTo) {
+        (dump["X "+path+".-s->"] = dump[(++dumplen[0])+" X "+path+".-s->"] = {n1, info:"<-bad type/bindTo->", n2});
+        return false;
+      }
+
 
       const bindingbottom = this.$properties.hasOwnProperty("bindingbottom") ? this.bindingbottom : false;
 
@@ -119,7 +133,7 @@ class ItemBase {
         (dump[path] = dump[(++dumplen[0])+" "+path] = {n1,info:"<-id:ok->", n2, that, this});
       }
 
-      if (bindingbottom) {
+      if (tbflags & QmlWeb.TBtop) {
         if (this.bindTo) {
           this.bindTo(that);
           (dump[path+".b"] = dump[(++dumplen[0])+" "+path+".b"] = {info:"<-bound:ok->"});
@@ -127,7 +141,7 @@ class ItemBase {
           (dump["X "+path+".b"] = dump[(++dumplen[0])+" X "+path+".b"] = {info:"<-!bindTo->"});
         }
       } else {
-        (dump["X "+path+".b"] = dump[(++dumplen[0])+" X "+path+".b"] = {info:"<-!bottom->"});
+        (dump["X "+path+".b"] = dump[(++dumplen[0])+" X "+path+".b"] = {info:"<-!top->"});
       }
 
       if (tbflags & QmlWeb.TBelements && that.$context && !(tbflags & QmlWeb._TBthiselems)) {
@@ -146,76 +160,67 @@ class ItemBase {
           const n2val = ""+thatval+" "+thatelem;
           if (thisval === this || thatval === that) {
             (dump["X "+path+"."+thiselem] = dump[(++dumplen[0])+" X "+path+"."+thiselem] = {n1val, info:"<-this->", n2val});
-          } else if (!thisval || !thatval) {
-            (dump["X "+path+"."+thiselem] = dump[(++dumplen[0])+" X "+path+"."+thiselem] = {n1val, info:"<-null->", n2val});
           } else {
             // This flag serves to prevent duplications, all child elements are also in this.$context.$elements :
-            thisval.treeBindTo(thatval, tbflags | QmlWeb._TBthiselems, suffix, path, dump, dumplen);
+            thisval.treeBindTo(thatval, tbflags | QmlWeb.TBtop | QmlWeb._TBthiselems, suffix, path, dump, dumplen);
           }
         }
       }
 
       if (tbflags & QmlWeb.TBproperties) {
-        if ((tbflags & QmlWeb.TBproperties) && that.$properties) {
-          let tpdone = 0;
-          let thatprop;
-          if (this.modelProperty) {
-            thatprop = that.$properties[this.modelProperty];
-          } else {
-            if (that.id) {
-              thatprop = that.$properties[that.id+suffix];
-            }
-            if (!thatprop) {
-              thatprop = that.$properties["model"];
-            }
-            if (!bindingbottom && thatprop && thatprop.obj !== that) {
-              var inf = {info:"<-!super!Model->"};
-              inf[thatprop.toString(true)]=thatprop;
-              (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = inf);
-              tpdone = 1;
-            }
-          }
-
-          if (!tpdone) {
-            if (thatprop) {
-              var inf = {info:"<-Model:ok->"};
-              inf[thatprop.toString(true)]=thatprop;
-              (dump[path+".m"] = dump[(++dumplen[0])+" "+path+".m"] = inf);
-              thatprop.readOnly = true;
-              thatprop.set(this, QmlWeb.QMLProperty.ReasonInitPrivileged);
-            } else {
-              (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = {info:"<-!ModelProp->"});
-            }
-          }
+        let tpdone = 0;
+        let thatprop;
+        if (this.modelProperty) {
+          thatprop = that.$properties[this.modelProperty];
         } else {
-          (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = {info:"<-!that.$prop->"});
+          if (that.id) {
+            thatprop = that.$properties[that.id+suffix];
+          }
+          if (!thatprop) {
+            thatprop = that.$properties["model"];
+          }
+          if (!bindingbottom && thatprop && thatprop.obj !== that) {
+            var inf = {info:"<-!super!Model->"};
+            inf[thatprop.toString(true)]=thatprop;
+            (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = inf);
+            tpdone = 1;
+          }
+        }
+
+        if (!tpdone) {
+          if (thatprop) {
+            var inf = {info:"<-Model:ok->"};
+            inf[thatprop.toString(true)]=thatprop;
+            (dump[path+".m"] = dump[(++dumplen[0])+" "+path+".m"] = inf);
+            thatprop.readOnly = true;
+            thatprop.set(this, QmlWeb.QMLProperty.ReasonInitPrivileged);
+          } else {
+            (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = {info:"<-!ModelProp->"});
+          }
         }
       }
 
-      if (!this.$properties.hasOwnProperty("bindingbottom") || !this.bindingbottom) {
+      if (!bindingbottom) {
         var pthis = this.__proto__;
         var pthat = that.__proto__;
         const n1val = ""+pthis+(pthis?" "+pthis.id:"");
         const n2val = ""+pthat+(pthat?" "+pthat.id:"");
-        if (!pthis || !pthat) {
+        if (!pthis) {
           (dump["X "+path+".-s->"] = dump[(++dumplen[0])+" X "+path+".-s->"] = {n1val, info:"<-no super->", n2val});
-        } else if (!pthis.treeBindTo && !pthat.treeBindTo) {
-          (dump["X "+path+".-s->"] = dump[(++dumplen[0])+" X "+path+".-s->"] = {n1val, info:"<-bad super->", n2val});
         } else {
-          pthis.treeBindTo(pthat, tbflags & ~QmlWeb._TBthiselems, suffix, path, dump, dumplen);
+          pthis.treeBindTo(pthat, tbflags & ~(QmlWeb._TBthiselems|QmlWeb.TBtop), suffix, path, dump, dumplen);
         }
       } else {
         (dump["X "+path+".-s->"] = dump[(++dumplen[0])+" X "+path+".-s->"] = {info:"<-bottom->"});
       }
 
 
-      path.pop();
-
       return true;
     } finally {
       if (top) {
         console.log("treeBindTo : ", dump);
       }
+      path.pop();
     }
   }
 
@@ -244,5 +249,6 @@ QmlWeb.ItemBase = ItemBase;
 
 QmlWeb.TBproperties = 1;
 QmlWeb.TBelements = 2;
-QmlWeb.TBall = 3;
-QmlWeb._TBthiselems = 4;
+QmlWeb.TBtop = 4;
+QmlWeb.TBall = 7;
+QmlWeb._TBthiselems = 8;
