@@ -410,7 +410,8 @@ class QMLEngine {
         info["#"+i+":"+op.info] = op;
       } catch (err) {
         e++;
-        info["#"+i+":ERR:"+err.message] = op;
+        info["#ERR:#"+i+err.message] = op;
+        op.err = err;
       }
 
       i++;

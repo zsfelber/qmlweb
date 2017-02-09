@@ -320,9 +320,11 @@ function connectSignal(item, signalName, value) {
       value.flags |= QMLBinding.ImplFunction;
       value.compile();
     } catch (err) {
-      console.warn("connectSignal/slot compile error : "+
-                   (err.srcdumpok?" . signal:"+signalName+" :":" :")+err.message+" "+
-                   (err.srcdumpok?"srcdump:ok":""+connection));
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+        console.warn("connectSignal/slot compile error : "+
+                     (err.srcdumpok?" . signal:"+signalName+" :":" :")+err.message+" "+
+                     (err.srcdumpok?"srcdump:ok":""+connection));
+      }
       err.srcdumpok = 1;
       throw err;
     }

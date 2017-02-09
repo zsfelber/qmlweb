@@ -172,8 +172,10 @@ class QMLBinding {
       }
       return this.implGet.call(obj);
     } catch (err) {
-      var os = QmlWeb.objToStringSafe(obj);
-      QmlWeb.dumpEvalError("Binding/get error : "+err.message+" this:"+os+(err.srcdumpok?" srcdump:ok":" "+this), err);
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+        var os = QmlWeb.objToStringSafe(obj);
+        QmlWeb.dumpEvalError("Binding/get error : "+err.message+" this:"+os+(err.srcdumpok?" srcdump:ok":" "+this), err);
+      }
       err.srcdumpok = 1;
       throw err;
     } finally {
@@ -194,8 +196,10 @@ class QMLBinding {
       }
       this.implSet.call(obj, value, flags, declaringItem);
     } catch (err) {
-      var os = QmlWeb.objToStringSafe(obj);
-      QmlWeb.dumpEvalError("Binding/set error : "+err.message+" this:"+os+" value:"+value+" flags:"+flags+(err.srcdumpok?" srcdump:ok":" "+this), err);
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+        var os = QmlWeb.objToStringSafe(obj);
+        QmlWeb.dumpEvalError("Binding/set error : "+err.message+" this:"+os+" value:"+value+" flags:"+flags+(err.srcdumpok?" srcdump:ok":" "+this), err);
+      }
       err.srcdumpok = 1;
       throw err;
     } finally {
@@ -216,8 +220,10 @@ class QMLBinding {
       }
       this.binding.implRun.apply(this.bindingObj, arguments);
     } catch (err) {
-      var os = QmlWeb.objToStringSafe(this.bindingObj);
-      QmlWeb.dumpEvalError("Binding/run error : "+err.message+" this:" + os + (err.srcdumpok?" srcdump:ok":" "+this.binding), err);
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+        var os = QmlWeb.objToStringSafe(this.bindingObj);
+        QmlWeb.dumpEvalError("Binding/run error : "+err.message+" this:" + os + (err.srcdumpok?" srcdump:ok":" "+this.binding), err);
+      }
       err.srcdumpok = 1;
       throw err;
     } finally {

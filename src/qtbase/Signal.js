@@ -191,7 +191,7 @@ class Signal {
             reason:err
           });
         }
-      } else {
+      } else if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
         if (desc.binding) {
           console.warn("Signal : "+dso+" . "+ desc.signal.$name + (desc.slotObj!==desc.thisObj?" slotObj:" + QmlWeb.objToStringSafe(desc.slotObj):"") +" thisObj:" + to+"  slot(autobound) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.binding.toString());
         } else {

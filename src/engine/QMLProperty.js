@@ -224,7 +224,9 @@ class QMLProperty {
 
 
     } catch (e) {
-      console.warn("QMLProperty.update binding error "+this.toString(true), e);
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+        console.warn("QMLProperty.update binding error "+this.toString(true), e);
+      }
       if (this.updateState !== QMLProperty.StateValid) {
         this.updateState = QMLProperty.StateNeedsUpdate;
       }
