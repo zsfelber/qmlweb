@@ -103,6 +103,7 @@ class ItemBase {
       const n1 = this+" "+this.id;
       const n2 = that+" "+that.id;
 
+      const bindingbottom = this.$properties.hasOwnProperty("bindingbottom") ? this.bindingbottom : false;
 
       if (this.id !== that.id+suffix){
         if (this.id === that.id){
@@ -118,11 +119,15 @@ class ItemBase {
         (dump[path] = dump[(++dumplen[0])+" "+path] = {n1,info:"<-id:ok->", n2, that, this});
       }
 
-      if (this.bindTo) {
-        this.bindTo(that);
-        (dump[path+".b"] = dump[(++dumplen[0])+" "+path+".b"] = {n1,info:"<-bound:ok->", n2});
+      if (bindingbottom) {
+        if (this.bindTo) {
+          this.bindTo(that);
+          (dump[path+".b"] = dump[(++dumplen[0])+" "+path+".b"] = {info:"<-bound:ok->"});
+        } else {
+          (dump["X "+path+".b"] = dump[(++dumplen[0])+" X "+path+".b"] = {info:"<-!bindTo->"});
+        }
       } else {
-        (dump["X "+path+".b"] = dump[(++dumplen[0])+" X "+path+".b"] = {n1,info:"<-!bindTo->", n2});
+        (dump["X "+path+".b"] = dump[(++dumplen[0])+" X "+path+".b"] = {info:"<-!bottom->"});
       }
 
       if (tbflags & QmlWeb.TBelements && that.$context && !(tbflags & QmlWeb._TBthiselems)) {
@@ -151,53 +156,58 @@ class ItemBase {
       }
 
       if (tbflags & QmlWeb.TBproperties) {
-        if ((tbflags & QmlWeb.TBproperties) && that.$properties && that.id) {
+        if ((tbflags & QmlWeb.TBproperties) && that.$properties) {
           let tpdone = 0;
           let thatprop;
           if (this.modelProperty) {
             thatprop = that.$properties[this.modelProperty];
           } else {
-            thatprop = that.$properties[that.id+suffix];
+            if (that.id) {
+              thatprop = that.$properties[that.id+suffix];
+            }
             if (!thatprop) {
               thatprop = that.$properties["model"];
-              if (thatprop && thatprop.obj !== that) {
-                var inf = {n1, info:"<-!super!Model->", n2};
-                inf[thatprop.toString(true)]=thatprop;
-                (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = inf);
-                tpdone = 1;
-              }
+            }
+            if (!bindingbottom && thatprop && thatprop.obj !== that) {
+              var inf = {info:"<-!super!Model->"};
+              inf[thatprop.toString(true)]=thatprop;
+              (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = inf);
+              tpdone = 1;
             }
           }
 
           if (!tpdone) {
             if (thatprop) {
-              var inf = {n1, info:"<-Model:ok->", n2};
+              var inf = {info:"<-Model:ok->"};
               inf[thatprop.toString(true)]=thatprop;
               (dump[path+".m"] = dump[(++dumplen[0])+" "+path+".m"] = inf);
               thatprop.readOnly = true;
               thatprop.set(this, QmlWeb.QMLProperty.ReasonInitPrivileged);
             } else {
-              (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = {n1, info:"<-!ModelProp->", n2});
+              (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = {info:"<-!ModelProp->"});
             }
           }
         } else {
-          (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = {n1, info:"<-!that.$prop/id->", n2});
+          (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = {info:"<-!that.$prop->"});
         }
       }
 
-      var pthis = this.__proto__;
-      var pthat = that.__proto__;
-      const n1val = ""+pthis+(pthis?" "+pthis.id:"");
-      const n2val = ""+pthat+(pthat?" "+pthat.id:"");
-      if (!pthis || !pthat) {
-        (dump["X "+path+".-s->"] = dump[(++dumplen[0])+" X "+path+".-s->"] = {n1val, info:"<-no super->", n2val});
-      } else if (!pthis.treeBindTo && !pthat.treeBindTo) {
-        (dump["X "+path+".-s->"] = dump[(++dumplen[0])+" X "+path+".-s->"] = {n1val, info:"<-bad super->", n2val});
-      } else if (!pthis.id && !pthat.id) {
-        (dump["X "+path+".-s->"] = dump[(++dumplen[0])+" X "+path+".-s->"] = {n1val, info:"<-no super id->", n2val});
+      if (!this.$properties.hasOwnProperty("bindingbottom") || !this.bindingbottom) {
+        var pthis = this.__proto__;
+        var pthat = that.__proto__;
+        const n1val = ""+pthis+(pthis?" "+pthis.id:"");
+        const n2val = ""+pthat+(pthat?" "+pthat.id:"");
+        if (!pthis || !pthat) {
+          (dump["X "+path+".-s->"] = dump[(++dumplen[0])+" X "+path+".-s->"] = {n1val, info:"<-no super->", n2val});
+        } else if (!pthis.treeBindTo && !pthat.treeBindTo) {
+          (dump["X "+path+".-s->"] = dump[(++dumplen[0])+" X "+path+".-s->"] = {n1val, info:"<-bad super->", n2val});
+        } else {
+          pthis.treeBindTo(pthat, tbflags & ~QmlWeb._TBthiselems, suffix, path, dump, dumplen);
+        }
       } else {
-        pthis.treeBindTo(pthat, tbflags & ~QmlWeb._TBthiselems, suffix, path, dump, dumplen);
+        (dump["X "+path+".-s->"] = dump[(++dumplen[0])+" X "+path+".-s->"] = {info:"<-bottom->"});
       }
+
 
       path.pop();
 

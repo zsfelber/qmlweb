@@ -228,16 +228,20 @@ function applyProperty(item, i, value) {
 
   if (value instanceof Object) {
     if (value instanceof QmlWeb.QMLSignalDefinition) {
-      item[i] = QmlWeb.Signal.signal(i, value.parameters);
-      item.$context[i] = item[i];
+      var met = QmlWeb.Signal.signal(i, value.parameters);0
+      item.$context[i] = met;
+      item[i] = met;
+      met.owner = item;
       return true;
     } else if (value instanceof QmlWeb.QMLMethod) {
       if (!value.flags&QMLBinding.ImplFunction) {
-        throw new Error("Binding/run should be a function : " + value);
+        throw new Error("Qml method binding should be a function : " + value);
       }
       value.compile();
-      item[i] = value.run.bind({binding:value, bindingObj:item});
-      item.$context[i] = item[i];
+      var met = value.run.bind({binding:value, bindingObj:item});
+      item.$context[i] = met;
+      item[i] = met;
+      met.owner = item;
       return true;
     } else if (value instanceof QmlWeb.QMLAliasDefinition) {
       createProperty("alias", item, i, {path:value.path, readOnly:value.readonly});
