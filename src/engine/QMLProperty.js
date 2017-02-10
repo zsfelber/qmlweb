@@ -363,38 +363,28 @@ class QMLProperty {
       throw anotherError;
     }
 
+    if (this.updateState & QmlWeb.QMLPropertyState.Uninitialized) {
+      // This 'get' is directed to an unitialized property : all dependent properties will be uninitilazed, too
+      // no need to register as pending property or print out the error :
+      this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
+      throw new QmlWeb.UninitializedEvaluation();
+    }
+
     if (this.val && this.val.$get) {
       return this.val.$get();
     }
 
-    if (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate) {
+    if (this.binding && (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate)) {
 
-      if (this.updateState & QmlWeb.QMLPropertyState.Uninitialized) {
-        // This 'get' is directed to an unitialized property : all dependent properties will be uninitilazed, too
-        // no need to register as pending property or print out the error :
-        this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
-        throw new QmlWeb.UninitializedEvaluation();
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
+          (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
+
+        QmlWeb.engine.pendingOperations.push({
+           property:this,
+           info:"Pending property get/binding initialization : "+this,
+           });
       }
-
-      // If it is a binding but has no input dependencies at all :
-      // we re-evaluate it at 2nd round of startup initialization (because missing properties
-      // could still be created in 1st round)
-      // If it is a binding but input dependencies already calculated,
-      // then its input dependencies will trigger reevaluation, as needed
-      //
-      if (this.binding && !Object.keys(this.evalTreeConnections).length) {
-
-        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
-            (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
-
-          QmlWeb.engine.pendingOperations.push({
-             property:this,
-             info:"Pending property get/binding initialization : "+this,
-             });
-        }
-        throw new QmlWeb.PendingEvaluation(`Binding not yet initialized.`, this);
-
-      }
+      throw new QmlWeb.PendingEvaluation(`Binding not yet initialized.`, this);
     }
 
     return this.val;
