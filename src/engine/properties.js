@@ -63,7 +63,11 @@ function createProperty(type, obj, propName, options) {
       val = QMLProperty.typeInitialValues[type];
       if (val !== undefined) {
         prop.set(val, flags);
+      } else {
+        prop.updateState = QmlWeb.QMLPropertyState.StateUninitialized;
       }
+    } else {
+      prop.updateState = QmlWeb.QMLPropertyState.StateUninitialized;
     }
   }
 

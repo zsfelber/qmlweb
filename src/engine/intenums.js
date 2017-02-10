@@ -4,8 +4,8 @@ const QMLOperationState = {
   System: 2,
   Starting: 4,
   Init: 8,
-  SystemInit: 10,
-  BeforeStart: 12,
+  SystemInit: 2|8,
+  BeforeStart: 4|8,
   Remote: 16,
 
   toString: function(flags) {
@@ -15,7 +15,7 @@ const QMLOperationState = {
 };
 
 const Component = {
-  Null: 1, Ready: 2, Loading: 3, Error: 4,
+  Null: 0, Ready: 1, Loading: 2, Error: 4,
 
   toString: function(flags) {
     return humanize.call(Component, flags);
@@ -66,10 +66,10 @@ const QMLPropertyFlags = {
   ReasonInit : 1,
   ReasonAnimation : 2,
   Privileged : 4,
+  ReasonInitPrivileged : 1 | 4,
   RemoveBidirectionalBinding : 8,
   SetChildren : 16,
   ThroughBinding : 32,
-  ReasonInitPrivileged : 1 | 4,
 
   toString: function(flags) {
     return humanize.call(QMLPropertyFlags, flags);
@@ -80,10 +80,12 @@ const QMLPropertyState = {
   StateValid : 0,
   StateNeedsUpdate : 1,
   StateUpdating : 2,
+  StateUninitialized : 4,
 
   StateValid_mnem : "ok",
-  StateNeedsUpdate_mnem : "U",
+  StateNeedsUpdate_mnem : "!",
   StateUpdating_mnem : "~",
+  StateUninitialized_mnem : "-",
 
   toString: function(flags, mnem = true) {
     return humanize.call(QMLPropertyState, flags, mnem);

@@ -69,6 +69,7 @@ class QMLProperty {
     this.obj = obj;
     this.$rootComponent = obj.$component ? obj.$component.$root : {};
     this.name = name;
+    this.options = options;
     this.readOnly = options.readOnly;
     this.pendingInit = options.pendingInit;
     this.changed = QmlWeb.Signal.signal("changed", [{name:"val"}, {name:"oldVal"}, {name:"name"}], { obj });
@@ -306,8 +307,9 @@ class QMLProperty {
       throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}\n${this.stacksToString()}`, this);
     }
 
-    if (this.updateState &&
-        !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
+    if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) &&
+         (this.updateState & QmlWeb.QMLPropertyState.StateNeedsUpdate) &&
+        !(this.updateState & QmlWeb.QMLPropertyState.StateUninitialized)) {
       this.update();
     }
 
@@ -449,8 +451,8 @@ class QMLProperty {
 
     // $base because to avoid infinite loops for overriden toString:
     return os+" . prop:"+this.name+(detail?"#"+this.$propertyId:"")+
-      (detail?" "+QmlWeb.QMLPropertyState.toString(this.updateState)+" "+(this.binding?QmlWeb.QMLBindingFlags.toString(this.binding.flags):""):"")+
-       " "+(this.val?"v:"+this.val:"");
+      (detail?" "+QmlWeb.QMLPropertyState.toString(this.updateState)+(this.binding?" "+QmlWeb.QMLBindingFlags.toString(this.binding.flags):""):"")+
+       (this.val?" v:"+this.val:"")+(this.readOnly?" ro":"")+(this.pendingInit?" pi":"");
   }
 
   stackToString(stack) {
