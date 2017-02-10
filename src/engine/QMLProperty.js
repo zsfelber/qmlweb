@@ -363,7 +363,7 @@ class QMLProperty {
 
         QmlWeb.engine.pendingOperations.push({
            property:this,
-           info:"Pending property get/binding initialization : "+this,
+           info:"Pending property get/binding initialization : "+this
            });
       }
       throw new QmlWeb.PendingEvaluation(`Binding not yet initialized.`, this);
@@ -456,7 +456,7 @@ class QMLProperty {
             fun:_changed_init,
             thisObj:this,
             args:[],
-            info:"Pending property set/changed_init : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
+            info:"Pending property set/changed_init : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags)
           });
           //console.warn("PendingEvaluation : Pending property set/changed init :" + this.name + "  obj:" + this.obj);
         }

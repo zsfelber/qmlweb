@@ -114,7 +114,15 @@ gulp.task("qmlweb-covered", () =>
     .pipe(gulp.dest("./tmp"))
 );
 
-gulp.task("qmlweb-dev", () =>
+gulp.task("qmlweb-gen", () => {
+  gulp.src(qtcoreSources)
+    .pipe(order(qtcoreSources, { base: __dirname }))
+    .pipe(concat("qt.0.js"))
+    .pipe(changed("./lib"))
+    .pipe(gulp.dest("./lib"));
+});
+
+gulp.task("qmlweb-dev", ["qmlweb-gen"], () => {
   gulp.src(qtcoreSources)
     .pipe(order(qtcoreSources, { base: __dirname }))
     .pipe(sourcemaps.init())
@@ -129,7 +137,7 @@ gulp.task("qmlweb-dev", () =>
     }))
     .pipe(sourcemaps.write("./"))
     .pipe(gulp.dest("./lib"))
-);
+});
 
 gulp.task("qmlweb", ["qmlweb-dev"], () =>
   gulp.src("./lib/qt.js")

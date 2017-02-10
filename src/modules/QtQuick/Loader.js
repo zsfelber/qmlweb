@@ -83,7 +83,7 @@ QmlWeb.registerQmlType({
     const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
     let qmlComponent = newItem;
     if (newItem instanceof QMLComponent) {
-      qmlComponent = newItem.$createObject(this, /*{}, this*/);
+      qmlComponent = newItem.$createObject(this /*---{}, this*/);
     }
     qmlComponent.parent = this;
     this.item = qmlComponent;
