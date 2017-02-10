@@ -85,14 +85,14 @@ class QMLComponent {
             }
           }
           this.meta.context = this.context = this.loaderComponent.context.createChild(
-                                        this.loaderComponent +" -> " +this);
+                                        this.loaderComponent +" -> " +this.toString(undefined, true));
 
           if (this.loaderComponent.flags & QmlWeb.QMLComponentFlags.Super) {
             throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.context)
           }
         } else {
 
-          this.meta.context = this.context = engine.rootContext.createChild(loaderComponent + " .. " +this);
+          this.meta.context = this.context = engine.rootContext.createChild(loaderComponent + " .. " +this.toString(undefined, true));
 
         }
 
@@ -108,7 +108,7 @@ class QMLComponent {
         this.$leaf = this;
         this.$root = loaderComponent.$root;
 
-        this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this, true);
+        this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this.toString(undefined, true), true);
         this.context.nestedLevel = this.nestedLevel;
         // inherit page top $pageElements :
         this.context.$pageElements = loaderComponent.context.$pageElements;
@@ -123,7 +123,7 @@ class QMLComponent {
       this.$leaf = this;
       this.$root = this;
 
-      this.meta.context = this.context = engine.rootContext.createChild(this.toString());
+      this.meta.context = this.context = engine.rootContext.createChild(this.toString(undefined, true));
 
       //console.warn("Component  "+this);
       if (this.flags&QmlWeb.QMLComponentFlags.Nested) {
@@ -402,13 +402,13 @@ class QMLComponent {
     return item;
   }
 
-  toString(name) {
+  toString(name, raw) {
     if (!name) name = this.$file;
     if (!name) name = this.$name;
     if (this.$id) name += ":"+this.$id;
     var c = QmlWeb.QMLComponentFlags.toString(this.flags);
 
-    return c+"["+name+(this.nestedLevel?" l"+this.nestedLevel:"")+" "+QmlWeb.Component.toString(this.status)+"]";
+    return c+"["+name+(this.nestedLevel?" l"+this.nestedLevel:"")+(raw?"":" "+QmlWeb.Component.toString(this.status))+"]";
   }
 
   static complete() {

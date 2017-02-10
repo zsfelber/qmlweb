@@ -222,19 +222,7 @@ class QMLProperty {
 
       var val = this.binding.get(this.obj);
 
-      try {
-        this.$setVal(val, flags, declaringItem);
-      } catch (err) {
-        if ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && err.ctType === "PendingEvaluation") {
-          QmlWeb.engine.pendingOperations.push({
-            fun:this.$setVal,
-            thisObj:this,
-            args:[val, flags, declaringItem],
-            info:"Pending property update/$setVal : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
-          });
-        }
-        throw err;
-      }
+      this.$setVal(val, flags, declaringItem);
 
       this.updateState = QmlWeb.QMLPropertyState.Valid;
 
@@ -441,19 +429,7 @@ class QMLProperty {
         this.binding = null;
       }
 
-      try {
-        this.$setVal(val, flags, declaringItem);
-      } catch (err) {
-        if (err.ctType === "PendingEvaluation") {
-          QmlWeb.engine.pendingOperations.push({
-            fun:this.$setVal,
-            thisObj:this,
-            args:[val, flags, declaringItem],
-            info:"Pending property set/$setVal : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
-          });
-        }
-        throw err;
-      }
+      this.$setVal(val, flags, declaringItem);
     }
 
     if (this.val !== oldVal) {

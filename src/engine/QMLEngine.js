@@ -378,6 +378,7 @@ class QMLEngine {
 
       try {
         if (property) {
+          a++;
           if (!property.binding) {
             // Probably, the binding was overwritten by an explicit value. Ignore.
             a1++;
@@ -404,14 +405,15 @@ class QMLEngine {
               obj.$updateVGeometry(property.val, property.val, property.name);
             }
           }
-          a++;
         } else {
-          op.fun.apply(op.thisObj, op.args);
           b++;
+          op.fun.apply(op.thisObj, op.args);
         }
         if (op.errors.length==1) {
-          errors["#ERR:#"+i+":"+op.info+":"+op.errors[0].message] = op;
+          e++;
+          errors["#ERR:#"+i+":"+op.info+":"+op.errors[0].err.message] = op;
         } else if (op.errors.length) {
+          e++;
           errors["#ERR:#"+i+":"+op.info+":"+op.errors.length+" errors"] = op;
         } else {
           info["#"+i+":"+op.info] = op;

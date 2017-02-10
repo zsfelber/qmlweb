@@ -49,8 +49,16 @@ function initMeta(self, meta, constructor) {
         if (typeof desc === "string") {
           desc = { type: desc };
         }
-        QmlWeb.createProperty(desc.type, self, name, desc);
-      }
+        try {
+          QmlWeb.createProperty(desc.type, self, name, desc);
+        } catch (err) {
+          if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
+               || ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
+            console.warn("Cannot create module type property : "+self+" . "+name+"  opstate:"+QmlWeb.QMLOperationState.toString(QmlWeb.engine.operationState));
+          } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
+            QmlWeb.engine.currentPendingOp.errors.push({loc:"initMeta", err});
+          }
+        }
     }
     if (info.signals) {
       for (var name in info.signals) {

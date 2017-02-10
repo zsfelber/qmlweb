@@ -52,9 +52,9 @@ QmlWeb.registerQmlType({
         this.$trigger();
       }
       if (this.repeat)
-        this.$intervalId = setInterval(this.$trigger, this.interval);
+        this.$intervalId = setInterval(this.$trigger.bind(this), this.interval);
       else
-        setTimeout(this.$trigger, this.interval);
+        setTimeout(this.$trigger.bind(this), this.interval);
     } else {
       if (this.$intervalId) {
         clearInterval(this.$intervalId);
@@ -62,7 +62,7 @@ QmlWeb.registerQmlType({
       }
     }
   }
-  $trigger() {
+  static $trigger() {
     if (!this.repeat) {
       // We set the value directly in order to be able to emit the
       // runningChanged signal after triggered, like Qt does it.

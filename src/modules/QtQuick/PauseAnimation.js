@@ -12,7 +12,7 @@ QmlWeb.registerQmlType({
 
      this.runningChanged.connect(this, this.$onRunningChanged);
    }
-   $ticker() {
+   static $ticker() {
      if (!this.running && this.$loop !== -1 || this.paused) {
        // $loop === -1 is a marker to just finish this run
        return;
@@ -26,9 +26,9 @@ QmlWeb.registerQmlType({
      if (newVal) {
        const A = QmlWeb.getConstructor("QtQuick", "2.0", "Animation");
        if (this.loops)
-         this.$intervalId = setInterval(this.$ticker, this.duration);
+         this.$intervalId = setInterval(this.$ticker.bind(this), this.duration);
        else
-         setTimeout(this.$ticker, this.duration);
+         setTimeout(this.$ticker.bind(this), this.duration);
        if (this.parent instanceof A) {
          this.parent.paused = true;
        }

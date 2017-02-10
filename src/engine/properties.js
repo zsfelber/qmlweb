@@ -163,15 +163,10 @@ function applyProperties(metaObject, item) {
   QmlWeb.engine.$component = item.$component;
 
   function _hand_err(err, i) {
-    if (err.ctType === "PendingEvaluation") {
-      //console.warn("PendingEvaluation : Cannot apply property bindings (reevaluating at startup) :" + i + "  item:" + item);
-    } else if (err.ctType === "UninitializedEvaluation") {
-      //console.warn("UninitializedEvaluation : Cannot apply property bindings :" + i + "  item:" + item);
-    } else {
-      console.warn("Cannot apply property bindings : "+item+" . "+i+"  Context:"+item.$context+"  "+err.message+"  opstate:"+QmlWeb.QMLOperationState.toString(QmlWeb.engine.operationState));
-    }
-
-    if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
+    if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
+         || ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
+      console.warn("Cannot apply property : "+item+" . "+i+"  opstate:"+QmlWeb.QMLOperationState.toString(QmlWeb.engine.operationState));
+    } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
       QmlWeb.engine.currentPendingOp.errors.push({loc:"applyProperties", err, item, i});
     }
   }
