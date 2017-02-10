@@ -225,7 +225,7 @@ class QMLProperty {
       try {
         this.$setVal(val, flags, declaringItem);
       } catch (err) {
-        if (err.ctType === "PendingEvaluation") {
+        if ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && err.ctType === "PendingEvaluation") {
           QmlWeb.engine.pendingOperations.push({
             fun:this.$setVal,
             thisObj:this,
@@ -261,20 +261,11 @@ class QMLProperty {
       }
     }
 
-
     if (!nofinalization && this.val !== oldVal) {
       if (this.animation) {
         this.resetAnimation(oldVal);
       }
-      try {
-        this.changed(this.val, oldVal, this.name);
-      } catch (e) {
-        // Not necessary to reevaluate and even rethrow it here in this case,
-        // changed/Signal.$execute is reevaluated already !
-        if (e.ctType !== "PendingEvaluation") {
-          throw e;
-        }
-      }
+      this.changed(this.val, oldVal, this.name);
     }
   }
 
@@ -347,6 +338,7 @@ class QMLProperty {
           QMLProperty.prototype.updateLater,
           QmlWeb.Signal.UniqueConnection
         );
+        con.isInternal = true;
         parent.evalTreeConnections[this.$propertyId] = con;
         con.signalOwner = this;
         this.childEvalTreeConnections++;
@@ -375,9 +367,11 @@ class QMLProperty {
     }
 
     if (this.binding && (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate)) {
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init))
+        throw new Error("Assertion failed: "+QmlWeb.engine.operationState);
 
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
-          (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
+        (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
 
         QmlWeb.engine.pendingOperations.push({
            property:this,
@@ -410,9 +404,7 @@ class QMLProperty {
       this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
       this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
 
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
-        this.update(true, flags);
-      } else {
+      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
         if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
             (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
           QmlWeb.engine.pendingOperations.push({
@@ -423,6 +415,8 @@ class QMLProperty {
         }
         //console.warn("PendingEvaluation : Pending property set/binding :" + this.name + "  obj:" + this.obj);
         return;
+      } else {
+        this.update(true, flags);
       }
     } else {
       this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
@@ -478,17 +472,20 @@ class QMLProperty {
           }
         }
       }
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
+
+      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
+        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
+                   (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
+          QmlWeb.engine.pendingOperations.push({
+            fun:_changed_init,
+            thisObj:this,
+            args:[],
+            info:"Pending property set/changed_init : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
+          });
+          //console.warn("PendingEvaluation : Pending property set/changed init :" + this.name + "  obj:" + this.obj);
+        }
+      } else {
         _changed_init.call(this);
-      } else if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
-                 (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
-        QmlWeb.engine.pendingOperations.push({
-          fun:_changed_init,
-          thisObj:this,
-          args:[],
-          info:"Pending property set/changed_init : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
-        });
-        //console.warn("PendingEvaluation : Pending property set/changed init :" + this.name + "  obj:" + this.obj);
       }
     }
   }

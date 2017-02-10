@@ -177,29 +177,34 @@ class Signal {
     try {
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
-      var dso = QmlWeb.objToStringSafe(desc.signal.obj);
-      var to = QmlWeb.objToStringSafe(desc.thisObj);
-      if (err.ctType === "PendingEvaluation") {
-        //console.warn("PendingEvaluation : Signal :" + desc.signal.$name + "  slotObj:" + so +" thisObj:" + to  pending operation:", err.message);
-        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) || (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
-          QmlWeb.engine.pendingOperations.push({
-            fun:desc.slot,
-            thisObj:desc.thisObj,
-            args:args,
-            info:"Pending signal (waiting to initialization) : "+dso+" . "+desc.signal.$name+(desc.slotObj!==desc.thisObj?" -> " + QmlWeb.objToStringSafe(desc.slotObj):"")+" -> " + to,
-            connection:desc,
-            reason:err
-          });
+      if ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && desc.isInternal) {
+        var dso = QmlWeb.objToStringSafe(desc.signal.obj);
+        var to = QmlWeb.objToStringSafe(desc.thisObj);
+        if (err.ctType === "PendingEvaluation") {
+          //console.warn("PendingEvaluation : Signal :" + desc.signal.$name + "  slotObj:" + so +" thisObj:" + to  pending operation:", err.message);
+          if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) || (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
+            QmlWeb.engine.pendingOperations.push({
+              fun:desc.slot,
+              thisObj:desc.thisObj,
+              args:args,
+              info:"Pending signal (waiting to initialization) : "+dso+" . "+desc.signal.$name+(desc.slotObj!==desc.thisObj?" -> " + QmlWeb.objToStringSafe(desc.slotObj):"")+" -> " + to,
+              connection:desc,
+              reason:err
+            });
+            return;
+          }
         }
-      } else if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+      }
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
         if (desc.binding) {
           console.warn("Signal : "+dso+" . "+ desc.signal.$name + (desc.slotObj!==desc.thisObj?" slotObj:" + QmlWeb.objToStringSafe(desc.slotObj):"") +" thisObj:" + to+"  slot(autobound) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.binding.toString());
         } else {
           console.warn("Signal : "+dso+" . "+ desc.signal.$name + (desc.slotObj!==desc.thisObj?" slotObj:" + QmlWeb.objToStringSafe(desc.slotObj):"") +" thisObj:" + to+"  slot(user function) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.slot.toString());
         }
+      } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
+        QmlWeb.engine.currentPendingOp.errors.push({loc:"$execute", desc, args});
       }
       err.srcdumpok = 1;
-      throw err;
     }
   }
 

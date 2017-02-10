@@ -371,6 +371,8 @@ class QMLEngine {
     let info = {}, errors = {};
     while (this.pendingOperations.length > 0) {
       const op = this.pendingOperations.shift();
+      op.errors = [];
+      this.currentPendingOp = op;
 
       const property = op.property;
 
@@ -407,7 +409,13 @@ class QMLEngine {
           op.fun.apply(op.thisObj, op.args);
           b++;
         }
-        info["#"+i+":"+op.info] = op;
+        if (op.errors.length==1) {
+          errors["#ERR:#"+i+":"+op.info+":"+op.errors[0].message] = op;
+        } else if (op.errors.length) {
+          errors["#ERR:#"+i+":"+op.info+":"+op.errors.length+" errors"] = op;
+        } else {
+          info["#"+i+":"+op.info] = op;
+        }
       } catch (err) {
         e++;
         errors["#ERR:#"+i+":"+op.info+":"+err.message] = op;
