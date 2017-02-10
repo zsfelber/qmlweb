@@ -83,7 +83,7 @@ function construct(meta, parent, flags) {
 
   // means : created by Component.$createObject
   if (flags & QmlWeb.QMLComponentFlags.Element) {
-    if (meta !== component.meta || meta.$name!==component.$name  || meta.$id!==component.$id
+    if (meta !== component.meta || meta.$name!==component.$name  || meta.id!==component.$id
         || meta.context!==component.context || meta.component!==component) {
       throw new Error("Invalid Element construct : "+item);
     }

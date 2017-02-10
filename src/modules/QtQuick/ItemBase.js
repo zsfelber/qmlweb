@@ -36,8 +36,8 @@ class ItemBase {
     if (this.dom) {
       if (element.dom) {
         this.dom.appendChild(element.dom);
-      } else {
-        console.warn("Child has no 'dom':"+element);
+      //} else {
+      //  console.warn("Child has no 'dom':"+element);
       }
     }
   }
@@ -76,8 +76,8 @@ class ItemBase {
     if (this.dom) {
       if (element.dom) {
         this.dom.removeChild(element.dom);
-      } else {
-        console.warn("Child has no 'dom':"+element);
+      //} else {
+      //  console.warn("Child has no 'dom':"+element);
       }
     }
   }

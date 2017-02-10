@@ -205,7 +205,7 @@ class QMLComponent {
       }
     }
 
-    this.$id = this.meta.$id;
+    this.$id = this.meta.id;
     this.$name = this.meta.$name;
     this.$file = this.meta.$file;
     this.$imports = this.meta.$imports;
