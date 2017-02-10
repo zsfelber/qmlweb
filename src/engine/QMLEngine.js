@@ -379,10 +379,10 @@ class QMLEngine {
           if (!property.binding) {
             // Probably, the binding was overwritten by an explicit value. Ignore.
             a1++;
-            console.warning("Property binding has been removed : "+prop);
+            //console.log("Property binding has been removed : "+property);
           } else if (property.updateState & QmlWeb.QMLPropertyFlags.StateUpdating) {
             a1++;
-            console.error("Property state is invalid : update has not finished : "+prop);
+            console.error("Property state is invalid : update has not finished : "+property);
           } else if (property.updateState & QmlWeb.QMLPropertyFlags.StateNeedsUpdate) {
             a2++;
             property.update(false, op.flags, op.declaringItem);

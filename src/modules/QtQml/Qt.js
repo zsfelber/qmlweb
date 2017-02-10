@@ -85,7 +85,7 @@ const Qt = {
     } else {
       b.src = getterFunction;
       if (setterFunction && !(flags & QMLBindingFlags.Bidirectional)) {
-        throw new Error("Qt.binding() leave argument 2 blank if binding is not intended to be Bidirectional or user that flag.", setterFunction);
+        throw new Error("Qt.binding() leave argument 2 blank if binding is not intended to be Bidirectional or use Bidirectional flag.", setterFunction);
       }
       if (flags & QMLBindingFlags.Bidirectional) {
         if (!setterFunction) {

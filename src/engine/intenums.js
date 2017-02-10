@@ -9,7 +9,7 @@ const QMLOperationState = {
   Remote: 16,
 
   toString: function(flags) {
-    humanize.call(QMLOperationState, flags);
+    return humanize.call(QMLOperationState, flags);
   }
 
 };
@@ -18,7 +18,7 @@ const Component = {
   Null: 1, Ready: 2, Loading: 3, Error: 4,
 
   toString: function(flags) {
-    humanize.call(Component, flags);
+    return humanize.call(Component, flags);
   }
 };
 
@@ -39,7 +39,7 @@ const QMLComponentFlags = {
   LoadImports_mnem : "i",
 
   toString: function(flags, mnem = true) {
-    humanize.call(QMLComponentFlags, flags, mnem);
+    return humanize.call(QMLComponentFlags, flags, mnem);
   }
 };
 
@@ -55,7 +55,7 @@ const QMLBindingFlags = {
   ListTemplate : 64,
 
   toString: function(flags) {
-    humanize.call(QMLBindingFlags, flags);
+    return humanize.call(QMLBindingFlags, flags);
   }
 };
 
@@ -70,7 +70,7 @@ const QMLPropertyFlags = {
   ReasonInitPrivileged : 1 | 4,
 
   toString: function(flags) {
-    humanize.call(QMLPropertyFlags, flags);
+    return humanize.call(QMLPropertyFlags, flags);
   }
 };
 
@@ -84,7 +84,7 @@ const QMLPropertyState = {
   StateUpdating_mnem : "~",
 
   toString: function(flags, mnem = true) {
-    humanize.call(QMLPropertyState, flags, mnem);
+    return humanize.call(QMLPropertyState, flags, mnem);
   }
 };
 

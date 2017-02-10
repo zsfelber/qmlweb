@@ -22,7 +22,7 @@ class QMLComponent {
   init(loaderComponent) {
     const engine = QmlWeb.engine;
 
-    if ( this.flags & QmlWeb.QmlWeb.QMLComponentFlags.Nested ) {
+    if ( this.flags & QmlWeb.QMLComponentFlags.Nested ) {
 
       // NOTE on the top of a Nested Component's loader hierarchy, we have to insert 1 extra level of Components into
       // chains, changing $class from the "superclass" to the current again (but with Super Component flag):
@@ -341,6 +341,13 @@ class QMLComponent {
       // no parent -> this.context   see initMeta
       item = QmlWeb.construct(this.meta, parent, QmlWeb.QMLComponentFlags.Element|this.createFlags);
       QmlWeb.helpers.copy(item, properties);
+
+      // !!! see QMLBinding
+      // see QObject.constructor()
+      this.context.$ownerObject = item;
+      item.$elements = this.context.$elements;
+      item.$info = this.context.$info;
+
 
       this.finalizeImports();
 
