@@ -190,7 +190,7 @@ class QMLProperty {
 
   // Updater recalculates the value of a property if one of the dependencies
   // changed
-  update(nofinalization, flags, declaringItem) {
+  update(flags, declaringItem) {
 
     this.updateState = QmlWeb.QMLPropertyState.Updating;
 
@@ -249,7 +249,7 @@ class QMLProperty {
       }
     }
 
-    if (!nofinalization && this.val !== oldVal) {
+    if (this.val !== oldVal) {
       if (this.animation) {
         this.resetAnimation(oldVal);
       }
@@ -404,7 +404,7 @@ class QMLProperty {
         //console.warn("PendingEvaluation : Pending property set/binding :" + this.name + "  obj:" + this.obj);
         return;
       } else {
-        this.update(true, flags);
+        this.update(flags);
       }
     } else {
       this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
@@ -432,36 +432,19 @@ class QMLProperty {
       this.$setVal(val, flags, declaringItem);
     }
 
-    if (this.val !== oldVal) {
-      function _changed_init() {
-        if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
-          this.changed(this.val, oldVal, this.name);
-        } else {
-          if (this.animation) {
-            this.resetAnimation(oldVal);
-          }
-          this.changed(this.val, oldVal, this.name);
-
-          // TODO gz   $syncPropertyToRemote !!!!!!!!!!!!
-          if (this.$rootComponent.webSocket) {
-            QmlWeb.$syncPropertyToRemote(this.$rootComponent, this);
-          }
-        }
-      }
-
-      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
-        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
-                   (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
-          QmlWeb.engine.pendingOperations.push({
-            fun:_changed_init,
-            thisObj:this,
-            args:[],
-            info:"Pending property set/changed_init : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags)
-          });
-          //console.warn("PendingEvaluation : Pending property set/changed init :" + this.name + "  obj:" + this.obj);
-        }
+    if (this.val !== oldVal && !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
+      if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
+        this.changed(this.val, oldVal, this.name);
       } else {
-        _changed_init.call(this);
+        if (this.animation) {
+          this.resetAnimation(oldVal);
+        }
+        this.changed(this.val, oldVal, this.name);
+
+        // TODO gz   $syncPropertyToRemote !!!!!!!!!!!!
+        if (this.$rootComponent.webSocket) {
+          QmlWeb.$syncPropertyToRemote(this.$rootComponent, this);
+        }
       }
     }
   }

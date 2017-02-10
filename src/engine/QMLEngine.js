@@ -388,7 +388,7 @@ class QMLEngine {
             console.error("Property state is invalid : update has not finished : "+property);
           } else if (property.updateState & QmlWeb.QMLPropertyFlags.StateNeedsUpdate) {
             a2++;
-            property.update(false, op.flags, op.declaringItem);
+            property.update(op.flags, op.declaringItem);
           } else if (geometryProperties.indexOf(property.name) >= 0) {
             a3++;
             // It is possible that bindings with these names was already evaluated
