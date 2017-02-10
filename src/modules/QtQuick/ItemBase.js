@@ -33,7 +33,13 @@ class ItemBase {
       this.resources.push(leafElement);
       this.resourcesChanged();
     }
-    if (this.dom) this.dom.appendChild(element.dom);
+    if (this.dom) {
+      if (element.dom) {
+        this.dom.appendChild(element.dom);
+      } else {
+        console.warn("Child has no 'dom':"+element);
+      }
+    }
   }
 
   $onElementRemove(element) {
@@ -67,7 +73,13 @@ class ItemBase {
       }
       this.resourcesChanged();
     }
-    if (this.dom) this.dom.appendChild(element.dom);
+    if (this.dom) {
+      if (element.dom) {
+        this.dom.removeChild(element.dom);
+      } else {
+        console.warn("Child has no 'dom':"+element);
+      }
+    }
   }
 
   $onHoveredChanged() {
