@@ -382,6 +382,8 @@ class QMLProperty {
     const oldVal = this.val;
     let val = newVal;
 
+    const wasuninit = (this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
+
     if (val !== undefined) {
       this.updateState &= ~QmlWeb.QMLPropertyState.Uninitialized;
     }
@@ -432,18 +434,20 @@ class QMLProperty {
       this.$setVal(val, flags, declaringItem);
     }
 
-    if (this.val !== oldVal && !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
-      if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
-        this.changed(this.val, oldVal, this.name);
-      } else {
-        if (this.animation) {
-          this.resetAnimation(oldVal);
-        }
-        this.changed(this.val, oldVal, this.name);
+    if (this.val !== oldVal) {
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) || !wasuninit) {
+        if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
+          this.changed(this.val, oldVal, this.name);
+        } else {
+          if (this.animation) {
+            this.resetAnimation(oldVal);
+          }
+          this.changed(this.val, oldVal, this.name);
 
-        // TODO gz   $syncPropertyToRemote !!!!!!!!!!!!
-        if (this.$rootComponent.webSocket) {
-          QmlWeb.$syncPropertyToRemote(this.$rootComponent, this);
+          // TODO gz   $syncPropertyToRemote !!!!!!!!!!!!
+          if (this.$rootComponent.webSocket) {
+            QmlWeb.$syncPropertyToRemote(this.$rootComponent, this);
+          }
         }
       }
     }

@@ -180,9 +180,9 @@ class Signal {
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
            || ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
         if (desc.binding) {
-          console.warn("Signal : "+QmlWeb.objToStringSafe(desc.thisObj)+" . "+ desc.signal.$name + (desc.slotObj!==desc.thisObj?" slotObj:" + QmlWeb.objToStringSafe(desc.slotObj):"") +" slot(autobound) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.binding.toString());
+          console.warn("Signal : "+QmlWeb.objToStringSafe(desc.thisObj)+" . "+ desc.signal.$name + (desc.slotObj!==desc.thisObj?" slotObj:" + QmlWeb.objToStringSafe(desc.slotObj):"") +" slot(autobound) error:", err);
         } else {
-          console.warn("Signal : "+QmlWeb.objToStringSafe(desc.thisObj)+" . "+ desc.signal.$name + (desc.slotObj!==desc.thisObj?" slotObj:" + QmlWeb.objToStringSafe(desc.slotObj):"") +" slot(user function) error:", err.message, err, err.srcdumpok?" srcdump:ok":" "+desc.slot.toString());
+          console.warn("Signal : "+QmlWeb.objToStringSafe(desc.thisObj)+" . "+ desc.signal.$name + (desc.slotObj!==desc.thisObj?" slotObj:" + QmlWeb.objToStringSafe(desc.slotObj):"") +" slot(user function) error:", err);
         }
       } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
         QmlWeb.engine.currentPendingOp.errors.push({loc:"$execute", desc, args, err});
