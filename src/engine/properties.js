@@ -44,7 +44,20 @@ function createProperty(type, obj, propName, options) {
   const prop = new QMLProperty(type, obj, propName, options);
   function _set_prop(propName, prop, flags) {
     obj[`${propName}Changed`] = prop.changed;
-    if (options.hasOwnProperty("initialValue")) {
+
+    // default values:
+    // undefined (not initialized at startup):
+    // property ButtonModel buttonModel;
+    // property var something;
+    // property ButtonModel buttonModel : undefined;
+
+    // initialized at startup:
+    // null:
+    // property ButtonModel buttonModel : null;
+    // 0:
+    // property int something;
+
+    if (options.initialValue !== undefined) {
       prop.set(options.initialValue, flags);
     } else if (QMLProperty.typeInitialValues.hasOwnProperty(type)) {
       val = QMLProperty.typeInitialValues[type];

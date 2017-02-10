@@ -256,6 +256,9 @@ function addElementToPageContexts(item, id, ctx) {
   ctx[id] = item;
 
   // current page top context $pageElements is inherited :
+  if (ctx.$pageElements[id]) {
+    throw new Error("Duplicated element id:"+id+" in "+ctx);
+  }
   ctx.$pageElements[id] = item;
 
 //  // put it into context.$elements of :
