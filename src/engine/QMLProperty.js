@@ -190,7 +190,7 @@ class QMLProperty {
 
   // Updater recalculates the value of a property if one of the dependencies
   // changed
-  update(preventhacks, flags, declaringItem) {
+  update(nofinalization, flags, declaringItem) {
 
     this.updateState = QmlWeb.QMLPropertyState.Updating;
 
@@ -202,6 +202,7 @@ class QMLProperty {
       if (!this.binding) {
         this.updateState = QmlWeb.QMLPropertyState.Valid;
         this.obsoleteConnections = this.evalTreeConnections;
+        this.evalTreeConnections = {};
         return;
       }
 
@@ -215,7 +216,7 @@ class QMLProperty {
         this.binding.compile();
       }
 
-      this.obsoleteConnections = QmlWeb.helpers.mergeObjects(this.evalTreeConnections);
+      this.obsoleteConnections = this.evalTreeConnections;
       // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
       this.evalTreeConnections = {};
 
@@ -261,7 +262,7 @@ class QMLProperty {
     }
 
 
-    if (!preventhacks && this.val !== oldVal) {
+    if (!nofinalization && this.val !== oldVal) {
       if (this.animation) {
         this.resetAnimation(oldVal);
       }
@@ -315,16 +316,16 @@ class QMLProperty {
       throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}\n${this.stacksToString()}`, this);
     }
 
-    let childUninitEval;
+    let childEvalError, anotherError;
     if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) &&
          (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate) ) {
       try {
         this.update();
       } catch (err) {
-        if (err.ctType==="UninitializedEvaluation") {
-          childUninitEval = err;
+        if (err.ctType==="UninitializedEvaluation" || err.ctType==="PendingEvaluation") {
+          childEvalError = err;
         } else {
-          throw err;
+          anotherError = err;
         }
       }
     }
@@ -352,9 +353,14 @@ class QMLProperty {
       }
     }, this);
 
-    // if this property depends on unitilazed properties, this one is considered uninitialized, too
-    if (childUninitEval) {
-      throw childUninitEval;
+    // if this property depends on unitilazed/pending properties, this one is considered uninitialized/pending, too
+    // No need to double - register this property in eval queue because its dependency has already been done so :
+    // its 'evalTreeConnections' automatically triggers this property when just neeeded:
+    if (childEvalError) {
+      this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
+      throw childEvalError;
+    } else if (anotherError) {
+      throw anotherError;
     }
 
     if (this.val && this.val.$get) {
@@ -366,6 +372,7 @@ class QMLProperty {
       if (this.updateState & QmlWeb.QMLPropertyState.Uninitialized) {
         // This 'get' is directed to an unitialized property : all dependent properties will be uninitilazed, too
         // no need to register as pending property or print out the error :
+        this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
         throw new QmlWeb.UninitializedEvaluation();
       }
 
