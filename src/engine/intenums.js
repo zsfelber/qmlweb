@@ -77,15 +77,16 @@ const QMLPropertyFlags = {
 };
 
 const QMLPropertyState = {
-  StateValid : 0,
-  StateNeedsUpdate : 1,
-  StateUpdating : 2,
-  StateUninitialized : 4,
+  Valid : 0,
+  NeedsUpdate : 1,
+  Updating : 2,
+  Uninitialized : 4,
+  Dirty : 1 | 2,
 
-  StateValid_mnem : "ok",
-  StateNeedsUpdate_mnem : "!",
-  StateUpdating_mnem : "~",
-  StateUninitialized_mnem : "-",
+  Valid_mnem : "ok",
+  NeedsUpdate_mnem : "!",
+  Updating_mnem : "~",
+  Uninitialized_mnem : "-",
 
   toString: function(flags, mnem = true) {
     return humanize.call(QMLPropertyState, flags, mnem);

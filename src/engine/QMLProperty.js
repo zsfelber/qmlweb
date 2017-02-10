@@ -9,6 +9,13 @@ class PendingEvaluation extends Error {
   }
 }
 
+class UninitializedEvaluation extends Error {
+  constructor(...args) {
+    super(...args);
+    this.ctType = "UninitializedEvaluation";
+  }
+}
+
 function dumpEvalError(msg, err) {
   if (!err.ctType) {
     console.warn(msg);
@@ -72,12 +79,12 @@ class QMLProperty {
     this.options = options;
     this.readOnly = options.readOnly;
     this.pendingInit = options.pendingInit;
+    this.updateState = QmlWeb.QMLPropertyState.Uninitialized;
     this.changed = QmlWeb.Signal.signal("changed", [{name:"val"}, {name:"oldVal"}, {name:"name"}], { obj });
     this.binding = null;
     this.value = undefined;
     this.type = type;
     this.animation = null;
-    this.updateState = QmlWeb.QMLPropertyState.StateNeedsUpdate;
     this.get.$owner = this;
     this.set.$owner = this;
 
@@ -185,17 +192,19 @@ class QMLProperty {
   // changed
   update(preventhacks, flags, declaringItem) {
 
-    if (!this.binding) {
-      this.updateState = QmlWeb.QMLPropertyState.StateValid;
-      return;
-    }
-
-    this.updateState = QmlWeb.QMLPropertyState.StateUpdating;
+    this.updateState = QmlWeb.QMLPropertyState.Updating;
 
     const oldVal = this.val;
 
     var pushed;
     try {
+
+      if (!this.binding) {
+        this.updateState = QmlWeb.QMLPropertyState.Valid;
+        this.obsoleteConnections = this.evalTreeConnections;
+        return;
+      }
+
       pushed = QMLProperty.pushEvaluatingProperty(this);
 
       if (this.binding instanceof QmlWeb.QtBindingDefinition) {
@@ -206,30 +215,42 @@ class QMLProperty {
         this.binding.compile();
       }
 
+      this.obsoleteConnections = QmlWeb.helpers.mergeObjects(this.evalTreeConnections);
+      // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
+      this.evalTreeConnections = {};
+
+      var val = this.binding.get(this.obj);
+
       try {
-        this.obsoleteConnections = QmlWeb.helpers.mergeObjects(this.evalTreeConnections);
-        // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
-        this.evalTreeConnections = {};
-
-        var val = this.binding.get(this.obj);
-
-        try {
-          this.$setVal(val, flags, declaringItem);
-        } catch (err) {
-          if (err.ctType === "PendingEvaluation") {
-            QmlWeb.engine.pendingOperations.push({
-              fun:this.$setVal,
-              thisObj:this,
-              args:[val, flags, declaringItem],
-              info:"Pending property update/$setVal : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
-            });
-          }
-          throw err;
+        this.$setVal(val, flags, declaringItem);
+      } catch (err) {
+        if (err.ctType === "PendingEvaluation") {
+          QmlWeb.engine.pendingOperations.push({
+            fun:this.$setVal,
+            thisObj:this,
+            args:[val, flags, declaringItem],
+            info:"Pending property update/$setVal : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
+          });
         }
+        throw err;
+      }
 
-        this.updateState = QmlWeb.QMLPropertyState.StateValid;
+      this.updateState = QmlWeb.QMLPropertyState.Valid;
 
-      } finally {
+
+    } catch (e) {
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+        console.warn("QMLProperty.update binding error "+this.toString(true)+" "+QmlWeb.QMLPropertyFlags.toString(flags), e);
+      }
+      if (this.updateState !== QmlWeb.QMLPropertyState.Valid) {
+        this.updateState = QmlWeb.QMLPropertyState.NeedsUpdate;
+      }
+      throw e;
+    } finally {
+      if (pushed) {
+        QMLProperty.popEvaluatingProperty();
+      }
+      if (this.obsoleteConnections) {
         for (var i in this.obsoleteConnections) {
           con = this.obsoleteConnections[i];
           con.disconnect();
@@ -237,21 +258,8 @@ class QMLProperty {
         }
         delete this.obsoleteConnections;
       }
-
-
-    } catch (e) {
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
-        console.warn("QMLProperty.update binding error "+this.toString(true)+" "+QmlWeb.QMLPropertyFlags.toString(flags), e);
-      }
-      if (this.updateState !== QmlWeb.QMLPropertyState.StateValid) {
-        this.updateState = QmlWeb.QMLPropertyState.StateNeedsUpdate;
-      }
-      throw e;
-    } finally {
-      if (pushed) {
-        QMLProperty.popEvaluatingProperty();
-      }
     }
+
 
     if (!preventhacks && this.val !== oldVal) {
       if (this.animation) {
@@ -274,7 +282,7 @@ class QMLProperty {
       if (this.animation || (this.changed.connectedSlots && this.changed.connectedSlots.length>this.childEvalTreeConnections)) {
         this.update();
       } else {
-        this.updateState = QmlWeb.QMLPropertyState.StateNeedsUpdate;
+        this.updateState = QmlWeb.QMLPropertyState.NeedsUpdate;
       }
 
       // nothing to do with bidirectional binding here,
@@ -293,13 +301,13 @@ class QMLProperty {
       // }
 
     } else  {
-      this.updateState = QmlWeb.QMLPropertyState.StateNeedsUpdate;
+      this.updateState = QmlWeb.QMLPropertyState.NeedsUpdate;
     }
   }
 
   // Define getter
   get() {
-    if (this.updateState & QmlWeb.QMLPropertyState.StateUpdating) {
+    if (this.updateState & QmlWeb.QMLPropertyState.Updating) {
       // This get is not valid, so throwing PendingEvaluation.
       // However, not registering this to engine.pendingOperations, as
       // this property is being updated anyway, and we can trust that outside process
@@ -307,10 +315,18 @@ class QMLProperty {
       throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}\n${this.stacksToString()}`, this);
     }
 
+    let childUninitEval;
     if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) &&
-         (this.updateState & QmlWeb.QMLPropertyState.StateNeedsUpdate) &&
-        !(this.updateState & QmlWeb.QMLPropertyState.StateUninitialized)) {
-      this.update();
+         (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate) ) {
+      try {
+        this.update();
+      } catch (err) {
+        if (err.ctType==="UninitializedEvaluation") {
+          childUninitEval = err;
+        } else {
+          throw err;
+        }
+      }
     }
 
     // If this call to the getter is due to a property that is dependant on this
@@ -336,20 +352,42 @@ class QMLProperty {
       }
     }, this);
 
+    // if this property depends on unitilazed properties, this one is considered uninitialized, too
+    if (childUninitEval) {
+      throw childUninitEval;
+    }
 
     if (this.val && this.val.$get) {
       return this.val.$get();
     }
 
-    if (this.updateState && (this.pendingInit || this.binding)) {
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
-          (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
-        QmlWeb.engine.pendingOperations.push({
-           property:this,
-           info:"Pending property get/binding initialization : "+this,
-           });
+    if (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate) {
+
+      if (this.updateState & QmlWeb.QMLPropertyState.Uninitialized) {
+        // This 'get' is directed to an unitialized property : all dependent properties will be uninitilazed, too
+        // no need to register as pending property or print out the error :
+        throw new QmlWeb.UninitializedEvaluation();
       }
-      throw new QmlWeb.PendingEvaluation(`Binding not yet initialized.`, this);
+
+      // If it is a binding but has no input dependencies at all :
+      // we re-evaluate it at 2nd round of startup initialization (because missing properties
+      // could still be created in 1st round)
+      // If it is a binding but input dependencies already calculated,
+      // then its input dependencies will trigger reevaluation, as needed
+      //
+      if (this.binding && !Object.keys(this.evalTreeConnections).length) {
+
+        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
+            (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
+
+          QmlWeb.engine.pendingOperations.push({
+             property:this,
+             info:"Pending property get/binding initialization : "+this,
+             });
+        }
+        throw new QmlWeb.PendingEvaluation(`Binding not yet initialized.`, this);
+
+      }
     }
 
     return this.val;
@@ -363,10 +401,17 @@ class QMLProperty {
     }
 
     const oldVal = this.val;
-
     let val = newVal;
+
+    if (val !== undefined) {
+      this.updateState &= ~QmlWeb.QMLPropertyState.Uninitialized;
+    }
+
+
     if (val instanceof QmlWeb.QMLBinding || val instanceof QmlWeb.QtBindingDefinition) {
       this.binding = val;
+      this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
+      this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
 
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
         this.update(true, flags);
@@ -383,6 +428,11 @@ class QMLProperty {
         return;
       }
     } else {
+      this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
+      if (this.pendingInit) {
+        this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
+      }
+
       if (val instanceof Array) {
         val = val.slice(); // Copies the array
       }
@@ -561,5 +611,6 @@ QMLProperty.typeInitialValues = {
 
 QmlWeb.QMLProperty = QMLProperty;
 QmlWeb.PendingEvaluation = PendingEvaluation;
+QmlWeb.UninitializedEvaluation = UninitializedEvaluation;
 QmlWeb.dumpEvalError = dumpEvalError;
 QmlWeb.objToStringSafe = objToStringSafe;
