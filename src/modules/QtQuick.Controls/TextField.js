@@ -106,7 +106,7 @@ QmlWeb.registerQmlType({
   }
   $updateValue() {
     if (this.text !== this.impl.value) {
-      this.$properties.text.set(this.impl.value, QMLProperty.Privileged);
+      this.$properties.text.set(this.impl.value, QMLPropertyFlags.Privileged);
     }
   }
 });

@@ -19,7 +19,7 @@ const Qt = {
   createComponent: name => {
     let imp = QmlWeb.resolveImport(name);
 
-    return QmlWeb.createComponent(imp, QmlWeb.QMLComponent.LoadImports);
+    return QmlWeb.createComponent(imp, QmlWeb.QMLComponentFlags.LoadImports);
   },
 
   createQmlObject: (src, parent, file) => {
@@ -62,20 +62,20 @@ const Qt = {
     var b = new QMLBinding();
 
     if (getterFunction instanceof Function || setterFunction instanceof Function) {
-      flags |= QMLBinding.User;
+      flags |= QMLBindingFlags.User;
     }
 
-    if (flags & QMLBinding.User) {
+    if (flags & QMLBindingFlags.User) {
 
-      flags |= QMLBinding.ImplFunction;
+      flags |= QMLBindingFlags.ImplFunction;
 
       if (!(getterFunction instanceof Function)) {
-        throw new Error("Qt.binding() With QMLBinding.User flags, argument 1 should be a getter (evaluator) function. Or remove User flag. Bad:", getterFunction);
+        throw new Error("Qt.binding() With QMLBindingFlags.User flags, argument 1 should be a getter (evaluator) function. Or remove User flag. Bad:", getterFunction);
       }
       if (setterFunction && !(setterFunction instanceof Function)) {
-        throw new Error("Qt.binding() With QMLBinding.User flags, argument 2 should be a setter (updater) function. Or remove User flag. Bad:", setterFunction);
+        throw new Error("Qt.binding() With QMLBindingFlags.User flags, argument 2 should be a setter (updater) function. Or remove User flag. Bad:", setterFunction);
       }
-      if (flags & QMLBinding.Bidirectional) {
+      if (flags & QMLBindingFlags.Bidirectional) {
         if (!setterFunction) {
           throw new Error("Qt.binding() argument 2 should be a setter (updater) function with  flags & Bidirectional");
         }
@@ -84,10 +84,10 @@ const Qt = {
       b.setterFunc = setterFunction;
     } else {
       b.src = getterFunction;
-      if (setterFunction && !(flags & QMLBinding.Bidirectional)) {
+      if (setterFunction && !(flags & QMLBindingFlags.Bidirectional)) {
         throw new Error("Qt.binding() leave argument 2 blank if binding is not intended to be Bidirectional or user that flag.", setterFunction);
       }
-      if (flags & QMLBinding.Bidirectional) {
+      if (flags & QMLBindingFlags.Bidirectional) {
         if (!setterFunction) {
           throw new Error("Qt.binding() binding uses Bidirectional flag but property isn't specified in argument 2 .", setterFunction);
         }

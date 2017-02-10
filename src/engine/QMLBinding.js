@@ -81,13 +81,13 @@ class QMLBinding {
     if (flags === undefined) {
       if (property && property[0] === "block" &&
           property[1][0] && property[1][0][0] !== "label") {
-        this.flags = QMLBinding.ImplBlock;
+        this.flags = QmlWeb.QMLBindingFlags.ImplBlock;
       }
     } else {
       this.flags = flags;
       this.property = property;
     }
-    this.flags |= QMLBinding.ImplExpression;
+    this.flags |= QmlWeb.QMLBindingFlags.ImplExpression;
 
     if (src) {
       src = compressImpl(src);
@@ -117,7 +117,7 @@ class QMLBinding {
   stripFunction(src, stripargs) {
     if (src) {
       let match;
-      if (this.flags & QMLBinding.ImplFunction) {
+      if (this.flags & QmlWeb.QMLBindingFlags.ImplFunction) {
         match = /^(?:function\b)?\s*(?:\w|\$)*\(((?:(?:\w|\$)*\s*\,\s*)*(?:\w|\$)*)\)\s*\{/m.exec(src);
       } else {
         match = /^function\s*(?:\w|\$)*\(((?:(?:\w|\$)*\s*\,\s*)*(?:\w|\$)*)\)\s*\{/m.exec(src);
@@ -132,10 +132,10 @@ class QMLBinding {
         }
         this.args = match[1];
 
-        this.flags &= ~QMLBinding.ImplBlock;
-        this.flags |= QMLBinding.ImplFunction;
+        this.flags &= ~QmlWeb.QMLBindingFlags.ImplBlock;
+        this.flags |= QmlWeb.QMLBindingFlags.ImplFunction;
       } else {
-        if (this.flags & QMLBinding.ImplFunction) {
+        if (this.flags & QmlWeb.QMLBindingFlags.ImplFunction) {
           throw new Error("Binding is effectively not a function but declared so : "+(this.info?this.info:src));
         }
       }
@@ -241,9 +241,9 @@ class QMLBinding {
 
     this.compiled = true;
 
-    if (this.flags & QMLBinding.User) {
+    if (this.flags & QmlWeb.QMLBindingFlags.User) {
       this.implGet = this.bindGet();
-      if (this.flags & QMLBinding.Bidirectional) {
+      if (this.flags & QmlWeb.QMLBindingFlags.Bidirectional) {
         this.implSet = this.bindSet();
       }
 
@@ -253,7 +253,7 @@ class QMLBinding {
         this.src = _ubertrim(this.src);
       }
 
-      if (this.flags&QMLBinding.ImplFunction) {
+      if (this.flags&QMLBindingFlags.ImplFunction) {
         if (this.args!==undefined) {
           if (this.src0===undefined) this.src0 = this.src;
           this.src = "("+this.args+")"+this.src0;
@@ -262,7 +262,7 @@ class QMLBinding {
         this.implRun = this.bindRun();
       } else {
         this.implGet = this.bindGet();
-        if (this.flags & QMLBinding.Bidirectional) {
+        if (this.flags & QmlWeb.QMLBindingFlags.Bidirectional) {
           this.implSet = this.bindSet();
         }
       }
@@ -271,8 +271,8 @@ class QMLBinding {
 
   namespace() {
     var vvith;
-    if (this.flags & QMLBinding.OmitContext) {
-      if (this.flags & QMLBinding.Alias) {
+    if (this.flags & QmlWeb.QMLBindingFlags.OmitContext) {
+      if (this.flags & QmlWeb.QMLBindingFlags.Alias) {
         vvith = "with(QmlWeb) with(this.$leaf!==this?this.$leaf.$noalias:{}) with(this.$noalias)";
       } else {
         vvith = "with(QmlWeb) with(this.$leaf!==this?this.$leaf:{})          with(this)";
@@ -282,7 +282,7 @@ class QMLBinding {
       // NOTE necessary to use $context.$ownerObject instead of 'this' directly because of attached objects
       // see QObject() QMLComponent.getAttachedObject()
 
-      if (this.flags & QMLBinding.Alias) {
+      if (this.flags & QmlWeb.QMLBindingFlags.Alias) {
         vvith = "var c=this.$context,o,lf; with(QmlWeb) with(c.loaderContext) with((lf=(o=c.$ownerObject).$leaf)!==o?lf.$noalias:{}) with(c.$elements) with(o.$noalias)";
       } else {
         vvith = "var c=this.$context,o,lf; with(QmlWeb) with(c.loaderContext) with((lf=(o=c.$ownerObject).$leaf)!==o?lf:{})          with(c.$elements) with(o)";
@@ -293,8 +293,8 @@ class QMLBinding {
 
   bindGet() {
 
-    if (this.flags & QMLBinding.User) {
-      if ((this.flags&QMLBinding.ImplBlock) || !(this.flags&QMLBinding.ImplFunction)) {
+    if (this.flags & QmlWeb.QMLBindingFlags.User) {
+      if ((this.flags&QmlWeb.QMLBindingFlags.ImplBlock) || !(this.flags&QmlWeb.QMLBindingFlags.ImplFunction)) {
         throw new Error("Invalid Qt.Binding flags : "+this.flags," Valid flags:User,ImplFunction,Bidirectional,Alias");
       }
       if (!this.getterFunc) {
@@ -310,7 +310,7 @@ class QMLBinding {
       var src = this.src;
       if (this.property) {
         var fp = QmlWeb.formatPath(this.property);
-        if (this.flags&(QMLBinding.ImplFunction|QMLBinding.ImplBlock)) {
+        if (this.flags&(QmlWeb.QMLBindingFlags.ImplFunction|QmlWeb.QMLBindingFlags.ImplBlock)) {
           throw new Error("Invalid binding property, passed along with a function/block : "+this);
         }
         if (src) {
@@ -319,7 +319,7 @@ class QMLBinding {
           src = fp;
         }
       } else {
-        if (this.flags&(QMLBinding.ImplFunction)) {
+        if (this.flags&(QmlWeb.QMLBindingFlags.ImplFunction)) {
           throw new Error("Function is not valid binding type for get : "+this);
         }
       }
@@ -330,7 +330,7 @@ class QMLBinding {
 
       return new Function(`
         ${vvith} {
-          ${ (this.flags&QMLBinding.ImplFunction) ? "return function"+src+";" : (this.flags&QMLBinding.ImplBlock) ? src : "return "+src+";"}
+          ${ (this.flags&QmlWeb.QMLBindingFlags.ImplFunction) ? "return function"+src+";" : (this.flags&QmlWeb.QMLBindingFlags.ImplBlock) ? src : "return "+src+";"}
         }
       `);
     } else if (this.src instanceof Object) {
@@ -354,14 +354,14 @@ class QMLBinding {
 
     const vvith = this.namespace();
     var props;
-    if (this.flags & QMLBinding.Alias) {
+    if (this.flags & QmlWeb.QMLBindingFlags.Alias) {
       props = "$properties_noalias";
     } else {
       props = "$properties";
     }
 
-    if (this.flags & QMLBinding.User) {
-      if ((this.flags&QMLBinding.ImplBlock) || !(this.flags&QMLBinding.ImplFunction)) {
+    if (this.flags & QmlWeb.QMLBindingFlags.User) {
+      if ((this.flags&QmlWeb.QMLBindingFlags.ImplBlock) || !(this.flags&QmlWeb.QMLBindingFlags.ImplFunction)) {
         throw new Error("Invalid Qt.Binding flags : "+this.flags," Valid flags:User,ImplFunction,Bidirectional,Alias");
       }
       if (!this.setterFunc) {
@@ -371,7 +371,7 @@ class QMLBinding {
       return this.setterFunc;
 
     } else {
-      if (this.flags&(QMLBinding.ImplFunction|QMLBinding.ImplBlock)) {
+      if (this.flags&(QmlWeb.QMLBindingFlags.ImplFunction|QmlWeb.QMLBindingFlags.ImplBlock)) {
         throw new Error("Invalid writable/bidirectional binding, it should be an expression : "+this);
       }
       if (!this.property) {
@@ -399,7 +399,7 @@ class QMLBinding {
                 prop = obj.$properties${fp};
 
               if (prop) {
-                prop.set($$__value, $$__flags | QmlWeb.QMLProperty.ThroughBinding, $$__declaringItem);
+                prop.set($$__value, $$__flags | QmlWeb.QMLPropertyFlags.ThroughBinding, $$__declaringItem);
               } else {
                 if (obj.$context.$elements${fp}) {
                   throw new Error("Writable/Bidirectional binding write error : target property '${this.src} ${fp}' is an element, considered readonly.");
@@ -419,7 +419,7 @@ class QMLBinding {
                 if (prop.readOnly) {
                   throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is read-only.");
                 } else {
-                  prop.set($$__value, $$__flags | QmlWeb.QMLProperty.ThroughBinding, $$__declaringItem);
+                  prop.set($$__value, $$__flags | QmlWeb.QMLPropertyFlags.ThroughBinding, $$__declaringItem);
                 }
               } else {
                 if (this.$context.$elements${fp}) {
@@ -440,7 +440,7 @@ class QMLBinding {
             if (prop.readOnly) {
               throw new Error("Writable/Bidirectional binding write error : target property '"+fp+"' is read-only.");
             } else {
-              prop.set($$__value, $$__flags | QmlWeb.QMLProperty.ThroughBinding, $$__declaringItem);
+              prop.set($$__value, $$__flags | QmlWeb.QMLPropertyFlags.ThroughBinding, $$__declaringItem);
             }
           } else {
             if (this.$context.$elements[fp]) {
@@ -463,7 +463,7 @@ class QMLBinding {
 
     const vvith = this.namespace();
 
-    if (!this.flags&QMLBinding.ImplFunction) {
+    if (!this.flags&QmlWeb.QMLBindingFlags.ImplFunction) {
       throw new Error("Binding/run should be a function : " + this);
     }
 
@@ -474,18 +474,10 @@ class QMLBinding {
 
 
   toString() {
-    return "Binding#"+this.$bindingId+": flags:"+this.flags+" prop:"+QmlWeb.formatPath(this.property)+"  impl:("+this.args+")=>\n"+this.src;
+    return "Binding#"+this.$bindingId+": "+QmlWeb.QMLBindingFlags.toString(this.flags)+
+      " prop:"+QmlWeb.formatPath(this.property)+"  impl:("+this.args+")=>\n"+this.src;
   }
 }
-QMLBinding.ImplExpression = 0;
-QMLBinding.ImplBlock = 1;
-QMLBinding.ImplFunction = 2;
-QMLBinding.Bidirectional = 4;
-QMLBinding._Alias = 8;
-QMLBinding.Alias = 12; // always bidirectional
-QMLBinding.User = 16;
-QMLBinding.OmitContext = 32;
-QMLBinding.ListTemplate = 64;
 
 QmlWeb._ubertrim = _ubertrim;
 QmlWeb.compressImpl = compressImpl;

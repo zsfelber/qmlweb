@@ -14,10 +14,10 @@ class ItemBase {
       var prop = this.$properties[this.$defaultProperty];
       if (prop.type === "list") {
         var parr = prop.get();
-        element.$properties.$index.set(parr.length, QmlWeb.QMLProperty.ReasonInitPrivileged);
+        element.$properties.$index.set(parr.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
         parr.push(leafElement);
       } else {
-        element.$properties.$index.set(0, QmlWeb.QMLProperty.ReasonInitPrivileged);
+        element.$properties.$index.set(0, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
         prop.set(leafElement);
       }
     } else {
@@ -25,11 +25,11 @@ class ItemBase {
     }
 
     if (leafElement instanceof ItemBase) {
-      element.$properties.$childIndex.set(this.children.length, QmlWeb.QMLProperty.ReasonInitPrivileged);
+      element.$properties.$childIndex.set(this.children.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
       this.children.push(leafElement);
       this.childrenChanged();
     } else {
-      element.$properties.$resourceIndex.set(this.resources.length, QmlWeb.QMLProperty.ReasonInitPrivileged);
+      element.$properties.$resourceIndex.set(this.resources.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
       this.resources.push(leafElement);
       this.resourcesChanged();
     }
@@ -45,7 +45,7 @@ class ItemBase {
         var parr = prop.get();
         parr.splice(element.$index, 1);
         for (var i = element.$index; i < parr.length; ++i) {
-          parr[i].$properties.$index.set(i, QmlWeb.QMLProperty.ReasonInitPrivileged);
+          parr[i].$properties.$index.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
         }
       } else {
         prop.set(null);
@@ -57,13 +57,13 @@ class ItemBase {
     if (leafElement instanceof ItemBase) {
       this.children.splice(element.$childIndex, 1);
       for (var i = element.$childIndex; i < this.children.length; ++i) {
-        this.children[i].$properties.$childIndex.set(i, QmlWeb.QMLProperty.ReasonInitPrivileged);
+        this.children[i].$properties.$childIndex.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
       }
       this.childrenChanged();
     } else {
       this.resources.splice(element.$resourceIndex, 1);
       for (var i = element.$resourceIndex; i < this.resources.length; ++i) {
-        this.resources[i].$properties.$resourceIndex.set(i, QmlWeb.QMLProperty.ReasonInitPrivileged);
+        this.resources[i].$properties.$resourceIndex.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
       }
       this.resourcesChanged();
     }
@@ -74,11 +74,11 @@ class ItemBase {
     if (this.parent) {
       if (this.hovered) {
         if (this.hoverChildIndex)
-          this.parent.$properties.hoverIndex.set(this.hoverChildIndex, QmlWeb.QMLProperty.ReasonInitPrivileged);
+          this.parent.$properties.hoverIndex.set(this.hoverChildIndex, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
         else
-          this.parent.$properties.hoverIndex.set(this.$childIndex, QmlWeb.QMLProperty.ReasonInitPrivileged);
+          this.parent.$properties.hoverIndex.set(this.$childIndex, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
       } else {
-        this.parent.$properties.hoverIndex.set(-1, QmlWeb.QMLProperty.ReasonInitPrivileged);
+        this.parent.$properties.hoverIndex.set(-1, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
       }
     }
   }
@@ -205,7 +205,7 @@ class ItemBase {
             inf["thatprop:"+thatprop]=thatprop;
             (dump[path+".m"] = dump[(++dumplen[0])+" "+path+".m"] = inf);
             thatprop.readOnly = true;
-            thatprop.set(this, QmlWeb.QMLProperty.ReasonInitPrivileged);
+            thatprop.set(this, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
           } else {
             (dump["X "+path+".m"] = dump[(++dumplen[0])+" X "+path+".m"] = {info:"<-!ModelProp->"});
           }

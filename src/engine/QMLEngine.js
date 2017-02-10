@@ -209,7 +209,7 @@ class QMLEngine {
 
       this.rootObject = QmlWeb.createComponentAndElement(
                     {clazz: clazz, $file: file}, parent,
-                    QmlWeb.QMLComponent.Root | QmlWeb.QMLComponent.LoadImports);
+                    QmlWeb.QMLComponentFlags.Root | QmlWeb.QMLComponentFlags.LoadImports);
 
       this.rootObject.$component.serverWsAddress = serverWsAddress;
       this.rootObject.$component.isClientSide = isClientSide;
@@ -380,10 +380,10 @@ class QMLEngine {
             // Probably, the binding was overwritten by an explicit value. Ignore.
             a1++;
             console.warning("Property binding has been removed : "+prop);
-          } else if (property.updateState & QmlWeb.QMLProperty.StateUpdating) {
+          } else if (property.updateState & QmlWeb.QMLPropertyFlags.StateUpdating) {
             a1++;
             console.error("Property state is invalid : update has not finished : "+prop);
-          } else if (property.updateState & QmlWeb.QMLProperty.StateNeedsUpdate) {
+          } else if (property.updateState & QmlWeb.QMLPropertyFlags.StateNeedsUpdate) {
             a2++;
             property.update(false, op.flags, op.declaringItem);
           } else if (geometryProperties.indexOf(property.name) >= 0) {

@@ -18,7 +18,7 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.superAndInitMeta(this, meta);
 
-    this.$properties.container.set(this.$parent, QmlWeb.QMLProperty.ReasonInit);
+    this.$properties.container.set(this.$parent, QmlWeb.QMLPropertyFlags.ReasonInit);
 
     /* This ensures that if the user toggles the "running" property manually,
      * the timer will trigger. */

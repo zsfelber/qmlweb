@@ -139,7 +139,7 @@ class Item {
         $context: (newState ? newState.$context : action.target.$context)
       };
       action.target.$properties[action.property].set(
-        action.value, QmlWeb.QMLProperty.ReasonUser, scope
+        action.value, QmlWeb.QMLPropertyFlags.ReasonUser, scope
       );
     }
     for (const i in actions) {

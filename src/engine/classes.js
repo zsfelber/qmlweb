@@ -82,7 +82,7 @@ function construct(meta, parent, flags) {
   let superitem = constructSuper(meta, parent);
 
   // means : created by Component.$createObject
-  if (flags & QmlWeb.QMLComponent.Element) {
+  if (flags & QmlWeb.QMLComponentFlags.Element) {
     if (meta !== component.meta || meta.$name!==component.$name  || meta.$id!==component.$id
         || meta.context!==component.context || meta.component!==component) {
       throw new Error("Invalid Element construct : "+item);
@@ -107,7 +107,7 @@ function construct(meta, parent, flags) {
 
     item.$superclass = item.$class;
     item.$class = nm;
-    if (flags & QmlWeb.QMLComponent.Nested) {
+    if (flags & QmlWeb.QMLComponentFlags.Nested) {
       item.$classname = "["+nm+"]";
     } else {
       item.$classname = nm;
@@ -118,7 +118,7 @@ function construct(meta, parent, flags) {
     // !!! see QMLBinding
     ctx.$ownerObject = item;
 
-    if (!component.loaderComponent===!(flags & QmlWeb.QMLComponent.Root)) {
+    if (!component.loaderComponent===!(flags & QmlWeb.QMLComponentFlags.Root)) {
       throw new Error("Assertion failed. No Loader + Root or Root + Loader : "+component+"  ctx:"+ctx);
     }
 
@@ -139,7 +139,7 @@ function construct(meta, parent, flags) {
     // (see properties.createProperty. )
     if (meta.id) {
       addElementToPageContexts(item, meta.id, ctx);
-    //} else if (flags & QmlWeb.QMLComponent.Nested) {
+    //} else if (flags & QmlWeb.QMLComponentFlags.Nested) {
     //  console.warn("No element id for item  : "+item+"  ctx:"+ctx);
     }
 
@@ -174,7 +174,7 @@ function constructSuper(meta, parent) {
     }
 
     // always super here:
-    item = createComponentAndElement(clinfo, parent, QMLComponent.Super);
+    item = createComponentAndElement(clinfo, parent, QMLComponentFlags.Super);
 
     if (typeof item.dom !== "undefined") {
       item.dom.className += ` ${clinfo.$path[clinfo.$path.length - 1]}`;
@@ -189,7 +189,7 @@ function createComponentAndElement(meta, parent, flags) {
   // NOTE 1 : class component from meta. meta may be resolved superclass info (Super: from resolveClassImport)
   // or QMLElement directly (Nested : in form {clazz:element_meta}):
   // NOTE 2 : LoadImports only works for Super and not for Nested
-  const component = QmlWeb.createComponent(meta, flags |= QmlWeb.QMLComponent.LoadImports);
+  const component = QmlWeb.createComponent(meta, flags |= QmlWeb.QMLComponentFlags.LoadImports);
 
   if (!component) {
     throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);
@@ -222,7 +222,7 @@ function createQmlObject(src, parent, file) {
   const clazz = QmlWeb.parseQML(src, file);
   file = file || "createQmlObject_function";
 
-  var component = QmlWeb.createComponent({clazz, parent, $file:file}, QmlWeb.QMLComponent.LoadImports);
+  var component = QmlWeb.createComponent({clazz, parent, $file:file}, QmlWeb.QMLComponentFlags.LoadImports);
 
   const obj = component.createObject(parent);
 
@@ -246,7 +246,7 @@ function addElementToPageContexts(item, id, ctx) {
   // see also QObject.createChild()->Object.create() in classes.construct
   // see also Object.create in QMLContext.createChild
   // see also QMLProperty.createProperty how element access can be hidden by same name property or alias
-  // see also QMLBinding.bindXXX methods how a name is eventually resolved at runtime
+  // see also QMLBindingFlags.bindXXX methods how a name is eventually resolved at runtime
 
   if (ctx.hasOwnProperty(id)) {
     console.warn("Context entry overriden by Element : "+id+" object:"+item);
@@ -276,7 +276,7 @@ function addElementToPageContexts(item, id, ctx) {
     );
 
     // ectx is current Page top : exit
-    if (!(ectx.component.flags&QmlWeb.QMLComponent.Nested)) {
+    if (!(ectx.component.flags&QmlWeb.QMLComponentFlags.Nested)) {
       break;
     }
   }

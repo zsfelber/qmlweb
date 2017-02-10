@@ -86,16 +86,16 @@ function createProperty(type, obj, propName, options) {
 
     var p = formatPath(path0);
     const QMLBinding = QmlWeb.QMLBinding;
-    var binding = new QMLBinding(p, proplast, QMLBinding.ImplExpression|QMLBinding.Alias);
-    prop.set(binding, QMLProperty.ReasonInitPrivileged);
+    var binding = new QMLBinding(p, proplast, QMLBindingFlags.ImplExpression|QMLBindingFlags.Alias);
+    prop.set(binding, QMLPropertyFlags.ReasonInitPrivileged);
 
-    _set_prop(propName, prop, QMLProperty.ReasonInit);
+    _set_prop(propName, prop, QMLPropertyFlags.ReasonInit);
 
     obj.$properties[propName] = prop;
     QmlWeb.setupGetterSetter(obj, propName, getter, setter, prop);
 
   } else {
-    _set_prop(propName, prop, QMLProperty.ReasonInitPrivileged);
+    _set_prop(propName, prop, QMLPropertyFlags.ReasonInitPrivileged);
 
     obj.$properties[propName] = prop;
     QmlWeb.setupGetterSetter(obj, propName, getter, setter, prop);
@@ -110,7 +110,7 @@ function createProperty(type, obj, propName, options) {
   var ctx = obj.$context;
 
   // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
-  // (It's true. We may use QMLBinding.OmitContext flag to omit context lookup in compilation in the related cases.
+  // (It's true. We may use QMLBindingFlags.OmitContext flag to omit context lookup in compilation in the related cases.
   //  Usually we call javascript functions from custom module js classes -> connect(...) codes directly, so this
   //  flag was not used so far. )
 
@@ -153,7 +153,7 @@ function applyProperties(metaObject, item) {
     if (err.ctType === "PendingEvaluation") {
       //console.warn("PendingEvaluation : Cannot apply property bindings (reevaluating at startup) :" + i + "  item:" + item);
     } else {
-      console.warn("Cannot apply property bindings : "+item+" . "+i+"  Context:"+item.$context+"  "+err.message+"  opstate:"+QmlWeb.engine.operationState);
+      console.warn("Cannot apply property bindings : "+item+" . "+i+"  Context:"+item.$context+"  "+err.message+"  opstate:"+QmlWeb.QMLOperationState.toString(QmlWeb.engine.operationState));
     }
 
     if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
@@ -167,7 +167,7 @@ function applyProperties(metaObject, item) {
       if (item.$defaultProperty) {
         try {
           item.$properties[item.$defaultProperty].set(
-              metaObject.$children, QMLProperty.ReasonInitPrivileged|QMLProperty.SetChildren, item
+              metaObject.$children, QMLPropertyFlags.ReasonInitPrivileged|QMLPropertyFlags.SetChildren, item
             );
 
         } catch (err) {
@@ -234,7 +234,7 @@ function applyProperty(item, i, value) {
       met.owner = item;
       return true;
     } else if (value instanceof QmlWeb.QMLMethod) {
-      if (!value.flags&QMLBinding.ImplFunction) {
+      if (!value.flags&QMLBindingFlags.ImplFunction) {
         throw new Error("Qml method binding should be a function : " + value);
       }
       value.compile();
@@ -259,7 +259,7 @@ function applyProperty(item, i, value) {
   }
 
   if (item.$properties && i in item.$properties) {
-    item.$properties[i].set(value, QMLProperty.ReasonInitPrivileged);
+    item.$properties[i].set(value, QMLPropertyFlags.ReasonInitPrivileged);
     return true;
   } else if (i in item) {
     item[i] = value;
@@ -303,7 +303,7 @@ function connectSignal(item, signalName, value) {
     }
 
     try {
-      if (value.flags&QMLBinding.ImplFunction) {
+      if (value.flags&QMLBindingFlags.ImplFunction) {
         if (!value.compiled) {
           throw new Error("Invalid slot binding, it should not be a function : "+value.src);
         }
@@ -316,8 +316,8 @@ function connectSignal(item, signalName, value) {
       }
 
       value.args = ps;
-      value.flags &= ~QMLBinding.ImplBlock;
-      value.flags |= QMLBinding.ImplFunction;
+      value.flags &= ~QMLBindingFlags.ImplBlock;
+      value.flags |= QMLBindingFlags.ImplFunction;
       value.compile();
     } catch (err) {
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {

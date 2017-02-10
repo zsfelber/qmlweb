@@ -7,7 +7,7 @@ class QMLComponent {
     this.copyMeta(meta, flags);
 
     this.flags = flags;
-    this.createFlags = this.flags & (QMLComponent.Root|QMLComponent.Nested|QMLComponent.Super);
+    this.createFlags = this.flags & (QmlWeb.QMLComponentFlags.Root|QmlWeb.QMLComponentFlags.Nested|QmlWeb.QMLComponentFlags.Super);
 
     // init now, otherwise it's Lazy
     if (this.createFlags) {
@@ -22,7 +22,7 @@ class QMLComponent {
   init(loaderComponent) {
     const engine = QmlWeb.engine;
 
-    if ( this.flags & QmlWeb.QMLComponent.Nested ) {
+    if ( this.flags & QmlWeb.QmlWeb.QMLComponentFlags.Nested ) {
 
       // NOTE on the top of a Nested Component's loader hierarchy, we have to insert 1 extra level of Components into
       // chains, changing $class from the "superclass" to the current again (but with Super Component flag):
@@ -46,28 +46,28 @@ class QMLComponent {
     // see also QObject.createChild()->Object.create() in classes.construct
     // see also Object.create in QMLContext.createChild
     if (loaderComponent) {
-      if (!(this.flags&QMLComponent.Super)===!(this.flags&QMLComponent.Nested))
-        throw new Error("Assertion failed : either meta.nested or meta.super  It is "+((this.flags&QMLComponent.Super)?"both":"neither")+" "+this);
+      if (!(this.flags&QmlWeb.QMLComponentFlags.Super)===!(this.flags&QmlWeb.QMLComponentFlags.Nested))
+        throw new Error("Assertion failed : either meta.nested or meta.super  It is "+((this.flags&QmlWeb.QMLComponentFlags.Super)?"both":"neither")+" "+this);
 
-      if (this.flags&QMLComponent.Nested) {
+      if (this.flags&QmlWeb.QMLComponentFlags.Nested) {
         this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
       }
-      if (this.flags&QMLComponent.Root) {
+      if (this.flags&QmlWeb.QMLComponentFlags.Root) {
         throw new Error("Invalid root Component construction (a loader Component is found) : "+this);
       }
 
-      if (this.flags&QMLComponent.Super) {
+      if (this.flags&QmlWeb.QMLComponentFlags.Super) {
 
         loaderComponent.$base = this;
         this.$leaf = loaderComponent.$leaf;
         this.$root = loaderComponent.$root;
 
-        if (loaderComponent.flags & QMLComponent.Super) {
+        if (loaderComponent.flags & QmlWeb.QMLComponentFlags.Super) {
 
           this.loaderComponent = loaderComponent.loaderComponent;
           this.topComponent = loaderComponent.topComponent;
 
-        } else if (loaderComponent.flags & (QMLComponent.Root|QMLComponent.Nested)) {
+        } else if (loaderComponent.flags & (QmlWeb.QMLComponentFlags.Root|QmlWeb.QMLComponentFlags.Nested)) {
 
           this.loaderComponent = loaderComponent;
           this.topComponent = this;
@@ -79,7 +79,7 @@ class QMLComponent {
 
         if (this.loaderComponent) {
 
-          if (loaderComponent.flags & QMLComponent.Nested) {
+          if (loaderComponent.flags & QmlWeb.QMLComponentFlags.Nested) {
             if (loaderComponent.$file) {
               throw new Error("Loader Component $file mismatch (should not be set in loader of Nested but) : "+loaderComponent.$file+" vs "+this.$file);
             }
@@ -87,7 +87,7 @@ class QMLComponent {
           this.meta.context = this.context = this.loaderComponent.context.createChild(
                                         this.loaderComponent +" -> " +this);
 
-          if (this.loaderComponent.flags & QMLComponent.Super) {
+          if (this.loaderComponent.flags & QmlWeb.QMLComponentFlags.Super) {
             throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.context)
           }
         } else {
@@ -123,13 +123,13 @@ class QMLComponent {
       this.meta.context = this.context = engine.rootContext.createChild(this.toString());
 
       //console.warn("Component  "+this);
-      if (this.flags&QMLComponent.Nested) {
+      if (this.flags&QmlWeb.QMLComponentFlags.Nested) {
         throw new Error("Component is nested but no loader Component.");
       }
-      if (this.flags&QMLComponent.Super) {
+      if (this.flags&QmlWeb.QMLComponentFlags.Super) {
         console.warn("Component is super but no loader Component : "+this);
       }
-      if (!(this.flags&QMLComponent.Root)) {
+      if (!(this.flags&QmlWeb.QMLComponentFlags.Root)) {
         throw new Error("Component has no loader but Root flag is not set : "+this);
       }
       if (!this.$file) {
@@ -149,7 +149,7 @@ class QMLComponent {
       throw new Error("No component context");
     }
 
-    if (this.flags & QMLComponent.Nested) {
+    if (this.flags & QmlWeb.QMLComponentFlags.Nested) {
 
       // Nested item top level uses loader Component imports:
       this.bindImports(loaderComponent);
@@ -259,7 +259,7 @@ class QMLComponent {
 
     QmlWeb.preloadImports(this, moduleImports);
 
-    if (this.flags & QMLComponent.LoadImports) {
+    if (this.flags & QmlWeb.QMLComponentFlags.LoadImports) {
       // TODO gz  undefined -> component.$basePath  from createQmlObject
       QmlWeb.loadImports(this, this.$imports);
     }
@@ -324,10 +324,10 @@ class QMLComponent {
       if (!this.createFlags) {
         let loaderComponent;
         if (parent) {
-          this.createFlags = QMLComponent.Nested;
+          this.createFlags = QmlWeb.QMLComponentFlags.Nested;
           loaderComponent = parent.$component;
         } else {
-          this.createFlags = QMLComponent.Root;
+          this.createFlags = QmlWeb.QMLComponentFlags.Root;
         }
         this.flags |= this.createFlags;
         this.init(loaderComponent);
@@ -339,14 +339,8 @@ class QMLComponent {
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
-      item = QmlWeb.construct(this.meta, parent, QMLComponent.Element|this.createFlags);
+      item = QmlWeb.construct(this.meta, parent, QmlWeb.QMLComponentFlags.Element|this.createFlags);
       QmlWeb.helpers.copy(item, properties);
-
-      // !!! see QMLBinding
-      this.context.$ownerObject = item;
-
-      item.$elements = this.context.$elements;
-      item.$info = this.context.$info;
 
       this.finalizeImports();
 
@@ -379,9 +373,9 @@ class QMLComponent {
     const item = this.$createObject(parent, properties);
 
     if (item instanceof QmlWeb.ItemBase) {
-      item.$properties.parent.set(parent, QmlWeb.QMLProperty.ReasonInitPrivileged);
+      item.$properties.parent.set(parent, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
     } else if (item instanceof QmlWeb.QtObject) {
-      item.$properties.container.set(parent, QmlWeb.QMLProperty.ReasonInitPrivileged);
+      item.$properties.container.set(parent, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
     } else if (item instanceof QMLComponent) {
       item.$component = this;
     }
@@ -393,19 +387,9 @@ class QMLComponent {
     if (!name) name = this.$file;
     if (!name) name = this.$name;
     if (this.$id) name += ":"+this.$id;
-    var c = "";
-    var f = "";
-    var fn = this.flags;
-    for (;;) {
-      if (fn>=QMLComponent.LoadImports) { f+="i";    fn-=QMLComponent.LoadImports; }
-      else if (fn>=QMLComponent.Element) { f+="e";    fn-=QMLComponent.Element; }
-      else if (fn>=QMLComponent.Root) { c+="R";  fn-=QMLComponent.Root; }
-      else if (fn>=QMLComponent.Nested) { c+="N";fn-=QMLComponent.Nested; }
-      else if (fn>=QMLComponent.Super) { c+="S"; fn-=QMLComponent.Super; }
-      else break;
-    }
+    var c = QmlWeb.QMLComponentFlags.toString(this.flags);
 
-    return c+"["+name+(this.flags?" "+f:"")+(this.nestedLevel?" l"+this.nestedLevel:"")+"]";
+    return c+"["+name+(this.nestedLevel?" l"+this.nestedLevel:"")+" "+QmlWeb.Component.toString(this.status)+"]";
   }
 
   static complete() {
@@ -455,13 +439,4 @@ QmlWeb.registerQmlType({
   constructor: QMLComponent
 });
 
-// determine automatically whether Nested or Root (Super is not possible)
-// at every ($)createObject
-QMLComponent.LazyOrFactory = 0;
-
-QMLComponent.Super = 1;
-QMLComponent.Nested = 2;
-QMLComponent.Root = 4;
-QMLComponent.Element = 8;
-QMLComponent.LoadImports = 16;
 QmlWeb.QMLComponent = QMLComponent;

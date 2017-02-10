@@ -26,7 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 class QMLMethod extends QmlWeb.QMLBinding {
   constructor(src) {
-    super(src, undefined, QMLBinding.ImplFunction);
+    super(src, undefined, QMLBindingFlags.ImplFunction);
     Object.defineProperty(this, "serializedTypeId", {
       value: "m",
       configurable: false,

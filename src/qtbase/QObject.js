@@ -7,8 +7,23 @@ class QObject {
     if (meta) {
       this.$meta = meta;
       if (meta.component||meta.context) {
+        // NOTE context bindings of object prototype chain :
+        // QObject.context : UserAbstractItem.context
+        // QtQml.QtObject.context : UserAbstractItem.context
+        // QtQuick.Item.context : UserAbstractItem.context
+        // UserAbstractItem.context : UserAbstractItem.context
+        // UserItem.context : UserItem.context
+        // ...
+        // UserLeafItem.context : $leaf.context
+
         this.$component = meta.component;
         this.$context = meta.context;
+
+        // !!! see QMLBinding
+        this.$context.$ownerObject = this;
+
+        this.$elements = this.$context.$elements;
+        this.$info = this.$context.$info;
       }
     }
 

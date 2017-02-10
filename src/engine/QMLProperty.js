@@ -76,7 +76,7 @@ class QMLProperty {
     this.value = undefined;
     this.type = type;
     this.animation = null;
-    this.updateState = QMLProperty.StateNeedsUpdate;
+    this.updateState = QmlWeb.QMLPropertyState.StateNeedsUpdate;
     this.get.$owner = this;
     this.set.$owner = this;
 
@@ -98,7 +98,7 @@ class QMLProperty {
     var parentObj;
 
     try {
-      const isch = flags & QMLProperty.SetChildren;
+      const isch = flags & QmlWeb.QMLPropertyFlags.SetChildren;
       if (isch) {
 
         // NOTE declaringItem is passed only along with SetChildren
@@ -127,7 +127,7 @@ class QMLProperty {
         }
 
         // NOTE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
-        var tmp = QmlWeb.qmlList(val, parentObj, QmlWeb.QMLComponent.Nested);
+        var tmp = QmlWeb.qmlList(val, parentObj, QmlWeb.QMLComponentFlags.Nested);
 
         // Otherwise, we trust containerChanged/onAddElement
         if (!isch) {
@@ -141,13 +141,13 @@ class QMLProperty {
           this.val = QmlWeb.createComponent({
             clazz: val,
             $file: val.$file
-          }, QmlWeb.QMLComponent.Nested);
+          }, QmlWeb.QMLComponentFlags.Nested);
         } else {
           // NOTE gz : key entry point 2 of QmlWeb.construct
           // all the other ones just forward these
           // Call to here comes from
           // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
-          this.val = QmlWeb.createComponentAndElement({clazz:val}, parentObj, QmlWeb.QMLComponent.Nested);
+          this.val = QmlWeb.createComponentAndElement({clazz:val}, parentObj, QmlWeb.QMLComponentFlags.Nested);
         }
       } else if (val instanceof Object || val === undefined || val === null) {
         this.val = val;
@@ -182,11 +182,11 @@ class QMLProperty {
   update(preventhacks, flags, declaringItem) {
 
     if (!this.binding) {
-      this.updateState = QMLProperty.StateValid;
+      this.updateState = QmlWeb.QMLPropertyState.StateValid;
       return;
     }
 
-    this.updateState = QMLProperty.StateUpdating;
+    this.updateState = QmlWeb.QMLPropertyState.StateUpdating;
 
     const oldVal = this.val;
 
@@ -217,13 +217,13 @@ class QMLProperty {
               fun:this.$setVal,
               thisObj:this,
               args:[val, flags, declaringItem],
-              info:"Pending property update/$setVal : "+this,
+              info:"Pending property update/$setVal : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
             });
           }
           throw err;
         }
 
-        this.updateState = QMLProperty.StateValid;
+        this.updateState = QmlWeb.QMLPropertyState.StateValid;
 
       } finally {
         for (var i in this.obsoleteConnections) {
@@ -237,10 +237,10 @@ class QMLProperty {
 
     } catch (e) {
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
-        console.warn("QMLProperty.update binding error "+this.toString(true), e);
+        console.warn("QMLProperty.update binding error "+this.toString(true)+" "+QmlWeb.QMLPropertyFlags.toString(flags), e);
       }
-      if (this.updateState !== QMLProperty.StateValid) {
-        this.updateState = QMLProperty.StateNeedsUpdate;
+      if (this.updateState !== QmlWeb.QMLPropertyState.StateValid) {
+        this.updateState = QmlWeb.QMLPropertyState.StateNeedsUpdate;
       }
       throw e;
     } finally {
@@ -270,7 +270,7 @@ class QMLProperty {
       if (this.animation || (this.changed.connectedSlots && this.changed.connectedSlots.length>this.childEvalTreeConnections)) {
         this.update();
       } else {
-        this.updateState = QMLProperty.StateNeedsUpdate;
+        this.updateState = QmlWeb.QMLPropertyState.StateNeedsUpdate;
       }
 
       // nothing to do with bidirectional binding here,
@@ -284,18 +284,18 @@ class QMLProperty {
       //                        [dependency2]
       //                        [dependency3]
 
-      // } else if ((this.binding.flags & QmlWeb.QMLBinding.Bidirectional)) {
+      // } else if ((this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
       //   ...
       // }
 
     } else  {
-      this.updateState = QMLProperty.StateNeedsUpdate;
+      this.updateState = QmlWeb.QMLPropertyState.StateNeedsUpdate;
     }
   }
 
   // Define getter
   get() {
-    if (this.updateState & QMLProperty.StateUpdating) {
+    if (this.updateState & QmlWeb.QMLPropertyState.StateUpdating) {
       // This get is not valid, so throwing PendingEvaluation.
       // However, not registering this to engine.pendingOperations, as
       // this property is being updated anyway, and we can trust that outside process
@@ -351,8 +351,8 @@ class QMLProperty {
 
   // Define setter
   set(newVal, flags, declaringItem) {
-    flags = flags || QMLProperty.ReasonUser;
-    if (this.readOnly && !(flags & QMLProperty.Privileged)) {
+    flags = flags || QmlWeb.QMLPropertyFlags.ReasonUser;
+    if (this.readOnly && !(flags & QmlWeb.QMLPropertyFlags.Privileged)) {
       throw new Error(`property '${this.name}' has read only access`);
     }
 
@@ -368,7 +368,7 @@ class QMLProperty {
         if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) || (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
           QmlWeb.engine.pendingOperations.push({
              property:this,
-             info:"Pending property set/binding initialization : "+this,
+             info:"Pending property set/binding initialization : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
              flags, declaringItem
              });
         }
@@ -380,8 +380,8 @@ class QMLProperty {
         val = val.slice(); // Copies the array
       }
 
-      if (this.binding && (this.binding.flags & QmlWeb.QMLBinding.Bidirectional)) {
-        if (flags & QMLProperty.RemoveBidirectionalBinding) {
+      if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
+        if (flags & QmlWeb.QMLPropertyFlags.RemoveBidirectionalBinding) {
           this.binding = null;
         } else {
           if (!this.binding.compiled) {
@@ -389,7 +389,7 @@ class QMLProperty {
           }
           this.binding.set(this.obj, newVal, flags, declaringItem);
         }
-      } else if (!(flags & QMLProperty.ReasonAnimation)) {
+      } else if (!(flags & QmlWeb.QMLPropertyFlags.ReasonAnimation)) {
         this.binding = null;
       }
 
@@ -401,7 +401,7 @@ class QMLProperty {
             fun:this.$setVal,
             thisObj:this,
             args:[val, flags, declaringItem],
-            info:"Pending property set/$setVal : "+this,
+            info:"Pending property set/$setVal : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
           });
         }
         throw err;
@@ -410,7 +410,7 @@ class QMLProperty {
 
     if (this.val !== oldVal) {
       function _changed_init() {
-        if (flags & QMLProperty.ReasonInit) {
+        if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
           this.changed(this.val, oldVal, this.name);
         } else {
           if (this.animation) {
@@ -431,7 +431,7 @@ class QMLProperty {
           fun:_changed_init,
           thisObj:this,
           args:[],
-          info:"Pending property set/changed_init : "+this,
+          info:"Pending property set/changed_init : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
         });
         //console.warn("PendingEvaluation : Pending property set/changed init :" + this.name + "  obj:" + this.obj);
       }
@@ -443,7 +443,7 @@ class QMLProperty {
 
     // $base because to avoid infinite loops for overriden toString:
     return os+" . prop:"+this.name+(detail?"#"+this.$propertyId:"")+
-      (detail?" "+(this.updateState?this.updateState&QMLProperty.StateNeedsUpdate?"needsUpdate":"updating":"ok")+" "+(this.binding?"b:"+this.binding.flags:""):"")+
+      (detail?" "+QmlWeb.QMLPropertyState.toString(this.updateState)+" "+(this.binding?QmlWeb.QMLBindingFlags.toString(this.binding.flags):""):"")+
        " "+(this.val?"v:"+this.val:"");
   }
 
@@ -550,18 +550,6 @@ QMLProperty.typeInitialValues = {
   url: ""
 };
 
-QMLProperty.ReasonUser = 0;
-QMLProperty.ReasonInit = 1;
-QMLProperty.ReasonAnimation = 2;
-QMLProperty.Privileged = 4;
-QMLProperty.RemoveBidirectionalBinding = 8;
-QMLProperty.SetChildren = 16;
-QMLProperty.ThroughBinding = 32;
-QMLProperty.ReasonInitPrivileged = QMLProperty.ReasonInit | QMLProperty.Privileged;
-
-QMLProperty.StateValid = 0;
-QMLProperty.StateNeedsUpdate = 1;
-QMLProperty.StateUpdating = 2;
 
 QmlWeb.QMLProperty = QMLProperty;
 QmlWeb.PendingEvaluation = PendingEvaluation;
