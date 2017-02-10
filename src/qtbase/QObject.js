@@ -22,7 +22,7 @@ class QObject {
         // !!! see QMLBinding
         this.$context.$ownerObject = this;
 
-        this.$elements = this.$context.$elements;
+        this.$pageElements = this.$context.$pageElements;
         this.$info = this.$context.$info;
       }
     }

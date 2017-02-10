@@ -18,11 +18,11 @@ class QMLContext {
 
     // see properties.createProperty /
     // namespace setting in QMLBinding with(...) -s / QObject.$noalias.createChild / components.js.createChild :
-    // we use "this", $elements and loader context in evaluation, as all the variable names other than elements
+    // we use "this", $pageElements and loader context in evaluation, as all the variable names other than elements
     // are either in "this"(and supers) or in parent(ie loader) context,
 
     // init always to blank
-    childContext.$elements = {};
+    childContext.$pageElements = {};
     childContext.$ownerObject = null;
 
     return childContext;

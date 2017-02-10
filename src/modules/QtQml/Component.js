@@ -100,7 +100,8 @@ class QMLComponent {
           throw new Error("No component file");
         }
 
-      } else {
+      } else { // Nested !
+
         this.loaderComponent = loaderComponent;
         this.topComponent = this;
         this.$base = this;
@@ -109,6 +110,8 @@ class QMLComponent {
 
         this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent+" -> "+this, true);
         this.context.nestedLevel = this.nestedLevel;
+        // inherit page top $pageElements :
+        this.context.$pageElements = loaderComponent.context.$pageElements;
 
       }
 
@@ -174,7 +177,7 @@ class QMLComponent {
 
   }
 
-  copyMeta(meta) {
+  copyMeta(meta, flags) {
     var cons;
     this.meta = {component:this};
     if (meta.clazz) {
@@ -196,13 +199,22 @@ class QMLComponent {
     }
 
     if (cons === QMLComponent) {
-      var metaObject = this.meta.$children;
-      if (metaObject instanceof Array) {
-        if (metaObject.length !== 1) {
+      if (flags & QmlWeb.QMLComponentFlags.Flat) {
+        throw new Errror("Flat Component should be a sole QMLMetaElement : "+this);
+      }
+
+      var metachild = this.meta.$children;
+      if (metachild instanceof Array) {
+        if (metachild.length !== 1) {
           throw new Errror("Component should define 1 element : "+this.meta.$name+"("+this.meta.$class+") "+this.meta.id);
         }
-        QmlWeb.helpers.copy(this.meta, metaObject[0]);
+        metachild = metachild[0];
       }
+      if (!(metachild instanceof QMLMetaElement)) {
+        throw new Errror("Component's 'children' should be a sole QMLMetaElement : "+this);
+      }
+
+      QmlWeb.helpers.copy(this.meta, metachild);
     }
 
     this.$id = this.meta.id;
@@ -345,7 +357,7 @@ class QMLComponent {
       // !!! see QMLBinding
       // see QObject.constructor()
       this.context.$ownerObject = item;
-      item.$elements = this.context.$elements;
+      item.$pageElements = this.context.$pageElements;
       item.$info = this.context.$info;
 
 

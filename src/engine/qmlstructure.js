@@ -329,8 +329,8 @@ convertToEngine.walkers = {
       var ro = 0;
       switch (statement[0]) {
         case "qmldefaultprop":
-        item.$defaultProperty = name;
-        item[name] = val;
+        item.$defaultProperty = name[1];
+        item[name[1]] = val;
         break;
         case "qmlpropdefro":
         case "qmlaliasdefro":

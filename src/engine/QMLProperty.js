@@ -135,13 +135,16 @@ class QMLProperty {
         }
       } else if (val instanceof QmlWeb.QMLMetaElement) {
         // Root element or nested Component element ?
-        if (constructors[val.$class] === QMLComponent ||
-            constructors[this.type] === QMLComponent) {
-          // TODO gz , legacy code works here  ?? : val is usually a QMLMetaElement
+        if (constructors[val.$class] === QMLComponent) {
           this.val = QmlWeb.createComponent({
             clazz: val,
             $file: val.$file
-          }, QmlWeb.QMLComponentFlags.Nested);
+          }, QmlWeb.QMLComponentFlags.LazyOrFactory);
+        } else if (constructors[this.type] === QMLComponent) {
+          this.val = QmlWeb.createComponent({
+            clazz: val,
+            $file: val.$file
+          }, QmlWeb.QMLComponentFlags.LazyOrFactory|QmlWeb.QMLComponentFlags.Flat);
         } else {
           // NOTE gz : key entry point 2 of QmlWeb.construct
           // all the other ones just forward these

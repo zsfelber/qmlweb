@@ -283,9 +283,9 @@ class QMLBinding {
       // see QObject() QMLComponent.getAttachedObject()
 
       if (this.flags & QmlWeb.QMLBindingFlags.Alias) {
-        vvith = "var c=this.$context,o,lf; with(QmlWeb) with(c.loaderContext) with((lf=(o=c.$ownerObject).$leaf)!==o?lf.$noalias:{}) with(c.$elements) with(o.$noalias)";
+        vvith = "var c=this.$context,o,lf; with(QmlWeb) with(c.loaderContext) with((lf=(o=c.$ownerObject).$leaf)!==o?lf.$noalias:{}) with(c.$pageElements) with(o.$noalias)";
       } else {
-        vvith = "var c=this.$context,o,lf; with(QmlWeb) with(c.loaderContext) with((lf=(o=c.$ownerObject).$leaf)!==o?lf:{})          with(c.$elements) with(o)";
+        vvith = "var c=this.$context,o,lf; with(QmlWeb) with(c.loaderContext) with((lf=(o=c.$ownerObject).$leaf)!==o?lf:{})          with(c.$pageElements) with(o)";
       }
     }
     return vvith;
@@ -401,7 +401,7 @@ class QMLBinding {
               if (prop) {
                 prop.set($$__value, $$__flags | QmlWeb.QMLPropertyFlags.ThroughBinding, $$__declaringItem);
               } else {
-                if (obj.$context.$elements${fp}) {
+                if (obj.$context.$pageElements${fp}) {
                   throw new Error("Writable/Bidirectional binding write error : target property '${this.src} ${fp}' is an element, considered readonly.");
                 } else {
                   throw new Error("Writable/Bidirectional binding write error : target property '${this.src} ${fp}' not found, cannot write to null.");
@@ -422,7 +422,7 @@ class QMLBinding {
                   prop.set($$__value, $$__flags | QmlWeb.QMLPropertyFlags.ThroughBinding, $$__declaringItem);
                 }
               } else {
-                if (this.$context.$elements${fp}) {
+                if (this.$context.$pageElements${fp}) {
                   throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is an element, considered readonly.");
                 } else {
                   throw new Error("Writable/Bidirectional binding write error : target property '${fp}' not found, cannot write to null.");
@@ -443,7 +443,7 @@ class QMLBinding {
               prop.set($$__value, $$__flags | QmlWeb.QMLPropertyFlags.ThroughBinding, $$__declaringItem);
             }
           } else {
-            if (this.$context.$elements[fp]) {
+            if (this.$context.$pageElements[fp]) {
               throw new Error("Writable/Bidirectional binding write error : target property '"+fp+"' is an element, considered readonly.");
             } else {
               throw new Error("Writable/Bidirectional binding write error : target property '"+fp+"' not found, cannot write to null.");

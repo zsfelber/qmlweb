@@ -163,7 +163,7 @@ class ItemBase {
       }
 
       if (tbflags & QmlWeb.TBelements && that.$context && !(tbflags & QmlWeb._TBthiselems)) {
-        for (var thiselem in this.$context.$elements) {
+        for (var thiselem in this.$context.$pageElements) {
           var m = sr.exec(thiselem);
           var thatelem;
           if (m) {
@@ -172,8 +172,8 @@ class ItemBase {
             thatelem = thiselem;
           }
 
-          var thisval = this.$context.$elements[thiselem];
-          var thatval = that.$context.$elements[thatelem];
+          var thisval = this.$context.$pageElements[thiselem];
+          var thatval = that.$context.$pageElements[thatelem];
 
           inf = null;
           if (thisval === this || thatval === that) {
@@ -185,7 +185,7 @@ class ItemBase {
             inf["thisval:"+thisval] = thisval;
             inf["thatval:"+thatval] = thatval;
           } else {
-            // This flag serves to prevent duplications, all child elements are also in this.$context.$elements :
+            // This flag serves to prevent duplications, all child elements are also in this.$context.$pageElements :
             thisval.treeBindTo(thatval, tbflags | QmlWeb.TBtop | QmlWeb._TBthiselems, suffix, path, dump, dumplen);
           }
         }

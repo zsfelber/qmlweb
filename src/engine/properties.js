@@ -122,7 +122,7 @@ function createProperty(type, obj, propName, options) {
     // see also Component.constructor
     // see also QObject.createChild()->Object.create() in classes.construct
     // see also Object.create in QMLContext.createChild
-    // see also classes.construct where $context.$elements come from
+    // see also classes.construct where $context.$pageElements come from
 
     // current leaf nested element context (its own supertype hierarchy doesn't matter) :
     //

@@ -31,12 +31,14 @@ const QMLComponentFlags = {
   Root : 4,
   Element : 8,
   LoadImports : 16,
+  Flat : 32,
 
   Super_mnem : "S",
   Nested_mnem : "N",
   Root_mnem : "R",
   Element_mnem : "e",
   LoadImports_mnem : "i",
+  Flat_mnem : "_",
 
   toString: function(flags, mnem = true) {
     return humanize.call(QMLComponentFlags, flags, mnem);
