@@ -287,9 +287,9 @@ class QMLComponent {
     }
 
     if (this.$jsImports&&this.$jsImports.length ||
-        this.moduleConstructors&&Object.keys(this.moduleConstructors).length ||
-        this.ctxQmldirs&&Object.keys(this.ctxQmldirs).length ||
-        this.componentImportPaths&&Object.keys(this.componentImportPaths).length  ) {
+        this.moduleConstructors&&!this.moduleConstructors.isEmpty ||
+        this.ctxQmldirs&&!this.ctxQmldirs.isEmpty ||
+        this.componentImportPaths&&!this.componentImportPaths.isEmpty ) {
       console.warn("bindImports : imports already loaded, of : "+this+", now rebinding imports to another Component");
     }
 

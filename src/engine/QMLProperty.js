@@ -228,9 +228,21 @@ class QMLProperty {
       this.updateState = QmlWeb.QMLPropertyState.Valid;
 
     } catch (err) {
-      if (!err.ctType) {
-        parent.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
+
+      if (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate) {
+        // register (only) the root item to pending queue:
+        if (this.binding && this.evalTreeConnections.isEmpty) {
+          QmlWeb.engine.pendingOperations.push({
+             property:this,
+             info:"Pending property get/binding initialization : "+this
+             });
+        }
       }
+
+      if (!err.ctType) {
+        this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
+      }
+
       throw err;
     } finally {
 
@@ -288,23 +300,27 @@ class QMLProperty {
     // defer exceptions, because it is still correct to register current eval tree state :
     let error;
 
+    const invalidityFlags = this.updateState & QmlWeb.QMLPropertyState.InvalidityFlags;
+
     if (this.updateState & QmlWeb.QMLPropertyState.Updating) {
       // This get is not valid, so throwing PendingEvaluation.
       // However, not registering this to engine.pendingOperations, as
       // this property is being updated anyway, and we can trust that outside process
       // takes care of it
       error = new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}\n${this.stacksToString()}`, this);
-    } else if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) &&
-         (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate) ) {
-      try {
-        this.update();
-      } catch (err) {
-        error = err;
+    } else if (invalidityFlags) {
+      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
+        // not possible to update at init stage :
+        error = new QmlWeb.PendingEvaluation(`Init time, cannot update : Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
+      } else {
+        try {
+          this.update();
+        } catch (err) {
+          error = err;
+        }
       }
     }
 
-    // still invalid after update ?
-    const invalidityFlags = this.updateState & QmlWeb.QMLPropertyState.InvalidityFlags;
 
     // If this call to the getter is due to a property that is dependant on thisQMLPropertyState
     // one, we need it to take track of changes
@@ -342,16 +358,6 @@ class QMLProperty {
     }
 
     if (invalidityFlags) {
-
-      if ((invalidityFlags & QmlWeb.QMLPropertyState.NeedsUpdate) &&
-          (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
-        (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide))) {
-
-        QmlWeb.engine.pendingOperations.push({
-           property:this,
-           info:"Pending property get/binding initialization : "+this
-           });
-      }
 
       // This 'get' is directed to an unitialized property
       throw new QmlWeb.PendingEvaluation(`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);

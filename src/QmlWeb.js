@@ -17,6 +17,16 @@ if (typeof require !== 'undefined') {
   console.log("QmlWeb : require/UglifyJS was not found")
 }
 
+function isEmpty(obj) {
+    for (var x in obj) { if (obj.hasOwnProperty(x))  return false; }
+    return true;
+}
+var ie = {
+    get : function() {return isEmpty(this);},
+    enumerable:false
+};
+Object.prototype.defineProperty(this, "isEmpty", ie);
+
 
 const QmlWeb = {};
 
