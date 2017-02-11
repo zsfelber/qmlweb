@@ -443,12 +443,13 @@ class QMLProperty {
 
           if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
               (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
+            const opId = this.$propertyId + (this.updateState & QmlWeb.QMLPropertyFlags.Changed ? ":w" : ":r");
             // triggers update at Starting stage:
-            QmlWeb.engine.pendingOperations.push({
+            QmlWeb.engine.pendingOperations[opId] = {
                property:this,
-               info:"Pending property set/binding initialization : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
+               info:"Pending property : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
                flags, declaringItem
-               });
+               };
           }
 
         } else {
