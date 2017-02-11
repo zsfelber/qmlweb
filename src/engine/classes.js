@@ -54,7 +54,7 @@ function initMeta(self, meta, constructor) {
         } catch (err) {
           if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
                || ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
-            console.warn("Cannot create object property from module definition : "+self+" . "+name+"  opstate:"+
+            console.warn("Cannot create object property from module definition : "+self.$classname+"("+self.$objectId+") . "+name+"  opstate:"+
                          QmlWeb.QMLOperationState.toString(QmlWeb.engine.operationState));
           } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
             QmlWeb.engine.currentPendingOp.errors.push({loc:"initMeta", err});

@@ -111,11 +111,12 @@ function createProperty(type, obj, propName, options) {
     obj.$properties[propName] = prop;
     QmlWeb.setupGetterSetter(obj, propName, getter, setter, prop);
 
-    if (!obj.$noalias) {
-      throw new Error("Assertion failed : bad object, $noalias not defined.")
+    if (obj.$noalias) {
+      obj.$properties_noalias[propName] = prop;
+      QmlWeb.setupGetterSetter(obj.$noalias, propName, getter, setter, prop);
+    } else {
+      console.error("Invalid object : "+obj+"  $noalias missing.");
     }
-    obj.$properties_noalias[propName] = prop;
-    QmlWeb.setupGetterSetter(obj.$noalias, propName, getter, setter, prop);
   }
 
 

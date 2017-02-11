@@ -108,7 +108,7 @@ function humanize(flags, mnems) {
   var f = [];
   for (var field in this) {
     var val = this[field];
-    if (LogTwo[val]!==undefined && (val & flags)) {
+    if (typeof val==="number" && LogTwo[val]!==undefined && (val & flags)) {
       if (mnems) {
         var mnem = this[field+"_mnem"];
         f.push(mnem);

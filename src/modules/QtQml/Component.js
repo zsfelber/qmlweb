@@ -452,9 +452,6 @@ QmlWeb.registerQmlType({
     completed: [],
     destruction: []
   },
-  properties: {
-    status: { type:"enum", initialValue: QmlWeb.Component.Null}
-  },
   constructor: QMLComponent
 });
 
