@@ -425,7 +425,7 @@ class QMLComponent {
         this.completed();
         //console.log("Completed : "+this+" : "+item);
       } catch (err) {
-        if (err.ctType === "PendingEvaluation") {
+        if (err.ctType) {
           //console.warn("PendingEvaluation : Cannot call Component.completed : parent:"+parent+"  ctx:"+this.context);
         } else {
           throw err;

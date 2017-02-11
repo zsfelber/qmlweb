@@ -9,13 +9,6 @@ class PendingEvaluation extends Error {
   }
 }
 
-class UninitializedEvaluation extends Error {
-  constructor(...args) {
-    super(...args);
-    this.ctType = "UninitializedEvaluation";
-  }
-}
-
 function dumpEvalError(msg, err) {
   if (!err.ctType) {
     console.warn(msg);
@@ -234,15 +227,15 @@ class QMLProperty {
 
       this.updateState = QmlWeb.QMLPropertyState.Valid;
 
-    } catch (e) {
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
-        console.warn("QMLProperty.update binding error "+this.toString(true)+" "+QmlWeb.QMLPropertyFlags.toString(flags), e);
+    } catch (err) {
+      if (!err.ctType) {
+        parent.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
       }
-      if (this.updateState !== QmlWeb.QMLPropertyState.Valid) {
-        this.updateState = QmlWeb.QMLPropertyState.NeedsUpdate;
-      }
-      throw e;
+      throw err;
     } finally {
+
+      parent.updateState &= ~QmlWeb.QMLPropertyState.Updating;
+
       if (pushed) {
         QMLProperty.popEvaluatingProperty();
       }
@@ -291,29 +284,29 @@ class QMLProperty {
 
   // Define getter
   get() {
+
+    // defer exceptions, because it is still correct to register current eval tree state :
+    let error;
+
     if (this.updateState & QmlWeb.QMLPropertyState.Updating) {
       // This get is not valid, so throwing PendingEvaluation.
       // However, not registering this to engine.pendingOperations, as
       // this property is being updated anyway, and we can trust that outside process
       // takes care of it
-      throw new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}\n${this.stacksToString()}`, this);
-    }
-
-    let childEvalError, anotherError;
-    if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) &&
+      error = new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}\n${this.stacksToString()}`, this);
+    } else if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) &&
          (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate) ) {
       try {
         this.update();
       } catch (err) {
-        if (err.ctType==="UninitializedEvaluation" || err.ctType==="PendingEvaluation") {
-          childEvalError = err;
-        } else {
-          anotherError = err;
-        }
+        error = err;
       }
     }
 
-    // If this call to the getter is due to a property that is dependant on this
+    // still invalid after update ?
+    const invalidityFlags = this.updateState & QmlWeb.QMLPropertyState.InvalidityFlags;
+
+    // If this call to the getter is due to a property that is dependant on thisQMLPropertyState
     // one, we need it to take track of changes
 
     QMLProperty.evaluatingProperties.stack.forEach(function (parent) {
@@ -334,44 +327,40 @@ class QMLProperty {
         parent.evalTreeConnections[this.$propertyId] = con;
         con.signalOwner = this;
         this.childEvalTreeConnections++;
+
+        // if 'parent' property depends on unitilazed/pending properties (just checking 'this'), 'parent' is considered
+        // uninitialized/pending, too.
+        // No need to double - register 'parent' property in pending queue because its dependency ('this') has already been marked :
+        // its 'evalTreeConnections' automatically triggers 'parent' property update :
+        parent.updateState |= invalidityFlags;
       }
     }, this);
 
-    // if this property depends on unitilazed/pending properties, this one is considered uninitialized/pending, too
-    // No need to double - register this property in eval queue because its dependency has already been done so :
-    // its 'evalTreeConnections' automatically triggers this property when just neeeded:
-    if (childEvalError) {
-      this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
-      throw childEvalError;
-    } else if (anotherError) {
-      throw anotherError;
+    // now, we forward exceptions:
+    if (error) {
+      throw error;
     }
 
-    if (this.updateState & QmlWeb.QMLPropertyState.Uninitialized) {
-      // This 'get' is directed to an unitialized property : all dependent properties will be uninitilazed, too
-      // no need to register as pending property or print out the error :
-      this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
-      throw new QmlWeb.UninitializedEvaluation();
-    }
+    if (invalidityFlags) {
 
-    if (this.val && this.val.$get) {
-      return this.val.$get();
-    }
-
-    if (this.binding && (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate)) {
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init))
-        throw new Error("Assertion failed: "+QmlWeb.engine.operationState);
-
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
-        (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
+      if ((invalidityFlags & QmlWeb.QMLPropertyState.NeedsUpdate) &&
+          (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
+        (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide))) {
 
         QmlWeb.engine.pendingOperations.push({
            property:this,
            info:"Pending property get/binding initialization : "+this
            });
       }
-      throw new QmlWeb.PendingEvaluation(`Binding not yet initialized.`, this);
+
+      // This 'get' is directed to an unitialized property
+      throw new QmlWeb.PendingEvaluation(`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
     }
+
+    if (this.val && this.val.$get) {
+      return this.val.$get();
+    }
+
 
     return this.val;
   }
@@ -383,32 +372,31 @@ class QMLProperty {
       throw new Error(`property '${this.name}' has read only access`);
     }
 
-    const oldVal = this.val;
+    let oldVal = this.val;
+    let needSend = !(this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
 
-    if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
-      if (newVal === undefined) {
-        if (QMLProperty.typeInitialValues.hasOwnProperty(this.type)) {
-          newVal = QMLProperty.typeInitialValues[this.type];
-        }
+    if (newVal === undefined) {
+      if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
+        newVal = QMLProperty.typeInitialValues[this.type];
       }
-    } else if (newVal !== undefined) {
-      this.updateState &= ~QmlWeb.QMLPropertyState.Uninitialized;
+      this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
+    } else {
+      this.updateState &= ~QmlWeb.QMLPropertyState.DirtyAll;
     }
 
 
     if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
+      oldVal = this.binding;
       this.binding = newVal;
-      this.updateState &= ~(QmlWeb.QMLPropertyState.Dirty|QmlWeb.QMLPropertyState.Uninitialized);
       this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
 
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
+      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
+        needSend = (newVal !== oldVal);
+      } else {
         this.update(flags);
+        needSend = false;
       }
     } else {
-      this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
-      if (this.pendingInit) {
-        this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
-      }
 
       if (newVal instanceof Array) {
         newVal = newVal.slice(); // Copies the array
@@ -429,10 +417,11 @@ class QMLProperty {
 
       this.$setVal(newVal, flags, declaringItem);
 
+      needSend |= (newVal !== oldVal);
       flags |= QmlWeb.QMLPropertyFlags.Changed;
     }
 
-    if (!(this.updateState & QmlWeb.QMLPropertyState.Uninitialized) && newVal !== oldVal) {
+    if (needSend) {
 
       if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
 
@@ -571,6 +560,5 @@ QMLProperty.typeInitialValues = {
 
 QmlWeb.QMLProperty = QMLProperty;
 QmlWeb.PendingEvaluation = PendingEvaluation;
-QmlWeb.UninitializedEvaluation = UninitializedEvaluation;
 QmlWeb.dumpEvalError = dumpEvalError;
 QmlWeb.objToStringSafe = objToStringSafe;
