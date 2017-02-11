@@ -4,9 +4,9 @@ QmlWeb.engine = null;
 
 QmlWeb.useShadowDom = true;
 
-const geometryProperties = [
-  "width", "height", "fill", "x", "y", "left", "right", "top", "bottom"
-];
+const geometryProperties = {
+  "width":1, "height":1, "fill":1, "x":1, "y":1, "left":1, "right":1, "top":1, "bottom":1
+};
 
 
 // QML engine. EXPORTED.
@@ -367,7 +367,7 @@ class QMLEngine {
 
     console.log("processPendingOperations : "+this.pendingOperations.length);
 
-    var i=0,a=0,a01=0,a02=0,a1=0,a2=0,a3=0,b=0,e=0;
+    var i=0,a=0,a0=0,a1=0,a2=0,a3=0,b=0,e=0;
     let info = {}, errors = {};
     while (this.pendingOperations.length > 0) {
       const op = this.pendingOperations.shift();
@@ -380,20 +380,15 @@ class QMLEngine {
       try {
         if (property) {
           a++;
-          if (!property.binding) {
-            // Probably, the binding was overwritten by an explicit value. Ignore.
-            a01++;
-            //console.log("Property binding has been removed : "+property);
-            mode=":a01";
-          } else if (property.updateState & QmlWeb.QMLPropertyFlags.StateUpdating) {
+          if (property.updateState & QmlWeb.QMLPropertyFlags.StateUpdating) {
             a1++;
             mode=":a1";
-            console.error("Property state is invalid : update has not finished : "+property);
+            op.errors.push("Property state is invalid : update has not finished : "+property);
           } else if (property.updateState & QmlWeb.QMLPropertyFlags.StateNeedsUpdate) {
             a2++;
             mode=":a2";
             property.update(op.flags, op.declaringItem);
-          } else if (geometryProperties.indexOf(property.name) >= 0) {
+          } else if (geometryProperties[property.name]) {
             a3++;
             mode=":a3";
             // It is possible that bindings with these names was already evaluated
@@ -410,8 +405,8 @@ class QMLEngine {
               obj.$updateVGeometry(property.val, property.val, property.name);
             }
           } else {
-            mode=":a02";
-            a02++;
+            mode=":a0";
+            a0++;
           }
         } else {
           b++;
@@ -438,7 +433,7 @@ class QMLEngine {
       i++;
     }
 
-    console.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a01+","+a02+":"+a1+","+a2+","+a3)+") functions:"+b+" errors:"+e, "Info:",info, "Errors:",errors);
+    console.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a0+":"+a1+","+a2+","+a3)+") functions:"+b+" errors:"+e, "Info:",info, "Errors:",errors);
   }
 
   static dumpErr() {
