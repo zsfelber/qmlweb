@@ -42,7 +42,7 @@ class QMLEngine {
     // List of properties whose values are bindings. For internal use only.
     // +
     // List of operations to perform later after init. For internal use only.
-    this.pendingOperations = [];
+    this.pendingOperations = {stack:[], map:{}};
 
     // Root object of the engine
     this.rootObject = null;
@@ -360,78 +360,77 @@ class QMLEngine {
 
     console.log("processPendingOperations : "+this.pendingOperations.length);
 
-    var i=0,a=0,a0=0,a1=0,a2=0,a3=0,b=0,e=0;
+    var i=0,a=0,a1=0,a2=0,a3=0,b=0,e=0;
     let info = {}, errors = {};
-    while (!QmlWeb.isEmpty(this.pendingOperations)) {
-      for (var name in this.pendingOperations) {
-        const op = this.pendingOperations[name];
-        delete this.pendingOperations[name];
-        op.errors = [];
-        this.currentPendingOp = op;
+    while (this.pendingOperations.stack.length > 0) {
+      const op = this.pendingOperations.stack.shift();
+      op.errors = [];
+      this.currentPendingOp = op;
+      let mode="";
+      if (op.opId) {
+        mode=":"+op.opId;
+        delete this.pendingOperations.map[op.opId];
+      }
 
-        const property = op.property;
+      const property = op.property;
 
-        let mode="";
-        try {
-          if (property) {
-            a++;
-            if (property.updateState & QmlWeb.QMLPropertyState.Updating) {
-              a1++;
-              mode=":a1";
-              op.errors.push("Property state is invalid : update has not finished : "+property);
+      try {
+        if (property) {
+          a++;
+          if (property.updateState & QmlWeb.QMLPropertyState.Updating) {
+            a1++;
+            mode+=":a1";
+            op.errors.push("Property state is invalid : update has not finished : "+property);
+          } else {
+            property.update(op.flags, op.declaringItem, op.value);
+
+            if (geometryProperties[property.name]) {
+              a3++;
+              mode+=":a3";
+              // It is possible that bindings with these names was already evaluated
+              // during eval of other bindings but in that case $updateHGeometry and
+              // $updateVGeometry could be blocked during their eval.
+              // So we call them explicitly, just in case.
+              const { obj, changed } = property;
+              if (obj.$updateHGeometry &&
+                  changed.isConnected(obj, obj.$updateHGeometry)) {
+                obj.$updateHGeometry(property.val, property.val, property.name);
+              }
+              if (obj.$updateVGeometry &&
+                  changed.isConnected(obj, obj.$updateVGeometry)) {
+                obj.$updateVGeometry(property.val, property.val, property.name);
+              }
             } else {
               a2++;
-              mode=":a2";
-              property.update(op.flags, op.declaringItem);
-
-              if (geometryProperties[property.name]) {
-                a3++;
-                mode=":a3";
-                // It is possible that bindings with these names was already evaluated
-                // during eval of other bindings but in that case $updateHGeometry and
-                // $updateVGeometry could be blocked during their eval.
-                // So we call them explicitly, just in case.
-                const { obj, changed } = property;
-                if (obj.$updateHGeometry &&
-                    changed.isConnected(obj, obj.$updateHGeometry)) {
-                  obj.$updateHGeometry(property.val, property.val, property.name);
-                }
-                if (obj.$updateVGeometry &&
-                    changed.isConnected(obj, obj.$updateVGeometry)) {
-                  obj.$updateVGeometry(property.val, property.val, property.name);
-                }
-              } else {
-                mode=":a0";
-                a0++;
-              }
+              mode+=":a2";
             }
-          } else {
-            b++;
-            mode=":b";
-            op.fun.apply(op.thisObj, op.args);
           }
-
-          if (op.errors.length==1) {
-            e++;
-            errors["#ERR:#"+i+":"+name+mode+":"+op.info+":"+op.errors[0].err.message] = op;
-          } else if (op.errors.length) {
-            e++;
-            errors["#ERR:#"+i+":"+name+mode+":"+op.info+":"+op.errors.length+" errors"] = op;
-          } else {
-            info["#"+i+":"+name+mode+":"+op.info] = op;
-          }
-
-        } catch (err) {
-          e++;
-          errors["#ERR:#"+i+":"+name+mode+":"+op.info+":"+err.message] = op;
-          op.dumpErr = QMLEngine.dumpErr.bind(err);
+        } else {
+          b++;
+          mode+=":b";
+          op.fun.apply(op.thisObj, op.args);
         }
 
-        i++;
+        if (op.errors.length==1) {
+          e++;
+          errors["#ERR:#"+i+mode+":"+op.info+":"+op.errors[0].err.message] = op;
+        } else if (op.errors.length) {
+          e++;
+          errors["#ERR:#"+i+mode+":"+op.info+":"+op.errors.length+" errors"] = op;
+        } else {
+          info["#"+i+mode+":"+op.info] = op;
+        }
+
+      } catch (err) {
+        e++;
+        errors["#ERR:#"+i+mode+":"+op.info+":"+err.message] = op;
+        op.dumpErr = QMLEngine.dumpErr.bind(err);
       }
+
+      i++;
     }
 
-    console.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a0+":"+a1+","+a2+","+a3)+") functions:"+b+" errors:"+e, "Info:",info, "Errors:",errors);
+    console.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+a3)+") functions:"+b+" errors:"+e, "Info:",info, "Errors:",errors);
   }
 
   static dumpErr() {

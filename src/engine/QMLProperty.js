@@ -59,6 +59,9 @@ function objToStringSafe(obj, detail) {
   return os;
 }
 
+function e(msg) {
+  throw new Error(msg);
+}
 
 class QMLProperty {
   constructor(type, obj, name, options) {
@@ -193,11 +196,14 @@ class QMLProperty {
     }
   }
 
+
   // Updater recalculates the value of a property if one of the dependencies
   // changed
-  update(flags, declaringItem) {
+  update(flags, declaringItem, value) {
 
-    this.updateState = QmlWeb.QMLPropertyState.Updating;
+    const origState = this.updateState;
+    this.updateState &= ~QmlWeb.QMLPropertyState.DirtyUninit;
+    this.updateState |= QmlWeb.QMLPropertyState.Updating;
 
     const oldVal = this.val;
 
@@ -222,7 +228,7 @@ class QMLProperty {
 
         if (flags & QMLPropertyFlags.Changed) {
           // binding/set
-          this.binding.set(this.obj, this.val, flags, declaringItem);
+          this.binding.set(this.obj, value, flags, declaringItem);
         } else {
           // binding/get
           pushed = QMLProperty.pushEvaluatingProperty(this);
@@ -237,10 +243,14 @@ class QMLProperty {
 
     } catch (err) {
 
-      if (!err.ctType) {
-        // default back-infection invalidity flag (when err.ctType==true:
-        // PendingEval uses custom logic in get() implementation) :
-        this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
+      if (err.ctType) {
+        if (flags & QMLPropertyFlags.Changed) {
+          throw new Error("Assertion failed : "+QMLPropertyFlags.toString(flags));
+        }
+      } else {
+        // when err.ctType==true:
+        // PendingEval uses custom logic in get() implementation :
+        this.updateState = origState;
       }
 
       throw err;
@@ -262,7 +272,9 @@ class QMLProperty {
       }
     }
 
-    if (this.val !== oldVal || (flags & QMLPropertyFlags.Changed)) {
+
+    if (this.binding ? (flags & QMLPropertyFlags.Changed ? false : this.val !== oldVal) :
+                       (flags & QMLPropertyFlags.Changed ? true : e("Assertion failed: don't call update()/read/non-bound"))  ) {
       this.sendChanged(oldVal);
     }
   }
@@ -424,7 +436,7 @@ class QMLProperty {
             needSend = (newVal !== oldVal);
           } else {
             // with Changed flag = set/binding mode
-            this.update(flags);
+            this.update(flags, undefined, newVal);
             needSend = false;
           }
         } else {
@@ -439,17 +451,19 @@ class QMLProperty {
 
         if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
 
-          this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
-
           if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
               (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
-            const opId = this.$propertyId + (this.updateState & QmlWeb.QMLPropertyFlags.Changed ? ":w" : ":r");
-            // triggers update at Starting stage:
-            QmlWeb.engine.pendingOperations[opId] = {
-               property:this,
-               info:"Pending property : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
-               flags, declaringItem
-               };
+            const opId = this.$propertyId+(flags&QmlWeb.QMLPropertyFlags.Changed?":w":":r");
+            if (!QmlWeb.engine.pendingOperations.map[opId]) {
+              const itm = {
+                property:this,
+                info:"Pending property : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
+                opId, flags, declaringItem, value:newVal
+                };
+              QmlWeb.engine.pendingOperations.map[opId] = itm;
+              // triggers update at Starting stage:
+              QmlWeb.engine.pendingOperations.stack.push(itm);
+            }
           }
 
         } else {
