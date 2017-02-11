@@ -188,6 +188,18 @@ class QMLProperty {
     this.animation.running = true;
   }
 
+  function sendChanged(oldVal) {
+    if (this.animation) {
+      this.resetAnimation(oldVal);
+    }
+    this.changed(this.val, oldVal, this.name);
+
+    // TODO gz   $syncPropertyToRemote !!!!!!!!!!!!
+    if (this.$rootComponent.webSocket) {
+      QmlWeb.$syncPropertyToRemote(this.$rootComponent, this);
+    }
+  }
+
   // Updater recalculates the value of a property if one of the dependencies
   // changed
   update(flags, declaringItem) {
@@ -199,33 +211,28 @@ class QMLProperty {
     var pushed;
     try {
 
-      if (!this.binding) {
-        this.updateState = QmlWeb.QMLPropertyState.Valid;
-        this.obsoleteConnections = this.evalTreeConnections;
-        this.evalTreeConnections = {};
-        return;
-      }
-
-      pushed = QMLProperty.pushEvaluatingProperty(this);
-
-      if (this.binding instanceof QmlWeb.QtBindingDefinition) {
-        this.binding = Qt.binding(this.binding.get, this.binding.set, this.binding.flags);
-      }
-
-      if (!this.binding.compiled) {
-        this.binding.compile();
-      }
-
       this.obsoleteConnections = this.evalTreeConnections;
       // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
       this.evalTreeConnections = {};
 
-      var val = this.binding.get(this.obj);
+      if (this.binding) {
+        pushed = QMLProperty.pushEvaluatingProperty(this);
 
-      this.$setVal(val, flags, declaringItem);
+        if (this.binding instanceof QmlWeb.QtBindingDefinition) {
+          this.binding = Qt.binding(this.binding.get, this.binding.set, this.binding.flags);
+        }
+
+        if (!this.binding.compiled) {
+          this.binding.compile();
+        }
+
+        var val = this.binding.get(this.obj);
+
+        this.$setVal(val, flags, declaringItem);
+
+      }
 
       this.updateState = QmlWeb.QMLPropertyState.Valid;
-
 
     } catch (e) {
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
@@ -249,11 +256,8 @@ class QMLProperty {
       }
     }
 
-    if (this.val !== oldVal) {
-      if (this.animation) {
-        this.resetAnimation(oldVal);
-      }
-      this.changed(this.val, oldVal, this.name);
+    if (this.val !== oldVal || (flags & QMLPropertyFlags.Changed)) {
+      sendChanged(oldVal);
     }
   }
 
@@ -380,32 +384,24 @@ class QMLProperty {
     }
 
     const oldVal = this.val;
-    let val = newVal;
 
-    const wasuninit = (this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
-
-    if (val !== undefined) {
+    if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
+      if (newVal === undefined) {
+        if (QMLProperty.typeInitialValues.hasOwnProperty(this.type)) {
+          newVal = QMLProperty.typeInitialValues[this.type];
+        }
+      }
+    } else if (newVal !== undefined) {
       this.updateState &= ~QmlWeb.QMLPropertyState.Uninitialized;
     }
 
 
-    if (val instanceof QmlWeb.QMLBinding || val instanceof QmlWeb.QtBindingDefinition) {
-      this.binding = val;
-      this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
+    if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
+      this.binding = newVal;
+      this.updateState &= ~(QmlWeb.QMLPropertyState.Dirty|QmlWeb.QMLPropertyState.Uninitialized);
       this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
 
-      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
-        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
-            (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
-          QmlWeb.engine.pendingOperations.push({
-             property:this,
-             info:"Pending property set/binding initialization : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
-             flags, declaringItem
-             });
-        }
-        //console.warn("PendingEvaluation : Pending property set/binding :" + this.name + "  obj:" + this.obj);
-        return;
-      } else {
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
         this.update(flags);
       }
     } else {
@@ -414,8 +410,8 @@ class QMLProperty {
         this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
       }
 
-      if (val instanceof Array) {
-        val = val.slice(); // Copies the array
+      if (newVal instanceof Array) {
+        newVal = newVal.slice(); // Copies the array
       }
 
       if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
@@ -431,23 +427,30 @@ class QMLProperty {
         this.binding = null;
       }
 
-      this.$setVal(val, flags, declaringItem);
+      this.$setVal(newVal, flags, declaringItem);
+
+      flags |= QmlWeb.QMLPropertyFlags.Changed;
     }
 
-    if (this.val !== oldVal) {
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) || !wasuninit) {
+    if (!(this.updateState & QmlWeb.QMLPropertyState.Uninitialized) && newVal !== oldVal) {
+
+      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
+
+        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
+            (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
+          QmlWeb.engine.pendingOperations.push({
+             property:this,
+             info:"Pending property set/binding initialization : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
+             flags, declaringItem
+             });
+        }
+
+      } else {
+
         if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
           this.changed(this.val, oldVal, this.name);
         } else {
-          if (this.animation) {
-            this.resetAnimation(oldVal);
-          }
-          this.changed(this.val, oldVal, this.name);
-
-          // TODO gz   $syncPropertyToRemote !!!!!!!!!!!!
-          if (this.$rootComponent.webSocket) {
-            QmlWeb.$syncPropertyToRemote(this.$rootComponent, this);
-          }
+          sendChanged(oldVal);
         }
       }
     }

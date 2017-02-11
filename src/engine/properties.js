@@ -59,11 +59,8 @@ function createProperty(type, obj, propName, options) {
 
     if (options.initialValue !== undefined) {
       prop.set(options.initialValue, flags);
-    } else if (QMLProperty.typeInitialValues.hasOwnProperty(type)) {
-      val = QMLProperty.typeInitialValues[type];
-      if (val !== undefined) {
-        prop.set(val, flags);
-      }
+    } else {
+      prop.set(undefined, flags);
     }
   }
 
@@ -102,6 +99,7 @@ function createProperty(type, obj, propName, options) {
     var binding = new QMLBinding(p, proplast, QMLBindingFlags.ImplExpression|QMLBindingFlags.Alias);
     prop.set(binding, QMLPropertyFlags.ReasonInitPrivileged);
 
+    // NOTE alias + initialValue works too
     _set_prop(propName, prop, QMLPropertyFlags.ReasonInit);
 
     obj.$properties[propName] = prop;
@@ -113,10 +111,11 @@ function createProperty(type, obj, propName, options) {
     obj.$properties[propName] = prop;
     QmlWeb.setupGetterSetter(obj, propName, getter, setter, prop);
 
-    if (obj.$noalias) {
-      obj.$properties_noalias[propName] = prop;
-      QmlWeb.setupGetterSetter(obj.$noalias, propName, getter, setter, prop);
+    if (!obj.$noalias) {
+      throw new Error("Assertion failed : bad object, $noalias not defined.")
     }
+    obj.$properties_noalias[propName] = prop;
+    QmlWeb.setupGetterSetter(obj.$noalias, propName, getter, setter, prop);
   }
 
 
@@ -269,7 +268,7 @@ function applyProperty(item, i, value) {
   }
 
   if (item.$properties && i in item.$properties) {
-    item.$properties[i].set(value, QMLPropertyFlags.ReasonInitPrivileged);
+    item.$properties[i].set(value, QMLPropertyFlags.Privileged);
     return true;
   } else if (i in item) {
     item[i] = value;
