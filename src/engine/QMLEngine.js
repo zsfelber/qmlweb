@@ -367,7 +367,7 @@ class QMLEngine {
 
     console.log("processPendingOperations : "+this.pendingOperations.length);
 
-    var i=0,a01=0,a02=0,a1=0,a2=0,a3=0,b=0,e=0;
+    var i=0,a=0,a01=0,a02=0,a1=0,a2=0,a3=0,b=0,e=0;
     let info = {}, errors = {};
     while (this.pendingOperations.length > 0) {
       const op = this.pendingOperations.shift();
