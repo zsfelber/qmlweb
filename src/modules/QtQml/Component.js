@@ -408,7 +408,7 @@ class QMLComponent {
     if (this.$id) name += ":"+this.$id;
     var c = QmlWeb.QMLComponentFlags.toString(this.flags);
 
-    return c+"["+name+(this.nestedLevel?" l"+this.nestedLevel:"")+(raw?"":" "+QmlWeb.Component.toString(this.status))+"]";
+    return c+"["+name+(this.nestedLevel?" l"+this.nestedLevel:"")+(raw?"":" "+QmlWeb.Component.toString(this.$properties.status.val))+"]";
   }
 
   static complete() {

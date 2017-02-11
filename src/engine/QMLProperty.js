@@ -263,7 +263,7 @@ class QMLProperty {
     }
 
     if (this.val !== oldVal || (flags & QMLPropertyFlags.Changed)) {
-      sendChanged(oldVal);
+      this.sendChanged(oldVal);
     }
   }
 
@@ -398,7 +398,6 @@ class QMLProperty {
       if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
         oldVal = this.binding;
         this.binding = newVal;
-        this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
 
         if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
           needSend = (newVal !== oldVal);
@@ -440,6 +439,8 @@ class QMLProperty {
 
         if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
 
+          this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
+
           if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
               (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
             // triggers update at Starting stage:
@@ -455,7 +456,7 @@ class QMLProperty {
           if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
             this.changed(this.val, oldVal, this.name);
           } else {
-            sendChanged(oldVal);
+            this.sendChanged(oldVal);
           }
         }
       }

@@ -380,11 +380,11 @@ class QMLEngine {
       try {
         if (property) {
           a++;
-          if (property.updateState & QmlWeb.QMLPropertyFlags.StateUpdating) {
+          if (property.updateState & QmlWeb.QMLPropertyState.Updating) {
             a1++;
             mode=":a1";
             op.errors.push("Property state is invalid : update has not finished : "+property);
-          } else if (property.updateState & QmlWeb.QMLPropertyFlags.StateNeedsUpdate) {
+          } else if (property.updateState & QmlWeb.QMLPropertyState.NeedsUpdate) {
             a2++;
             mode=":a2";
             property.update(op.flags, op.declaringItem);
