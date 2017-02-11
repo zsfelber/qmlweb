@@ -260,7 +260,7 @@ function applyProperty(item, i, value) {
     } else if (value instanceof QmlWeb.QMLPropertyDefinition) {
       createProperty(value.type, item, i, {readOnly:value.readonly, initialValue:value.value});
       return true;
-    } else if (item[i] && value instanceof QmlWeb.QMLMetaPropertyGroup) {
+    } else if (item.hasOwnProperty(i) && value instanceof QmlWeb.QMLMetaPropertyGroup) {
       // Apply properties one by one, otherwise apply at once
       applyProperties(value, item[i]);
       return true;
