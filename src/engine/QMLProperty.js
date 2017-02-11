@@ -303,15 +303,11 @@ class QMLProperty {
     const invalidityFlags = this.updateState & QmlWeb.QMLPropertyState.InvalidityFlags;
 
     if (this.updateState & QmlWeb.QMLPropertyState.Updating) {
-      // This get is not valid, so throwing PendingEvaluation.
-      // However, not registering this to engine.pendingOperations, as
-      // this property is being updated anyway, and we can trust that outside process
-      // takes care of it
       error = new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}\n${this.stacksToString()}`, this);
     } else if (invalidityFlags) {
       if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
         // not possible to update at init stage :
-        error = new QmlWeb.PendingEvaluation(`Init time, cannot update : Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
+        throw new Error(`Init time, cannot update : Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
       } else {
         try {
           this.update();
@@ -373,81 +369,90 @@ class QMLProperty {
 
   // Define setter
   set(newVal, flags, declaringItem) {
-    flags = flags || QmlWeb.QMLPropertyFlags.ReasonUser;
-    if (this.readOnly && !(flags & QmlWeb.QMLPropertyFlags.Privileged)) {
-      throw new Error(`property '${this.name}' has read only access`);
-    }
 
-    let oldVal = this.val;
-    let needSend = !(this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
+    QmlWeb.QMLProperty.pushEvalStack();
 
-    if (newVal === undefined) {
-      if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
-        newVal = QMLProperty.typeInitialValues[this.type];
-      }
-      this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
-    } else {
-      this.updateState &= ~QmlWeb.QMLPropertyState.DirtyAll;
-    }
+    try {
 
-
-    if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
-      oldVal = this.binding;
-      this.binding = newVal;
-      this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
-
-      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
-        needSend = (newVal !== oldVal);
-      } else {
-        this.update(flags);
-        needSend = false;
-      }
-    } else {
-
-      if (newVal instanceof Array) {
-        newVal = newVal.slice(); // Copies the array
+      flags = flags || QmlWeb.QMLPropertyFlags.ReasonUser;
+      if (this.readOnly && !(flags & QmlWeb.QMLPropertyFlags.Privileged)) {
+        throw new Error(`property '${this.name}' has read only access`);
       }
 
-      if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
-        if (flags & QmlWeb.QMLPropertyFlags.RemoveBidirectionalBinding) {
-          this.binding = null;
-        } else {
-          if (!this.binding.compiled) {
-            this.binding.compile();
-          }
-          this.binding.set(this.obj, newVal, flags, declaringItem);
-        }
-      } else if (!(flags & QmlWeb.QMLPropertyFlags.ReasonAnimation)) {
-        this.binding = null;
-      }
+      let oldVal = this.val;
+      let needSend = !(this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
 
-      this.$setVal(newVal, flags, declaringItem);
-
-      needSend |= (newVal !== oldVal);
-      flags |= QmlWeb.QMLPropertyFlags.Changed;
-    }
-
-    if (needSend) {
-
-      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
-
-        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
-            (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
-          QmlWeb.engine.pendingOperations.push({
-             property:this,
-             info:"Pending property set/binding initialization : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
-             flags, declaringItem
-             });
-        }
-
-      } else {
-
+      if (newVal === undefined) {
         if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
-          this.changed(this.val, oldVal, this.name);
+          newVal = QMLProperty.typeInitialValues[this.type];
+        }
+        this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
+      } else {
+        this.updateState &= ~QmlWeb.QMLPropertyState.DirtyAll;
+      }
+
+
+      if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
+        oldVal = this.binding;
+        this.binding = newVal;
+        this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
+
+        if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
+          needSend = (newVal !== oldVal);
         } else {
-          sendChanged(oldVal);
+          this.update(flags);
+          needSend = false;
+        }
+      } else {
+
+        if (newVal instanceof Array) {
+          newVal = newVal.slice(); // Copies the array
+        }
+
+        if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
+          if (flags & QmlWeb.QMLPropertyFlags.RemoveBidirectionalBinding) {
+            this.binding = null;
+          } else {
+            if (!this.binding.compiled) {
+              this.binding.compile();
+            }
+            this.binding.set(this.obj, newVal, flags, declaringItem);
+          }
+        } else if (!(flags & QmlWeb.QMLPropertyFlags.ReasonAnimation)) {
+          this.binding = null;
+        }
+
+        this.$setVal(newVal, flags, declaringItem);
+
+        needSend |= (newVal !== oldVal);
+        flags |= QmlWeb.QMLPropertyFlags.Changed;
+      }
+
+      if (needSend) {
+
+        if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
+
+          if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
+              (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
+            QmlWeb.engine.pendingOperations.push({
+               property:this,
+               info:"Pending property set/binding initialization : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
+               flags, declaringItem
+               });
+          }
+
+        } else {
+
+          if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
+            this.changed(this.val, oldVal, this.name);
+          } else {
+            sendChanged(oldVal);
+          }
         }
       }
+
+    } finally {
+      QmlWeb.QMLProperty.popEvalStack();
     }
   }
 
