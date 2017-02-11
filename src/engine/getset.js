@@ -28,6 +28,7 @@ function setupGetterSetter(obj, propName, getter, setter, owner, enumerable=fals
   });
 }
 
+
 QmlWeb.setupGetter = setupGetter;
 QmlWeb.setupSetter = setupSetter;
 QmlWeb.setupGetterSetter = setupGetterSetter;
