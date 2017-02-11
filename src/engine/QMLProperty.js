@@ -181,7 +181,7 @@ class QMLProperty {
     this.animation.running = true;
   }
 
-  function sendChanged(oldVal) {
+  sendChanged(oldVal) {
     if (this.animation) {
       this.resetAnimation(oldVal);
     }
@@ -238,6 +238,8 @@ class QMLProperty {
     } catch (err) {
 
       if (!err.ctType) {
+        // default back-infection invalidity flag (when err.ctType==true:
+        // PendingEval uses custom logic in get() implementation) :
         this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
       }
 
@@ -299,7 +301,8 @@ class QMLProperty {
     // defer exceptions, because it is still correct to register current eval tree state :
     let error;
 
-    const invalidityFlags = this.updateState & QmlWeb.QMLPropertyState.InvalidityFlags;
+    // Algo back-infects the dependent (eval tree 'parent') properties with 'this' invalidity :
+    let invalidityFlags = this.updateState & QmlWeb.QMLPropertyState.InvalidityFlags;
 
     if (this.updateState & QmlWeb.QMLPropertyState.Updating) {
       error = new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}\n${this.stacksToString()}`, this);
@@ -310,6 +313,7 @@ class QMLProperty {
       } else {
         try {
           this.update();
+          invalidityFlags = 0;
         } catch (err) {
           error = err;
         }

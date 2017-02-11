@@ -70,7 +70,7 @@ const QMLPropertyFlags = {
   RemoveBidirectionalBinding : 8,
   SetChildren : 16,
   ThroughBinding : 32,
-  Changed : 64
+  Changed : 64,
 
   toString: function(flags) {
     return humanize.call(QMLPropertyFlags, flags);
