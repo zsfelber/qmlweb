@@ -204,12 +204,13 @@ class QMLProperty {
     var pushed;
     try {
 
-      this.obsoleteConnections = this.evalTreeConnections;
-      // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
-      this.evalTreeConnections = {};
+      if (!this.binding || !(flags & QMLPropertyFlags.Changed))  {
+        this.obsoleteConnections = this.evalTreeConnections;
+        // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
+        this.evalTreeConnections = {};
+      }
 
       if (this.binding) {
-        pushed = QMLProperty.pushEvaluatingProperty(this);
 
         if (this.binding instanceof QmlWeb.QtBindingDefinition) {
           this.binding = Qt.binding(this.binding.get, this.binding.set, this.binding.flags);
@@ -219,31 +220,29 @@ class QMLProperty {
           this.binding.compile();
         }
 
-        var val = this.binding.get(this.obj);
+        if (flags & QMLPropertyFlags.Changed) {
+          // binding/set
+          this.binding.set(this.obj, this.val, flags, declaringItem);
+        } else {
+          // binding/get
+          pushed = QMLProperty.pushEvaluatingProperty(this);
 
-        this.$setVal(val, flags, declaringItem);
+          var val = this.binding.get(this.obj);
 
+          this.$setVal(val, flags, declaringItem);
+        }
       }
 
       this.updateState = QmlWeb.QMLPropertyState.Valid;
 
     } catch (err) {
 
-      if (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate) {
-        // register (only) the root item to pending queue:
-        if (this.binding && this.evalTreeConnections.isEmpty) {
-          QmlWeb.engine.pendingOperations.push({
-             property:this,
-             info:"Pending property get/binding initialization : "+this
-             });
-        }
-      }
-
       if (!err.ctType) {
         this.updateState |= QmlWeb.QMLPropertyState.NeedsUpdate;
       }
 
       throw err;
+
     } finally {
 
       parent.updateState &= ~QmlWeb.QMLPropertyState.Updating;
@@ -388,7 +387,7 @@ class QMLProperty {
         }
         this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
       } else {
-        this.updateState &= ~QmlWeb.QMLPropertyState.DirtyAll;
+        this.updateState &= ~QmlWeb.QMLPropertyState.DirtyUninit;
       }
 
 
@@ -400,32 +399,37 @@ class QMLProperty {
         if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
           needSend = (newVal !== oldVal);
         } else {
+          // with get/binding mode
           this.update(flags);
           needSend = false;
         }
       } else {
 
+        flags |= QmlWeb.QMLPropertyFlags.Changed;
+
         if (newVal instanceof Array) {
           newVal = newVal.slice(); // Copies the array
         }
 
+        this.$setVal(newVal, flags, declaringItem);
+
         if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
           if (flags & QmlWeb.QMLPropertyFlags.RemoveBidirectionalBinding) {
             this.binding = null;
+            needSend |= (newVal !== oldVal);
+          } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
+            needSend = (newVal !== oldVal);
           } else {
-            if (!this.binding.compiled) {
-              this.binding.compile();
-            }
-            this.binding.set(this.obj, newVal, flags, declaringItem);
+            // with Changed flag = set/binding mode
+            this.update(flags);
+            needSend = false;
           }
-        } else if (!(flags & QmlWeb.QMLPropertyFlags.ReasonAnimation)) {
-          this.binding = null;
+        } else {
+          if (!(flags & QmlWeb.QMLPropertyFlags.ReasonAnimation)) {
+            this.binding = null;
+          }
+          needSend |= (newVal !== oldVal);
         }
-
-        this.$setVal(newVal, flags, declaringItem);
-
-        needSend |= (newVal !== oldVal);
-        flags |= QmlWeb.QMLPropertyFlags.Changed;
       }
 
       if (needSend) {
@@ -434,6 +438,7 @@ class QMLProperty {
 
           if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
               (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
+            // triggers update at Starting stage:
             QmlWeb.engine.pendingOperations.push({
                property:this,
                info:"Pending property set/binding initialization : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),

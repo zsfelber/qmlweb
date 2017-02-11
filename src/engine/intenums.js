@@ -84,7 +84,7 @@ const QMLPropertyState = {
   Uninitialized : 4,
   Dirty : 1 | 2,
   InvalidityFlags : 1 | 4,
-  DirtyAll : 1 | 2 | 4,
+  DirtyUninit : 1 | 2 | 4,
 
   Valid_mnem : "ok",
   NeedsUpdate_mnem : "!",
