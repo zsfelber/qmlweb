@@ -71,6 +71,7 @@ const QMLPropertyFlags = {
   SetChildren : 16,
   ThroughBinding : 32,
   Changed : 64,
+  Save : 128,
 
   toString: function(flags) {
     return humanize.call(QMLPropertyFlags, flags);

@@ -94,7 +94,7 @@ class QMLProperty {
     this.childEvalTreeConnections = 0;
   }
 
-  // Called by update and set to actually set this.val, performing any type
+  // Called by update and set to actually set this.value, performing any type
   // conversion required.
   $setVal(val, flags, declaringItem) {
     var prevComponent = QmlWeb.engine.$component;
@@ -127,7 +127,7 @@ class QMLProperty {
         // otherwise : clear it, most important when this is the default property, otherwise it just appends new entries
         if (!isch) {
           // TODO cleanup (garbage collector now, but is it enough?). when isch/!isch?
-          this.val = [];
+          this.value = [];
         }
 
         // NOTE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
@@ -135,17 +135,17 @@ class QMLProperty {
 
         // Otherwise, we trust containerChanged/onAddElement
         if (!isch) {
-          this.val = tmp;
+          this.value = tmp;
         }
       } else if (val instanceof QmlWeb.QMLMetaElement) {
         // Root element or nested Component element ?
         if (constructors[val.$class] === QMLComponent) {
-          this.val = QmlWeb.createComponent({
+          this.value = QmlWeb.createComponent({
             clazz: val,
             $file: val.$file
           }, QmlWeb.QMLComponentFlags.LazyOrFactory);
         } else if (constructors[this.type] === QMLComponent) {
-          this.val = QmlWeb.createComponent({
+          this.value = QmlWeb.createComponent({
             clazz: val,
             $file: val.$file
           }, QmlWeb.QMLComponentFlags.LazyOrFactory|QmlWeb.QMLComponentFlags.Flat);
@@ -154,14 +154,14 @@ class QMLProperty {
           // all the other ones just forward these
           // Call to here comes from
           // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
-          this.val = QmlWeb.createComponentAndElement({clazz:val}, parentObj, QmlWeb.QMLComponentFlags.Nested);
+          this.value = QmlWeb.createComponentAndElement({clazz:val}, parentObj, QmlWeb.QMLComponentFlags.Nested);
         }
       } else if (val instanceof Object || val === undefined || val === null) {
-        this.val = val;
+        this.value = val;
       } else if (constructors[this.type].plainType) {
-        this.val = constructors[this.type](val);
+        this.value = constructors[this.type](val);
       } else {
-        this.val = new constructors[this.type](val);
+        this.value = new constructors[this.type](val);
       }
 
     } finally {
@@ -179,16 +179,16 @@ class QMLProperty {
       target: this.animation.target || this.obj,
       property: this.animation.property || this.name,
       from: this.animation.from || oldVal,
-      to: this.animation.to || this.val
+      to: this.animation.to || this.value
     }];
     this.animation.running = true;
   }
 
-  sendChanged(oldVal) {
+  sendChanged(oldVal, newVal) {
     if (this.animation) {
       this.resetAnimation(oldVal);
     }
-    this.changed(this.val, oldVal, this.name);
+    this.changed(newVal, oldVal, this.name);
 
     // TODO gz   $syncPropertyToRemote !!!!!!!!!!!!
     if (this.$rootComponent.webSocket) {
@@ -199,41 +199,43 @@ class QMLProperty {
 
   // Updater recalculates the value of a property if one of the dependencies
   // changed
-  update(flags, declaringItem, value) {
+  update(flags, declaringItem, binding, oldVal, newVal) {
 
     const origState = this.updateState;
     this.updateState &= ~QmlWeb.QMLPropertyState.DirtyUninit;
     this.updateState |= QmlWeb.QMLPropertyState.Updating;
 
-    const oldVal = this.val;
+    if (!binding) binding = this.binding;
+    if (!oldVal) oldVal = this.value;
+    if (!newVal) newVal = this.value;
 
     var pushed;
     try {
 
-      if (!this.binding || !(flags & QMLPropertyFlags.Changed))  {
+      if (!binding || !(flags & QmlWeb.QMLPropertyFlags.Save))  {
         this.obsoleteConnections = this.evalTreeConnections;
         // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
         this.evalTreeConnections = {};
       }
 
-      if (this.binding) {
+      if (binding) {
 
-        if (this.binding instanceof QmlWeb.QtBindingDefinition) {
-          this.binding = Qt.binding(this.binding.get, this.binding.set, this.binding.flags);
+        if (binding instanceof QmlWeb.QtBindingDefinition) {
+          binding = Qt.binding(binding.get, binding.set, binding.flags);
         }
 
-        if (!this.binding.compiled) {
-          this.binding.compile();
+        if (!binding.compiled) {
+          binding.compile();
         }
 
-        if (flags & QMLPropertyFlags.Changed) {
+        if (flags & QmlWeb.QMLPropertyFlags.Save) {
           // binding/set
-          this.binding.set(this.obj, value, flags, declaringItem);
+          binding.set(this.obj, newVal, flags, declaringItem);
         } else {
           // binding/get
           pushed = QMLProperty.pushEvaluatingProperty(this);
 
-          var val = this.binding.get(this.obj);
+          var val = binding.get(this.obj);
 
           this.$setVal(val, flags, declaringItem);
         }
@@ -244,8 +246,8 @@ class QMLProperty {
     } catch (err) {
 
       if (err.ctType) {
-        if (flags & QMLPropertyFlags.Changed) {
-          throw new Error("Assertion failed : "+QMLPropertyFlags.toString(flags));
+        if (flags & (QmlWeb.QMLPropertyFlags.Save|QmlWeb.QMLPropertyFlags.Changed)) {
+          throw new Error("Assertion failed : "+QmlWeb.QMLPropertyFlags.toString(flags));
         }
       } else {
         // when err.ctType==true:
@@ -273,9 +275,9 @@ class QMLProperty {
     }
 
 
-    if (this.binding ? (flags & QMLPropertyFlags.Changed ? false : this.val !== oldVal) :
-                       (flags & QMLPropertyFlags.Changed ? true : false)  ) {
-      this.sendChanged(oldVal);
+    if (binding ? (flags & QmlWeb.QMLPropertyFlags.Save ? false : newVal !== oldVal) :
+                       (flags & QmlWeb.QMLPropertyFlags.Changed ? true : false)  ) {
+      this.sendChanged(oldVal, value);
     }
   }
 
@@ -322,7 +324,7 @@ class QMLProperty {
       if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
         // not possible to update at init stage :
         throw new Error(`Init time, cannot update : Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
-      } else if (this.binding || flags & QMLPropertyFlags.Changed) {
+      } else if (this.binding || flags & QmlWeb.QMLPropertyFlags.Changed) {
         try {
           this.update();
           invalidityFlags = 0;
@@ -374,12 +376,12 @@ class QMLProperty {
       throw new QmlWeb.PendingEvaluation(`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
     }
 
-    if (this.val && this.val.$get) {
-      return this.val.$get();
+    if (this.value && this.value.$get) {
+      return this.value.$get();
     }
 
 
-    return this.val;
+    return this.value;
   }
 
   // Define setter
@@ -394,7 +396,7 @@ class QMLProperty {
         throw new Error(`property '${this.name}' has read only access`);
       }
 
-      let oldVal = this.val;
+      let oldVal = this.value;
       let needSend = !(this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
 
       if (newVal === undefined) {
@@ -406,11 +408,11 @@ class QMLProperty {
         this.updateState &= ~QmlWeb.QMLPropertyState.DirtyUninit;
       }
 
-      this.$setVal(newVal, flags, declaringItem);
 
       if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
         oldVal = this.binding;
         this.binding = newVal;
+        this.value = undefined;
 
         if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
           needSend = (newVal !== oldVal);
@@ -421,28 +423,31 @@ class QMLProperty {
         }
       } else {
 
-        flags |= QmlWeb.QMLPropertyFlags.Changed;
-
         if (newVal instanceof Array) {
           newVal = newVal.slice(); // Copies the array
         }
+
+        this.$setVal(newVal, flags, declaringItem);
 
         if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
           if (flags & QmlWeb.QMLPropertyFlags.RemoveBidirectionalBinding) {
             this.binding = null;
             needSend |= (newVal !== oldVal);
           } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
+            flags |= QmlWeb.QMLPropertyFlags.Save;
             needSend = (newVal !== oldVal);
           } else {
-            // with Changed flag = set/binding mode
-            this.update(flags, undefined, newVal);
+            flags |= QmlWeb.QMLPropertyFlags.Save;
             needSend = false;
+            // with Changed flag = set/binding mode
+            this.update(flags);
           }
         } else {
           if (!(flags & QmlWeb.QMLPropertyFlags.ReasonAnimation)) {
             this.binding = null;
           }
           needSend |= (newVal !== oldVal);
+          flags |= QmlWeb.QMLPropertyFlags.Changed;
         }
       }
 
@@ -456,13 +461,14 @@ class QMLProperty {
             if (itm = QmlWeb.engine.pendingOperations.map[this.$propertyId]) {
               itm.flags = flags;
               itm.declaringItem = declaringItem;
-              itm.value = newVal;
+              itm.oldVal = oldVal;
+              itm.newVal = this.value;
               itm.info+=" "+QmlWeb.QMLPropertyFlags.toString(flags),
             } else {
               itm = {
                 property:this,
                 info:"Pending property : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
-                flags, declaringItem, value:newVal
+                flags, declaringItem, oldVal, newVal:this.value
                 };
               QmlWeb.engine.pendingOperations.map[this.$propertyId] = itm;
               // triggers update at Starting stage:
@@ -473,9 +479,9 @@ class QMLProperty {
         } else {
 
           if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
-            this.changed(this.val, oldVal, this.name);
+            this.changed(this.value, oldVal, this.name);
           } else {
-            this.sendChanged(oldVal);
+            this.sendChanged(oldVal, this.value);
           }
         }
       }
@@ -491,7 +497,7 @@ class QMLProperty {
     // $base because to avoid infinite loops for overriden toString:
     return os+" . prop:"+this.name+(detail?"#"+this.$propertyId:"")+
       (detail?" "+QmlWeb.QMLPropertyState.toString(this.updateState)+(this.binding?" "+QmlWeb.QMLBindingFlags.toString(this.binding.flags):""):"")+
-       (this.val?" v:"+this.val:"")+(this.readOnly?" ro":"")+(this.pendingInit?" pi":"");
+       (this.value?" v:"+this.value:"")+(this.readOnly?" ro":"")+(this.pendingInit?" pi":"");
   }
 
   stackToString(stack) {

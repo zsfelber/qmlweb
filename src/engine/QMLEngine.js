@@ -382,7 +382,7 @@ class QMLEngine {
             mode+=":a1";
             op.errors.push("Property state is invalid : update has not finished : "+property);
           } else {
-            property.update(op.flags, op.declaringItem, op.value);
+            property.update(op.flags, op.declaringItem, op.binding, op.oldVal, op.newVal);
 
             if (geometryProperties[property.name]) {
               a3++;
