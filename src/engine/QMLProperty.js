@@ -274,7 +274,7 @@ class QMLProperty {
 
 
     if (this.binding ? (flags & QMLPropertyFlags.Changed ? false : this.val !== oldVal) :
-                       (flags & QMLPropertyFlags.Changed ? true : e("Assertion failed: don't call update()/read/non-bound"))  ) {
+                       (flags & QMLPropertyFlags.Changed ? true : false)  ) {
       this.sendChanged(oldVal);
     }
   }
@@ -322,7 +322,7 @@ class QMLProperty {
       if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
         // not possible to update at init stage :
         throw new Error(`Init time, cannot update : Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
-      } else {
+      } else if (this.binding || flags & QMLPropertyFlags.Changed) {
         try {
           this.update();
           invalidityFlags = 0;
