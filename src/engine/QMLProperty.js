@@ -406,6 +406,7 @@ class QMLProperty {
         this.updateState &= ~QmlWeb.QMLPropertyState.DirtyUninit;
       }
 
+      this.$setVal(newVal, flags, declaringItem);
 
       if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
         oldVal = this.binding;
@@ -425,8 +426,6 @@ class QMLProperty {
         if (newVal instanceof Array) {
           newVal = newVal.slice(); // Copies the array
         }
-
-        this.$setVal(newVal, flags, declaringItem);
 
         if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
           if (flags & QmlWeb.QMLPropertyFlags.RemoveBidirectionalBinding) {
@@ -453,14 +452,19 @@ class QMLProperty {
 
           if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
               (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
-            const opId = this.$propertyId+(flags&QmlWeb.QMLPropertyFlags.Changed?":w":":r");
-            if (!QmlWeb.engine.pendingOperations.map[opId]) {
-              const itm = {
+            let itm;
+            if (itm = QmlWeb.engine.pendingOperations.map[this.$propertyId]) {
+              itm.flags = flags;
+              itm.declaringItem = declaringItem;
+              itm.value = newVal;
+              itm.info+=" "+QmlWeb.QMLPropertyFlags.toString(flags),
+            } else {
+              itm = {
                 property:this,
                 info:"Pending property : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
-                opId, flags, declaringItem, value:newVal
+                flags, declaringItem, value:newVal
                 };
-              QmlWeb.engine.pendingOperations.map[opId] = itm;
+              QmlWeb.engine.pendingOperations.map[this.$propertyId] = itm;
               // triggers update at Starting stage:
               QmlWeb.engine.pendingOperations.stack.push(itm);
             }
