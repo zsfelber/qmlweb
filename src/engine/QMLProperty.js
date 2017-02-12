@@ -276,8 +276,8 @@ class QMLProperty {
 
 
     if (binding ? (flags & QmlWeb.QMLPropertyFlags.Save ? false : newVal !== oldVal) :
-                       (flags & QmlWeb.QMLPropertyFlags.Changed ? true : false)  ) {
-      this.sendChanged(oldVal, value);
+                  (flags & QmlWeb.QMLPropertyFlags.Changed ? true : e("Assertion failed : no binding/read/update"))  ) {
+      this.sendChanged(oldVal, newVal);
     }
   }
 
@@ -322,9 +322,12 @@ class QMLProperty {
       error = new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}\n${this.stacksToString()}`, this);
     } else if (invalidityFlags) {
       if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
-        // not possible to update at init stage :
-        throw new Error(`Init time, cannot update : Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
-      } else if (this.binding || flags & QmlWeb.QMLPropertyFlags.Changed) {
+        if (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate) {
+          // not possible to update at init stage :
+          throw new Error(`Init time, cannot update : Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
+        }
+        // otherwise : return uninitialized value (undefined, [] or so) finally
+      } else if (this.binding || (flags & QmlWeb.QMLPropertyFlags.Changed)) {
         try {
           this.update();
           invalidityFlags = 0;
@@ -370,8 +373,7 @@ class QMLProperty {
       throw error;
     }
 
-    if (invalidityFlags) {
-
+    if (invalidityFlags && !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
       // This 'get' is directed to an unitialized property
       throw new QmlWeb.PendingEvaluation(`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
     }
@@ -463,7 +465,7 @@ class QMLProperty {
               itm.declaringItem = declaringItem;
               itm.oldVal = oldVal;
               itm.newVal = this.value;
-              itm.info+=" "+QmlWeb.QMLPropertyFlags.toString(flags),
+              itm.info+=" "+QmlWeb.QMLPropertyFlags.toString(flags);
             } else {
               itm = {
                 property:this,
