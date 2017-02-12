@@ -141,6 +141,7 @@ function slice(a, start) {
 }
 
 var s_objectIds = 0;
+var undefinedMarker = {};
 
 function ssplice(str, startIndex, length, insertString){
   return str.substring(0,startIndex) + insertString + str.substring(startIndex + length);
@@ -159,6 +160,8 @@ function serializeObj(object, path, backrefs, dups, pos) {
   if (!object) {
     if (typeof object === "string") {
       return '""';
+    } else if (object===undefinedMarker) {
+      return undefined;
     } else {
       return object;
     }
@@ -310,6 +313,13 @@ convertToEngine.applyProp = function(item, name, val, readonly) {
   curr[sub] = val;
 }
 
+convertToEngine.keywords = {
+  "true" : true,
+  "false" : false,
+  "null" : null,
+  "undefined" : undefinedMarker
+}
+
 convertToEngine.walkers = {
   toplevel: (imports, statement) => {
     const item = { $class: "Component" };
@@ -329,35 +339,35 @@ convertToEngine.walkers = {
       var ro = 0;
       switch (statement[0]) {
         case "qmldefaultprop":
-        item.$defaultProperty = name[1];
-        item[name[1]] = val;
-        break;
+          item.$defaultProperty = name[1];
+          item[name[1]] = val;
+          break;
         case "qmlpropdefro":
         case "qmlaliasdefro":
-        val.readonly = true;
+          val.readonly = true;
         case "qmlprop":
         case "qmlpropdef":
         case "qmlaliasdef":
         case "qmlmethod":
         case "qmlsignaldef":
-        convertToEngine.applyProp(item, name, val, ro);
+          convertToEngine.applyProp(item, name, val, ro);
         break;
         case "qmlelem":
-        item.$children.push(val);
+          item.$children.push(val);
         break;
         case "qmlobjdef":
-        throw new Error(
-          "qmlobjdef support was removed, update qmlweb-parser to ^0.3.0."
-          );
+          throw new Error(
+            "qmlobjdef support was removed, update qmlweb-parser to ^0.3.0."
+            );
         case "qmlobj":
-        // Create object to item
-        item[name] = item[name] || new QMLMetaPropertyGroup();
-        for (const j in val) {
-          item[name][j] = val[j];
-        }
+          // Create object to item
+          item[name] = item[name] || new QMLMetaPropertyGroup();
+          for (const j in val) {
+            item[name][j] = val[j];
+          }
         break;
         default:
-        console.log("Unknown statement", statement);
+          console.log("Unknown statement", statement);
       }
     }
     // Make $children be either a single item or an array, if it's more than one
@@ -412,13 +422,12 @@ convertToEngine.walkers = {
                 new QMLSignalDefinition(params),
   qmldefaultprop: tree => convertToEngine.walk(tree),
   name: src => {
-    if (src === "true" || src === "false") {
-      return src === "true";
-    } else if (typeof src === "boolean") {
-      // TODO: is this needed? kept for compat with ==
-      return src;
+    const k = convertToEngine.keywords[src];
+    if (k !== undefined) {
+      return k;
+    } else {
+      return new QmlWeb.QMLBinding(src);
     }
-    return new QmlWeb.QMLBinding(src);
   },
   num: src => +src,
   string: src => String(src),
@@ -432,7 +441,7 @@ convertToEngine.walkers = {
 
       if (val instanceof QMLMetaElement) {
         isList = true;
-      } else if (val instanceof QmlWeb.QMLBinding) {
+      } else if (val === undefined || val instanceof QmlWeb.QMLBinding) {
         hasBinding = true;
       }
     }
@@ -448,6 +457,55 @@ convertToEngine.walkers = {
 
     return a;
   },
+  "unary-prefix": (op, arg) => {
+    const val = convertToEngine.bindout(arg);
+    if (val === undefined || val instanceof QmlWeb.QMLBinding) return undefined;
+
+    const impl = op+""+JSON.stringify(val);
+    try {
+      var result = eval(impl);
+      console.log(impl+" -> "+result);
+      return result;
+    } catch (err) {
+      console.error("Eval error:"+impl);
+      return undefined;
+    }
+  },
+  binary: (op, arg1, arg2) => {
+    const val1 = convertToEngine.bindout(arg1);
+    if (val1 === undefined || val1 instanceof QmlWeb.QMLBinding) return undefined;
+    const val2 = convertToEngine.bindout(arg2);
+    if (val2 === undefined || val2 instanceof QmlWeb.QMLBinding) return undefined;
+
+    const impl = JSON.stringify(val1)+""+op+""+JSON.stringify(val2);
+    try {
+      var result = eval(impl);
+      console.log(impl+" -> "+result);
+      return result;
+    } catch (err) {
+      console.error("Eval error:"+impl);
+      return undefined;
+    }
+  },
+  conditional: (arg1, arg2, arg3) => {
+    const val1 = convertToEngine.bindout(arg1);
+    if (val1 === undefined || val1 instanceof QmlWeb.QMLBinding) return undefined;
+    const val2 = convertToEngine.bindout(arg2);
+    if (val2 === undefined || val2 instanceof QmlWeb.QMLBinding) return undefined;
+    const val3 = convertToEngine.bindout(arg3);
+    if (val3 === undefined || val3 instanceof QmlWeb.QMLBinding) return undefined;
+
+    const impl = JSON.stringify(val1)+"?"+JSON.stringify(val2)+":"+JSON.stringify(val3);
+    try {
+      var result = eval(impl);
+      console.log(impl+" -> "+result);
+      return result;
+    } catch (err) {
+      console.error("Eval error:"+impl);
+      return undefined;
+    }
+  }
+
   //block: (blocks) => {
   //  blocks.forEach(function(stat) {
   //
@@ -478,10 +536,7 @@ convertToEngine.bindout = function(statement, binding, info) {
   const tree = statement[0] === "stat" ? statement[1] : statement;
 
   const type = tree[0];
-  const walker = convertToEngine.walkers[type];
-  if (walker) {
-    return walker.apply(type, tree.slice(1));
-  }
+  let result;
   // ["call", ["dot", ["name", "Qt"], "binding"]
   if (type === "call" && tree[1] && tree[1][0] && tree[1][0]==="dot" && tree[1][2] && tree[1][2]==="binding" &&
       tree[1][1] && tree[1][1][0] && tree[1][1][0]==="name" && tree[1][1][1] && tree[1][1][1]==="Qt") {
@@ -505,18 +560,26 @@ convertToEngine.bindout = function(statement, binding, info) {
     if (qtdef.set instanceof Function) {
       qtdef.set = QmlWeb.compressImpl(qtdef.set);
     }
-    return qtdef;
+    result = qtdef;
 
   } else {
-    //convertToEngine.walk(tree);
 
-    const b = new QmlWeb.QMLBinding(binding, tree, undefined, undefined, info);
-    if (!b.src && !b.property) {
-      return null;
-    } else {
-      return b;
+    const walker = convertToEngine.walkers[type];
+    if (walker) {
+      result = walker.apply(type, tree.slice(1));
+    }
+    if (result===undefined) {
+      //convertToEngine.walk(tree);
+
+      const b = new QmlWeb.QMLBinding(binding, tree, undefined, undefined, info);
+      if (!b.src && !b.property) {
+        result = null;
+      } else {
+        result = b;
+      }
     }
   }
+  return result;
 };
 
 // Help logger
