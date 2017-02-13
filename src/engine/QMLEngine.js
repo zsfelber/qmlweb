@@ -124,7 +124,7 @@ class QMLEngine {
       //this._tickers.forEach(ticker => ticker(now, elapsed));
       this._whenStart.forEach(function(val) {
         try {
-          val.callback();
+          val();
         } catch (err) {
           if (!err.ctType) {
             console.warn("Error in startup script : ", err);

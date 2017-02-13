@@ -22,46 +22,8 @@ function dumpEvalError(msg, err) {
   }
 }
 
-const toStrCalls = {};
 function objToStringSafe(obj, detail) {
-  var os = "";
-  try {
-    if (!obj) {
-      os = obj;
-    } else {
-      if (obj.$objectId) {
-        if (toStrCalls[obj.$objectId]) {
-          os = "toString loop:";
-          try {
-            os+=(obj.$base?obj.$base.toString():obj.$objectId);
-          } catch (err) {
-            os+=(err.ctType?err.ctType+":":"invalid:")+obj.$objectId;
-          }
-          return os;
-        } else {
-          toStrCalls[obj.$objectId] = 1;
-        }
-      }
-
-      if (engine.operationState & QmlWeb.QMLOperationState.BeforeStart) {
-        os = (obj.$base?obj.$base.toString():(obj.$objectId?obj.$objectId:"object"));
-      } else {
-        os = obj.toString(detail);
-      }
-    }
-  } catch (err) {
-    try {
-      os += (err.ctType?err.ctType+":":"invalid:");
-      os += (obj.$base?obj.$base.toString():(obj.$objectId?obj.$objectId:"object"));
-    } catch (err2) {
-      os += (err2.ctType?err2.ctType+":":"invalid:");
-      os += (obj.$objectId?obj.$objectId:"object");
-    }
-  } finally {
-    if (obj && obj.$objectId) {
-      delete toStrCalls[obj.$objectId];
-    }
-  }
+  var os = (obj.$base?obj.$base.toString():(obj.$classname||obj.constructor?(obj.$classname||obj.constructor.name)+":":"")+(obj.$objectId?obj.$objectId:"object"));
 
   return os;
 }

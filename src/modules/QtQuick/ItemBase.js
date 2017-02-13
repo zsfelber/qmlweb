@@ -153,8 +153,13 @@ class ItemBase {
 
       if (tbflags & QmlWeb.TBtop) {
         if (this.bindTo) {
-          this.bindTo(that);
-          (dump[path+".b"] = dump[(++dumplen[0])+" "+path+".b"] = {info:"<-bound:ok->"});
+          try {
+            this.bindTo(that);
+            (dump[path+".b"] = dump[(++dumplen[0])+" "+path+".b"] = {info:"<-bound:ok->"});
+          } catch (err) {
+            (dump["X "+path+".b"] = dump[(++dumplen[0])+" X "+path+".b"] = {info:"<-bindTo!err->", err});
+          }
+
         } else {
           (dump["X "+path+".b"] = dump[(++dumplen[0])+" X "+path+".b"] = {info:"<-!bindTo->"});
         }
