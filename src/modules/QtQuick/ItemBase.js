@@ -13,7 +13,7 @@ class ItemBase {
     if (this.$defaultProperty) {
       var prop = this.$properties[this.$defaultProperty];
       if (prop.type === "list") {
-        var parr = prop.get();
+        var parr = prop.value;
         element.$properties.$index.set(parr.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
         parr.push(leafElement);
       } else {
@@ -25,11 +25,11 @@ class ItemBase {
     }
 
     if (leafElement instanceof ItemBase) {
-      element.$properties.$childIndex.set(this.children.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+      element.$properties.$childIndex.set(this.$properties.children.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
       this.children.push(leafElement);
       this.childrenChanged();
     } else {
-      element.$properties.$resourceIndex.set(this.resources.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+      element.$properties.$resourceIndex.set(this.$properties.resources.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
       this.resources.push(leafElement);
       this.resourcesChanged();
     }

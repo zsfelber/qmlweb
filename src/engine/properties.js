@@ -167,7 +167,11 @@ function applyProperties(metaObject, item) {
          || ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
       console.warn("Cannot apply property : "+item+" . "+i+"  opstate:"+QmlWeb.QMLOperationState.toString(QmlWeb.engine.operationState));
     } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
-      QmlWeb.engine.currentPendingOp.errors.push({loc:"applyProperties", err, item, i});
+      if (err.ctType === "UninitializedEvaluation")
+        QmlWeb.engine.currentPendingOp.warnings.push({loc:"applyProperties", err, item, i})
+        ;
+      else
+        QmlWeb.engine.currentPendingOp.errors.push({loc:"applyProperties", err, item, i});
     }
   }
 

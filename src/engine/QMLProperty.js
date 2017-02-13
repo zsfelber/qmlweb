@@ -9,6 +9,13 @@ class PendingEvaluation extends Error {
   }
 }
 
+class UninitializedEvaluation extends Error {
+  constructor(...args) {
+    super(...args);
+    this.ctType = "UninitializedEvaluation";
+  }
+}
+
 function dumpEvalError(msg, err) {
   if (!err.ctType) {
     console.warn(msg);
@@ -202,7 +209,7 @@ class QMLProperty {
   update(flags, declaringItem, oldVal) {
 
     const origState = this.updateState;
-    this.updateState &= ~QmlWeb.QMLPropertyState.DirtyUninit;
+    this.updateState &= ~QmlWeb.QMLPropertyState.DirtyAll;
     this.updateState |= QmlWeb.QMLPropertyState.Updating;
 
     let newVal;
@@ -210,7 +217,7 @@ class QMLProperty {
     var pushed;
     try {
 
-      if (!this.binding || !(flags & QmlWeb.QMLPropertyState.SaveBinding))  {
+      if (!this.binding || !(origState & QmlWeb.QMLPropertyState.BoundSet))  {
         this.obsoleteConnections = this.evalTreeConnections;
         // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
         this.evalTreeConnections = {};
@@ -226,7 +233,7 @@ class QMLProperty {
           this.binding.compile();
         }
 
-        if (flags & QmlWeb.QMLPropertyState.SaveBinding) {
+        if (origState & QmlWeb.QMLPropertyState.BoundSet) {
           // binding/set
           newVal = this.value;
           this.binding.set(this.obj, newVal, flags, declaringItem);
@@ -247,8 +254,9 @@ class QMLProperty {
     } catch (err) {
 
       if (err.ctType) {
-        if (flags & (QmlWeb.QMLPropertyState.SaveBinding|QmlWeb.QMLPropertyFlags.Changed)) {
-          throw new Error("Assertion failed : "+QmlWeb.QMLPropertyFlags.toString(flags));
+        if (origState & (QmlWeb.QMLPropertyState.BoundSet|QmlWeb.QMLPropertyState.NonBoundSet)) {
+          console.error("Assertion failed : "+QmlWeb.QMLPropertyState.toString(origState) +" -> "+ QmlWeb.QMLPropertyState.toString(this.updateState)+"  Invalid Error:"+err.message);
+          this.updateState = origState;
         }
       } else {
         // when err.ctType==true:
@@ -276,8 +284,8 @@ class QMLProperty {
     }
 
 
-    if (this.binding ? (flags & QmlWeb.QMLPropertyState.SaveBinding ? false : newVal !== oldVal) :
-                  (flags & QmlWeb.QMLPropertyFlags.Changed ? newVal !== oldVal : e("Assertion failed : no binding/read/update"))  ) {
+    if (this.binding ? (origState & QmlWeb.QMLPropertyState.BoundSet ? false : newVal !== oldVal) :
+                  (origState & QmlWeb.QMLPropertyState.NonBoundSet ? newVal !== oldVal : e("Assertion failed : no binding/read/update"))  ) {
       this.sendChanged(oldVal, newVal);
     }
   }
@@ -328,7 +336,7 @@ class QMLProperty {
           throw new Error(`Init time, cannot update : Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
         }
         // otherwise : return uninitialized value (undefined, [] or so) finally
-      } else if (this.binding || (flags & QmlWeb.QMLPropertyFlags.Changed)) {
+      } else if (this.binding || (this.updateState & QmlWeb.QMLPropertyState.NonBoundSet)) {
         try {
           this.update();
           invalidityFlags = 0;
@@ -375,8 +383,12 @@ class QMLProperty {
     }
 
     if (invalidityFlags && !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
-      // This 'get' is directed to an unitialized property
-      throw new QmlWeb.PendingEvaluation(`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
+      if (invalidityFlags & QmlWeb.QMLPropertyState.Uninitialized) {
+        // This 'get' is directed to an unitialized property
+        throw new QmlWeb.UninitializedEvaluation(`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
+      } else {
+        throw new QmlWeb.PendingEvaluation(`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
+      }
     }
 
     if (this.value && this.value.$get) {
@@ -403,33 +415,34 @@ class QMLProperty {
         if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
           newVal = QMLProperty.typeInitialValues[this.type];
         }
-        this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
       } else {
         //if (newVal instanceof Array) {
         //  newVal = newVal.slice(); // Copies the array
         //}
-        this.updateState &= ~QmlWeb.QMLPropertyState.DirtyUninit;
+        this.updateState &= ~QmlWeb.QMLPropertyState.Uninitialized;
       }
 
       let oldVal = this.value;
       let desiredState;
       let needSend;
+
       if (flags & QmlWeb.QMLPropertyFlags.ResetBinding) {
         this.binding = null;
       }
+
       if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
         needSend = this.binding !== newVal;
         this.binding = newVal;
         desiredState = QmlWeb.QMLPropertyState.NeedsUpdate;
       } else {
         if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
-          desiredState = QmlWeb.QMLPropertyState.SaveBinding;
+          desiredState = QmlWeb.QMLPropertyState.BoundSet;
           needSend = true;
         } else {
           if (!(flags & QmlWeb.QMLPropertyFlags.ReasonAnimation)) {
             this.binding = null;
           }
-          desiredState = QmlWeb.QMLPropertyState.Changed;
+          desiredState = QmlWeb.QMLPropertyState.NonBoundSet;
           needSend = !(this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
         }
         if (newVal !== oldVal) {
@@ -441,15 +454,6 @@ class QMLProperty {
 
       if (needSend) {
         this.updateState = desiredState;
-        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
-          needSend = false;
-          // with get/binding mode
-          this.update(flags);
-        }
-      }
-
-
-      if (needSend) {
 
         if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
 
@@ -474,6 +478,7 @@ class QMLProperty {
           }
 
         } else {
+          this.update(flags);
 
           if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
             this.changed(this.value, oldVal, this.name);
@@ -603,5 +608,6 @@ QMLProperty.typeInitialValues = {
 
 QmlWeb.QMLProperty = QMLProperty;
 QmlWeb.PendingEvaluation = PendingEvaluation;
+QmlWeb.UninitializedEvaluation = UninitializedEvaluation;
 QmlWeb.dumpEvalError = dumpEvalError;
 QmlWeb.objToStringSafe = objToStringSafe;

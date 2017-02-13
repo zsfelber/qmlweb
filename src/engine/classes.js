@@ -57,7 +57,11 @@ function initMeta(self, meta, constructor) {
             console.warn("Cannot create object property from module definition : "+self.$classname+"("+self.$objectId+") . "+name+"  opstate:"+
                          QmlWeb.QMLOperationState.toString(QmlWeb.engine.operationState));
           } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
-            QmlWeb.engine.currentPendingOp.errors.push({loc:"initMeta", err});
+            if (err.ctType === "UninitializedEvaluation")
+              QmlWeb.engine.currentPendingOp.warnings.push({loc:"initMeta", type:desc.type, self, name, err})
+              ;
+            else
+              QmlWeb.engine.currentPendingOp.errors.push({loc:"initMeta", type:desc.type, self, name, err});
           }
         }
       }

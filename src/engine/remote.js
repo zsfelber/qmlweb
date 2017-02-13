@@ -2,10 +2,10 @@
 function $syncPropertyToRemote(rootComponent, property) {
   //rootComponent.serverWsAddress
   //rootComponent.webSocket;
-  if (property.val && property.val.$base)
-    rootComponent.webSocket.send(JSON.stringify({id:property.$propertyId, val:property.val.$objectId, type:1}));
+  if (property.value && property.value.$base)
+    rootComponent.webSocket.send(JSON.stringify({id:property.$propertyId, val:property.value.$objectId, type:1}));
   else
-    rootComponent.webSocket.send(JSON.stringify({id:property.$propertyId, val:property.val}));
+    rootComponent.webSocket.send(JSON.stringify({id:property.$propertyId, val:property.value}));
 }
 
 QmlWeb.$syncPropertyToRemote = $syncPropertyToRemote;

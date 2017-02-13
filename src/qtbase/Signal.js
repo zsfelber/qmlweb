@@ -185,7 +185,11 @@ class Signal {
           console.warn("Signal : "+QmlWeb.objToStringSafe(desc.thisObj)+" . "+ desc.signal.$name + (desc.slotObj!==desc.thisObj?" slotObj:" + QmlWeb.objToStringSafe(desc.slotObj):"") +" slot(user function) error:", err);
         }
       } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
-        QmlWeb.engine.currentPendingOp.errors.push({loc:"$execute", desc, args, err});
+        if (err.ctType === "UninitializedEvaluation")
+          QmlWeb.engine.currentPendingOp.warnings.push({loc:"$execute", desc, args, err})
+          ;
+        else
+          QmlWeb.engine.currentPendingOp.errors.push({loc:"$execute", desc, args, err});
       }
       err.srcdumpok = 1;
     }

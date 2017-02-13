@@ -40,8 +40,8 @@ QmlWeb.registerQmlType({
       // NOTE aliases are now regular properties (so Changed works)
       const prop = this.$properties[attrName];
       /*if (prop && prop.type==="alias") {
-        emitter = this.$context[prop.val.objectName];
-        signalName = `${prop.val.propertyName}Changed`;
+        emitter = this.$context[prop.value.objectName];
+        signalName = `${prop.value.propertyName}Changed`;
       } else */if (!prop) {
         return;
       }

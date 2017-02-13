@@ -66,7 +66,7 @@ QmlWeb.registerQmlType({
     if (!this.repeat) {
       // We set the value directly in order to be able to emit the
       // runningChanged signal after triggered, like Qt does it.
-      this.$properties.running.val = false;
+      this.$properties.running.value = false;
     }
 
     // Trigger this.

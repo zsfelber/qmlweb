@@ -360,11 +360,12 @@ class QMLEngine {
 
     console.log("processPendingOperations : "+this.pendingOperations.length);
 
-    var i=0,a=0,a1=0,a2=0,a3=0,b=0,e=0;
-    let info = {}, errors = {};
+    var i=0,a=0,ae=0,a1=0,a2=0,b=0,e=0,w=0;
+    let info = {}, warning = {}, error = {};
     while (this.pendingOperations.stack.length > 0) {
       const op = this.pendingOperations.stack.shift();
       op.errors = [];
+      op.warnings = [];
       this.currentPendingOp = op;
       let mode="";
       if (op.opId) {
@@ -378,16 +379,16 @@ class QMLEngine {
         if (property) {
           a++;
           if (property.updateState & QmlWeb.QMLPropertyState.Updating) {
-            a1++;
-            mode+=":a1";
+            ae++;
+            mode+=":ae";
             op.errors.push("Property state is invalid : update has not finished : "+property);
           } else {
 
             property.update(op.flags, op.declaringItem, op.oldVal);
 
             if (geometryProperties[property.name]) {
-              a3++;
-              mode+=":a3";
+              a2++;
+              mode+=":a2";
               // It is possible that bindings with these names was already evaluated
               // during eval of other bindings but in that case $updateHGeometry and
               // $updateVGeometry could be blocked during their eval.
@@ -395,15 +396,15 @@ class QMLEngine {
               const { obj, changed } = property;
               if (obj.$updateHGeometry &&
                   changed.isConnected(obj, obj.$updateHGeometry)) {
-                obj.$updateHGeometry(property.val, property.val, property.name);
+                obj.$updateHGeometry(property.value, property.value, property.name);
               }
               if (obj.$updateVGeometry &&
                   changed.isConnected(obj, obj.$updateVGeometry)) {
-                obj.$updateVGeometry(property.val, property.val, property.name);
+                obj.$updateVGeometry(property.value, property.value, property.name);
               }
             } else {
-              a2++;
-              mode+=":a2";
+              a1++;
+              mode+=":a1";
             }
           }
         } else {
@@ -412,26 +413,26 @@ class QMLEngine {
           op.fun.apply(op.thisObj, op.args);
         }
 
-        if (op.errors.length==1) {
+        if (op.errors.length) {
           e++;
-          errors["#ERR:#"+i+mode+":"+op.info+":"+op.errors[0].err.message] = op;
-        } else if (op.errors.length) {
-          e++;
-          errors["#ERR:#"+i+mode+":"+op.info+":"+op.errors.length+" errors"] = op;
+          error["#"+i+mode+"!!"+op.info] = op;
+        } else if (op.warnings.length) {
+          w++;
+          warning["#"+i+mode+"!"+op.info] = op;
         } else {
           info["#"+i+mode+":"+op.info] = op;
         }
 
       } catch (err) {
         e++;
-        errors["#ERR:#"+i+mode+":"+op.info+":"+err.message] = op;
+        error["#ERR:#"+i+mode+":"+op.info+":"+err.message] = op;
         op.dumpErr = QMLEngine.dumpErr.bind(err);
       }
 
       i++;
     }
 
-    console.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+a3)+") functions:"+b+" errors:"+e, "Info:",info, "Errors:",errors);
+    console.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+ae)+") functions:"+b+" error:"+e+" warnings:"+w, "Info:",info, "Warning:",warning, "Error:",error);
   }
 
   static dumpErr() {

@@ -133,6 +133,7 @@ class Item {
     // before we fetch the values because properties can be interdependent.
     for (const i in actions) {
       const action = actions[i];
+      // TODO gz obsolete : scope
       const scope = {
         action: action,
         $object: action.target,
@@ -195,7 +196,7 @@ class Item {
         target: change.target,
         property: item.property,
         origValue: change.target.$properties[item.property].binding ||
-                    change.target.$properties[item.property].val,
+                    change.target.$properties[item.property].value,
         value: item.value,
         from: change.target[item.property],
         to: undefined,
@@ -225,7 +226,7 @@ class Item {
           target: change.target,
           property: item.property,
           value: change.target.$properties[item.property].binding ||
-                  change.target.$properties[item.property].val,
+                  change.target.$properties[item.property].value,
           from: undefined,
           to: change.target[item.property]
         });

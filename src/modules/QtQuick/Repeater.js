@@ -92,6 +92,7 @@ QmlWeb.registerQmlType({
     for (let index = startIndex; index <= endIndex; index++) {
       const item = this.$items[index];
       const modelData = item.$properties.model;
+     // TODO gz obsolete : scope
       const scope = {
         $object: item,
         $context: this.model.$context
@@ -155,6 +156,7 @@ QmlWeb.registerQmlType({
     for (index = startIndex; index < endIndex; index++) {
       const newItem = this.delegate.$createObject(this.parent);
       createProperty("int", newItem, "index", { initialValue: index });
+     // TODO gz obsolete : scope
       const scope = {
         $object: newItem,
         $context: this.model.$context
