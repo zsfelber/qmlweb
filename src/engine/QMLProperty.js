@@ -382,10 +382,12 @@ class QMLProperty {
       throw error;
     }
 
-    if (invalidityFlags && !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
+    if (invalidityFlags) {
       if (invalidityFlags & QmlWeb.QMLPropertyState.Uninitialized) {
-        // This 'get' is directed to an unitialized property
-        throw new QmlWeb.UninitializedEvaluation(`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
+        if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
+          // This 'get' is directed to an unitialized property
+          throw new QmlWeb.UninitializedEvaluation(`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
+        }
       } else {
         throw new QmlWeb.PendingEvaluation(`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
       }

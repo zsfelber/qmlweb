@@ -122,8 +122,28 @@ class QMLEngine {
       this.operationState |= QMLOperationState.Running;
       //this._tickerId = setInterval(this._tick.bind(this), this.$interval);
       //this._tickers.forEach(ticker => ticker(now, elapsed));
-      this._whenStart.forEach(callback => callback());
-      this._tickers.forEach(ticker => $startTicker(ticker));
+      this._whenStart.forEach(function(val) {
+        try {
+          val.callback();
+        } catch (err) {
+          if (!err.ctType) {
+            console.warn("Error in startup script : ", err);
+          } else {
+            console.warn(err.ctType+" error in startup script.");
+          }
+        }
+      });
+      this._tickers.forEach(function(val) {
+        try {
+          this.$startTicker(val);
+        } catch (err) {
+          if (!err.ctType) {
+            console.warn("Startup error in ticker : ", err);
+          } else {
+            console.warn(err.ctType+" : Startup error in ticker.");
+          }
+        }
+      });
     }
   }
 
