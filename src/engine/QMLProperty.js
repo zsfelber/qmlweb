@@ -199,46 +199,47 @@ class QMLProperty {
 
   // Updater recalculates the value of a property if one of the dependencies
   // changed
-  update(flags, declaringItem, binding, oldVal, newVal) {
+  update(flags, declaringItem, oldVal) {
 
     const origState = this.updateState;
     this.updateState &= ~QmlWeb.QMLPropertyState.DirtyUninit;
     this.updateState |= QmlWeb.QMLPropertyState.Updating;
 
-    if (!binding) binding = this.binding;
-    if (!oldVal) oldVal = this.value;
-    if (!newVal) newVal = this.value;
+    let newVal;
 
     var pushed;
     try {
 
-      if (!binding || !(flags & QmlWeb.QMLPropertyFlags.Save))  {
+      if (!this.binding || !(flags & QmlWeb.QMLPropertyState.SaveBinding))  {
         this.obsoleteConnections = this.evalTreeConnections;
         // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
         this.evalTreeConnections = {};
       }
 
-      if (binding) {
+      if (this.binding) {
 
-        if (binding instanceof QmlWeb.QtBindingDefinition) {
-          binding = Qt.binding(binding.get, binding.set, binding.flags);
+        if (this.binding instanceof QmlWeb.QtBindingDefinition) {
+          this.binding = Qt.binding(this.binding.get, this.binding.set, this.binding.flags);
         }
 
-        if (!binding.compiled) {
-          binding.compile();
+        if (!this.binding.compiled) {
+          this.binding.compile();
         }
 
-        if (flags & QmlWeb.QMLPropertyFlags.Save) {
+        if (flags & QmlWeb.QMLPropertyState.SaveBinding) {
           // binding/set
-          binding.set(this.obj, newVal, flags, declaringItem);
+          newVal = this.value;
+          this.binding.set(this.obj, newVal, flags, declaringItem);
         } else {
-          // binding/get
+          // this.binding/get
           pushed = QMLProperty.pushEvaluatingProperty(this);
 
-          var val = binding.get(this.obj);
-
-          this.$setVal(val, flags, declaringItem);
+          if (oldVal === undefined) oldVal = this.value;
+          newVal = this.binding.get(this.obj);
+          this.$setVal(newVal, flags, declaringItem);
         }
+      } else {
+        newVal = this.value;
       }
 
       this.updateState = QmlWeb.QMLPropertyState.Valid;
@@ -246,7 +247,7 @@ class QMLProperty {
     } catch (err) {
 
       if (err.ctType) {
-        if (flags & (QmlWeb.QMLPropertyFlags.Save|QmlWeb.QMLPropertyFlags.Changed)) {
+        if (flags & (QmlWeb.QMLPropertyState.SaveBinding|QmlWeb.QMLPropertyFlags.Changed)) {
           throw new Error("Assertion failed : "+QmlWeb.QMLPropertyFlags.toString(flags));
         }
       } else {
@@ -275,8 +276,8 @@ class QMLProperty {
     }
 
 
-    if (binding ? (flags & QmlWeb.QMLPropertyFlags.Save ? false : newVal !== oldVal) :
-                  (flags & QmlWeb.QMLPropertyFlags.Changed ? true : e("Assertion failed : no binding/read/update"))  ) {
+    if (this.binding ? (flags & QmlWeb.QMLPropertyState.SaveBinding ? false : newVal !== oldVal) :
+                  (flags & QmlWeb.QMLPropertyFlags.Changed ? newVal !== oldVal : e("Assertion failed : no binding/read/update"))  ) {
       this.sendChanged(oldVal, newVal);
     }
   }
@@ -398,60 +399,55 @@ class QMLProperty {
         throw new Error(`property '${this.name}' has read only access`);
       }
 
-      let oldVal = this.value;
-      let needSend = !(this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
-
       if (newVal === undefined) {
         if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
           newVal = QMLProperty.typeInitialValues[this.type];
         }
         this.updateState &= ~QmlWeb.QMLPropertyState.Dirty;
       } else {
+        //if (newVal instanceof Array) {
+        //  newVal = newVal.slice(); // Copies the array
+        //}
         this.updateState &= ~QmlWeb.QMLPropertyState.DirtyUninit;
       }
 
-
+      let oldVal = this.value;
+      let desiredState;
+      let needSend;
+      if (flags & QmlWeb.QMLPropertyFlags.ResetBinding) {
+        this.binding = null;
+      }
       if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
-        oldVal = this.binding;
+        needSend = this.binding !== newVal;
         this.binding = newVal;
-        this.value = undefined;
-
-        if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
-          needSend = (newVal !== oldVal);
-        } else {
-          // with get/binding mode
-          this.update(flags);
-          needSend = false;
-        }
+        desiredState = QmlWeb.QMLPropertyState.NeedsUpdate;
       } else {
-
-        if (newVal instanceof Array) {
-          newVal = newVal.slice(); // Copies the array
-        }
-
-        this.$setVal(newVal, flags, declaringItem);
-
         if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
-          if (flags & QmlWeb.QMLPropertyFlags.RemoveBidirectionalBinding) {
-            this.binding = null;
-            needSend |= (newVal !== oldVal);
-          } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
-            flags |= QmlWeb.QMLPropertyFlags.Save;
-            needSend = (newVal !== oldVal);
-          } else {
-            flags |= QmlWeb.QMLPropertyFlags.Save;
-            needSend = false;
-            // with Changed flag = set/binding mode
-            this.update(flags);
-          }
+          desiredState = QmlWeb.QMLPropertyState.SaveBinding;
+          needSend = true;
         } else {
           if (!(flags & QmlWeb.QMLPropertyFlags.ReasonAnimation)) {
             this.binding = null;
           }
-          needSend |= (newVal !== oldVal);
-          flags |= QmlWeb.QMLPropertyFlags.Changed;
+          desiredState = QmlWeb.QMLPropertyState.Changed;
+          needSend = !(this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
+        }
+        if (newVal !== oldVal) {
+          this.$setVal(newVal, flags, declaringItem);
+        } else {
+          needSend = false;
         }
       }
+
+      if (needSend) {
+        this.updateState = desiredState;
+        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init)) {
+          needSend = false;
+          // with get/binding mode
+          this.update(flags);
+        }
+      }
+
 
       if (needSend) {
 
@@ -461,16 +457,15 @@ class QMLProperty {
               (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
             let itm;
             if (itm = QmlWeb.engine.pendingOperations.map[this.$propertyId]) {
+              // NOTE not setting oldValue here, keeping the oldest one
               itm.flags = flags;
               itm.declaringItem = declaringItem;
-              itm.oldVal = oldVal;
-              itm.newVal = this.value;
               itm.info+=" "+QmlWeb.QMLPropertyFlags.toString(flags);
             } else {
               itm = {
                 property:this,
                 info:"Pending property : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
-                flags, declaringItem, oldVal, newVal:this.value
+                flags, declaringItem, oldVal
                 };
               QmlWeb.engine.pendingOperations.map[this.$propertyId] = itm;
               // triggers update at Starting stage:

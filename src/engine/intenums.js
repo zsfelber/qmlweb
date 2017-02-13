@@ -67,11 +67,9 @@ const QMLPropertyFlags = {
   ReasonAnimation : 2,
   Privileged : 4,
   ReasonInitPrivileged : 1 | 4,
-  RemoveBidirectionalBinding : 8,
+  ResetBinding : 8,
   SetChildren : 16,
   ThroughBinding : 32,
-  Changed : 64,
-  Save : 128,
 
   toString: function(flags) {
     return humanize.call(QMLPropertyFlags, flags);
@@ -86,11 +84,15 @@ const QMLPropertyState = {
   Dirty : 1 | 2,
   InvalidityFlags : 1 | 4,
   DirtyUninit : 1 | 2 | 4,
+  Changed : 8,
+  SaveBinding : 16,
 
   Valid_mnem : "ok",
   NeedsUpdate_mnem : "!",
   Updating_mnem : "~",
   Uninitialized_mnem : "-",
+  Changed_mnem : ">",
+  Save_mnem : ">*",
 
   toString: function(flags, mnem = true) {
     return humanize.call(QMLPropertyState, flags, mnem);
