@@ -432,7 +432,7 @@ class QMLEngine {
       i++;
     }
 
-    console.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+ae)+") functions:"+b+" error:"+e+" warnings:"+w, "Info:",info, "Warning:",warning, "Error:",error);
+    console.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+ae)+") functions:"+b+"  Info:",info, "   Warning("+w+"):",warning, "   Error("+e+"):",error);
   }
 
   static dumpErr() {
