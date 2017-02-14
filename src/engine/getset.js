@@ -1,20 +1,20 @@
 /* eslint accessor-pairs: 0 */
 
-function setupGetter(obj, propName, func, owner) {
+function setupGetter(obj, propName, func, owner, enumerable=false) {
   Object.defineProperty(obj, propName, {
     get: func,
     owner: owner,
     configurable: true,
-    enumerable: true
+    enumerable
   });
 }
 
-function setupSetter(obj, propName, func, owner) {
+function setupSetter(obj, propName, func, owner, enumerable=false) {
   Object.defineProperty(obj, propName, {
     set: func,
     owner: owner,
     configurable: true,
-    enumerable: false
+    enumerable
   });
 }
 

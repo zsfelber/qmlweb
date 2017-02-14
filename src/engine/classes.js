@@ -262,12 +262,14 @@ function addElementToPageContexts(item, id, ctx) {
   // see also QMLProperty.createProperty how element access can be hidden by same name property or alias
   // see also QMLBindingFlags.bindXXX methods how a name is eventually resolved at runtime
 
-  if (ctx.hasOwnProperty(id)) {
+  if (id in ctx) {
     console.warn("Context entry overriden by Element : "+id+" object:"+item);
-  }
 
-  // always put nothing but self to inheritable context (only self of elements, but all properties) :
-  ctx[id] = item;
+    QmlWeb.setupGetter(ctx, id, () => item, ctx);
+  } else {
+    // always put nothing but self to inheritable context (only self of elements, but all properties) :
+    ctx[id] = item;
+  }
 
   // current page top context $pageElements is inherited :
   if (ctx.$pageElements[id]) {
@@ -275,27 +277,6 @@ function addElementToPageContexts(item, id, ctx) {
   }
   ctx.$pageElements[id] = item;
 
-//  // put it into context.$elements of :
-//  // - this QML page or element
-//  // - through all nested parent
-//  // - until current page top  :
-//  for (var ectx = ctx; ; ectx=ectx.loaderContext) {
-//    if (ectx.$elements[id]) {
-//      throw new Error("Duplicated element id:"+id+" in "+ectx);
-//    }
-
-//    QmlWeb.setupGetterSetter(
-//      ectx.$elements, id,
-//      () => item,
-//      () => {},
-//      item, true
-//    );
-
-//    // ectx is current Page top : exit
-//    if (!(ectx.component.flags&QmlWeb.QMLComponentFlags.Nested)) {
-//      break;
-//    }
-//  }
 }
 
 
