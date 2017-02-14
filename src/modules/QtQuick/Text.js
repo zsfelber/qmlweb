@@ -35,7 +35,7 @@ QmlWeb.registerQmlType({
     this.dom.appendChild(fc);
 
     const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
-    this.font = new QMLFont(this);
+    this.font = new QMLFont(this, {attached:true, info:"drag"});
 
     this.colorChanged.connect(this, this.$onColorChanged);
     this.textChanged.connect(this, this.$onTextChanged);

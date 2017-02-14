@@ -595,7 +595,9 @@ QmlWeb.registerQmlType({
     opacity: { type: "real", initialValue: 1 },
     visible: { type: "bool", initialValue: true },
     clip: "bool",
-    focus: "bool"
+    focus: "bool",
+    antialiasing: "bool",
+    smooth : "bool"
   },
   defaultProperty: "data",
   constructor: Item

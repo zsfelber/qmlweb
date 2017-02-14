@@ -12,7 +12,8 @@ QmlWeb.registerQmlType({
     menu: { type: "array", initialValue: [] },
     model: { type: "array", initialValue: [] },
     pressed: "bool",
-    popupVisible: "bool"
+    popupVisible: "bool",
+    editable: "bool"
   },
   signals: {
     accepted: [],

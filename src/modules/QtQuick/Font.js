@@ -4,8 +4,8 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   baseClass: "QtQml.QtObject"
 }, class extends QmlWeb.QObject {
-  constructor(parent) {
-    super(parent); // TODO: superAndInitMeta support?
+  constructor(parent, meta) {
+    super(parent, meta); // TODO: superAndInitMeta support?
     this.Font = global.Font; // TODO: make a sane enum
 
     const Font = this.Font;

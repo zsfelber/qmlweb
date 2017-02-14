@@ -5,7 +5,8 @@ QmlWeb.registerQmlType({
   baseClass: "Repeater",
   properties: {
     orientation: "enum",
-    spacing: "real"
+    spacing: "real",
+    currentIndex: "int"
   }
 }, class {
   constructor(meta) {

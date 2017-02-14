@@ -38,6 +38,18 @@ QmlWeb.registerQmlType({
 
     this.cursorShapeChanged.connect(this, this.$onCursorShapeChanged);
 
+    // TODO gz dummy
+   this.drag = new QmlWeb.QObject(this, {attached:true, info:"drag"});
+   createProperty("Item", this.drag, "target");
+   createProperty("bool", this.drag, "active");
+   createProperty("enum", this.drag, "axis");
+   createProperty("int", this.drag, "minimumX");
+   createProperty("int", this.drag, "maximumX");
+   createProperty("int", this.drag, "minimumY");
+   createProperty("int", this.drag, "maximumY");
+   createProperty("bool", this.drag, "filterChildren");
+   createProperty("real", this.drag, "threshold");
+
    this.dom.addEventListener("click", e => this.$handleClick(e));
    this.dom.addEventListener("dblclick", e => this.$handleDblClick(e));
 
