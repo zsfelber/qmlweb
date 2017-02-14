@@ -15,10 +15,14 @@ QmlWeb.registerQmlType({
     cursorShape: "enum" // Qt.ArrowCursor
   },
   signals: {
-    clicked: [{ type: "variant", name: "mouse" }],
-    entered: [],
-    exited: [],
-    positionChanged: [{ type: "variant", name: "mouse" }]
+   clicked: [{ type: "variant", name: "mouse" }],
+   doubleClicked: [{ type: "variant", name: "mouse" }],
+   pressed: [{ type: "variant", name: "mouse" }],
+   released: [{ type: "variant", name: "mouse" }],
+   entered: [],
+   exited: [],
+   positionChanged: [{ type: "variant", name: "mouse" }],
+   propagateComposedEvents: "bool"
   }
 }, class {
   constructor(meta) {
@@ -34,7 +38,9 @@ QmlWeb.registerQmlType({
 
     this.cursorShapeChanged.connect(this, this.$onCursorShapeChanged);
 
-    this.dom.addEventListener("click", e => this.$handleClick(e));
+   this.dom.addEventListener("click", e => this.$handleClick(e));
+   this.dom.addEventListener("dblclick", e => this.$handleDblClick(e));
+
     this.dom.addEventListener("contextmenu", e => this.$handleClick(e));
     const handleMouseMove = e => {
       if (!this.enabled || !this.hoverEnabled && !this.pressed) return;
@@ -46,6 +52,8 @@ QmlWeb.registerQmlType({
       document.removeEventListener("mouseup", handleMouseUp);
       this.$clientTransform = undefined;
       document.removeEventListener("mousemove", handleMouseMove);
+
+      this.released(mouse);
     };
     this.dom.addEventListener("mousedown", e => {
       if (!this.enabled) return;
@@ -64,6 +72,9 @@ QmlWeb.registerQmlType({
       this.mouseY = mouse.y;
       this.pressed = true;
       this.pressedButtons = mouse.button;
+
+      this.pressed(mouse);
+
       document.addEventListener("mouseup", handleMouseUp);
       document.addEventListener("mousemove", handleMouseMove);
     });
@@ -100,6 +111,12 @@ QmlWeb.registerQmlType({
     // This decides whether to show the browser's context menu on right click or
     // not
     return !(this.acceptedButtons & QmlWeb.Qt.RightButton);
+  }
+  $handleClick(e) {
+    const mouse = this.$eventToMouse(e);
+    if (this.enabled && this.acceptedButtons & mouse.button) {
+      this.doubleClicked(mouse);
+    }
   }
   $eventToMouse(e) {
     const Qt = QmlWeb.Qt;
