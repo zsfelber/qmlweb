@@ -375,6 +375,8 @@ class QMLProperty {
         throw new Error(`property '${this.name}' has read only access`);
       }
 
+      let needSend = !(this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
+
       if (newVal === undefined) {
         if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
           newVal = QMLProperty.typeInitialValues[this.type];
@@ -388,7 +390,6 @@ class QMLProperty {
 
       let oldVal = this.value;
       let desiredState;
-      let needSend;
 
       if (flags & QmlWeb.QMLPropertyFlags.ResetBinding) {
         this.binding = null;
@@ -407,7 +408,6 @@ class QMLProperty {
             this.binding = null;
           }
           desiredState = QmlWeb.QMLPropertyState.NonBoundSet;
-          needSend = !(this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
         }
         if (newVal !== oldVal) {
           this.$setVal(newVal, flags, declaringItem);
@@ -417,6 +417,7 @@ class QMLProperty {
       }
 
       if (needSend) {
+
         this.updateState = desiredState;
 
         if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
@@ -443,12 +444,6 @@ class QMLProperty {
 
         } else {
           this.update(flags);
-
-          if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
-            this.changed(this.value, oldVal, this.name);
-          } else {
-            this.sendChanged(oldVal, this.value);
-          }
         }
       }
 
@@ -463,7 +458,7 @@ class QMLProperty {
     // $base because to avoid infinite loops for overriden toString:
     return os+" . prop:"+this.name+(detail?"#"+this.$propertyId:"")+
       (detail?" "+QmlWeb.QMLPropertyState.toString(this.updateState)+(this.binding?" "+QmlWeb.QMLBindingFlags.toString(this.binding.flags):""):"")+
-       (this.value?" v:"+this.value:"")+(this.readOnly?" ro":"")+(this.pendingInit?" pi":"");
+       (this.value?" v:"+this.value:"")+" "+(this.readOnly?"ro":"")+(this.pendingInit?"pi":"");
   }
 
   stackToString(stack) {
