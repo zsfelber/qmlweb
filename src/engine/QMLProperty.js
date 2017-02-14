@@ -3,8 +3,7 @@ let propertyIds = 0;
 class PendingEvaluation extends Error {
   constructor(...args) {
     super(...args);
-    const prop = args[1];
-    this.property = prop;
+    this.property = args[1];
     this.ctType = "PendingEvaluation";
   }
 }
@@ -12,6 +11,7 @@ class PendingEvaluation extends Error {
 class UninitializedEvaluation extends Error {
   constructor(...args) {
     super(...args);
+    this.property = args[1];
     this.ctType = "UninitializedEvaluation";
   }
 }
@@ -217,7 +217,7 @@ class QMLProperty {
 
       if (err.ctType) {
         if (origState & (QmlWeb.QMLPropertyState.BoundSet|QmlWeb.QMLPropertyState.NonBoundSet)) {
-          console.error("Assertion failed : "+QmlWeb.QMLPropertyState.toString(origState) +" -> "+ QmlWeb.QMLPropertyState.toString(this.updateState)+"  Invalid Error:"+err.message);
+          console.error("Assertion failed : "+err.ctType+" : "+QmlWeb.QMLPropertyState.toString(origState) +" -> "+ QmlWeb.QMLPropertyState.toString(this.updateState)+"  Invalid Error:"+err.message);
           this.updateState = origState;
         }
       } else {

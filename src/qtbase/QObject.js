@@ -51,6 +51,7 @@ class QObject {
     this.$properties_noalias = {};
     this.$noalias = {};
     this.$signals = {};
+    this.$leaf = this;
 
     this.$objectId = ++objectIds;
   }
