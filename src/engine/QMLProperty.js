@@ -348,10 +348,12 @@ class QMLProperty {
       if (invalidityFlags & QmlWeb.QMLPropertyState.Uninitialized) {
         if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
           // This 'get' is directed to an unitialized property
-          throw new QmlWeb.UninitializedEvaluation(`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
+          QmlWeb.engine.currentPendingOp.warnings.push({loc:"get",
+                                                        err:`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)} -> ${QmlWeb.QMLPropertyState.toString(this.updateState)}`,
+                                                        prop:this});
         }
       } else {
-        throw new QmlWeb.PendingEvaluation(`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
+        throw new QmlWeb.PendingEvaluation(`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)} -> ${QmlWeb.QMLPropertyState.toString(this.updateState)}`, this);
       }
     }
 
