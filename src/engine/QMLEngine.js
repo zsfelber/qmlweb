@@ -436,17 +436,28 @@ class QMLEngine {
         if (op.errors.length) {
           e++;
           error["#"+i+mode+"!!"+op.info] = op;
+          op.err = op.errors[0];
+          if (op.err.err !== undefined)
+            op.err = op.err.err;
         } else if (op.warnings.length) {
           w++;
           warning["#"+i+mode+"!"+op.info] = op;
+          op.warn = op.warnings[0];
+          if (op.warn.err !== undefined)
+            op.warn = op.warn.err;
         } else {
           info["#"+i+mode+":"+op.info] = op;
         }
 
       } catch (err) {
-        e++;
-        error["#ERR:#"+i+mode+":"+op.info+":"+err.message] = op;
-        op.dumpErr = QMLEngine.dumpErr.bind(err);
+        if (err.ctType==="UninitializedEvaluation") {
+          w++;
+          warning["#"+i+mode+"!"+op.info] = op;
+        } else {
+          e++;
+          error["#"+i+mode+"!!"+op.info] = op;
+        }
+        op.err = err;
       }
 
       i++;

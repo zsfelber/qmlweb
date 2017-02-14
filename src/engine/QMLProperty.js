@@ -23,7 +23,7 @@ function dumpEvalError(msg, err) {
 }
 
 function objToStringSafe(obj, detail) {
-  var os = (obj.$base?obj.$base.toString():(obj.$classname||obj.constructor?(obj.$classname||obj.constructor.name)+":":"")+(obj.$objectId?obj.$objectId:"object"));
+  var os = (typeof obj.$info==="string"?obj.$info:(obj.$base?obj.$base.toString():(obj.$classname||obj.constructor?(obj.$classname||obj.constructor.name)+":":""))+(detail&&obj.$objectId?obj.$objectId:""));
 
   return os;
 }
@@ -433,7 +433,7 @@ class QMLProperty {
             } else {
               itm = {
                 property:this,
-                info:"Pending property : "+this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
+                info:this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
                 flags, declaringItem, oldVal
                 };
               QmlWeb.engine.pendingOperations.map[this.$propertyId] = itm;
