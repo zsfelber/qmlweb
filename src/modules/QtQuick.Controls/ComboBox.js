@@ -23,7 +23,7 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.superAndInitMeta(this, meta);
 
-    this.dom.style.pointerEvents = "auto";
+    QmlWeb.setStyle(this.css, "pointerEvents", "auto");
     this.name = "QMLComboBox";
 
     this.Component.completed.connect(this, this.Component$onCompleted);

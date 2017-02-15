@@ -27,11 +27,11 @@ QmlWeb.registerQmlType({
     QmlWeb.superAndInitMeta(this, meta);
 
     const fc = this.impl = document.createElement("span");
-    fc.style.pointerEvents = "none";
-    fc.style.width = "100%";
-    fc.style.height = "100%";
-    fc.style.whiteSpace = "pre";
-    this.dom.style.textAlign = "left";
+    this.fcss = QmlWeb.createStyle(fc.style);
+    fc.className = "qmltext";
+
+    QmlWeb.setStyle(this.css, "textAlign", "left");
+
     this.dom.appendChild(fc);
 
     const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
@@ -118,7 +118,7 @@ QmlWeb.registerQmlType({
         textAlign = "justify";
         break;
     }
-    this.dom.style.textAlign = textAlign;
+    QmlWeb.setStyle(this.css, "textAlign", textAlign);
     this.$updateJustifyWhiteSpace();
   }
   $onFontChanged() {

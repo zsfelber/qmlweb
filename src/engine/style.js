@@ -10,7 +10,7 @@ function createStyle(css) {
   return style;
 }
 
-function setStyle(style, arg, value, defaultStyle = defaultItemStype) {
+function setStyle(style, arg, value, defaultStyle = defaultItemStyle) {
   style[arg] = value;
   if (value && defaultStyle[arg] !== value) {
     style.css[arg] = value;

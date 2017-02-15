@@ -72,6 +72,7 @@ QmlWeb.registerQmlType({
     this.redoStackPosition = -1;
 
     const textarea = this.impl = document.createElement("textarea");
+    this.impl.className = "qmltextarea";
     this.tacss = QmlWeb.createStyle(textarea.style);
 
     textarea.disabled = false;
@@ -158,7 +159,7 @@ QmlWeb.registerQmlType({
     this.impl.value = newVal;
   }
   $onColorChanged(newVal) {
-    QmlWeb.setStyle(this.tacss, "color", newVal);
+    QmlWeb.setStyle(this.tacss, "color", newVal, defaultTextareaStyle);
   }
   $updateValue() {
     if (this.text !== this.impl.value) {
@@ -183,8 +184,8 @@ QmlWeb.registerQmlType({
       const o = supported[n];
       const v = this.css[o];
       if (v) {
-        QmlWeb.setStyle(this.tacss, o, v);
-        QmlWeb.setStyle(this.css, o, null);
+        QmlWeb.setStyle(this.tacss, o, v, defaultTextareaStyle);
+        QmlWeb.setStyle(this.css, o, null, defaultTextareaStyle);
       }
     }
   }

@@ -28,6 +28,6 @@ QmlWeb.registerQmlType({
     this.colorChanged.connect(this, this.$onColorChanged);
   }
   $onColorChanged(newVal) {
-    this.dom.style.backgroundColor = newVal;
+    QmlWeb.setStyle(this.css, "backgroundColor", newVal);
   }
 });

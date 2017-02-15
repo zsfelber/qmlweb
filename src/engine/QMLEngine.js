@@ -73,16 +73,17 @@ class QMLEngine {
     //----------Construct----------
 
     if (this.dom) {
+      this.css = QmlWeb.createStyle(this.dom.style);
       // No QML stuff should stand out the root element
-      this.dom.style.overflow = "hidden";
+      QmlWeb.setStyle(this.css, "overflow", "hidden");
 
       // Needed to make absolute positioning work
-      if (!this.dom.style.position) {
+      if (!this.css.position) {
         const style = window.getComputedStyle(this.dom);
         if (style.getPropertyValue("position") === "static") {
-          this.dom.style.position = "relative";
-          this.dom.style.top = "0";
-          this.dom.style.left = "0";
+          QmlWeb.setStyle(this.css, "position", "relative");
+          QmlWeb.setStyle(this.css, "top", "0px");
+          QmlWeb.setStyle(this.css, "left", "0px");
         }
       }
     }

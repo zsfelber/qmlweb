@@ -5,14 +5,14 @@ class Item {
     if (!this.dom) { // Create a dom element for this item.
       this.dom = document.createElement(meta.tagName || "div");
     }
-    this.dom.style.position = "absolute";
-    this.dom.style.pointerEvents = "none";
+    this.css = QmlWeb.createStyle(this.dom.style);
+    QmlWeb.setStyle(this.css, "position", "absolute");
+    QmlWeb.setStyle(this.css, "pointerEvents", "none");
     // In case the class is qualified, only use the last part for the css class
     // name.
     const classComponent = meta.$class.split(".").pop();
     //this.dom.className = `${classComponent}${this.id ? ` ${this.id}` : ""}`;
-    this.dom.className = "qmlitem";
-    this.css = QmlWeb.createStyle(this.dom.style);
+    //this.dom.className = "qmlitem";
     this.impl = null; // Store the actually drawn element
 
     const createProperty = QmlWeb.createProperty;
@@ -307,13 +307,13 @@ class Item {
     if (typeof this.z === "number") {
       transform += ` translate3d(0, 0, ${this.z}px)`;
     }
-    this.dom.style.transform = transform;
-    this.dom.style.transformStyle = transformStyle;
-    this.dom.style.webkitTransform = transform; // Chrome, Safari and Opera
-    this.dom.style.webkitTransformStyle = transformStyle;
-    this.dom.style.msTransform = transform;     // IE
-    this.dom.style.filter = filter;
-    this.dom.style.webkitFilter = filter; // Chrome, Safari and Opera
+    QmlWeb.setStyle(this.css, "transform", transform);
+    QmlWeb.setStyle(this.css, "transformStyle", transformStyle);
+    QmlWeb.setStyle(this.css, "webkitTransform", transform); // Chrome, Safari and Opera
+    QmlWeb.setStyle(this.css, "webkitTransformStyle", transformStyle);
+    QmlWeb.setStyle(this.css, "msTransform", transform);     // IE
+    QmlWeb.setStyle(this.css, "filter", filter);
+    QmlWeb.setStyle(this.css, "webkitFilter", filter); // Chrome, Safari and Opera
   }
   Component$onCompleted_() {
     this.$calculateOpacity();

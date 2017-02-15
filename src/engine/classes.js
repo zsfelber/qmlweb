@@ -138,11 +138,11 @@ function construct(meta, parent, flags) {
 
     // Finalize instantiation over supertype item :
 
-    if (typeof item.dom !== "undefined") {
-      if (meta.id) {
-        item.dom.className += `  ${meta.id}`;
-      }
-    }
+    //if (typeof item.dom !== "undefined") {
+    //  if (meta.id) {
+    //    item.dom.className += `  ${meta.id}`;
+    //  }
+    //}
 
     if (!ctx) {
       throw new Error("No context : "+item);
@@ -190,9 +190,9 @@ function constructSuper(meta, parent) {
     // always super here:
     item = createComponentAndElement(clinfo, parent, QMLComponentFlags.Super);
 
-    if (typeof item.dom !== "undefined") {
-      item.dom.className += ` ${clinfo.$path[clinfo.$path.length - 1]}`;
-    }
+    //if (typeof item.dom !== "undefined") {
+    //  item.dom.className += ` ${clinfo.$path[clinfo.$path.length - 1]}`;
+    //}
   }
 
   return item;

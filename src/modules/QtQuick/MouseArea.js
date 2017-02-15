@@ -28,13 +28,13 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.superAndInitMeta(this, meta);
 
-    this.dom.style.pointerEvents = "all";
+    QmlWeb.setStyle(this.css, "pointerEvents", "all");
 
     // IE does not handle mouse clicks to transparent divs, so we have
     // to set a background color and make it invisible using opacity
     // as that doesn't affect the mouse handling.
-    this.dom.style.backgroundColor = "white";
-    this.dom.style.opacity = 0;
+    QmlWeb.setStyle(this.css, "backgroundColor", "white");
+    QmlWeb.setStyle(this.css, "opacity", 0);
 
     this.cursorShapeChanged.connect(this, this.$onCursorShapeChanged);
 
@@ -107,7 +107,7 @@ QmlWeb.registerQmlType({
     });
   }
   $onCursorShapeChanged() {
-    this.dom.style.cursor = this.$cursorShapeToCSS();
+    QmlWeb.setStyle(this.css, "cursor", this.$cursorShapeToCSS());
   }
   $handlePositionChanged(e) {
     const mouse = this.$eventToMouse(e);

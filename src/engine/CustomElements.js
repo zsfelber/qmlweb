@@ -61,6 +61,7 @@ function registerElement(name, file) {
     connectedCallback() {
       if (!this.css) {
         this.css = QmlWeb.createStyle(this.style);
+        this.className = "qmlcustom";
       }
 
       // Default wrapper display is inline-block to support native width/height
@@ -99,13 +100,13 @@ function registerElement(name, file) {
       });
 
       // Set and update wrapper width/height
-      QmlWeb.setStyle(this.css, "width", `${qml.width}px`);
-      QmlWeb.setStyle(this.css, "height", `${qml.height}px`);
+      QmlWeb.setStyle(this.css, "width", `${qml.width}px`, {});
+      QmlWeb.setStyle(this.css, "height", `${qml.height}px`, {});
       qml.$properties.width.changed.connect(this, width => {
-        QmlWeb.setStyle(this.css, "width", `${width}px`);
+        QmlWeb.setStyle(this.css, "width", `${width}px`, {});
       });
       qml.$properties.height.changed.connect(this, height => {
-        QmlWeb.setStyle(this.css, "height", `${height}px`);
+        QmlWeb.setStyle(this.css, "height", `${height}px`, {});
       });
     }
 
