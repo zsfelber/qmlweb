@@ -57,11 +57,16 @@ function registerElement(name, file) {
   }, {});
 
   const QmlElement = class extends HTMLElement {
+
     connectedCallback() {
+      if (!this.css) {
+        this.css = QmlWeb.createStyle(this.style);
+      }
+
       // Default wrapper display is inline-block to support native width/height
       const computedStyle = window.getComputedStyle(this);
       if (computedStyle.display === "inline") {
-        this.style.display = "inline-block";
+        QmlWeb.setStyle(this.css, "display", "inline-block");
       }
 
       const engine = this.engine = new QmlWeb.QMLEngine(this);
@@ -94,13 +99,13 @@ function registerElement(name, file) {
       });
 
       // Set and update wrapper width/height
-      this.style.width = `${qml.width}px`;
-      this.style.height = `${qml.height}px`;
+      QmlWeb.setStyle(this.css, "width", `${qml.width}px`);
+      QmlWeb.setStyle(this.css, "height", `${qml.height}px`);
       qml.$properties.width.changed.connect(this, width => {
-        this.style.width = `${width}px`;
+        QmlWeb.setStyle(this.css, "width", `${width}px`);
       });
       qml.$properties.height.changed.connect(this, height => {
-        this.style.height = `${height}px`;
+        QmlWeb.setStyle(this.css, "height", `${height}px`);
       });
     }
 

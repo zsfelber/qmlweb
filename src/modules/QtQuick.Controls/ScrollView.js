@@ -18,7 +18,7 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     QmlWeb.superAndInitMeta(this, meta);
 
-    this.css.pointerEvents = "auto";
+    QmlWeb.setStyle(this.css, "pointerEvents", "auto");
     this.setupFocusOnDom(this.dom);
 
     this.contentItemChanged.connect(this, this.$onContentItemChanged);
@@ -61,18 +61,18 @@ QmlWeb.registerQmlType({
   $onViewportChanged() {
   }
   $onFocusChanged(focus) {
-    this.css.outline = this.highlight && focus
+    QmlWeb.setStyle(this.css, "outline", this.highlight && focus
       ? "outline: lightblue solid 2px;"
-      : "";
+      : "");
   }
   $onFrameVisibleChanged(visible) {
-    this.css.border = visible ? "1px solid gray" : "hidden";
+    QmlWeb.setStyle(this.css, "border", visible ? "1px solid gray" : "hidden");
   }
   $onHorizontalScrollBarPolicyChanged(newPolicy) {
-    this.css.overflowX = this.$scrollBarPolicyToCssOverflow(newPolicy);
+    QmlWeb.setStyle(this.css, "overflowX", this.$scrollBarPolicyToCssOverflow(newPolicy));
   }
   $onVerticalScrollBarPolicyChanged(newPolicy) {
-    this.css.overflowY = this.$scrollBarPolicyToCssOverflow(newPolicy);
+    QmlWeb.setStyle(this.css, "overflowY", this.$scrollBarPolicyToCssOverflow(newPolicy));
   }
   $onStyleChanged() {
   }

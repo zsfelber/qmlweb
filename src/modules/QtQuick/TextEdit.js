@@ -1,3 +1,16 @@
+var defaultTextareaStyle = {
+  pointerEvents  : "auto",
+  width  : "100%",
+  height  : "100%",
+  boxSizing  : "border-box",
+  borderWidth  : "0",
+  background  : "none",
+  outline  : "none",
+  resize  : "none",
+  padding  : "0",
+  margin  : "0",
+};
+
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "TextEdit",
@@ -59,18 +72,8 @@ QmlWeb.registerQmlType({
     this.redoStackPosition = -1;
 
     const textarea = this.impl = document.createElement("textarea");
-    textarea.style.pointerEvents = "auto";
-    textarea.style.width = "100%";
-    textarea.style.height = "100%";
-    textarea.style.boxSizing = "border-box";
-    textarea.style.borderWidth = "0";
-    textarea.style.background = "none";
-    textarea.style.outline = "none";
-    textarea.style.resize = "none";
-    textarea.style.padding = "0"; // TODO: padding/*Padding props from Qt 5.6
-    // In some browsers text-areas have a margin by default, which distorts
-    // the positioning, so we need to manually set it to 0.
-    textarea.style.margin = "0";
+    this.tacss = QmlWeb.createStyle(textarea.style);
+
     textarea.disabled = false;
     this.dom.appendChild(textarea);
 
@@ -155,7 +158,7 @@ QmlWeb.registerQmlType({
     this.impl.value = newVal;
   }
   $onColorChanged(newVal) {
-    this.impl.style.color = newVal;
+    QmlWeb.setStyle(this.tacss, "color", newVal);
   }
   $updateValue() {
     if (this.text !== this.impl.value) {
@@ -175,13 +178,13 @@ QmlWeb.registerQmlType({
       "borderColor",
       "backgroundColor",
     ];
-    const style = this.impl.style;
+    const style = this.tacss;
     for (let n = 0; n < supported.length; n++) {
       const o = supported[n];
       const v = this.css[o];
       if (v) {
-        style[o] = v;
-        this.css[o] = null;
+        QmlWeb.setStyle(this.tacss, o, v);
+        QmlWeb.setStyle(this.css, o, null);
       }
     }
   }

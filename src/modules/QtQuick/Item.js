@@ -10,11 +10,10 @@ class Item {
     // In case the class is qualified, only use the last part for the css class
     // name.
     const classComponent = meta.$class.split(".").pop();
-    this.dom.className = `${classComponent}${this.id ? ` ${this.id}` : ""}`;
-    this.css = this.dom.style;
+    //this.dom.className = `${classComponent}${this.id ? ` ${this.id}` : ""}`;
+    this.dom.className = "qmlitem";
+    this.css = QmlWeb.createStyle(this.dom.style);
     this.impl = null; // Store the actually drawn element
-
-    this.css.boxSizing = "border-box";
 
     const createProperty = QmlWeb.createProperty;
 
@@ -91,8 +90,8 @@ class Item {
 
     this.spacing = 0;
     this.$revertActions = [];
-    this.css.left = `${this.x}px`;
-    this.css.top = `${this.y}px`;
+    QmlWeb.setStyle(this.css, "left", `${this.x}px`);
+    QmlWeb.setStyle(this.css, "top", `${this.y}px`);
   }
   $onParentChanged_(newParent, oldParent, propName) {
     this.$updateHGeometry(newParent, oldParent, propName);
@@ -234,27 +233,27 @@ class Item {
     }
   }
   $onVisibleChanged_(newVal) {
-    this.css.visibility = newVal ? "inherit" : "hidden";
+    QmlWeb.setStyle(this.css, "visibility", newVal ? "inherit" : "hidden");
   }
   $onClipChanged(newVal) {
-    this.css.overflow = newVal ? "hidden" : "visible";
+    QmlWeb.setStyle(this.css, "overflow", newVal ? "hidden" : "visible");
   }
   $onZChanged() {
     this.$updateTransform();
   }
   $onXChanged(newVal) {
-    this.css.left = `${newVal}px`;
+    QmlWeb.setStyle(this.css, "left", `${newVal}px`);
     this.$updateHGeometry();
   }
   $onYChanged(newVal) {
-    this.css.top = `${newVal}px`;
+    QmlWeb.setStyle(this.css, "top", `${newVal}px`);
     this.$updateVGeometry();
   }
   $onWidthChanged_(newVal) {
-    this.css.width = newVal ? `${newVal}px` : "auto";
+    QmlWeb.setStyle(this.css, "width", newVal ? `${newVal}px` : "auto");
   }
   $onHeightChanged_(newVal) {
-    this.css.height = newVal ? `${newVal}px` : "auto";
+    QmlWeb.setStyle(this.css, "height", newVal ? `${newVal}px` : "auto");
   }
   $onFocusChanged_(newVal) {
     if (newVal) {
@@ -323,7 +322,7 @@ class Item {
     // TODO: reset all opacity on layer.enabled changed
     /*
     if (false) { // TODO: check layer.enabled
-      this.css.opacity = this.opacity;
+      QmlWeb.setStyle(this.css, "opacity", this.opacity);
     }
     */
     const parentOpacity = this.$parent && this.$parent.$opacity || 1;
