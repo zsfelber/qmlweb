@@ -2,7 +2,8 @@ var styleGroups = {};
 var defaultItemStyle = {
   top:"0px", left:"0px",
   position:"absolute",
-  boxSizing:"border-box"
+  boxSizing:"border-box",
+  pointerEvents:"none"
 };
 
 function createStyle(css) {

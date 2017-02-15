@@ -24,15 +24,9 @@ QmlWeb.registerQmlType({
     this.font = new QMLFont(this);
 
     const input = this.impl = document.createElement("input");
+    input.className = "qmltextinput";
     input.type = "text";
     input.disabled = true;
-    input.style.pointerEvents = "auto";
-    // In some browsers text-inputs have a margin by default, which distorts
-    // the positioning, so we need to manually set it to 0.
-    input.style.margin = "0";
-    input.style.padding = "0";
-    input.style.width = "100%";
-    input.style.height = "100%";
     this.dom.appendChild(input);
     this.setupFocusOnDom(input);
     input.disabled = false;

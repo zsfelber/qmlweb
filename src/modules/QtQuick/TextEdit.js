@@ -3,12 +3,12 @@ var defaultTextareaStyle = {
   width  : "100%",
   height  : "100%",
   boxSizing  : "border-box",
-  borderWidth  : "0",
+  borderWidth  : "0px",
   background  : "none",
   outline  : "none",
   resize  : "none",
-  padding  : "0",
-  margin  : "0",
+  padding  : "0px",
+  margin  : "0px"
 };
 
 QmlWeb.registerQmlType({

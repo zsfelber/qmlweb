@@ -36,11 +36,9 @@ QmlWeb.registerQmlType({
     this.font = new QMLFont(this);
 
     const input = this.impl = document.createElement("input");
+    input.className = "qmltextfield";
     input.type = "text";
     input.disabled = true;
-    input.style.pointerEvents = "auto";
-    input.style.margin = "0";
-    input.style.width = "100%";
     this.dom.appendChild(input);
     this.setupFocusOnDom(input);
     input.disabled = false;

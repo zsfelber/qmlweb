@@ -19,7 +19,7 @@ QmlWeb.registerQmlType({
     this.enabledChanged.connect(this, this.$onEnabledChanged);
 
     const button = this.impl = document.createElement("button");
-    button.style.pointerEvents = "auto";
+    button.className = "qmlbutton"
     this.dom.appendChild(button);
 
     button.onclick = () => {

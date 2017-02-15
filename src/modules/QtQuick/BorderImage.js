@@ -31,9 +31,7 @@ QmlWeb.registerQmlType({
     createProperty("int", this.border, "bottom");
 
     const bg = this.impl = document.createElement("div");
-    bg.style.pointerEvents = "none";
-    bg.style.height = "100%";
-    bg.style.boxSizing = "border-box";
+    bg.className = "qmlborderimg";
     this.dom.appendChild(bg);
 
     this.$img = new Image();

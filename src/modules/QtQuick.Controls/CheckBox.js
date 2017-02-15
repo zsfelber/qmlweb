@@ -13,11 +13,11 @@ QmlWeb.registerQmlType({
     QmlWeb.superAndInitMeta(this, meta);
 
     this.impl = document.createElement("label");
-    this.impl.style.pointerEvents = "auto";
+    this.impl.className = "qmllabel"
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.style.verticalAlign = "text-bottom";
+    checkbox.className = "qmlcheckbox";
     checkbox.addEventListener("change", () => {
       this.checked = checkbox.checked;
     });

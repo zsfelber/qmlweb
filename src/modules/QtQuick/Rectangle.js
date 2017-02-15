@@ -18,13 +18,7 @@ QmlWeb.registerQmlType({
     this.$borderActive = false;
 
     const bg = this.impl = document.createElement("div");
-    bg.style.pointerEvents = "none";
-    bg.style.position = "absolute";
-    bg.style.left = bg.style.right = bg.style.top = bg.style.bottom = "0px";
-    bg.style.borderWidth = "0px";
-    bg.style.borderStyle = "solid";
-    bg.style.borderColor = "black";
-    bg.style.backgroundColor = "white";
+    bg.className = "qmlrectangle";
     this.dom.appendChild(bg);
 
     this.colorChanged.connect(this, this.$onColorChanged);
