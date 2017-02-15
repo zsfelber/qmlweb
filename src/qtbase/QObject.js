@@ -6,7 +6,7 @@ class QObject {
     this.$base = this;
     if (meta) {
       this.$meta = meta;
-      if (meta.component||meta.context) {
+      if (meta.$component||meta.$context) {
         // NOTE context bindings of object prototype chain :
         // QObject.context : UserAbstractItem.context
         // QtQml.QtObject.context : UserAbstractItem.context
@@ -16,8 +16,8 @@ class QObject {
         // ...
         // UserLeafItem.context : $leaf.context
 
-        this.$component = meta.component;
-        this.$context = meta.context;
+        this.$component = meta.$component;
+        this.$context = meta.$context;
 
         // !!! see QMLBinding
         this.$context.$ownerObject = this;

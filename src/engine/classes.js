@@ -24,7 +24,7 @@ function superAndInitMeta(self, meta) {
 
   csontsructor.call(self, meta);
 
-  if (meta.context && !self.$context) throw new Error("Instantiantion error, no context !");
+  if (meta.$context && !self.$context) throw new Error("Instantiantion error, no context !");
   initMeta(self, meta, constructor);
 }
 
@@ -98,7 +98,7 @@ function construct(meta, parent, flags) {
   // means : created by Component.$createObject
   if (flags & QmlWeb.QMLComponentFlags.Element) {
     if (meta !== component.meta || meta.$name!==component.$name  || meta.id!==component.$id
-        || meta.context!==component.context || meta.component!==component) {
+        || meta.$context!==component.context || meta.$component!==component) {
       throw new Error("Invalid Element construct : "+item);
     }
   } else {

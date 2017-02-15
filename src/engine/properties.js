@@ -42,7 +42,7 @@ function createProperty(type, obj, propName, options) {
 
   const QMLProperty = QmlWeb.QMLProperty;
   const prop = new QMLProperty(type, obj, propName, options);
-  function _set_prop(propName, prop, flags) {
+  function _set_prop(propName, prop, flags, binding) {
     obj[`${propName}Changed`] = prop.changed;
 
     // default values:
@@ -57,9 +57,13 @@ function createProperty(type, obj, propName, options) {
     // 0:
     // property int something;
 
+    if (binding) {
+      prop.set(binding, QMLPropertyFlags.ReasonInitPrivileged);
+    }
+
     if (options.initialValue !== undefined) {
       prop.set(options.initialValue, flags);
-    } else {
+    } else if (!binding) {
       prop.set(undefined, flags);
     }
   }
@@ -97,10 +101,9 @@ function createProperty(type, obj, propName, options) {
     var p = formatPath(path0);
     const QMLBinding = QmlWeb.QMLBinding;
     var binding = new QMLBinding(p, proplast, QMLBindingFlags.ImplExpression|QMLBindingFlags.Alias);
-    prop.set(binding, QMLPropertyFlags.ReasonInitPrivileged);
 
     // NOTE alias + initialValue works too
-    _set_prop(propName, prop, QMLPropertyFlags.ReasonInit);
+    _set_prop(propName, prop, QMLPropertyFlags.ReasonInit, binding);
 
     obj.$properties[propName] = prop;
     QmlWeb.setupGetterSetter(obj, propName, getter, setter, prop);

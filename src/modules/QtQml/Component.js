@@ -3,7 +3,7 @@ let componentIds = 0;
 class QMLComponent {
   constructor(meta, flags) {
 
-    this.componentId = ++componentIds;
+    this.$componentId = ++componentIds;
     this.$properties = {};
     QmlWeb.initMeta(this, {}, QMLComponent);
 
@@ -87,7 +87,7 @@ class QMLComponent {
               throw new Error("Loader Component $file mismatch (should not be set in loader of Nested but) : "+loaderComponent.$file+" vs "+this.$file);
             }
           }
-          this.meta.context = this.context = this.loaderComponent.context.createChild(
+          this.meta.$context = this.context = this.loaderComponent.context.createChild(
                                         this.loaderComponent.toString(undefined, true) +" -> " +this.toString(undefined, true));
 
           if (this.loaderComponent.flags & QmlWeb.QMLComponentFlags.Super) {
@@ -95,7 +95,7 @@ class QMLComponent {
           }
         } else {
 
-          this.meta.context = this.context = engine.rootContext.createChild(loaderComponent.toString(undefined, true) + " .. " +this.toString(undefined, true));
+          this.meta.$context = this.context = engine.rootContext.createChild(loaderComponent.toString(undefined, true) + " .. " +this.toString(undefined, true));
 
         }
 
@@ -111,7 +111,7 @@ class QMLComponent {
         this.$leaf = this;
         this.$root = loaderComponent.$root;
 
-        this.meta.context = this.context = loaderComponent.context.createChild(loaderComponent.toString(undefined, true)+" -> "+this.toString(undefined, true), true);
+        this.meta.$context = this.context = loaderComponent.context.createChild(loaderComponent.toString(undefined, true)+" -> "+this.toString(undefined, true), true);
         this.context.nestedLevel = this.nestedLevel;
         // inherit page top $pageElements :
         this.context.$pageElements = loaderComponent.context.$pageElements;
@@ -126,7 +126,7 @@ class QMLComponent {
       this.$leaf = this;
       this.$root = this;
 
-      this.meta.context = this.context = engine.rootContext.createChild(this.toString(undefined, true));
+      this.meta.$context = this.context = engine.rootContext.createChild(this.toString(undefined, true));
 
       //console.warn("Component  "+this);
       if (this.flags&QmlWeb.QMLComponentFlags.Nested) {
@@ -182,7 +182,7 @@ class QMLComponent {
 
   copyMeta(meta, flags) {
     var cons;
-    this.meta = {component:this};
+    this.meta = {$component:this};
     if (meta.clazz) {
       if (meta.$file === undefined) {
           meta.$file = meta.clazz.$file;
