@@ -51,9 +51,9 @@ QmlWeb.registerQmlType({
     this.$runningEventListener = 0;
 
     this.impl = document.createElement("video");
-    this.impl.style.width = this.impl.style.height = "100%";
-    this.impl.style.margin = "0";
+    this.impl.className = "qmlvideo";
     this.dom.appendChild(this.impl);
+    this.icss = QmlWeb.createStyle(this.impl);
 
     this.volume = this.impl.volume;
     this.duration = this.impl.duration;
@@ -167,13 +167,13 @@ QmlWeb.registerQmlType({
   $onFillModeChanged(newValue) {
     switch (newValue) {
       case this.VideoOutput.Stretch:
-        this.impl.style.objectFit = "fill";
+        QmlWeb.setStyle(this.impl, "objectFit", "fill");
         break;
       case this.VideoOutput.PreserveAspectFit:
-        this.impl.style.objectFit = "";
+        QmlWeb.setStyle(this.impl, "objectFit", "");
         break;
       case this.VideoOutput.PreserveAspectCrop:
-        this.impl.style.objectFit = "cover";
+        QmlWeb.setStyle(this.impl, "objectFit", "cover");
         break;
     }
   }

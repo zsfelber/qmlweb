@@ -32,6 +32,7 @@ QmlWeb.registerQmlType({
 
     const bg = this.impl = document.createElement("div");
     bg.className = "qmlborderimg";
+    this.icss = QmlWeb.createStyle(bg.style);
     this.dom.appendChild(bg);
 
     this.$img = new Image();
@@ -57,8 +58,8 @@ QmlWeb.registerQmlType({
     this.status = this.BorderImage.Loading;
     const style = this.impl.style;
     const imageURL = QmlWeb.$resolveImageURL(source);
-    style.OBorderImageSource = `url("${imageURL}")`;
-    style.borderImageSource = `url("${imageURL}")`;
+    QmlWeb.setStyle(this.icss, "OBorderImageSource", `url("${imageURL}")`);
+    QmlWeb.setStyle(this.icss, "borderImageSource", `url("${imageURL}")`);
     this.$img.src = imageURL;
     if (this.$img.complete) {
       this.progress = 1;
@@ -71,22 +72,22 @@ QmlWeb.registerQmlType({
     const slice = `${top} ${right} ${bottom} ${left} fill`;
     const width = `${top}px ${right}px ${bottom}px ${left}px`;
     const repeat = `${this.horizontalTileMode} ${this.verticalTileMode}`;
-    style.OBorderImageSlice = slice;
-    style.OBorderImageRepeat = repeat;
-    style.OBorderImageWidth = width;
-    style.borderImageSlice = slice;
-    style.borderImageRepeat = repeat;
-    style.borderImageWidth = width;
+    QmlWeb.setStyle(this.icss, "OBorderImageSlice", slice);
+    QmlWeb.setStyle(this.icss, "OBorderImageRepeat", repeat);
+    QmlWeb.setStyle(this.icss, "OBorderImageWidth", width);
+    QmlWeb.setStyle(this.icss, "borderImageSlice", slice);
+    QmlWeb.setStyle(this.icss, "borderImageRepeat", repeat);
+    QmlWeb.setStyle(this.icss, "borderImageWidth", width);
   }
   $onSmoothChanged(val) {
     const style = this.impl.style;
     if (val) {
-      style.imageRendering = "auto";
+      QmlWeb.setStyle(this.icss, "imageRendering", "auto");
     } else {
-      style.imageRendering = "-webkit-optimize-contrast";
-      style.imageRendering = "-moz-crisp-edges";
-      style.imageRendering = "crisp-edges";
-      style.imageRendering = "pixelated";
+      QmlWeb.setStyle(this.icss, "imageRendering", "-webkit-optimize-contrast");
+      QmlWeb.setStyle(this.icss, "imageRendering", "-moz-crisp-edges");
+      QmlWeb.setStyle(this.icss, "imageRendering", "crisp-edges");
+      QmlWeb.setStyle(this.icss, "imageRendering", "pixelated");
     }
   }
 });
