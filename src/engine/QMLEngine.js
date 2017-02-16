@@ -199,11 +199,21 @@ class QMLEngine {
       }
     }
 
-    this.$basePathA.href = QmlWeb.extractBasePath(file);
-    this.$basePath = this.$basePathA.href;
+    let x = QmlWeb.extractBasePath(file);
+    this.$basePathA.href = x;
+    x = this.$basePathA.href;
+    if (!/[/]$/.test(x)) {
+      const r = /^(.*[/]).*?$/;
+      const cap = r.exec(x);
+      if (cap) {
+        x = cap[1];
+      }
+    }
+
+    this.$basePath = x;
     const fileName = extractFileName(file);
     // TODO gz resolveClass  += engine.containers[...]
-    const respath = QmlWeb.$resolvePath(fileName, this.$basePathA.href);
+    const respath = QmlWeb.$resolvePath(fileName, x);
     const clazz = QmlWeb.resolveClass(respath);
     const component = this.loadQMLTree(clazz, parent, file, operationFlags, serverWsAddress, isClientSide, webSocket);
     console.log("loadFile success. LOADED : "+file);
