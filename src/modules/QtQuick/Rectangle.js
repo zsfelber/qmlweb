@@ -5,6 +5,8 @@ var defaultRectStyle = QmlWeb.helpers.mergeObjects(QmlWeb.defaultItemStyle, {
    right: "0px",
    top: "0px",
    bottom: "0px",
+   width: "100%",
+   height: "100%",
    borderWidth: "0px",
    borderStyle: "solid",
    borderColor: "black",

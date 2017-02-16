@@ -4,10 +4,9 @@ class Item {
 
     if (!this.dom) { // Create a dom element for this item.
       this.dom = document.createElement(meta.tagName || "div");
+      this.dom.id = this.$objectId;
     }
     this.css = QmlWeb.createStyle(this.dom.style);
-    QmlWeb.setStyle(this.css, "position", "absolute");
-    QmlWeb.setStyle(this.css, "pointerEvents", "none");
     // In case the class is qualified, only use the last part for the css class
     // name.
     const classComponent = meta.$class.split(".").pop();
@@ -361,7 +360,7 @@ class Item {
     const left = this.parent ? this.parent.left : 0;
 
     // Width
-    if (propName === "width") {createProperty
+    if (propName === "width") {
       this.$isUsingImplicitWidth = false;
     }
 
