@@ -25,7 +25,7 @@ QmlWeb.registerQmlType({
     this.urlChanged.connect(this, this.$onUrlChanged);
 
     const iframe = this.impl = document.createElement("iframe");
-    iframe.className = qmlwebview;
+    iframe.className = "qmlwebview";
     this.dom.appendChild(iframe);
 
     iframe.onload = () => {
