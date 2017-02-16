@@ -4,12 +4,14 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
+    target: "QtObject",
     xScale: "real",
     yScale: "real"
   }
 }, class {
   constructor(meta) {
     QmlWeb.superAndInitMeta(this, meta);
+    this.target = this.$parent;
 
     const createProperty = QmlWeb.createProperty;
     this.origin = new QmlWeb.QObject(this, {attached:true, info:"origin"});
@@ -25,9 +27,12 @@ QmlWeb.registerQmlType({
      * $updateOrigin must be called to set the initial transformOrigin. */
     this.$updateOrigin();
   }
+  getTargetStyle() {
+    return this.target.css;
+  }
   $updateOrigin() {
-    const style = this.$parent.dom.style;
-    style.transformOrigin = `${this.origin.x}px ${this.origin.y}px`;
-    style.webkitTransformOrigin = `${this.origin.x}px ${this.origin.y}px`;
+    const css = this.getTargetStyle();
+    QmlWeb.setStyle(css, "transformOrigin", `${this.origin.x}px ${this.origin.y}px`);
+    QmlWeb.setStyle(css, "webkitTransformOrigin", `${this.origin.x}px ${this.origin.y}px`);
   }
 });

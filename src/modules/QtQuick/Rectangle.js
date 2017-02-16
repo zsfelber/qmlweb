@@ -29,11 +29,13 @@ QmlWeb.registerQmlType({
     this.heightChanged.connect(this, this.$updateBorder);
   }
   $onColorChanged(newVal) {
-    this.impl.style.backgroundColor = new QmlWeb.QColor(newVal);
+    const css = this.getStyle();
+    QmlWeb.setStyle(css, "backgroundColor", new QmlWeb.QColor(newVal));
   }
   border$onColorChanged(newVal) {
+    const css = this.getStyle();
     this.$borderActive = true;
-    this.impl.style.borderColor = new QmlWeb.QColor(newVal);
+    QmlWeb.setStyle(css, "borderColor", new QmlWeb.QColor(newVal));
     this.$updateBorder();
   }
   border$onWidthChanged() {
@@ -41,17 +43,18 @@ QmlWeb.registerQmlType({
     this.$updateBorder();
   }
   $onRadiusChanged(newVal) {
-    this.impl.style.borderRadius = `${newVal}px`;
+    const css = this.getStyle();
+    QmlWeb.setStyle(css, "borderRadius", `${newVal}px`);
   }
   $updateBorder() {
     const border = this.$borderActive ? Math.max(0, this.border.width) : 0;
-    const style = this.impl.style;
+    const css = this.getStyle();
     if (border * 2 > this.width || border * 2 > this.height) {
       // Border is covering the whole background
-      style.borderWidth = "0px";
-      style.borderTopWidth = `${this.height}px`;
+      QmlWeb.setStyle(css, "borderWidth", "0px");
+      QmlWeb.setStyle(css, "borderTopWidth", `${this.height}px`);
     } else {
-      style.borderWidth = `${border}px`;
+      QmlWeb.setStyle(css, "borderWidth", `${border}px`);
     }
   }
 });
