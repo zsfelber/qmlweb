@@ -23,7 +23,7 @@ function dumpEvalError(msg, err) {
 }
 
 function objToStringSafe(obj, detail) {
-  var os = (typeof obj.$info==="string"?obj.$info:(obj.$base?obj.$base.toString():(obj.$classname||obj.constructor?(obj.$classname||obj.constructor.name)+":":""))+(detail&&obj.$objectId?obj.$objectId:""));
+  var os = (typeof obj.$info==="string"?obj.$info:(obj.$base?obj.$base.toString():(obj.$classname||obj.constructor?(obj.$classname||obj.constructor.name)+":":""))+(detail&&obj.$objectId?obj.$objectId+":":""));
 
   return os;
 }
@@ -38,6 +38,7 @@ class QMLProperty {
       throw new Error("Invalid QMLProperty:"+name+" of null, type:"+type+" options:"+JSON.stringify(options));
     }
 
+    this.stacks = QMLProperty;
     this.obj = obj;
     this.$rootComponent = obj.$component ? obj.$component.$root : {};
     this.name = name;
@@ -300,8 +301,8 @@ class QMLProperty {
     let invalidityFlags = this.updateState & QmlWeb.QMLPropertyState.InvalidityFlags;
 
     if (this.updateState & QmlWeb.QMLPropertyState.Updating) {
-      var recordedStack = QMLProperty.recordStack();
-      error = new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this, "  recordedStack:", recordedStack);
+      console.error(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this, "  recordedStack:", QMLProperty.recordStack());
+      error = new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this);
     } else if (invalidityFlags) {
       if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
         if (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate) {
@@ -466,16 +467,16 @@ class QMLProperty {
   }
 
   toString(detail) {
-    var os = objToStringSafe(this.obj);
+    var os = objToStringSafe(this.obj, detail);
 
     // $base because to avoid infinite loops for overriden toString:
     return os+" . prop:"+this.name+(detail?"#"+this.$propertyId:"")+
-      (detail?" "+QmlWeb.QMLPropertyState.toString(this.updateState)+(this.binding?" "+QmlWeb.QMLBindingFlags.toString(this.binding.flags):""):"")+
+      (detail?" "+QmlWeb.QMLPropertyState.toString(this.updateState)+(this.binding?" b#"+this.binding.id+":"+QmlWeb.QMLBindingFlags.toString(this.binding.flags):""):"")+
        (this.value?" v:"+this.value:"")+" "+(this.readOnly?"ro":"")+(this.pendingInit?"pi":"");
   }
 
   static stackToString(stack, parent) {
-    if (!parent) parent = QMLProperty;
+    if (!parent) parent = this.stacks;
     var result = "";
     var cur = !stack;
     if (cur) {
@@ -491,16 +492,16 @@ class QMLProperty {
   }
 
   static stacksToString(parent) {
-    if (!parent) parent = QMLProperty;
+    if (!parent) parent = this.stacks;
     var result = "Stacks:\n";
     var i = 1;
     parent.evaluatingPropertyStackOfStacks.forEach(function (s) {
       result += i+":\n";
-      result += stackToString.call(this, s.stack, parent);
+      result += QMLProperty.stackToString.call(this, s.stack, parent);
       ++i;
     }, this);
     result += "Current:\n";
-    result += stackToString.call(this, undefined, parent);
+    result += QMLProperty.stackToString.call(this, undefined, parent);
     return result;
   }
 
@@ -543,8 +544,7 @@ class QMLProperty {
     // TODO say warnings if already on stack. This means primary binding loop.
     // NOTE secondary binding loop is possible when dependencies has hidden in "stack of stacks"
     if (s.map[prop.$propertyId]) {
-      var recordedStack = QMLProperty.recordStack();
-      console.error(`(Primary) property binding loop detected for property : ${prop.toString(true)}`, "  recordedStack:", recordedStack);
+      console.error(`(Primary) property binding loop detected for property : ${prop.toString(true)}`, "  recordedStack:", QMLProperty.recordStack());
       return false;
     }
     QMLProperty.initEvaluatingProperty(prop);
@@ -577,20 +577,27 @@ class QMLProperty {
   }
 
   static recordStack() {
+    var dupEvalStack = [];
+    QMLProperty.evaluatingPropertyStackOfStacks.forEach(function (item) {
+      dupEvalStack.push({stack : item.stack.slice(0)});
+    });
+
     var recordedStack = {
-      evaluatingPropertyStackOfStacks : QMLProperty.evaluatingPropertyStackOfStacks.slice(0),
-      evaluatingProperties : QMLProperty.evaluatingProperties.slice(0),
+      evaluatingPropertyStackOfStacks : dupEvalStack,
+      evaluatingProperties : {stack : QMLProperty.evaluatingProperties.stack.slice(0)},
       evaluatingProperty : QMLProperty.evaluatingProperty
     };
-    Object.defineProperty(recordedStack, "stackString", {
+    recordedStack.stacks = recordedStack;
+
+    Object.defineProperty(recordedStack, "stackLines", {
       get: QMLProperty.stackToString,
       configurable: true,
-      enumerable
+      enumerable: true
     });
-    Object.defineProperty(recordedStack, "stacksString", {
+    Object.defineProperty(recordedStack, "stacksLines", {
       get: QMLProperty.stacksToString,
       configurable: true,
-      enumerable
+      enumerable: true
     });
     return recordedStack;
   }
