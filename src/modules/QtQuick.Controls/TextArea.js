@@ -8,8 +8,8 @@ QmlWeb.registerQmlType({
     QmlWeb.superAndInitMeta(this, meta);
     const textarea = this.impl;
 
-    QmlWeb.setStyle(this.tacss, "padding", "5px");
-    QmlWeb.setStyle(this.tacss, "borderWidth", "1px");
-    QmlWeb.setStyle(this.tacss, "backgroundColor", "#fff");
+    QmlWeb.setStyle(this.tacss, "padding", "5px", defaultTextareaStyle);
+    QmlWeb.setStyle(this.tacss, "borderWidth", "1px", defaultTextareaStyle);
+    QmlWeb.setStyle(this.tacss, "backgroundColor", "#fff", defaultTextareaStyle);
   }
 });

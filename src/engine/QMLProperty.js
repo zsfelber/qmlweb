@@ -226,15 +226,15 @@ class QMLProperty {
         this.updateState = origState;
       }
 
+      if (pushed) {
+        pushed = false;
+        QMLProperty.popEvaluatingProperty();
+      }
+
       throw err;
 
     } finally {
 
-      parent.updateState &= ~QmlWeb.QMLPropertyState.Updating;
-
-      if (pushed) {
-        QMLProperty.popEvaluatingProperty();
-      }
       if (this.obsoleteConnections) {
         for (var i in this.obsoleteConnections) {
           con = this.obsoleteConnections[i];
@@ -243,12 +243,22 @@ class QMLProperty {
         }
         delete this.obsoleteConnections;
       }
+
+      parent.updateState &= ~QmlWeb.QMLPropertyState.Updating;
     }
 
-
-    if (this.binding ? (origState & QmlWeb.QMLPropertyState.BoundSet ? false : newVal !== oldVal) :
-                  (origState & QmlWeb.QMLPropertyState.NonBoundSet ? newVal !== oldVal : e("Assertion failed : no binding/read/update"))  ) {
-      this.sendChanged(oldVal, newVal);
+    try {
+      if (this.binding ? (origState & QmlWeb.QMLPropertyState.BoundSet ? false : newVal !== oldVal) :
+                    (origState & QmlWeb.QMLPropertyState.NonBoundSet ? newVal !== oldVal : e("Assertion failed : no binding/read/update"))  ) {
+        this.sendChanged(oldVal, newVal);
+      }
+    } catch (err2) {
+      console.err("Assertion failed : update / "+this+" . changed threw error : "+err2.message);
+      throw err2;
+    } finally {
+      if (pushed) {
+        QMLProperty.popEvaluatingProperty();
+      }
     }
   }
 
@@ -368,7 +378,7 @@ class QMLProperty {
   // Define setter
   set(newVal, flags, declaringItem) {
 
-    QmlWeb.QMLProperty.pushEvalStack();
+    const pushed = QmlWeb.QMLProperty.pushEvalStack();
 
     try {
 
@@ -450,7 +460,7 @@ class QMLProperty {
       }
 
     } finally {
-      QmlWeb.QMLProperty.popEvalStack();
+      if (pushed) QmlWeb.QMLProperty.popEvalStack();
     }
   }
 
@@ -486,12 +496,17 @@ class QMLProperty {
   }
 
   static pushEvalStack() {
-    QMLProperty.evaluatingPropertyStackOfStacks.push(
-      QMLProperty.evaluatingProperties
-    );
-    QMLProperty.evaluatingProperties = {stack:[], map:{}};
-    QMLProperty.evaluatingProperty = undefined;
-  //  console.log("evaluatingProperty=>undefined due to push stck ");
+    if (QMLProperty.evaluatingProperty) {
+      QMLProperty.evaluatingPropertyStackOfStacks.push(
+        QMLProperty.evaluatingProperties
+      );
+      QMLProperty.evaluatingProperties = {stack:[], map:{}};
+      QMLProperty.evaluatingProperty = undefined;
+      //  console.log("evaluatingProperty=>undefined due to push stck ");
+      return true;
+    } else {
+      return false;
+    }
   }
 
   static popEvalStack() {
@@ -507,6 +522,13 @@ class QMLProperty {
     //}
   }
 
+  static initEvaluatingProperty(prop) {
+    var s = QMLProperty.evaluatingProperties;
+    QMLProperty.evaluatingProperty = prop;
+    s.map[prop.$propertyId] = prop;
+    s.stack.push(prop); //keep stack of props
+  }
+
   static pushEvaluatingProperty(prop) {
     var s = QMLProperty.evaluatingProperties;
     // TODO say warnings if already on stack. This means primary binding loop.
@@ -515,9 +537,7 @@ class QMLProperty {
       console.error(`(Primary) property binding loop detected for property : ${prop.toString(true)}\n${this.stackToString()}`);
       return false;
     }
-    QMLProperty.evaluatingProperty = prop;
-    s.map[prop.$propertyId] = prop;
-    s.stack.push(prop); //keep stack of props
+    QMLProperty.initEvaluatingProperty(prop);
     return true;
   }
 

@@ -167,13 +167,13 @@ QmlWeb.registerQmlType({
   $onFillModeChanged(newValue) {
     switch (newValue) {
       case this.VideoOutput.Stretch:
-        QmlWeb.setStyle(this.impl, "objectFit", "fill");
+        QmlWeb.setStyle(this.getImplStyle(), "objectFit", "fill");
         break;
       case this.VideoOutput.PreserveAspectFit:
-        QmlWeb.setStyle(this.impl, "objectFit", "");
+        QmlWeb.setStyle(this.getImplStyle(), "objectFit", "");
         break;
       case this.VideoOutput.PreserveAspectCrop:
-        QmlWeb.setStyle(this.impl, "objectFit", "cover");
+        QmlWeb.setStyle(this.getImplStyle(), "objectFit", "cover");
         break;
     }
   }

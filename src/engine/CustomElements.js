@@ -67,7 +67,7 @@ function registerElement(name, file) {
       // Default wrapper display is inline-block to support native width/height
       const computedStyle = window.getComputedStyle(this);
       if (computedStyle.display === "inline") {
-        QmlWeb.setStyle(this.css, "display", "inline-block");
+        QmlWeb.setStyle(this.css, "display", "inline-block", {});
       }
 
       const engine = this.engine = new QmlWeb.QMLEngine(this);

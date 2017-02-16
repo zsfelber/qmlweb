@@ -21,7 +21,7 @@ class Signal {
     }
   }
   execute(...args) {
-    QmlWeb.QMLProperty.pushEvalStack();
+    const pushed = QmlWeb.QMLProperty.pushEvalStack();
     try {
       for (const i in this.connectedSlots) {
         const desc = this.connectedSlots[i];
@@ -33,7 +33,7 @@ class Signal {
         }
       }
     } finally {
-      QmlWeb.QMLProperty.popEvalStack();
+      if (pushed) QmlWeb.QMLProperty.popEvalStack();
     }
   }
   connect(...args) {
@@ -210,13 +210,13 @@ class Signal {
     const queued = Signal.$queued;
     Signal.$queued = [];
 
-    QmlWeb.QMLProperty.pushEvalStack();
+    const pushed = QmlWeb.QMLProperty.pushEvalStack();
     try {
       for (const i in queued) {
         Signal.$execute(...queued[i]);
       }
     } finally {
-      QmlWeb.QMLProperty.popEvalStack();
+      if (pushed) QmlWeb.QMLProperty.popEvalStack();
     }
   }
 }
