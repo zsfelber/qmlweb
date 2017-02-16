@@ -1,3 +1,16 @@
+var defaultRectStyle = QmlWeb.helpers.mergeObjects(QmlWeb.defaultItemStyle, {
+   pointerEvents: "none",
+   position: "absolute",
+   left: "0px",
+   right: "0px",
+   top: "0px",
+   bottom: "0px",
+   borderWidth: "0px",
+   borderStyle: "solid",
+   borderColor: "black",
+   backgroundColor: "white"
+});
+
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Rectangle",
@@ -29,13 +42,13 @@ QmlWeb.registerQmlType({
     this.heightChanged.connect(this, this.$updateBorder);
   }
   $onColorChanged(newVal) {
-    const css = this.getStyle();
-    QmlWeb.setStyle(css, "backgroundColor", new QmlWeb.QColor(newVal));
+    const css = this.getImplStyle();
+    QmlWeb.setStyle(css, "backgroundColor", new QmlWeb.QColor(newVal), defaultRectStyle);
   }
   border$onColorChanged(newVal) {
-    const css = this.getStyle();
+    const css = this.getImplStyle();
     this.$borderActive = true;
-    QmlWeb.setStyle(css, "borderColor", new QmlWeb.QColor(newVal));
+    QmlWeb.setStyle(css, "borderColor", new QmlWeb.QColor(newVal), defaultRectStyle);
     this.$updateBorder();
   }
   border$onWidthChanged() {
@@ -43,18 +56,18 @@ QmlWeb.registerQmlType({
     this.$updateBorder();
   }
   $onRadiusChanged(newVal) {
-    const css = this.getStyle();
-    QmlWeb.setStyle(css, "borderRadius", `${newVal}px`);
+    const css = this.getImplStyle();
+    QmlWeb.setStyle(css, "borderRadius", `${newVal}px`, defaultRectStyle);
   }
   $updateBorder() {
     const border = this.$borderActive ? Math.max(0, this.border.width) : 0;
-    const css = this.getStyle();
+    const css = this.getImplStyle();
     if (border * 2 > this.width || border * 2 > this.height) {
       // Border is covering the whole background
-      QmlWeb.setStyle(css, "borderWidth", "0px");
-      QmlWeb.setStyle(css, "borderTopWidth", `${this.height}px`);
+      QmlWeb.setStyle(css, "borderWidth", "0px", defaultRectStyle);
+      QmlWeb.setStyle(css, "borderTopWidth", `${this.height}px`, defaultRectStyle);
     } else {
-      QmlWeb.setStyle(css, "borderWidth", `${border}px`);
+      QmlWeb.setStyle(css, "borderWidth", `${border}px`, defaultRectStyle);
     }
   }
 });

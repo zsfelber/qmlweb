@@ -43,10 +43,10 @@ QmlWeb.registerQmlType({
     this.wordSpacingChanged.connect(this, this.$onWordSpacingChanged);
   }
 
-  getTargetStyle() {
+  getTargetImplStyle() {
     // TODO firstChild : it's a draft
     //return this.fcss ? this.fcss : this.fcss = QmlWeb.createStyle(this.target.dom.firstChild.style);
-    return this.target.getStyle();
+    return this.target.getImplStyle();
   }
 
   $onBoldChanged(newVal) {
@@ -54,20 +54,20 @@ QmlWeb.registerQmlType({
     this.weight = newVal ? Font.Bold : Font.Normal;
   }
   $onCapitalizationChanged(newVal) {
-    const css = this.getTargetStyle();
+    const css = this.getTargetImplStyle();
     QmlWeb.setStyle(css, "fontVariant", newVal === this.Font.SmallCaps ? "small-caps" : "none");
     QmlWeb.setStyle(css, "textTransform", this.$capitalizationToTextTransform(newVal));
   }
   $onFamilyChanged(newVal) {
-    const css = this.getTargetStyle();
+    const css = this.getTargetImplStyle();
     QmlWeb.setStyle(css, "fontFamily", newVal);
   }
   $onItalicChanged(newVal) {
-    const css = this.getTargetStyle();
+    const css = this.getTargetImplStyle();
     QmlWeb.setStyle(css, "fontStyle", newVal ? "italic" : "normal");
   }
   $onLetterSpacingChanged(newVal) {
-    const css = this.getTargetStyle();
+    const css = this.getTargetImplStyle();
     QmlWeb.setStyle(css, "letterSpacing", newVal !== undefined ? `${newVal}px` : "");
   }
   $onPixelSizeChanged(newVal) {
@@ -76,7 +76,7 @@ QmlWeb.registerQmlType({
     }
     const val = `${newVal}px`;
     this.$parent.dom.QmlWeb.setStyle(css, "fontSize", val);
-    getTargetStyle().fontSize = val;
+    getTargetImplStyle().fontSize = val;
   }
   $onPointSizeChanged(newVal) {
     this.$sizeLock = true;
@@ -84,7 +84,7 @@ QmlWeb.registerQmlType({
     this.$sizeLock = false;
   }
   $onStrikeoutChanged(newVal) {
-    const css = this.getTargetStyle();
+    const css = this.getTargetImplStyle();
     QmlWeb.setStyle(css, "textDecoration", newVal
       ? "line-through"
       : this.$parent.font.underline
@@ -92,7 +92,7 @@ QmlWeb.registerQmlType({
         : "none");
   }
   $onUnderlineChanged(newVal) {
-    const css = this.getTargetStyle();
+    const css = this.getTargetImplStyle();
     QmlWeb.setStyle(css, "textDecoration", this.$parent.font.strikeout
       ? "line-through"
       : newVal
@@ -100,11 +100,11 @@ QmlWeb.registerQmlType({
         : "none");
   }
   $onWidthChanged(newVal) {
-    const css = this.getTargetStyle();
+    const css = this.getTargetImplStyle();
     QmlWeb.setStyle(css, "fontWeight", this.$weightToCss(newVal));
   }
   $onWordSpacingChanged(newVal) {
-    const css = this.getTargetStyle();
+    const css = this.getTargetImplStyle();
     QmlWeb.setStyle(css, "wordSpacing", newVal !== undefined ? `${newVal}px` : "");
   }
 

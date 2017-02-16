@@ -61,22 +61,22 @@ QmlWeb.registerQmlType({
     switch (val) {
       default:
       case this.Image.Stretch:
-        QmlWeb.setClass(this.impl, "fillMode", "qmlstretch");
+        QmlWeb.setCssClass(this.impl, "fillMode", "qmlstretch");
         break;
       case this.Image.Tile:
-        QmlWeb.setClass(this.impl, "fillMode", "qmltile");
+        QmlWeb.setCssClass(this.impl, "fillMode", "qmltile");
         break;
       case this.Image.PreserveAspectFit:
-        QmlWeb.setClass(this.impl, "fillMode", "qmlpreserveaspectfit");
+        QmlWeb.setCssClass(this.impl, "fillMode", "qmlpreserveaspectfit");
         break;
       case this.Image.PreserveAspectCrop:
-        QmlWeb.setClass(this.impl, "fillMode", "qmlpreserveaspectcrop");
+        QmlWeb.setCssClass(this.impl, "fillMode", "qmlpreserveaspectcrop");
         break;
       case this.Image.TileVertically:
-        QmlWeb.setClass(this.impl, "fillMode", "qmltilevertically");
+        QmlWeb.setCssClass(this.impl, "fillMode", "qmltilevertically");
         break;
       case this.Image.TileHorizontally:
-        QmlWeb.setClass(this.impl, "fillMode", "qmltilehorizontally");
+        QmlWeb.setCssClass(this.impl, "fillMode", "qmltilehorizontally");
         break;
     }
   }
@@ -110,9 +110,9 @@ QmlWeb.registerQmlType({
   $onSmoothChanged(val) {
     //const style = this.impl.style;
     if (val) {
-      QmlWeb.setClass(this.impl, "smooth", "qmlsmooth");
+      QmlWeb.setCssClass(this.impl, "smooth", "qmlsmooth");
     } else {
-      QmlWeb.setClass(this.impl, "smooth", "qmluglyimg");
+      QmlWeb.setCssClass(this.impl, "smooth", "qmluglyimg");
     }
   }
 });

@@ -318,7 +318,7 @@ class Item {
   Component$onCompleted_() {
     this.$calculateOpacity();
   }
-  getStyle() {
+  getImplStyle() {
     return this.fcss ? this.fcss : (this.impl ? this.fcss = QmlWeb.createStyle(this.impl.style) : null);
   }
   $calculateOpacity() {
@@ -330,7 +330,7 @@ class Item {
     */
     const parentOpacity = this.$parent && this.$parent.$opacity || 1;
     this.$opacity = this.opacity * parentOpacity;
-    const css = this.getStyle();
+    const css = this.getImplStyle();
     if (css) {
       QmlWeb.setStyle(css, "opacity", this.$opacity);
     }

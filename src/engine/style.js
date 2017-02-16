@@ -3,7 +3,13 @@ var defaultItemStyle = {
   top:"0px", left:"0px",
   position:"absolute",
   boxSizing:"border-box",
-  pointerEvents:"none"
+  pointerEvents:"none",
+  bottom: "0px",
+  right: "0px",
+  borderWidth: "0px",
+  borderStyle: "solid",
+  borderColor: "black",
+  opacity: 1
 };
 
 function createStyle(css) {
@@ -23,26 +29,26 @@ function setStyle(style, arg, value, defaultStyle = defaultItemStyle) {
   }
 }
 
-function addClass(elem, classname) {
+function addCssClass(elem, classname) {
   if (!new RegExp("\b"+classname+"\b").test(elem.className)) {
     elem.className+=" "+classname;
   }
 }
 
-function removeClass(elem, classname) {
+function removeCssClass(elem, classname) {
   elem.className.replace(new RegExp("\s*\b"+classname+"\b/g"),"");
 }
 
-function setClass(elem, category, classname) {
+function setCssClass(elem, category, classname) {
   const style = createStyle(elem.style);
   let cur = style.$classes[category];
   if (cur) {
     if (cur !== classname) {
-      removeClass(elem, cur);
-      addClass(elem, classname);
+      removeCssClass(elem, cur);
+      addCssClass(elem, classname);
     }
   } else {
-    addClass(elem, classname);
+    addCssClass(elem, classname);
   }
 }
 
@@ -50,6 +56,6 @@ function setClass(elem, category, classname) {
 QmlWeb.createStyle = createStyle;
 QmlWeb.setStyle = setStyle;
 QmlWeb.defaultItemStyle = defaultItemStyle;
-QmlWeb.addClass = addClass;
-QmlWeb.removeClass = removeClass;
-QmlWeb.setClass = setClass;
+QmlWeb.addCssClass = addCssClass;
+QmlWeb.removeCssClass = removeCssClass;
+QmlWeb.setCssClass = setCssClass;
