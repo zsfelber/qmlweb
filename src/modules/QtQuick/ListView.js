@@ -22,16 +22,16 @@ QmlWeb.registerQmlType({
   }
   $applyStyleOnItem($item) {
     const Qt = QmlWeb.Qt;
-    $item.dom.style.position = "initial";
+    QmlWeb.setStyle($item.css, "position", "initial");
     if (this.orientation === Qt.Horizontal) {
-      $item.dom.style.display = "inline-block";
+      QmlWeb.setStyle($item.css, "display", "inline-block");
       if ($item !== this.$items[0]) {
-        $item.dom.style["margin-left"] = `${this.spacing}px`;
+        QmlWeb.setStyle($item.css, "margin-left", `${this.spacing}px`);
       }
     } else {
-      $item.dom.style.display = "block";
+      QmlWeb.setStyle($item.css, "display", "block");
       if ($item !== this.$items[0]) {
-        $item.dom.style["margin-top"] = `${this.spacing}px`;
+        QmlWeb.setStyle($item.css, "margin-top", `${this.spacing}px`);
       }
     }
   }

@@ -64,7 +64,7 @@ QmlWeb.registerQmlType({
   name: "QtObject",
   versions: /.*/,
   properties : {
-     // to remove "Uninitialized" state because of  elementRemove / elementAdd
+     // null to remove "Uninitialized" state because of  elementRemove / elementAdd
      container: { type: "QtObject", initialValue: null },
      $index: { type: "int", pendingInit:true, readOnly:true },
      $resourceIndex: { type: "int", pendingInit:true, readOnly:true },

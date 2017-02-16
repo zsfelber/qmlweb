@@ -318,6 +318,9 @@ class Item {
   Component$onCompleted_() {
     this.$calculateOpacity();
   }
+  getStyle() {
+    return this.fcss ? this.fcss : (this.impl ? this.fcss = QmlWeb.createStyle(this.impl.style) : null);
+  }
   $calculateOpacity() {
     // TODO: reset all opacity on layer.enabled changed
     /*
@@ -327,8 +330,9 @@ class Item {
     */
     const parentOpacity = this.$parent && this.$parent.$opacity || 1;
     this.$opacity = this.opacity * parentOpacity;
-    if (this.impl) {
-      this.impl.style.opacity = this.$opacity;
+    const css = this.getStyle();
+    if (css) {
+      QmlWeb.setStyle(css, "opacity", this.$opacity);
     }
   }
   $onImplicitWidthChanged() {

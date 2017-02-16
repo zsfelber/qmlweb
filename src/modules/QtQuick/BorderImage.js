@@ -56,7 +56,7 @@ QmlWeb.registerQmlType({
   $onSourceChanged(source) {
     this.progress = 0;
     this.status = this.BorderImage.Loading;
-    const style = this.impl.style;
+    //const style = this.impl.style;
     const imageURL = QmlWeb.$resolveImageURL(source);
     QmlWeb.setStyle(this.icss, "OBorderImageSource", `url("${imageURL}")`);
     QmlWeb.setStyle(this.icss, "borderImageSource", `url("${imageURL}")`);
@@ -67,7 +67,7 @@ QmlWeb.registerQmlType({
     }
   }
   $updateBorder() {
-    const style = this.impl.style;
+    //const style = this.impl.style;
     const { right, left, top, bottom } = this.border;
     const slice = `${top} ${right} ${bottom} ${left} fill`;
     const width = `${top}px ${right}px ${bottom}px ${left}px`;
@@ -80,7 +80,7 @@ QmlWeb.registerQmlType({
     QmlWeb.setStyle(this.icss, "borderImageWidth", width);
   }
   $onSmoothChanged(val) {
-    const style = this.impl.style;
+    //const style = this.impl.style;
     if (val) {
       QmlWeb.setStyle(this.icss, "imageRendering", "auto");
     } else {

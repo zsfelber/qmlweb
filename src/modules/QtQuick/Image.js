@@ -33,6 +33,7 @@ QmlWeb.registerQmlType({
 
     const bg = this.impl = document.createElement("div");
     bg.className = "qmlimg";
+    this.icss = QmlWeb.createStyle(bg.style);
     this.dom.appendChild(bg);
 
     this.$img = new Image();
@@ -56,38 +57,26 @@ QmlWeb.registerQmlType({
     this.smoothChanged.connect(this, this.$onSmoothChanged);
   }
   $updateFillMode(val = this.fillMode) {
-    const style = this.impl.style;
+    //const style = this.impl.style;
     switch (val) {
       default:
       case this.Image.Stretch:
-        style.backgroundRepeat = "auto";
-        style.backgroundSize = "100% 100%";
-        style.backgroundPosition = "auto";
+        QmlWeb.setClass(this.impl, "fillMode", "qmlstretch");
         break;
       case this.Image.Tile:
-        style.backgroundRepeat = "auto";
-        style.backgroundSize = "auto";
-        style.backgroundPosition = "center";
+        QmlWeb.setClass(this.impl, "fillMode", "qmltile");
         break;
       case this.Image.PreserveAspectFit:
-        style.backgroundRepeat = "no-repeat";
-        style.backgroundSize = "contain";
-        style.backgroundPosition = "center";
+        QmlWeb.setClass(this.impl, "fillMode", "qmlpreserveaspectfit");
         break;
       case this.Image.PreserveAspectCrop:
-        style.backgroundRepeat = "no-repeat";
-        style.backgroundSize = "cover";
-        style.backgroundPosition = "center";
+        QmlWeb.setClass(this.impl, "fillMode", "qmlpreserveaspectcrop");
         break;
       case this.Image.TileVertically:
-        style.backgroundRepeat = "repeat-y";
-        style.backgroundSize = "100% auto";
-        style.backgroundPosition = "auto";
+        QmlWeb.setClass(this.impl, "fillMode", "qmltilevertically");
         break;
       case this.Image.TileHorizontally:
-        style.backgroundRepeat = "repeat-x";
-        style.backgroundSize = "auto 100%";
-        style.backgroundPosition = "auto";
+        QmlWeb.setClass(this.impl, "fillMode", "qmltilehorizontally");
         break;
     }
   }
@@ -95,7 +84,7 @@ QmlWeb.registerQmlType({
     this.progress = 0;
     this.status = this.Image.Loading;
     const imageURL = QmlWeb.$resolveImageURL(source);
-    this.impl.style.backgroundImage = `url("${imageURL}")`;
+    QmlWeb.setStyle(this.icss, "backgroundImage", `url("${imageURL}")`);
     this.$img.src = imageURL;
     if (this.$img.complete) {
       this.progress = 1;
@@ -119,14 +108,11 @@ QmlWeb.registerQmlType({
     this.$updateFillMode(val);
   }
   $onSmoothChanged(val) {
-    const style = this.impl.style;
+    //const style = this.impl.style;
     if (val) {
-      style.imageRendering = "auto";
+      QmlWeb.setClass(this.impl, "smooth", "qmlsmooth");
     } else {
-      style.imageRendering = "-webkit-optimize-contrast";
-      style.imageRendering = "-moz-crisp-edges";
-      style.imageRendering = "crisp-edges";
-      style.imageRendering = "pixelated";
+      QmlWeb.setClass(this.impl, "smooth", "qmluglyimg");
     }
   }
 });
