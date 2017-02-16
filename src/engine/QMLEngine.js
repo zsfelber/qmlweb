@@ -262,6 +262,8 @@ class QMLEngine {
 
       this.processPendingOperations();
 
+      this.operationState &= ~QmlWeb.QMLOperationState.Starting;
+
       this.start();
 
       this.updateGeometry();

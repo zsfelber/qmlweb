@@ -172,7 +172,8 @@ gulp.task("watch-dev", ["build-dev"], () => {
 gulp.task("test", ["build-dev"], () => {
   new karma.Server({
     singleRun: true,
-    configFile: path.join(__dirname, "karma.conf.js")
+    configFile: path.join(__dirname, "karma.conf.js"),
+    browsers: ["PhantomJSCustom"]
   }, code => {
     process.exit(code);
   }).start();
@@ -182,7 +183,8 @@ gulp.task("coverage", ["build-covered"], () => {
   new karma.Server({
     singleRun: true,
     coverageEnabled: true,
-    configFile: path.join(__dirname, "karma.conf.js")
+    configFile: path.join(__dirname, "karma.conf.js"),
+    browsers: ["PhantomJSCustom"]
   }, code => {
     process.exit(code);
   }).start();
@@ -190,14 +192,15 @@ gulp.task("coverage", ["build-covered"], () => {
 
 gulp.task("test-watch", ["watch-dev"], done => {
   new karma.Server({
-    configFile: path.join(__dirname, "karma.conf.js")
+    configFile: path.join(__dirname, "karma.conf.js"),
+    browsers: ["PhantomJSCustom"]
   }, done).start();
 });
 
 gulp.task("test-debug", ["watch-dev"], done => {
   new karma.Server({
     configFile: path.join(__dirname, "karma.conf.js"),
-    browsers: ["PhantomJSCustom", "Chrome"],
+    browsers: ["Chrome_without_security"],
     reporters: ["progress"],
     debug: true
   }, done).start();

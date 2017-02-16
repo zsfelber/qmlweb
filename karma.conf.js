@@ -16,7 +16,7 @@ module.exports = function(config) {
       { pattern: "tests/*/**/*.qml", included: false },
       { pattern: "tests/*/**/*.png", included: false }
     ],
-    browsers: ["PhantomJSCustom"],
+    browsers: ["PhantomJSCustom", "Chrome_without_security"],
     reporters: ["spec", "coverage"],
     coverageReporter: {
       type: "lcov",
@@ -28,7 +28,14 @@ module.exports = function(config) {
         options: {
           onCallback: require("./tests/phantom.callback.js")
         }
+      },
+      Chrome_without_security: {
+        base: 'Chrome',
+        flags: ['--disable-web-security'],
+        options: {
+          onCallback: require("./tests/phantom.callback.js")
+        }
       }
-    }
+   }
   });
 };
