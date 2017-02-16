@@ -135,6 +135,8 @@ See [Extending](docs/Extending.md).
 
 6. [@zsfelber/qmlweb](https://github.com/zsfelber/qmlweb).
 
+My version of engine is a medium deep rewrite of original, it is faster and has cleaner code. (as soon as it's ready)
+
 Intended to fix parse errors (like that of readonly property) and maybe another simple bugs which prevent my actual qml model to be compiled and used..
 As time has gone, I found the whole code needed a  serious refresh impulse which I did. These made my branch something might be called "QmlWeb2", in fact-
 I haven't yet given any name. Just enjoy despite these are my Anonymous Updates.
