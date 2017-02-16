@@ -173,7 +173,7 @@ function getModuleConstructors(moduleName, version) {
   const constructors = {};
   if (typeof ms === "undefined") {
     if (!notfound[moduleName]) {
-      console.warn(`module "${moduleName}" not found`);
+      QmlWeb.warn(`module "${moduleName}" not found`);
       notfound[moduleName] = 1;
     }
 

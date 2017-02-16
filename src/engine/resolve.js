@@ -159,7 +159,7 @@ function resolveImport(name) {
   }
 
   if (!clazz) {
-    console.warn("Class not found : "+name+"  resolved to:"+file+"  in context:"+(loaderComponent?loaderComponent.context:"<null>"));
+    QmlWeb.warn("Class not found : "+name+"  resolved to:"+file+"  in context:"+(loaderComponent?loaderComponent.context:"<null>"));
   }
 
   return {clazz, $file:file};

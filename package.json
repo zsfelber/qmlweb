@@ -39,7 +39,8 @@
     "test": "npm run lint && gulp test",
     "coverage": "gulp coverage",
     "build": "gulp build",
-    "watch": "gulp watch"
+    "watch": "gulp watch",
+    "debug-gulp-test": "devtool node_modules/gulp/bin/gulp.js test"
   },
   "main": "lib/qt.js",
   "files": [

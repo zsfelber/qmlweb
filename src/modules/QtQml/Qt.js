@@ -49,7 +49,7 @@ const Qt = {
     const js = QmlWeb.loadJS(uri);
 
     if (!js) {
-      console.error("Unable to load JavaScript module:", uri, path);
+      QmlWeb.error("Unable to load JavaScript module:", uri, path);
       return;
     }
 

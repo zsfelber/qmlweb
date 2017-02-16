@@ -63,7 +63,7 @@ QmlWeb.registerQmlType({
     for (let i = 0; i < this.attributes.length; ++i) {
       object[this.attributes[i]] = this.$properties[this.attributes[i]].get();
     }
-    console.log(object);
+    QmlWeb.log(object);
     switch (this.queryMimeType) {
       case "application/json":
       case "text/json":

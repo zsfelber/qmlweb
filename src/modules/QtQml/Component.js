@@ -38,7 +38,7 @@ class QMLComponent {
 
       //var cl = /(^.*?)\.qml/.exec(this.meta.$name)[1];
       //var cl = this.meta.$class;
-      //console.log("Nested Element top Component inserted  $class =  superclass:"+this.meta.$class+" -> actual:"+cl);
+      //QmlWeb.log("Nested Element top Component inserted  $class =  superclass:"+this.meta.$class+" -> actual:"+cl);
       //this.$class = this.meta.$class = cl;
     }
 
@@ -118,7 +118,7 @@ class QMLComponent {
 
       }
 
-      //console.warn("Component  "+this.context);
+      //QmlWeb.warn("Component  "+this.context);
     } else {
       this.loaderComponent = null;
       this.topComponent = this;
@@ -128,19 +128,19 @@ class QMLComponent {
 
       this.meta.$context = this.context = engine.rootContext.createChild(this.toString(undefined, true));
 
-      //console.warn("Component  "+this);
+      //QmlWeb.warn("Component  "+this);
       if (this.flags&QmlWeb.QMLComponentFlags.Nested) {
         throw new Error("Component is nested but no loader Component.");
       }
       if (this.flags&QmlWeb.QMLComponentFlags.Super) {
-        console.warn("Component is super but no loader Component : "+this);
+        QmlWeb.warn("Component is super but no loader Component : "+this);
       }
       if (!(this.flags&QmlWeb.QMLComponentFlags.Root)) {
         throw new Error("Component has no loader but Root flag is not set : "+this);
       }
-      if (!this.$file) {
-        throw new Error("No component file");
-      }
+      //if (!this.$file) {
+      //  throw new Error("No component file");
+      //}
     }
 
     this.context.component = this;
@@ -169,14 +169,14 @@ class QMLComponent {
       this.initImports();
     }
 
-    if (!this.$basePath) {
-      throw new Error("Assertion failed. No component basePath present.  "+this+"  "+this.context);
-    }
+    //if (!this.$basePath) {
+    //  throw new Error("Assertion failed. No component basePath present.  "+this+"  "+this.context);
+    //}
     if (!this.moduleConstructors) {
       throw new Error("Assertion failed. Component : no imports.  "+this+"  "+this.context);
     }
 
-    //console.log(this.context.toString());
+    //QmlWeb.log(this.context.toString());
 
   }
 
@@ -188,7 +188,9 @@ class QMLComponent {
           meta.$file = meta.clazz.$file;
       }
       if (meta.$file !== meta.clazz.$file) {
-        throw new Error("Assertion failed. $file-s in Component and class differ :  meta.$file:"+meta.$file+" === meta.clazz.$file:"+meta.clazz.$file);
+        if (!meta.clazz.$file.endsWith("/"+meta.$file)) {
+          throw new Error("Assertion failed. $file-s in Component and class differ :  meta.$file:"+meta.$file+" === meta.clazz.$file:"+meta.clazz.$file);
+        }
       }
 
       QmlWeb.helpers.copy(this.meta, meta.clazz);
@@ -237,7 +239,7 @@ class QMLComponent {
       const js = QmlWeb.loadJS($resolvePath(importDesc[1], this.$basePath));
 
       if (!js) {
-        console.log("Component.finalizeImports: failed to import JavaScript",
+        QmlWeb.log("Component.finalizeImports: failed to import JavaScript",
           importDesc[1]);
         continue;
       }
@@ -281,9 +283,9 @@ class QMLComponent {
   }
 
   bindImports(sourceComponent) {
-    //console.warn("bindImports : binding imports...  "+this+"  ==> "+sourceComponent);
+    //QmlWeb.warn("bindImports : binding imports...  "+this+"  ==> "+sourceComponent);
     if (this.boundImportComponent) {
-      console.warn("bindImports : rebind imports from   "+this+"  ==> "+sourceComponent + "   (2nd) ~~~ to ~~>   " +this.boundImportComponent);
+      QmlWeb.warn("bindImports : rebind imports from   "+this+"  ==> "+sourceComponent + "   (2nd) ~~~ to ~~>   " +this.boundImportComponent);
     }
     if (this.boundImportComponent === sourceComponent) {
       return ;
@@ -293,7 +295,7 @@ class QMLComponent {
         this.moduleConstructors&&!QmlWeb.isEmpty(this.moduleConstructors) ||
         this.ctxQmldirs&&!QmlWeb.isEmpty(this.ctxQmldirs) ||
         this.componentImportPaths&&!QmlWeb.isEmpty(this.componentImportPaths) ) {
-      console.warn("bindImports : imports already loaded, of : "+this+", now rebinding imports to another Component");
+      QmlWeb.warn("bindImports : imports already loaded, of : "+this+", now rebinding imports to another Component");
     }
 
     this.boundImportComponent = sourceComponent;
@@ -380,7 +382,7 @@ class QMLComponent {
       }
 
     } catch (err) {
-      //console.warn("Cannot create Object : parent:"+parent+"  ctx:"+this.context+"  "+err.message);
+      //QmlWeb.warn("Cannot create Object : parent:"+parent+"  ctx:"+this.context+"  "+err.message);
       this.status = QmlWeb.Component.Error;
       throw err;
     } finally {
@@ -430,10 +432,10 @@ class QMLComponent {
 
       try {
         this.completed();
-        //console.log("Completed : "+this+" : "+item);
+        //QmlWeb.log("Completed : "+this+" : "+item);
       } catch (err) {
         if (err.ctType) {
-          //console.warn("PendingEvaluation : Cannot call Component.completed : parent:"+parent+"  ctx:"+this.context);
+          //QmlWeb.warn("PendingEvaluation : Cannot call Component.completed : parent:"+parent+"  ctx:"+this.context);
         } else {
           throw err;
         }

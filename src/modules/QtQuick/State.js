@@ -28,7 +28,7 @@ QmlWeb.registerQmlType({
       if (base) {
         return base.$getAllChanges().concat(this.changes);
       }
-      console.error("Can't find the state to extend!");
+      QmlWeb.error("Can't find the state to extend!");
     }
     return this.changes;
   }

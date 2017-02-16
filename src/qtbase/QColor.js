@@ -64,7 +64,7 @@ class QColor {
       QColor.$colors[this.$value] = this;
       QColor.$colorsCount++;
       if (QColor.$colorsCount === QColor.comparableColorsLimit) {
-        console.warn(
+        QmlWeb.warn(
           "QmlWeb: the number of QColor instances reached the limit set in",
           "QmlWeb.QColor.comparableColorsLimit. Further created colors would",
           "not be comparable to avoid memory hit."

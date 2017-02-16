@@ -54,7 +54,7 @@ function initMeta(self, meta, constructor) {
         } catch (err) {
           if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
                || ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
-            console.warn("Cannot create object property from module definition : "+self.$classname+"("+self.$objectId+") . "+name+"  opstate:"+
+            QmlWeb.warn("Cannot create object property from module definition : "+self.$classname+"("+self.$objectId+") . "+name+"  opstate:"+
                          QmlWeb.QMLOperationState.toString(QmlWeb.engine.operationState), err);
           } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
             if (err.ctType === "UninitializedEvaluation")
@@ -102,7 +102,7 @@ function construct(meta, parent, flags) {
       throw new Error("Invalid Element construct : "+item);
     }
   } else {
-    console.warn("custom  construct (not Component.$createObject) : "+item);
+    QmlWeb.warn("custom  construct (not Component.$createObject) : "+item);
   }
 
   let item;
@@ -154,7 +154,7 @@ function construct(meta, parent, flags) {
     if (meta.id) {
       addElementToPageContexts(item, meta.id, ctx);
     //} else if (flags & QmlWeb.QMLComponentFlags.Nested) {
-    //  console.warn("No element id for item  : "+item+"  ctx:"+ctx);
+    //  QmlWeb.warn("No element id for item  : "+item+"  ctx:"+ctx);
     }
 
     // Apply properties according to this metatype info
@@ -263,7 +263,7 @@ function addElementToPageContexts(item, id, ctx) {
   // see also QMLBindingFlags.bindXXX methods how a name is eventually resolved at runtime
 
   if (id in ctx) {
-    console.warn("Context entry overriden by Element : "+id+" object:"+item);
+    QmlWeb.warn("Context entry overriden by Element : "+id+" object:"+item);
 
     QmlWeb.setupGetter(ctx, id, () => item, ctx);
   } else {

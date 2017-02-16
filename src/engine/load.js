@@ -3,7 +3,7 @@ function loadClass(file) {
 
   const uri = QmlWeb.$parseURI(file);
   if (!uri) {
-    console.warn("qmlweb loadClass: Empty url :", file);
+    QmlWeb.warn("qmlweb loadClass: Empty url :", file);
     return undefined;
   }
 
@@ -12,35 +12,35 @@ function loadClass(file) {
     let t0 = clazz;
     clazz = QmlWeb.qrc[uri.path];
     if (!clazz) {
-      console.warn("qmlweb loadClass: Empty qrc entry :", uri.path);
+      QmlWeb.warn("qmlweb loadClass: Empty qrc entry :", uri.path);
       return undefined;
     }
 
     // QmlWeb.qrc contains pre-parsed Component objects, but they still need
     // convertToEngine called on them.
     if (!clazz.$class) {
-       console.warn("Using legacy semi-pre-parsed qrc is deprecated : "+src);
+       QmlWeb.warn("Using legacy semi-pre-parsed qrc is deprecated : "+src);
        clazz = QmlWeb.convertToEngine(clazz);
        clazz.$name = t0.$name;
     }
   } else {
     const src = QmlWeb.getUrlContents(file, true);
     if (!src) {
-      console.error("qmlweb loadClass: Failed to load:", file);
+      QmlWeb.error("qmlweb loadClass: Failed to load:", file);
       return undefined;
     }
 
-    console.log("qmlweb loadClass: Loading file:", file);
+    QmlWeb.log("qmlweb loadClass: Loading file:", file);
     clazz = QmlWeb.parseQML(src, file);
   }
 
   if (!clazz) {
-    console.warn("qmlweb loadClass: Empty file :", file);
+    QmlWeb.warn("qmlweb loadClass: Empty file :", file);
     return undefined;
   }
 
   if (clazz.$children.length !== 1) {
-    console.error("qmlweb loadClass: Failed to load:", file,
+    QmlWeb.error("qmlweb loadClass: Failed to load:", file,
       ": A QML component must only contain one root element!");
     return undefined;
   }
@@ -118,7 +118,7 @@ function getUrlContents(url, skipExceptions) {
     }
 
     if (xhr.status !== 200 && xhr.status !== 0) { // 0 if accessing with file://
-      console.log(`Retrieving ${url} failed: ${xhr.responseText}`, xhr);
+      QmlWeb.log(`Retrieving ${url} failed: ${xhr.responseText}`, xhr);
       return false;
     }
     QmlWeb.urlContentCache[url] = xhr.responseText;
@@ -163,7 +163,7 @@ function readQmlDir(url) {
 
   const parsedUrl = QmlWeb.$parseURI(qmldirFileUrl);
   if (!parsedUrl) {
-    console.warn("Unable to parse directory url : "+qmldirFileUrl);
+    QmlWeb.warn("Unable to parse directory url : "+qmldirFileUrl);
     return false;
   }
 
@@ -202,7 +202,7 @@ function readQmlDir(url) {
     const match = line.split(/\s+/);
     if (match.length === 2 || match.length === 3) {
       if (match[0] === "plugin") {
-        console.log(`${url}: qmldir plugins are not supported!`);
+        QmlWeb.log(`${url}: qmldir plugins are not supported!`);
       } else if (match[0] === "internal") {
         internals[match[1]] = { url: makeurl(match[2]) };
       } else if (match.length === 2) {
@@ -211,7 +211,7 @@ function readQmlDir(url) {
         externals[match[0]] = { url: makeurl(match[2]), version: match[1] };
       }
     } else {
-      console.log(`${url}: unmatched: ${line}`);
+      QmlWeb.log(`${url}: unmatched: ${line}`);
     }
   }
   return { internals, externals };

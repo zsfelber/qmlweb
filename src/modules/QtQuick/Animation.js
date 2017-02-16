@@ -35,6 +35,6 @@ QmlWeb.registerQmlType({
   }
   complete() {
     // To be overridden
-    console.log("Unbound method for", this);
+    QmlWeb.log("Unbound method for", this);
   }
 });

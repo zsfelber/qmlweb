@@ -7,7 +7,7 @@ function _ubertrim(str) {
     str = str.replace(/^(?:\s|[;,])*/g, "");
     str = str.replace(/(?:\s|[;,])*$/g, "");
   } else {
-    console.warn("_ubertrim not possible : "+str+" "+(typeof str)+" "+JSON.stringify(str));
+    QmlWeb.warn("_ubertrim not possible : "+str+" "+(typeof str)+" "+JSON.stringify(str));
   }
 
   return str;
@@ -23,7 +23,7 @@ function compressImpl(src) {
       if (src.hasOwnProperty("code")) {
         src = src.code;
       } else {
-        console.warn(JSON.stringify(src));
+        QmlWeb.warn(JSON.stringify(src));
       }
 
       src = src.substring(2);
@@ -42,7 +42,7 @@ function compressImpl(src) {
         if (src.hasOwnProperty("code")) {
           src = src.code;
         } else {
-          console.warn(JSON.stringify(src));
+          QmlWeb.warn(JSON.stringify(src));
         }
         if (src) {
           src = _ubertrim(src);
@@ -56,7 +56,7 @@ function compressImpl(src) {
     }
   }
   if (e2) {
-    console.warn(e1.message+":\n"+e2.message+":\n"+info+":\n(_=) "+src0+"\n ->\n"+src);
+    QmlWeb.warn(e1.message+":\n"+e2.message+":\n"+info+":\n(_=) "+src0+"\n ->\n"+src);
   }
   return src;
 }
@@ -167,7 +167,7 @@ class QMLBinding {
     try {
       if (!this.implGet) {
         var os = QmlWeb.objToStringSafe(obj);
-        console.warn("Binding/get error  compiled:"+this.compiled+"  no compiled getter  this:"+os+"   src:\n"+this.src);
+        QmlWeb.warn("Binding/get error  compiled:"+this.compiled+"  no compiled getter  this:"+os+"   src:\n"+this.src);
         return;
       }
       return this.implGet.call(obj);
@@ -191,7 +191,7 @@ class QMLBinding {
     try {
       if (!this.implSet) {
         var os = QmlWeb.objToStringSafe(obj);
-        console.warn("Binding/set error  compiled:"+this.compiled+"  no compiled setter  this:"+os+" value:"+value+" flags:"+flags+" src:\n"+this.src);
+        QmlWeb.warn("Binding/set error  compiled:"+this.compiled+"  no compiled setter  this:"+os+" value:"+value+" flags:"+flags+" src:\n"+this.src);
         return;
       }
       this.implSet.call(obj, value, flags, declaringItem);
@@ -215,7 +215,7 @@ class QMLBinding {
     try {
       if (!this.binding.implRun) {
         var os = QmlWeb.objToStringSafe(this.bindingObj);
-        console.warn("Binding/run error  compiled:"+this.binding.compiled+"  no compiled runner  this:" + os + " src:\n"+this.binding.src);
+        QmlWeb.warn("Binding/run error  compiled:"+this.binding.compiled+"  no compiled runner  this:" + os + " src:\n"+this.binding.src);
         return;
       }
       this.binding.implRun.apply(this.bindingObj, arguments);
@@ -389,7 +389,7 @@ class QMLBinding {
             ${vvith} {
               var obj = ${this.src};
               if (!obj) {
-                console.error("Writable/Bidirectional binding write error : target property '${this.src}' is null. Cannot set '${fp}' on null.");
+                QmlWeb.error("Writable/Bidirectional binding write error : target property '${this.src}' is null. Cannot set '${fp}' on null.");
                 return;
               }
               var prop;

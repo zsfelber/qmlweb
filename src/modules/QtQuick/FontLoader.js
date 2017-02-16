@@ -77,7 +77,7 @@ QmlWeb.registerQmlType({
       FontLoader.testDiv = null;
       fontLoader.loadFonts();
     } else {
-      console.warn(`FontLoader.js library is not loaded.
+      QmlWeb.warn(`FontLoader.js library is not loaded.
 You should load FontLoader.js if you want to use QtQuick FontLoader elements.
 Refs: https://github.com/smnh/FontLoader.`);
       // You should not rely on 'status' property without FontLoader.js.

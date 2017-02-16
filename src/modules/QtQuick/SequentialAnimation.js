@@ -32,7 +32,7 @@ QmlWeb.registerQmlType({
       this.$curIndex++;
       if (this.$curIndex < this.animations.length) {
         const anim = this.animations[this.$curIndex];
-        console.log("nextAnimation", this, this.$curIndex, anim);
+        QmlWeb.log("nextAnimation", this, this.$curIndex, anim);
         anim.start();
       } else {
         this.$passedLoops++;

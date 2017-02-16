@@ -32,7 +32,7 @@ QmlWeb.registerQmlType({
       try {
         this.title = iframe.contentDocument.title;
       } catch (e) {
-        console.log(`CSP prevents us from reading title for ${this.url}`);
+        QmlWeb.log(`CSP prevents us from reading title for ${this.url}`);
         this.title = "";
       }
       this.loadProgress = 100;

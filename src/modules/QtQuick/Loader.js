@@ -51,7 +51,7 @@ QmlWeb.registerQmlType({
     }
     const nameIsUrl = fileName.charAt(0)==="//" || name.indexOf(":/") >= 0;
     if (!nameIsUrl) {
-      console.warn("Loader.$onSourceChanged  Not an absolute resource id:"+fileName);
+      QmlWeb.warn("Loader.$onSourceChanged  Not an absolute resource id:"+fileName);
     }
 
     let clazz;

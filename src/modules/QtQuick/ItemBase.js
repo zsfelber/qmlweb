@@ -37,7 +37,7 @@ class ItemBase {
       if (element.dom) {
         this.dom.appendChild(element.dom);
       //} else {
-      //  console.warn("Child has no 'dom':"+element);
+      //  QmlWeb.warn("Child has no 'dom':"+element);
       }
     }
   }
@@ -77,7 +77,7 @@ class ItemBase {
       if (element.dom) {
         this.dom.removeChild(element.dom);
       //} else {
-      //  console.warn("Child has no 'dom':"+element);
+      //  QmlWeb.warn("Child has no 'dom':"+element);
       }
     }
   }
@@ -247,7 +247,7 @@ class ItemBase {
       return true;
     } finally {
       if (top) {
-        console.log("treeBindTo : ", dump);
+        QmlWeb.log("treeBindTo : ", dump);
       }
       path.pop();
     }

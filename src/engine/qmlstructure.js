@@ -367,7 +367,7 @@ convertToEngine.walkers = {
           }
         break;
         default:
-          console.log("Unknown statement", statement);
+          QmlWeb.log("Unknown statement", statement);
       }
     }
     // Make $children be either a single item or an array, if it's more than one
@@ -464,10 +464,10 @@ convertToEngine.walkers = {
     const impl = op+""+JSON.stringify(val);
     try {
       var result = eval(impl);
-      console.log("constant: "+result);
+      QmlWeb.log("constant: "+result);
       return result;
     } catch (err) {
-      console.error("Eval error:"+impl);
+      QmlWeb.error("Eval error:"+impl);
       return undefined;
     }
   },
@@ -480,10 +480,10 @@ convertToEngine.walkers = {
     const impl = JSON.stringify(val1)+""+op+""+JSON.stringify(val2);
     try {
       var result = eval(impl);
-      console.log("constant: "+result);
+      QmlWeb.log("constant: "+result);
       return result;
     } catch (err) {
-      console.error("Eval error:"+impl);
+      QmlWeb.error("Eval error:"+impl);
       return undefined;
     }
   },
@@ -498,10 +498,10 @@ convertToEngine.walkers = {
     const impl = JSON.stringify(val1)+"?"+JSON.stringify(val2)+":"+JSON.stringify(val3);
     try {
       var result = eval(impl);
-      console.log("constant: "+result);
+      QmlWeb.log("constant: "+result);
       return result;
     } catch (err) {
-      console.error("Eval error:"+impl);
+      QmlWeb.error("Eval error:"+impl);
       return undefined;
     }
   }
@@ -523,7 +523,7 @@ convertToEngine.walk = function(tree) {
   const type = tree[0];
   const walker = convertToEngine.walkers[type];
   if (!walker) {
-    console.warn(`No walker for ${type}`);
+    QmlWeb.warn(`No walker for ${type}`);
     return undefined;
   }
   return walker.apply(type, tree.slice(1));
@@ -584,8 +584,8 @@ convertToEngine.bindout = function(statement, binding, info) {
 
 // Help logger
 convertToEngine.amIn = function(str, tree) {
-  console.log(str);
-  if (tree) console.log(JSON.stringify(tree, null, "  "));
+  QmlWeb.log(str);
+  if (tree) QmlWeb.log(JSON.stringify(tree, null, "  "));
 };
 
 
@@ -603,7 +603,7 @@ function loadParser() {
     return;
   }
 
-  console.log("Loading parser...");
+  QmlWeb.log("Loading parser...");
   const tags = document.getElementsByTagName("script");
   for (const i in tags) {
     if (tags[i].src && tags[i].src.indexOf("/qt.") !== -1) {

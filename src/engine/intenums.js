@@ -14,6 +14,19 @@ const QMLOperationState = {
 
 };
 
+const QMLEngineLogging = {
+  Error : 1,
+  Warning : 2,
+  WarnErr : 3,
+  Info : 4,
+  Debug : 8,
+  Full : 15,
+
+  toString: function(flags) {
+    return humanize.call(QMLEngineLogging, flags);
+  }
+};
+
 const Component = {
   Null: 0, Ready: 1, Loading: 2, Error: 4,
 
@@ -129,6 +142,7 @@ function humanize(flags, mnems) {
 }
 
 QmlWeb.QMLOperationState = QMLOperationState;
+QmlWeb.QMLEngineLogging = QMLEngineLogging;
 QmlWeb.Component = Component;
 QmlWeb.QMLComponentFlags = QMLComponentFlags;
 QmlWeb.QMLBindingFlags = QMLBindingFlags;

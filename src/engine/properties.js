@@ -118,7 +118,7 @@ function createProperty(type, obj, propName, options) {
       obj.$properties_noalias[propName] = prop;
       QmlWeb.setupGetterSetter(obj.$noalias, propName, getter, setter, prop);
     } else {
-      console.error("Invalid object : "+obj+"  $noalias missing.");
+      QmlWeb.error("Invalid object : "+obj+"  $noalias missing.");
     }
   }
 
@@ -168,7 +168,7 @@ function applyProperties(metaObject, item) {
   function _hand_err(err, i) {
     if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
          || ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
-      console.warn("Cannot apply property : "+item+" . "+i+"  opstate:"+QmlWeb.QMLOperationState.toString(QmlWeb.engine.operationState));
+      QmlWeb.warn("Cannot apply property : "+item+" . "+i+"  opstate:"+QmlWeb.QMLOperationState.toString(QmlWeb.engine.operationState));
     } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
       if (err.ctType === "UninitializedEvaluation")
         QmlWeb.engine.currentPendingOp.warnings.push({loc:"applyProperties", err, item, i})
@@ -285,7 +285,7 @@ function applyProperty(item, i, value) {
     item.$setCustomData(i, value);
     return true;
   } else if (!trivialProperties[i]) {
-    console.warn(
+    QmlWeb.warn(
       `Cannot assign to non-existent property  ${item} [ "${i}" ]. Ignoring assignment.  Context:${item.$context}`
     );
   }
@@ -298,10 +298,10 @@ function connectSignal(item, signalName, value) {
   const _signal = item[signalName];
 
   if (!_signal) {
-    console.warn(`No signal called ${signalName} found!`);
+    QmlWeb.warn(`No signal called ${signalName} found!`);
     return undefined;
   } else if (typeof _signal.connect !== "function") {
-    console.warn(`${signalName} is not a signal!`);
+    QmlWeb.warn(`${signalName} is not a signal!`);
     return undefined;
   }
 
@@ -314,9 +314,9 @@ function connectSignal(item, signalName, value) {
   var connection;
 
   if (ps!==value.args) {
-    //console.warn("connectSignal  Binding arguments  created or changed : "+value.args+" -> "+ps+"  signal:"+item+" . "+signalName)
+    //QmlWeb.warn("connectSignal  Binding arguments  created or changed : "+value.args+" -> "+ps+"  signal:"+item+" . "+signalName)
     if (value.args) {
-      console.warn("connectSignal  Binding arguments  changed : "+value.args+" -> "+ps+"  signal:"+item+" . "+signalName);
+      QmlWeb.warn("connectSignal  Binding arguments  changed : "+value.args+" -> "+ps+"  signal:"+item+" . "+signalName);
     }
 
     try {
@@ -328,7 +328,7 @@ function connectSignal(item, signalName, value) {
         if (value.compiled) {
           throw new Error("Invalid compiled slot binding, it should be a function : "+value.src);
         }
-        //console.warn("connectSignal  convert Binding to function : "+ps);
+        //QmlWeb.warn("connectSignal  convert Binding to function : "+ps);
         value.src = "{" + value.src + "}";
       }
 
@@ -338,7 +338,7 @@ function connectSignal(item, signalName, value) {
       value.compile();
     } catch (err) {
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
-        console.warn("connectSignal/slot compile error : "+
+        QmlWeb.warn("connectSignal/slot compile error : "+
                      (err.srcdumpok?" . signal:"+signalName+" :":" :")+err.message+" "+
                      (err.srcdumpok?"srcdump:ok":""+connection));
       }

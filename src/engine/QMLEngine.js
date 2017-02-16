@@ -11,8 +11,9 @@ const geometryProperties = {
 
 // QML engine. EXPORTED.
 class QMLEngine {
-  constructor(element) {
+  constructor(element, opts={}) {
     QmlWeb.engine = this;
+    this.logging = opts.logging || QmlWeb.QMLEngineLogging.Full;
 
     //----------Public Members----------
 
@@ -128,9 +129,9 @@ class QMLEngine {
           val();
         } catch (err) {
           if (!err.ctType) {
-            console.warn("Error in startup script : ", err);
+            QmlWeb.warn("Error in startup script : ", err);
           } else {
-            console.warn(err.ctType+" error in startup script.");
+            QmlWeb.warn(err.ctType+" error in startup script.");
           }
         }
       });
@@ -139,9 +140,9 @@ class QMLEngine {
           this.$startTicker(val);
         } catch (err) {
           if (!err.ctType) {
-            console.warn("Startup error in ticker : ", err);
+            QmlWeb.warn("Startup error in ticker : ", err);
           } else {
-            console.warn(err.ctType+" : Startup error in ticker.");
+            QmlWeb.warn(err.ctType+" : Startup error in ticker.");
           }
         }
       });
@@ -178,23 +179,23 @@ class QMLEngine {
           }
         }
         if (!wsUrl) {
-          console.error("Invalid server websockets address : "+serverWsAddress+". Should be a ws port or 'ws:/...' url.")
+          QmlWeb.error("Invalid server websockets address : "+serverWsAddress+". Should be a ws port or 'ws:/...' url.")
         }
       }
 
       if (wsUrl) {
-        console.log("Connecting to ws server : "+wsUrl);
+        QmlWeb.log("Connecting to ws server : "+wsUrl);
         webSocket = new WebSocket(wsUrl);
         webSocket.onopen = function(evt) {
-          console.log(wsUrl+" : Connection open ...");
+          QmlWeb.log(wsUrl+" : Connection open ...");
           webSocket.send(JSON.stringify({init:"hello UULord 012"}));
         };
         webSocket.onmessage = function(evt) {
           var data = JSON.parse(event.data);
-          console.log( wsUrl+" : Received Message: ", data);
+          QmlWeb.log( wsUrl+" : Received Message: ", data);
         };
         webSocket.onclose = function(evt) {
-          console.log(wsUrl+" : Connection closed.");
+          QmlWeb.log(wsUrl+" : Connection closed.");
         };
       }
     }
@@ -216,7 +217,7 @@ class QMLEngine {
     const respath = QmlWeb.$resolvePath(fileName, x);
     const clazz = QmlWeb.resolveClass(respath);
     const component = this.loadQMLTree(clazz, parent, file, operationFlags, serverWsAddress, isClientSide, webSocket);
-    console.log("loadFile success. LOADED : "+file);
+    QmlWeb.log("loadFile success. LOADED : "+file);
     return component;
   }
 
@@ -249,10 +250,10 @@ class QMLEngine {
 
       if (this.dom) {
         if (this.rootObject.dom) {
-          console.log(clazz.$name+" : DOM element FOUND ! Added to engine screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
+          QmlWeb.log(clazz.$name+" : DOM element FOUND ! Added to engine screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
           this.domTarget.appendChild(this.rootObject.dom);
         } else {
-          console.warn(clazz.$name+" : No DOM, it's a pure model object. Not added to screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
+          QmlWeb.log(clazz.$name+" : No DOM, it's a pure model object. Not added to screen root element : "+this.dom.tagName+"#"+this.dom.id+"."+this.dom.className);
         }
       }
 
@@ -389,7 +390,7 @@ class QMLEngine {
     // all pending operataions at once during "Starting" stage
     //
 
-    console.log("processPendingOperations : "+this.pendingOperations.length);
+    QmlWeb.log("processPendingOperations : "+this.pendingOperations.length);
 
     var i=0,a=0,ae=0,a1=0,a2=0,b=0,e=0,w=0;
     let info = {}, warning = {}, error = {};
@@ -474,12 +475,12 @@ class QMLEngine {
       i++;
     }
 
-    console.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+ae)+") functions:"+b+"  Info:",info, "   Warning("+w+"):",warning, "   Error("+e+"):",error);
+    QmlWeb.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+ae)+") functions:"+b+"  Info:",info, "   Warning("+w+"):",warning, "   Error("+e+"):",error);
   }
 
   static dumpErr() {
-    console.warn(this.message);
-    console.warn(this.stack);
+    QmlWeb.warn(this.message);
+    QmlWeb.warn(this.stack);
   }
 }
 

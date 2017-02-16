@@ -8,83 +8,83 @@ describe("Initialize.loadQml", function() {
 
 var modules = {
   "QtQuick 2.5": {
-    AnimatedImage: { dom: true },
+    AnimatedImage: { dom: "" },
     Animation: {},
     Behavior: {},
     BorderImage: {},
-    Canvas: { dom: true },
-    Column: { dom: true },
+    Canvas: { dom: "" },
+    Column: { dom: "" },
     DoubleValidator: {},
     Flow: {},
     Font: {},
     FontLoader: {},
-    Grid: { dom: true },
-    Image: { dom: true },
+    Grid: { dom: "" },
+    Image: { dom: "" },
     IntValidator: {},
     ListElement: {},
     ListModel: {},
-    ListView: { dom: true },
+    ListView: { dom: "" },
     Loader: {},
-    MouseArea: { dom: true },
+    MouseArea: { dom: "" },
     NumberAnimation: {},
     ParallelAnimation: {},
     PropertyAnimation: {},
-    Rectangle: { dom: true },
+    Rectangle: { dom: "" },
     RegExpValidator: {},
-    Repeater: { dom: true },
+    Repeater: { dom: "" },
     Rotation: {},
-    Row: { dom: true },
+    Row: { dom: "" },
     Scale: {},
     SequentialAnimation: {},
     State: {},
     SystemPalette: {},
-    Text: { dom: true },
-    TextEdit: { dom: true },
-    TextInput: { dom: true },
+    Text: { dom: "" },
+    TextEdit: { dom: "" },
+    TextInput: { dom: "" },
     Timer: {},
     Transition: {},
     Translate: {}
   },
-  "QtQml.Modules 2.2": {
+  "QtQml.Models 2.2": {
     ListElement: {},
     ListModel: {}
   },
   "QtQuick.Controls 1.4": {
-    ApplicationWindow: { dom: true },
-    Button: { dom: true },
-    CheckBox: { dom: true },
-    ComboBox: { dom: true },
-    ScrollView: { dom: true },
-    TextArea: { dom: true },
-    TextField: { dom: true }
+    ApplicationWindow: { dom: "" },
+    Button: { dom: "" },
+    CheckBox: { dom: "" },
+    ComboBox: { dom: "" },
+    ScrollView: { dom: "" },
+    TextArea: { dom: "" },
+    TextField: { dom: "" }
   },
   "QtQuick.Controls 2": {
-    ApplicationWindow: { dom: true }
+    ApplicationWindow: { dom: "" }
   },
   "QtGraphicalEffects 1.0": {
-    FastBlur: { dom: true }
+    FastBlur: { dom: "" }
   },
   "QtMobility 1.2": {
   },
   "QtMultimedia 5.0": {
     // X.0 imports should work
-    Video: { dom: true }
+    Video: { dom: "" }
   },
   "QtMultimedia 5.6": {
     Audio: {},
     Camera: {},
     MediaPlayer: {},
-    VideoOutput: { dom: true },
-    Video: { dom: true }
+    VideoOutput: { dom: "" },
+    Video: { dom: "" }
   },
   "QtNfc 5.2": {
     NearField: {}
   },
   "QtWebEngine 5.7": {
-    WebEngineView: { dom: true }
+    WebEngineView: { dom: "" }
   },
   "QtWebView 1.1": {
-    WebView: { dom: true }
+    WebView: { dom: "" }
   },
   "QtBluetooth 5.2": {
     BluetoothDiscoveryModel: {}
@@ -99,7 +99,7 @@ var modules = {
     RestModel: {}
   },
   "QmlWeb.Dom 1.0": {
-    DomElement: { dom: true }
+    DomElement: { dom: "" }
   }
 };
 
@@ -110,10 +110,10 @@ function testModule(module, element, imports, options) {
     it(element, function() {
       var src = imports + element + " { }\n";
       var qml = loadQml(src, this.div);
-      if (options.dom) {
+      if (options.dom!==undefined) {
         var div = this.div.children[0];
-        expect(div.className).toBe(element);
-        expect(div.style.boxSizing).toBe("border-box");
+        expect(div.className).toBe(options.dom);
+        expect(div.style.boxSizing).toBe("");
       }
       expect(qml.Component).not.toBe(undefined);
     });
@@ -121,6 +121,7 @@ function testModule(module, element, imports, options) {
 }
 
 Object.keys(modules).forEach(function(key) {
+  //console.log("Module : "+key);
   var module = modules[key];
   if (module._version) {
     module._name = key;
@@ -130,11 +131,13 @@ Object.keys(modules).forEach(function(key) {
     module._version = split[1];
   }
   var imports = "import " + module._name + " " + module._version + "\n";
-  for (var i in module._depends || []) {
-    imports += "import " + module._depends[i] + "\n";
+  var deps = module._depends || [];
+  for (var i in deps) {
+    imports += "import " + deps[i] + "\n";
   }
   Object.keys(module).forEach(function(element) {
     if (element[0] === "_") return;
+    //console.log("element : "+element);
     testModule(module._name, element, imports, module[element]);
   });
 });
