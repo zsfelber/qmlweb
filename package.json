@@ -40,7 +40,7 @@
     "coverage": "gulp coverage",
     "build": "gulp build",
     "watch": "gulp watch",
-    "debug-gulp-test": "devtool node_modules/gulp/bin/gulp.js test"
+    "debug-test": "devtool debug_test.js"
   },
   "main": "lib/qt.js",
   "files": [
