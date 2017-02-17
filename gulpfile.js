@@ -170,6 +170,8 @@ gulp.task("watch-dev", ["build-dev"], () => {
 });
 
 gulp.task("test", ["build-dev"], () => {
+  var g = typeof window!=="undefined" ? window : global;
+  g.testernodebug = true;
   new karma.Server({
     singleRun: true,
     configFile: path.join(__dirname, "karma.conf.js"),
@@ -180,6 +182,8 @@ gulp.task("test", ["build-dev"], () => {
 });
 
 gulp.task("coverage", ["build-covered"], () => {
+  var g = typeof window!=="undefined" ? window : global;
+  g.testernodebug = true;
   new karma.Server({
     singleRun: true,
     coverageEnabled: true,
@@ -191,6 +195,8 @@ gulp.task("coverage", ["build-covered"], () => {
 });
 
 gulp.task("test-watch", ["watch-dev"], done => {
+  var g = typeof window!=="undefined" ? window : global;
+  g.testernodebug = true;
   new karma.Server({
     configFile: path.join(__dirname, "karma.conf.js"),
     browsers: ["PhantomJSCustom"]
@@ -198,8 +204,6 @@ gulp.task("test-watch", ["watch-dev"], done => {
 });
 
 gulp.task("test-debug", ["watch-dev"], done => {
-  var g = typeof window!=="undefined" ? window : global;
-  g.testerdebug = true;
   new karma.Server({
     configFile: path.join(__dirname, "karma.conf.js"),
     browsers: ["PhantomJSCustom"/* "Chrome_without_security"*/],

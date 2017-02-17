@@ -4,6 +4,7 @@ module.exports = function(config) {
     frameworks: ["jasmine"],
     files: [
       config.coverageEnabled ? "tmp/qt.covered.js" : "lib/qt.js",
+      config.debug ? "karma_debug.js": "karma_nodebug.js",
       { pattern: "lib/*.js", included: false },
       { pattern: "lib/*.js.map", included: false },
       { pattern: "tmp/qmlweb.*.js", included: false },

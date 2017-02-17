@@ -1,0 +1,4 @@
+function isDebug() {
+  return true;
+}
+
