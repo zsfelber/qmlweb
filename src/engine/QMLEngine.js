@@ -17,16 +17,7 @@ class QMLEngine {
 
     //----------Public Members----------
 
-    //this.fps = 60;
-    // Math.floor, causes bugs to timing?
-    //this.$interval = Math.floor(1000 / this.fps);
-    this.dom = element || document.body;
-
-    // Target for the DOM children
-    this.domTarget = this.dom;
-    if (this.dom && QmlWeb.useShadowDom && this.dom.attachShadow) {
-      this.domTarget = this.dom.attachShadow({ mode: "open" });
-    }
+    this.setDom(element);
 
     // Cached component trees (post-QmlWeb.convertToEngine)
     this.classes = {};
@@ -74,6 +65,23 @@ class QMLEngine {
 
     //----------Construct----------
 
+    window.addEventListener("resize", () => this.updateGeometry());
+  }
+
+  setDom(element) {
+    //this.fps = 60;
+    // Math.floor, causes bugs to timing?
+    //this.$interval = Math.floor(1000 / this.fps);
+    this.dom = element || document.body;
+
+    // Target for the DOM children
+    this.domTarget = this.dom;
+    if (this.dom && QmlWeb.useShadowDom && this.dom.attachShadow) {
+      this.domTarget = this.dom.attachShadow({ mode: "open" });
+    }
+
+    //----------Construct----------
+
     if (this.dom) {
       this.css = QmlWeb.createStyle(this.dom.style);
       // No QML stuff should stand out the root element
@@ -89,8 +97,6 @@ class QMLEngine {
         }
       }
     }
-
-    window.addEventListener("resize", () => this.updateGeometry());
   }
 
   //---------- Public Methods ----------

@@ -6,6 +6,7 @@ var engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLoggi
 
 function loadQmlFile(file, div, opts) {
   //var engine = new QmlWeb.QMLEngine(div, opts || {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
+  engine.setDom(div);
   engine.loadFile(file);
   engine.start();
   engine.stop();
@@ -21,6 +22,7 @@ function prefixedQmlLoader(prefix) {
 
 function loadQml(src, div, opts) {
   //var engine = new QmlWeb.QMLEngine(div, opts || {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
+  engine.setDom(div);
   engine.loadQML(src);
   engine.start();
   engine.stop();

@@ -54,8 +54,19 @@ function registerGlobalQmlType(name, type) {
     At the same time, those signals are still pushed to
     `engine.completedSignals` by getAttachedObject.
   */
-  if (type.getAttachedObject && !QtObject.prototype.hasOwnProperty(name)) {
-    QmlWeb.setupGetter(QtObject.prototype, name, type.getAttachedObject);
+
+  // TODO gz : add all to all because of prototype chain !
+  // so each supertype __proto__ has different "Component" (also different $context ) attached to it :
+
+  for(var m in modules.Main) {
+    var type2 = modules.Main[m];
+
+    if (type.getAttachedObject && !type2.constructor.prototype.hasOwnProperty(name)) {
+      QmlWeb.setupGetter(type2.constructor.prototype, name, type.getAttachedObject);
+    }
+    if (type2.getAttachedObject && !type.constructor.prototype.hasOwnProperty(name)) {
+      QmlWeb.setupGetter(type.constructor.prototype, name, type2.getAttachedObject);
+    }
   }
 
 }
