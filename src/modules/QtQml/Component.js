@@ -138,9 +138,6 @@ class QMLComponent {
       if (!(this.flags&QmlWeb.QMLComponentFlags.Root)) {
         throw new Error("Component has no loader but Root flag is not set : "+this);
       }
-      //if (!this.$file) {
-      //  throw new Error("No component file");
-      //}
     }
 
     this.context.component = this;
@@ -169,9 +166,11 @@ class QMLComponent {
       this.initImports();
     }
 
-    //if (!this.$basePathUrl) {
-    //  throw new Error("Assertion failed. No component basePath present.  "+this+"  "+this.context);
-    //}
+    if (this.$file) {
+      if (!this.$basePathUrl) {
+        throw new Error("Assertion failed. No component basePath present.  "+this+"  "+this.context);
+      }
+    }
     if (!this.moduleConstructors) {
       throw new Error("Assertion failed. Component : no imports.  "+this+"  "+this.context);
     }
@@ -186,14 +185,14 @@ class QMLComponent {
     if (meta.clazz) {
       if (meta.$file === undefined) {
         meta.$file = meta.clazz.$file;
-      } else {
-        // url -> string
-        meta.clazz.$file = meta.clazz.$file.toString();
-      }
+      } else if (meta.clazz.$file) {
+        //  // url -> string
+        //  meta.clazz.$file = meta.clazz.$file.toString();
 
-      if (meta.$file !== meta.clazz.$file) {
-        if (!meta.clazz.$file.endsWith(meta.$file)) {
-          throw new Error("Assertion failed. $file-s in Component and class differ :  meta.$file:'"+meta.$file+"' === meta.clazz.$file:'"+meta.clazz.$file+"'");
+        if (meta.$file !== meta.clazz.$file) {
+          if (!meta.clazz.$file.endsWith(meta.$file)) {
+            throw new Error("Assertion failed. $file-s in Component and class differ :  meta.$file:'"+meta.$file+"' === meta.clazz.$file:'"+meta.clazz.$file+"'");
+          }
         }
       }
 
