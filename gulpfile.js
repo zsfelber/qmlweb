@@ -198,11 +198,18 @@ gulp.task("test-watch", ["watch-dev"], done => {
 });
 
 gulp.task("test-debug", ["watch-dev"], done => {
+  var g = typeof window!=="undefined" ? window : global;
+  g.testerdebug = true;
   new karma.Server({
     configFile: path.join(__dirname, "karma.conf.js"),
-    browsers: ["Chrome_without_security"],
+    browsers: ["PhantomJSCustom"/* "Chrome_without_security"*/],
     reporters: ["progress"],
-    debug: true
+    debug: true,
+    singleRun: false,
+    logLevel: "config.LOG_DISABLE",
+    client: {
+      captureConsole: false
+    }
   }, done).start();
 });
 

@@ -44,6 +44,20 @@ function extractBasePath(file) {
   return basePath.join("/");
 }
 
+function resolveBasePath(uri) {
+  if (!this.$basePathA) {
+    // Create an anchor element to get the absolute path from the DOM
+    this.$basePathA = document.createElement("a");
+  }
+  let x0 = extractBasePath(uri);
+  this.$basePathA.href = x0;
+  let x = this.$basePathA.href;
+  if (!x0) {
+    x = extractBasePath(x);
+  }
+  return x;
+}
+
 function extractFileName(file) {
   return file.split(/[/\\]/).pop();
 }
@@ -387,10 +401,9 @@ function $instanceOf(o, typestring, component) {
 }
 
 
-
-
 QmlWeb.removeDotSegments = removeDotSegments;
 QmlWeb.extractBasePath = extractBasePath;
+QmlWeb.resolveBasePath = resolveBasePath;
 
 QmlWeb.extractFileName = extractFileName;
 

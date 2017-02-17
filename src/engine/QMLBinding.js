@@ -161,7 +161,7 @@ class QMLBinding {
 
   get(obj) {
     var prevComponent = QmlWeb.engine.$component;
-    QmlWeb.engine.$component = this.$component;
+    QmlWeb.engine.$component = obj.$component;
 
     // .call is needed for `this` support
     try {
@@ -185,7 +185,7 @@ class QMLBinding {
 
   set(obj, value, flags, declaringItem) {
     var prevComponent = QmlWeb.engine.$component;
-    QmlWeb.engine.$component = this.$component;
+    QmlWeb.engine.$component = obj.$component;
 
     // .call is needed for `this` support
     try {

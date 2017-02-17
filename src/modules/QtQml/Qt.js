@@ -26,6 +26,11 @@ const Qt = {
     return QmlWeb.createQmlObject(src, parent, file);
   },
 
+  // Returns url resolved relative to the URL of the caller.
+  // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
+  // in QMLUrl.js
+  resolvedUrl: url => QmlWeb.qmlUrl(url),
+
   size: function size(width, height) {
     return new QmlWeb.QSizeF(width, height);
   },

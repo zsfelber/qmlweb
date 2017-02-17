@@ -20,13 +20,31 @@ Object.defineProperty(
   }
 );
 
-String.prototype.startsWith = function (str) {
+function startsWith(str) {
   return this.length >= str.length && this.substring(0, str.length)===str;
 };
 
-String.prototype.endsWith = function (str) {
+function endsWith(str) {
   return this.length >= str.length && this.substring(this.length-str.length)===str;
 };
+
+Object.defineProperty(
+  String.prototype,
+  "startsWith",
+  {
+    value : startsWith,
+    enumerable : false
+  }
+);
+
+Object.defineProperty(
+  String.prototype,
+  "endsWith",
+  {
+    value : endsWith,
+    enumerable : false
+  }
+);
 
 
 QmlWeb.debug = function() {

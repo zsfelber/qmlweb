@@ -23,14 +23,14 @@ describe("QMLEngine.basic", function() {
   it("Qt.resolvedUrl", function() {
     var qml = load("ResolvedUrl", this.div);
     /* Get the base address of the URL */
-    const a = document.createElement("a");
-    a.href = "/";
-    expect(qml.outer).toBe(a.href + "base/tests/");
+    const x = QmlWeb.resolveBasePath("/");
+
+    expect(qml.outer).toBe("tests/");
     expect(qml.current).toBe(qml.outer + "QMLEngine/qml/");
     expect(qml.inner1).toBe(qml.current + "foo/bar");
     expect(qml.inner2).toBe(qml.current + "foo/bar/");
     expect(qml.inner3).toBe(qml.current + "foo/foo/lol/");
-    expect(qml.absolute).toBe(a.href + "foo/bar");
+    expect(qml.absolute).toBe(x + "foo/bar");
     expect(qml.full).toBe("http://example.com/bar");
   });
 

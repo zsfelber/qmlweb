@@ -2,8 +2,17 @@
 // the DOM contents of QML elements through .children
 QmlWeb.useShadowDom = false;
 
+function isDebug() {
+  var g = typeof window!=="undefined" ? window : global;
+  if (g.hasOwnProperty("testerdebug")) {
+    return g.testerdebug;
+  }
+  return false;
+}
+
+
 function loadQmlFile(file, div, opts) {
-  var engine = new QmlWeb.QMLEngine(div, opts || {logging:QmlWeb.QMLEngineLogging.WarnErr});
+  var engine = new QmlWeb.QMLEngine(div, opts || {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
   engine.loadFile(file);
   engine.start();
   document.body.appendChild(div);
@@ -17,7 +26,7 @@ function prefixedQmlLoader(prefix) {
 }
 
 function loadQml(src, div, opts) {
-  var engine = new QmlWeb.QMLEngine(div, opts || {logging:QmlWeb.QMLEngineLogging.WarnErr});
+  var engine = new QmlWeb.QMLEngine(div, opts || {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
   engine.loadQML(src);
   engine.start();
   document.body.appendChild(div);

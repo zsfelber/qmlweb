@@ -163,10 +163,6 @@ class QMLEngine {
 
   // Load file, parse and construct (.qml or .qml.js)
   loadFile(file, parent = null, operationFlags = 0, serverWsAddress, isClientSide) {
-    // Create an anchor element to get the absolute path from the DOM
-    if (!this.$basePathA) {
-      this.$basePathA = document.createElement("a");
-    }
     var wsUrl, webSocket;
     if (operationFlags & QmlWeb.QMLOperationState.Remote) {
       if (serverWsAddress !== undefined) {
@@ -200,17 +196,7 @@ class QMLEngine {
       }
     }
 
-    let x = QmlWeb.extractBasePath(file);
-    this.$basePathA.href = x;
-    x = this.$basePathA.href;
-    if (!/[/]$/.test(x)) {
-      const r = /^(.*[/]).*?$/;
-      const cap = r.exec(x);
-      if (cap) {
-        x = cap[1];
-      }
-    }
-
+    const x = QmlWeb.resolveBasePath(file);
     this.$basePath = x;
     const fileName = extractFileName(file);
     // TODO gz resolveClass  += engine.containers[...]

@@ -185,11 +185,15 @@ class QMLComponent {
     this.meta = {$component:this};
     if (meta.clazz) {
       if (meta.$file === undefined) {
-          meta.$file = meta.clazz.$file;
+        meta.$file = meta.clazz.$file;
+      } else {
+        // url -> string
+        meta.clazz.$file = meta.clazz.$file.toString();
       }
+
       if (meta.$file !== meta.clazz.$file) {
-        if (!meta.clazz.$file.endsWith("/"+meta.$file)) {
-          throw new Error("Assertion failed. $file-s in Component and class differ :  meta.$file:"+meta.$file+" === meta.clazz.$file:"+meta.clazz.$file);
+        if (!meta.clazz.$file.endsWith(meta.$file)) {
+          throw new Error("Assertion failed. $file-s in Component and class differ :  meta.$file:'"+meta.$file+"' === meta.clazz.$file:'"+meta.clazz.$file+"'");
         }
       }
 

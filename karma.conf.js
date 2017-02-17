@@ -16,7 +16,7 @@ module.exports = function(config) {
       { pattern: "tests/*/**/*.qml", included: false },
       { pattern: "tests/*/**/*.png", included: false }
     ],
-    browsers: ["PhantomJSCustom", "Chrome_without_security"],
+    browsers: ["PhantomJSCustom"/*, "Chrome_without_security"*/],
     reporters: ["spec", "coverage"],
     coverageReporter: {
       type: "lcov",
