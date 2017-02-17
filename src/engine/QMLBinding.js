@@ -218,7 +218,7 @@ class QMLBinding {
         QmlWeb.warn("Binding/run error  compiled:"+this.binding.compiled+"  no compiled runner  this:" + os + " src:\n"+this.binding.src);
         return;
       }
-      this.binding.implRun.apply(this.bindingObj, arguments);
+      return this.binding.implRun.apply(this.bindingObj, arguments);
     } catch (err) {
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
         var os = QmlWeb.objToStringSafe(this.bindingObj);
