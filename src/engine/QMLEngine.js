@@ -50,7 +50,8 @@ class QMLEngine {
     this.rootContext = new QmlWeb.QMLContext();
 
     // Base path of qml engine (used for resource loading)
-    //this.$basePath = "";
+    // used in tests only
+    this.$basePathUrl = "";
 
     // Module import paths overrides
     this.userAddedModulePaths = {};
@@ -167,7 +168,7 @@ class QMLEngine {
     if (operationFlags & QmlWeb.QMLOperationState.Remote) {
       if (serverWsAddress !== undefined) {
         if (/^\d+$/.test(serverWsAddress)) {
-          var uri = QmlWeb.$parseURIwPort(window.location.href);
+          var uri = QmlWeb.$parseURIlong(window.location.href);
           wsUrl = "ws://"+uri.host+":"+(serverWsAddress?serverWsAddress:uri.port);
         } else {
           if (/^ws:[/]/.test(serverWsAddress)) {
@@ -197,7 +198,8 @@ class QMLEngine {
     }
 
     const x = QmlWeb.resolveBasePath(file);
-    //this.$basePath = x;
+    // used in tests only
+    this.$basePathUrl = x;
     const fileName = extractFileName(file);
     // TODO gz resolveClass  += engine.containers[...]
     const respath = QmlWeb.$resolvePath(fileName, x);
@@ -223,7 +225,7 @@ class QMLEngine {
 
     try {
       // Create and initialize objects
-      // TODO gz undefined->component.$basePath
+      // TODO gz undefined->component.$basePathUrl
 
       this.rootObject = QmlWeb.createComponentAndElement(
                     {clazz: clazz, $file: file}, parent,

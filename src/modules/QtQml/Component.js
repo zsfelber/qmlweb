@@ -169,7 +169,7 @@ class QMLComponent {
       this.initImports();
     }
 
-    //if (!this.$basePath) {
+    //if (!this.$basePathUrl) {
     //  throw new Error("Assertion failed. No component basePath present.  "+this+"  "+this.context);
     //}
     if (!this.moduleConstructors) {
@@ -231,7 +231,7 @@ class QMLComponent {
     this.$file = this.meta.$file;
     this.$imports = this.meta.$imports;
     if (this.$file) {
-      this.$basePath = QmlWeb.resolveBasePath(this.$file);
+      this.$basePathUrl = QmlWeb.resolveBasePath(this.$file);
     }
 
   }
@@ -240,7 +240,7 @@ class QMLComponent {
     const engine = QmlWeb.engine;
     for (let i = 0; i < this.$jsImports.length; ++i) {
       const importDesc = this.$jsImports[i];
-      const js = QmlWeb.loadJS($resolvePath(importDesc[1], this.$basePath));
+      const js = QmlWeb.loadJS($resolvePath(importDesc[1], this.$basePathUrl));
 
       if (!js) {
         QmlWeb.log("Component.finalizeImports: failed to import JavaScript",
@@ -281,7 +281,7 @@ class QMLComponent {
     QmlWeb.preloadImports(this, moduleImports);
 
     if (this.flags & QmlWeb.QMLComponentFlags.LoadImports) {
-      // TODO gz  undefined -> component.$basePath  from createQmlObject
+      // TODO gz  undefined -> component.$basePathUrl  from createQmlObject
       QmlWeb.loadImports(this, this.$imports);
     }
   }
@@ -305,26 +305,26 @@ class QMLComponent {
     this.boundImportComponent = sourceComponent;
 
     if (sourceComponent) {
-      if (!this.$basePath0) {
+      if (!this.$basePathUrl0) {
         // Save
         this.$jsImports0 = this.$jsImports;
         this.moduleConstructors0 = this.moduleConstructors;
         this.ctxQmldirs0 = this.ctxQmldirs; // resulting components lookup table
         this.componentImportPaths0 = this.componentImportPaths;
-        this.$basePath0 = sourceComponent.$basePath;
+        this.$basePathUrl0 = sourceComponent.$basePathUrl;
       }
       this.$jsImports = Object.create(sourceComponent.$jsImports);
       this.moduleConstructors = Object.create(sourceComponent.moduleConstructors);
       this.ctxQmldirs = Object.create(sourceComponent.ctxQmldirs); // resulting components lookup table
       this.componentImportPaths = Object.create(sourceComponent.componentImportPaths);
-      this.$basePath = sourceComponent.$basePath;
+      this.$basePathUrl = sourceComponent.$basePathUrl;
     } else {
       // Restore
       this.$jsImports = this.$jsImports0;
       this.moduleConstructors = this.moduleConstructors0;
       this.ctxQmldirs = this.ctxQmldirs0; // resulting components lookup table
       this.componentImportPaths = this.componentImportPaths0;
-      this.$basePath = sourceComponent.$basePath0;
+      this.$basePathUrl = sourceComponent.$basePathUrl0;
     }
   }
 

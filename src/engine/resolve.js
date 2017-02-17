@@ -45,23 +45,20 @@ function extractBasePath(file) {
 }
 
 function resolveBasePath(uri) {
-  let pu = $parseURI(uri);
-  let x;
-  if (pu) {
-    x = extractBasePath(uri);
-  } else {
-    if (!this.$basePathA) {
+  let pu = $parseURIlong(uri);
+  if (!pu) {
+    if (!this.$basePathUrlA) {
       // Create an anchor element to get the absolute path from the DOM
-      this.$basePathA = document.createElement("a");
+      this.$basePathUrlA = document.createElement("a");
     }
     let x0 = extractBasePath(uri);
-    this.$basePathA.href = x0;
-    x = this.$basePathA.href;
+    this.$basePathUrlA.href = x0;
+    let x = this.$basePathUrlA.href;
     if (!x0) {
       x = extractBasePath(x);
     }
   }
-  return x;
+  return pu;
 }
 
 function extractFileName(file) {
@@ -256,49 +253,26 @@ function $parseURI(uri) {
   return undefined;
 }
 
-// This parses the full URL into scheme, authority and path
-function $parseURIwAuth(uri) {
-  const match = uri.match(/^([^/]*?:[/])(.*?)[/](.*)$/);
-  if (match) {
-    return {
-      scheme: match[1],
-      authority: match[2],
-      path: match[3]
-    };
-  }
-  return undefined;
-}
-
 function $parseURIlong(uri) {
-  const match = uri.match(/^([^/]*?:[/])(.*)[/](.*?)$/);
+  const match = uri.match(/^([^/]*?:[/])(.*?)(:(\d+))?([/].*?[/])([^/]*)$/);
   if (match) {
     return {
-      scheme: match[1],
-      path: match[2],
-      file: match[3]
-    };
-  }
-  return undefined;
-}
-
-function $parseURIwPort(uri) {
-  const match = uri.match(/^([^/]*?:[/])(?:(.*?):(\d+))?(.*)$/);
-  if (match) {
-    return {
+      uri: uri,
       scheme: match[1],
       host: match[2],
-      port: match[3],
-      path: match[4],
-      authority: "",
+      authority: match[2]+match[3],
+      port: match[4],
+      path: match[5],
+      file: match[6],
     };
   }
   return undefined;
 }
 
 // Return a path to load the file
-function $resolvePath(file, basePath) {
-  if (!basePath) {
-    basePath = QmlWeb.engine.$component.$basePath;
+function $resolvePath(file, basePathUrl) {
+  if (!basePathUrl) {
+    basePathUrl = QmlWeb.engine.$component.$basePathUrl;
   }
   // probably, replace :// with :/ ?
   if (!file || file.indexOf(":/") !== -1 || file.startsWith("data:") ||
@@ -306,12 +280,12 @@ function $resolvePath(file, basePath) {
     return file;
   }
 
-  const basePathURI = $parseURI(basePath);
-  if (!basePathURI) {
+  //const basePathURI = $parseURI(basePath);
+  if (!basePathUrl) {
     return file;
   }
 
-  let path = basePathURI.path;
+  let path = basePathUrl.path;
   if (file && file.charAt(0) === "/") {
     path = file;
   } else {
@@ -321,7 +295,7 @@ function $resolvePath(file, basePath) {
   // Remove duplicate slashes and dot segments in the path
   path = removeDotSegments(path.replace(/([^:][/])[/]+/g, "$1"));
 
-  return `${basePathURI.scheme}${basePathURI.authority}${path}`;
+  return `${basePathUrl.scheme}${basePathUrl.authority}${path}`;
 }
 
 // Return a DOM-valid path to load the image (fileURL is an already-resolved
@@ -431,12 +405,7 @@ QmlWeb.resolveClassImport = resolveClassImport;
 // This parses the full URL into scheme and path
 QmlWeb.$parseURI = $parseURI;
 
-// This parses the full URL into scheme, authority and path
-QmlWeb.$parseURIwAuth = $parseURIwAuth;
-
 QmlWeb.$parseURIlong = $parseURIlong;
-
-QmlWeb.$parseURIwPort = $parseURIwPort;
 
 // Return a path to load the file
 QmlWeb.$resolvePath = $resolvePath;

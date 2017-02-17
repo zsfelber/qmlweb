@@ -124,7 +124,7 @@ function loadImports(component, importsArray) {
 
 function loadImport(entry, component) {
   const engine = QmlWeb.engine;
-  var currentFileDir = component.$basePath;
+  var curBaseUrl = component.$basePathUrl;
   let name = entry[1];
 
   // is it url to remote resource
@@ -137,7 +137,7 @@ function loadImport(entry, component) {
   const nameIsDir = !nameIsQualifiedModuleName && !nameIsUrl && !nameIsJs;
 
   if (nameIsDir) {
-    name = $resolvePath(name, currentFileDir);
+    name = $resolvePath(name, curBaseUrl);
     if (name[name.length - 1] === "/") {
       // remove trailing slash as it required for `readQmlDir`
       name = name.substr(0, name.length - 1);
@@ -163,7 +163,7 @@ function loadImport(entry, component) {
       // 3. Js file, don't need qmldir
     } else {
       // 4. qt-style lookup for qualified module
-      const probableDirs = [currentFileDir].concat(importPathList());
+      const probableDirs = [curBaseUrl].concat(importPathList());
       var diredName = name.replace(/\./g, "/");
       qrcName = "qrc:/"+diredName;
 

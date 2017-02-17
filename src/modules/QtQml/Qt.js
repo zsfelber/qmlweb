@@ -38,7 +38,7 @@ const Qt = {
   include(path) {
 
     // TODO gz (engine)basePath
-    const uri = $resolvePath(path);
+    const uri = QmlWeb.$resolvePath(path);
 
     /* Handle recursive includes */
     if (QmlWeb.engine.$component.$qmlJsIncludes === undefined) {
