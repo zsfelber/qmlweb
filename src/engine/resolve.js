@@ -247,17 +247,21 @@ function $parseURI(uri) {
 }
 
 function $parseURIlong(uri) {
-  //                        scheme      host     :port   path          file
-  const match = uri.match(/^([^/:]*:[/])([^/:]*)(:(\d*))?([/]|[/].*[/])([^/]*)$/);
+  //                        scheme            host     :port   path           file
+  const match = uri.match(/^([^/:]*:[/])([/]?)([^/:]*)(:(\d*)?)([/]|[/].*?[/])([^/]*)$/);
   if (match) {
+    if (match[2]===undefined) match[2]="";
+    if (match[4]===undefined) match[4]="";
+    const au = match[3]+match[4];
     return {
       uri: uri,
-      scheme: match[1],
-      host: match[2],
-      authority: match[2]+match[3],
-      port: match[4],
-      path: match[5],
-      file: match[6],
+      scheme: au ? match[1]+match[2] : match[1],
+      prefix: match[2],
+      host: match[3],
+      authority: au,
+      port: match[5],
+      path: au ? match[6] : match[2]+match[6],
+      file: match[7],
     };
   }
   return undefined;

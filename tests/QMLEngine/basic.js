@@ -25,12 +25,15 @@ describe("QMLEngine.basic", function() {
     /* Get the base address of the URL */
     const x = QmlWeb.resolveBasePath("/");
 
-    expect(qml.outer).toBe("tests/");
+    expect(qml.outer).toBe(x.uri + "base/tests/");
     expect(qml.current).toBe(qml.outer + "QMLEngine/qml/");
     expect(qml.inner1).toBe(qml.current + "foo/bar");
     expect(qml.inner2).toBe(qml.current + "foo/bar/");
     expect(qml.inner3).toBe(qml.current + "foo/foo/lol/");
-    expect([x + "foo/bar", "http://foo/bar"]).toContain(qml.absolute);
+    //if (isDebug())
+      expect(qml.absolute).toBe(x.uri + "foo/bar");
+    //else // document.create("<A>").href is just not working as expected:
+    //  expect(qml.absolute).toBe("http://foo/bar");
     expect(qml.full).toBe("http://example.com/bar");
   });
 
