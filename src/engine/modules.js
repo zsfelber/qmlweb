@@ -29,45 +29,7 @@ function registerGlobalQmlType(name, type) {
   constructors[name] = type;
   modules.Main[name] = type;
 
-  const QtObject = QmlWeb.QtObject;
-
-  /*
-    http://doc.qt.io/qt-5/qtqml-syntax-objectattributes.html#attached-properties-and-attached-signal-handlers
-
-    Some object treated as Attached. For example, Component.
-    In the cycle, we go via constructors and find such objects.
-    Then, we set property to object `QtObject.prototype` with name of
-    that object, and with specific getter func.
-    E.g., we create "someitem.Component" here.
-    Later, if somebody will read that property, the getter will be invoked.
-    Here all getters are set to `getAttachedObject` only, which is actually
-    dedicated for Component attached object.
-    The code of `getAttachedObject` checks whether $Component internal
-    variable exist, and creates it if it absent.
-    Then, `getAttachedObject` adds self "completed" signal to global
-    `engine.completedSignals`.
-    That is how completed handlers gathered into global list. This list then
-    is called by `engine.callCompletedSignals`.
-
-    p.s. At the moment, Repeater and Loader manually call
-    `Component.completed` signals on objects they create.
-    At the same time, those signals are still pushed to
-    `engine.completedSignals` by getAttachedObject.
-  */
-
-  // TODO gz : add all to all because of prototype chain !
-  // so each supertype __proto__ has different "Component" (also different $context ) attached to it :
-
-  for(var m in modules.Main) {
-    var type2 = modules.Main[m];
-
-    if (type.getAttachedObject && !type2.constructor.prototype.hasOwnProperty(name)) {
-      QmlWeb.setupGetter(type2.constructor.prototype, name, type.getAttachedObject);
-    }
-    if (type2.getAttachedObject && !type.constructor.prototype.hasOwnProperty(name)) {
-      QmlWeb.setupGetter(type.constructor.prototype, name, type2.getAttachedObject);
-    }
-  }
+  applyAttachedObjects(type, name, QmlWeb.QtObject.prototype);
 
 }
 
@@ -199,8 +161,55 @@ function getModuleConstructors(moduleName, version) {
   return constructors;
 }
 
+function applyAttachedObjects(type, name, proto) {
+  /*
+    http://doc.qt.io/qt-5/qtqml-syntax-objectattributes.html#attached-properties-and-attached-signal-handlers
+
+    Some object treated as Attached. For example, Component.
+    In the cycle, we go via constructors and find such objects.
+    Then, we set property to object `QtObject.prototype` with name of
+    that object, and with specific getter func.
+    E.g., we create "someitem.Component" here.
+    Later, if somebody will read that property, the getter will be invoked.
+    Here all getters are set to `getAttachedObject` only, which is actually
+    dedicated for Component attached object.
+    The code of `getAttachedObject` checks whether $Component internal
+    variable exist, and creates it if it absent.
+    Then, `getAttachedObject` adds self "completed" signal to global
+    `engine.completedSignals`.
+    That is how completed handlers gathered into global list. This list then
+    is called by `engine.callCompletedSignals`.
+
+    p.s. At the moment, Repeater and Loader manually call
+    `Component.completed` signals on objects they create.
+    At the same time, those signals are still pushed to
+    `engine.completedSignals` by getAttachedObject.
+  */
+
+  if (type.getAttachedObject && !proto.hasOwnProperty(name)) {
+    QmlWeb.setupGetter(proto, name, type.getAttachedObject);
+  }
+}
+
+function applyAllAttachedObjects(proto) {
+
+  // TODO gz : add to each proto of prototype chain !
+  // so each supertype __proto__ has different "Component" (also different $context ) attached to it :
+
+  // applied to QtQml.QtObject first from registerGlobalQmlType
+  // then from classes.construct() when proto has just created
+
+  for(var m in modules.Main) {
+    var mtype = modules.Main[m];
+
+    applyAttachedObjects(mtype, m, proto);
+  }
+}
+
 
 QmlWeb.modules = modules;
 QmlWeb.registerGlobalQmlType = registerGlobalQmlType;
 QmlWeb.registerQmlType = registerQmlType;
 QmlWeb.getConstructor = getConstructor;
+QmlWeb.applyAttachedObjects = applyAttachedObjects;
+QmlWeb.applyAllAttachedObjects = applyAllAttachedObjects;

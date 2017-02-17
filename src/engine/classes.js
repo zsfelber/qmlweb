@@ -148,6 +148,8 @@ function construct(meta, parent, flags) {
       throw new Error("No context : "+item);
     }
 
+    QmlWeb.applyAllAttachedObjects(item);
+
     // each element into all parent context's elements on the page, by id :
     // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
     // (see properties.createProperty. )
