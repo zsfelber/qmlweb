@@ -57,14 +57,14 @@ class Signal {
         args[0].$tidyupList.push(this.signal);
       }
       const slot = args[0][args[1]];
-      connection = { thisObj: args[0], slotObj: args[0], slot, type };
+      connection = { thisObj: args[0], slotObj: args[0], id:args[0].$objectId, slot, type };
     } else {
       if (args[0].$tidyupList &&
         (!this.obj || args[0] !== this.obj && args[0] !== this.obj.$parent)
       ) {
         args[0].$tidyupList.push(this.signal);
       }
-      connection = { thisObj: args[0], slotObj: args[0], slot: args[1], type };
+      connection = { thisObj: args[0], slotObj: args[0], id:args[0].$objectId, slot: args[1], type };
     }
     if (!connection.slot) {
       throw new Error("Missing slot for signal:"+this.$name+"  connection   slotObj:"+connection.slotObj);
@@ -75,7 +75,7 @@ class Signal {
     };
     connection.index = this.connectedSlots.length;
     connection.signal = this;
-    connection.toString = function() {
+    connection.toString = function() {this
       return "Conn:"+connection.signal.obj+".signal:"+connection.signal.$name+" -> "+
             (connection.binding ? connection.binding.toString():
             (connection.slot ? connection.slot.toString() : ""));
@@ -105,9 +105,9 @@ class Signal {
       if (
         args.length === 0 ||
         callType === 1 && connection.slot === args[0] ||
-        callType === 2 && connection.slotObj === args[0] ||
-        callType === 3 && connection.slotObj === args[0] && connection.slot === args[0][args[1]] ||
-        connection.slotObj === args[0] && connection.slot === args[1]
+        callType === 2 && connection.id === args[0].$objectId ||
+        callType === 3 && connection.id === args[0].$objectId && connection.slot === args[0][args[1]] ||
+        connection.id === args[0].$objectId && connection.slot === args[1]
       ) {
         this.tidyupConnection(connection);
         // We have removed an item from the list so the indexes shifted one
@@ -130,8 +130,8 @@ class Signal {
     for (const i in this.connectedSlots) {
       const con = this.connectedSlots[i];
       if (callType === 1 && con.slot === args[0] ||
-          callType === 2 && con.slotObj === args[0] && con.slot === args[0][args[1]] ||
-          con.slotObj === args[0] && con.slot === args[1]
+          callType === 2 && con.id === args[0].$objectId && con.slot === args[0][args[1]] ||
+          con.id === args[0].$objectId && con.slot === args[1]
       ) {
         return con;
       }

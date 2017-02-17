@@ -87,8 +87,8 @@ class QObject {
   }
 
   $delete() {
-    if (this.Component) {
-      this.Component.destruction();
+    if (this.isComponentAttached) {
+      this.$component.destruction();
     }
 
     while (this.$tidyupList.length > 0) {
