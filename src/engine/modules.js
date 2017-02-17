@@ -16,6 +16,9 @@ const modules = {
   }
 };
 
+const objectAttachors = {
+};
+
 // All object constructors
 QmlWeb.constructors = modules.Main;
 
@@ -188,6 +191,7 @@ function applyAttachedObjects(type, name, proto) {
 
   if (type.getAttachedObject && !proto.hasOwnProperty(name)) {
     QmlWeb.setupGetter(proto, name, type.getAttachedObject);
+    objectAttachors[name] = type;
   }
 }
 
@@ -199,8 +203,8 @@ function applyAllAttachedObjects(proto) {
   // applied to QtQml.QtObject first from registerGlobalQmlType
   // then from classes.construct() when proto has just created
 
-  for(var m in modules.Main) {
-    var mtype = modules.Main[m];
+  for(var m in objectAttachors) {
+    var mtype = objectAttachors[m];
 
     applyAttachedObjects(mtype, m, proto);
   }
