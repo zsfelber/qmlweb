@@ -242,19 +242,25 @@ function resolveClassImport(name) {
 
 // This parses the full URL into scheme and path
 function $parseURI(uri) {
+  //                        scheme      fullpath
   const match = uri.match(/^([^/]*?:[/])(.*)$/);
   if (match) {
     return {
+      uri: uri,
       scheme: match[1],
-      path: match[2],
+      host: "",
       authority: "",
+      port: "",
+      path: match[2],
+      file: ""
     };
   }
   return undefined;
 }
 
 function $parseURIlong(uri) {
-  const match = uri.match(/^([^/]*?:[/])(.*?)(:(\d+))?([/].*?[/])([^/]*)$/);
+  //                        scheme      host     :port   path          file
+  const match = uri.match(/^([^/:]*:[/])([^/:]*)(:(\d*))?([/]|[/].*[/])([^/]*)$/);
   if (match) {
     return {
       uri: uri,
