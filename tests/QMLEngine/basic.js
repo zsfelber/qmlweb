@@ -30,7 +30,7 @@ describe("QMLEngine.basic", function() {
     expect(qml.inner1).toBe(qml.current + "foo/bar");
     expect(qml.inner2).toBe(qml.current + "foo/bar/");
     expect(qml.inner3).toBe(qml.current + "foo/foo/lol/");
-    expect(qml.absolute).toBe(x + "foo/bar");
+    expect([x + "foo/bar", "http://foo/bar"]).toContain(qml.absolute);
     expect(qml.full).toBe("http://example.com/bar");
   });
 

@@ -111,7 +111,7 @@ function addModulePath(moduleName, dirPath) {
   const engine = QmlWeb.engine;
   // Keep the mapping. It will be used in loadImports() function.
   // Remove trailing slash as it required for `readQmlDir`.
-  engine.userAddedModulePaths[moduleName] = dirPath?dirPath.replace(/\/$/, ""):null;
+  engine.userAddedModulePaths[moduleName] = dirPath?dirPath.replace(/[/]$/, ""):null;
 }
 
 /*registerProperty(obj, propName) {
@@ -245,7 +245,7 @@ function resolveClassImport(name) {
 
 // This parses the full URL into scheme and path
 function $parseURI(uri) {
-  const match = uri.match(/^([^/]*?:\/)(.*)$/);
+  const match = uri.match(/^([^/]*?:[/])(.*)$/);
   if (match) {
     return {
       scheme: match[1],
@@ -258,7 +258,7 @@ function $parseURI(uri) {
 
 // This parses the full URL into scheme, authority and path
 function $parseURIwAuth(uri) {
-  const match = uri.match(/^([^/]*?:\/)(.*?)\/(.*)$/);
+  const match = uri.match(/^([^/]*?:[/])(.*?)[/](.*)$/);
   if (match) {
     return {
       scheme: match[1],
@@ -270,7 +270,7 @@ function $parseURIwAuth(uri) {
 }
 
 function $parseURIlong(uri) {
-  const match = uri.match(/^([^/]*?:\/)(.*)\/(.*?)$/);
+  const match = uri.match(/^([^/]*?:[/])(.*)[/](.*?)$/);
   if (match) {
     return {
       scheme: match[1],
@@ -282,7 +282,7 @@ function $parseURIlong(uri) {
 }
 
 function $parseURIwPort(uri) {
-  const match = uri.match(/^([^/]*?:\/)(?:(.*?):(\d+))?(.*)$/);
+  const match = uri.match(/^([^/]*?:[/])(?:(.*?):(\d+))?(.*)$/);
   if (match) {
     return {
       scheme: match[1],
@@ -319,7 +319,7 @@ function $resolvePath(file, basePath) {
   }
 
   // Remove duplicate slashes and dot segments in the path
-  path = removeDotSegments(path.replace(/([^:]\/)\/+/g, "$1"));
+  path = removeDotSegments(path.replace(/([^:][/])[/]+/g, "$1"));
 
   return `${basePathURI.scheme}${basePathURI.authority}${path}`;
 }

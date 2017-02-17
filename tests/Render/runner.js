@@ -65,9 +65,9 @@
       return {
         qml: path,
         png: path.replace(/.qml$/, ".png"),
-        group: path.replace("/base/tests/Render/", "").replace(/\/[^/]+$/, "")
-                   .replace(/\//g, "."),
-        name: path.replace(/^.*\//, "").replace(".qml", "")
+        group: path.replace("/base/tests/Render/", "").replace(/[/][^/]+$/, "")
+                   .replace(/[/]/g, "."),
+        name: path.replace(/^.*[/]/, "").replace(".qml", "")
       };
     })
     .reduce(function(data, entry) {
