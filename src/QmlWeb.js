@@ -49,31 +49,31 @@ Object.defineProperty(
 
 QmlWeb.debug = function() {
   if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Debug) {
-    console.debug(arguments);
+    console.debug.apply(arguments);
   }
 }
 
 QmlWeb.info = function() {
   if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Info) {
-    console.info(arguments);
+    console.info.apply(arguments);
   }
 }
 
 QmlWeb.log = function() {
   if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Debug) {
-    console.log(arguments);
+    console.log.apply(arguments);
   }
 }
 
 QmlWeb.warn = function() {
   if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Warning) {
-    console.warn(arguments);
+    console.warn.apply(arguments);
   }
 }
 
 QmlWeb.error = function() {
   if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Error) {
-    console.error(arguments);
+    console.error.apply(arguments);
   }
 }
 

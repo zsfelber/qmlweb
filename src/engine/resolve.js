@@ -268,8 +268,10 @@ function $resolvePath(file, basePathUrl) {
   if (!basePathUrl) {
     basePathUrl = QmlWeb.engine.$component.$basePathUrl;
   }
-  if (!file) {
-    file = basePathUrl.file;
+  if (file===undefined || file===null) {
+    if (basePathUrl) {
+      file = basePathUrl.file;
+    }
   }
 
   // probably, replace :// with :/ ?
