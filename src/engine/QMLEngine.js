@@ -50,7 +50,7 @@ class QMLEngine {
     this.rootContext = new QmlWeb.QMLContext();
 
     // Base path of qml engine (used for resource loading)
-    this.$basePath = "";
+    //this.$basePath = "";
 
     // Module import paths overrides
     this.userAddedModulePaths = {};
@@ -197,7 +197,7 @@ class QMLEngine {
     }
 
     const x = QmlWeb.resolveBasePath(file);
-    this.$basePath = x;
+    //this.$basePath = x;
     const fileName = extractFileName(file);
     // TODO gz resolveClass  += engine.containers[...]
     const respath = QmlWeb.$resolvePath(fileName, x);

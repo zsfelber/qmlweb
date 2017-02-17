@@ -231,7 +231,7 @@ class QMLComponent {
     this.$file = this.meta.$file;
     this.$imports = this.meta.$imports;
     if (this.$file) {
-      this.$basePath = QmlWeb.extractBasePath(this.$file);
+      this.$basePath = QmlWeb.resolveBasePath(this.$file);
     }
 
   }

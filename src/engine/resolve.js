@@ -45,15 +45,21 @@ function extractBasePath(file) {
 }
 
 function resolveBasePath(uri) {
-  if (!this.$basePathA) {
-    // Create an anchor element to get the absolute path from the DOM
-    this.$basePathA = document.createElement("a");
-  }
-  let x0 = extractBasePath(uri);
-  this.$basePathA.href = x0;
-  let x = this.$basePathA.href;
-  if (!x0) {
-    x = extractBasePath(x);
+  let pu = $parseURI(uri);
+  let x;
+  if (pu) {
+    x = extractBasePath(uri);
+  } else {
+    if (!this.$basePathA) {
+      // Create an anchor element to get the absolute path from the DOM
+      this.$basePathA = document.createElement("a");
+    }
+    let x0 = extractBasePath(uri);
+    this.$basePathA.href = x0;
+    x = this.$basePathA.href;
+    if (!x0) {
+      x = extractBasePath(x);
+    }
   }
   return x;
 }
@@ -295,8 +301,8 @@ function $resolvePath(file, basePath) {
     basePath = QmlWeb.engine.$component.$basePath;
   }
   // probably, replace :// with :/ ?
-  if (!file || file.indexOf(":/") !== -1 || file.indexOf("data:") === 0 ||
-    file.indexOf("blob:") === 0) {
+  if (!file || file.indexOf(":/") !== -1 || file.startsWith("data:") ||
+    file.startsWith("blob:")) {
     return file;
   }
 

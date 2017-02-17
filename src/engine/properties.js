@@ -232,7 +232,7 @@ function applyProperty(item, i, value) {
   const QMLBinding = QmlWeb.QMLBinding;
 
   // slots
-  if (i.indexOf("on") === 0 && i.length > 2 && /[A-Z]/.test(i[2])) {
+  if (i.startsWith("on") && i.length > 2 && /[A-Z]/.test(i[2])) {
     // TODO binding when whithin group ??
     const signalName = i[2].toLowerCase() + i.slice(3);
     if (item.$setCustomSlot) {

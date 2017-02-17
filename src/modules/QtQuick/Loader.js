@@ -49,7 +49,7 @@ QmlWeb.registerQmlType({
       this.$sourceUrl = fileName;
       return;
     }
-    const nameIsUrl = fileName.charAt(0)==="//" || name.indexOf(":/") >= 0;
+    const nameIsUrl = fileName.startsWith("//") || name.indexOf(":/") >= 0;
     if (!nameIsUrl) {
       QmlWeb.warn("Loader.$onSourceChanged  Not an absolute resource id:"+fileName);
     }
