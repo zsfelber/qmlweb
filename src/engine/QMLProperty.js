@@ -265,7 +265,7 @@ class QMLProperty {
 
   updateLater() {
     if (this.binding) {
-      if (this.animation || (this.changed.connectedSlots && this.changed.connectedSlots.length>this.childEvalTreeConnections)) {
+      if (this.animation || (this.changed.$signal.connectedSlots && this.changed.$signal.connectedSlots.length>this.childEvalTreeConnections)) {
         this.update();
       } else {
         this.updateState = QmlWeb.QMLPropertyState.NeedsUpdate;
