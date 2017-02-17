@@ -210,7 +210,6 @@ gulp.task("test-debug", ["watch-dev"], done => {
     reporters: ["progress"],
     debug: true,
     singleRun: false,
-    logLevel: "config.LOG_DISABLE",
     client: {
       captureConsole: false
     }

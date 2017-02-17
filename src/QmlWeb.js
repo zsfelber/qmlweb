@@ -47,33 +47,33 @@ Object.defineProperty(
 );
 
 
-QmlWeb.debug = function() {
+QmlWeb.debug = function(...args) {
   if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Debug) {
-    console.debug.apply(arguments);
+    console.debug(...args);
   }
 }
 
-QmlWeb.info = function() {
+QmlWeb.info = function(...args) {
   if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Info) {
-    console.info.apply(arguments);
+    console.info(...args);
   }
 }
 
-QmlWeb.log = function() {
+QmlWeb.log = function(...args) {
   if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Debug) {
-    console.log.apply(arguments);
+    console.log(...args);
   }
 }
 
-QmlWeb.warn = function() {
+QmlWeb.warn = function(...args) {
   if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Warning) {
-    console.warn.apply(arguments);
+    console.warn(...args);
   }
 }
 
-QmlWeb.error = function() {
+QmlWeb.error = function(...args) {
   if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Error) {
-    console.error.apply(arguments);
+    console.error(...args);
   }
 }
 
