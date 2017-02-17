@@ -197,15 +197,16 @@ class QMLEngine {
       }
     }
 
-    const x = QmlWeb.resolveBasePath(file);
-    // used in tests only
-    this.$basePathUrl = x;
-    const fileName = extractFileName(file);
+    // used only in tests externally:
+    this.$basePathUrl = QmlWeb.resolveBasePath(file);
+
     // TODO gz resolveClass  += engine.containers[...]
-    const respath = QmlWeb.$resolvePath(fileName, x);
+    const respath = QmlWeb.$resolvePath(null, this.$basePathUrl);
     const clazz = QmlWeb.resolveClass(respath);
+
     const component = this.loadQMLTree(clazz, parent, file, operationFlags, serverWsAddress, isClientSide, webSocket);
     QmlWeb.log("loadFile success. LOADED : "+file);
+
     return component;
   }
 

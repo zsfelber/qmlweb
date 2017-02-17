@@ -37,13 +37,6 @@ function removeDotSegments(path) {
   return out.join("/");
 }
 
-function extractBasePath(file) {
-  // work both in url ("/") and windows ("\", from file://d:\test\) notation
-  const basePath = file.split(/[/\\]/);
-  basePath[basePath.length - 1] = "";
-  return basePath.join("/");
-}
-
 function resolveBasePath(uri) {
   let pu = $parseURIlong(uri);
   if (!pu) {
@@ -51,18 +44,13 @@ function resolveBasePath(uri) {
       // Create an anchor element to get the absolute path from the DOM
       this.$basePathUrlA = document.createElement("a");
     }
-    let x0 = extractBasePath(uri);
-    this.$basePathUrlA.href = x0;
-    let x = this.$basePathUrlA.href;
-    if (!x0) {
-      x = extractBasePath(x);
+    this.$basePathUrlA.href = uri;
+    pu = $parseURIlong(this.$basePathUrlA.href);
+    if (!pu) {
+      throw new Error("Assertion failed : <A> element href should be absolute url, but it is : ("+uri+" ->) "+this.$basePathUrlA.href)
     }
   }
   return pu;
-}
-
-function extractFileName(file) {
-  return file.split(/[/\\]/).pop();
 }
 
 function importSearchPaths(component) {
@@ -280,6 +268,10 @@ function $resolvePath(file, basePathUrl) {
   if (!basePathUrl) {
     basePathUrl = QmlWeb.engine.$component.$basePathUrl;
   }
+  if (!file) {
+    file = basePathUrl.file;
+  }
+
   // probably, replace :// with :/ ?
   if (!file || file.indexOf(":/") !== -1 || file.startsWith("data:") ||
     file.startsWith("blob:")) {
@@ -388,10 +380,8 @@ function $instanceOf(o, typestring, component) {
 
 
 QmlWeb.removeDotSegments = removeDotSegments;
-QmlWeb.extractBasePath = extractBasePath;
-QmlWeb.resolveBasePath = resolveBasePath;
 
-QmlWeb.extractFileName = extractFileName;
+QmlWeb.resolveBasePath = resolveBasePath;
 
 QmlWeb.importSearchPaths = importSearchPaths;
 
