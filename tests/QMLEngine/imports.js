@@ -119,10 +119,14 @@ describe("QMLEngine.imports", function() {
     }
   });
   it("directory imports are local to file, should fail", function() {
-    var f = function() {
+    const x = QmlWeb.resolveBasePath("/");
+    try {
       load("LocalToFile/DirectoryFail", this.div);
-    };
-    expect(f.bind(this)).toThrowError("QML class or constructor not found : tests/QMLEngine/qml/ImportLocalToFile/ImportMe.qml");
+      expect("It Should throw exception! Its message : ").toBe("QML class or constructor not found : tests/QMLEngine/qml/ImportLocalToFile/ImportMe.qml");
+    } catch (err) {
+      expect(["QML class or constructor not found : "+x.uri+"base/tests/QMLEngine/qml/ImportLocalToFile/ImportMe.qml",
+             "QML class or constructor not found : base/tests/QMLEngine/qml/ImportLocalToFile/ImportMe.qml"]).toContain(err.message);
+    }
   });
   it("can find local Component assigned to property when in another directory",
   function() {
