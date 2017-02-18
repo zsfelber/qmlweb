@@ -77,28 +77,53 @@ describe("QMLEngine.imports", function() {
     expect(qml.value).toBe(67);
   });
   it("module imports are local to file, should succeed", function() {
-    var f = function() {
-      load("LocalToFile/ModuleSucceed", this.div);
-    };
-    expect(f.bind(this)).not.toThrow();
+    var qml = load("LocalToFile/ModuleSucceed", this.div);
+    expect(!qml.data).toBe(false);
+    if (qml.data) {
+      expect(qml.data.length).toBe(2);
+      const elem1 = qml.data[0];
+      const ws1 = qml.data[1];
+      expect(ws1.$classname).toBe("[WebSocket]");
+      expect(!elem1.data).toBe(false);
+      if (elem1.data) {
+        expect(elem1.data.length).toBe(1);
+        const ws2 = elem1.data[0];
+        expect(ws2.$classname).toBe("[WebSocket]");
+      }
+    }
   });
   it("module imports are local to file, should fail 1", function() {
-    var f = function() {
-      load("LocalToFile/ModuleFail1", this.div);
-    };
-    expect(f.bind(this)).toThrowError("No constructor found for WebSocket");
+    var qml = load("LocalToFile/ModuleFail1", this.div);
+    expect(!qml.data).toBe(false);
+    if (qml.data) {
+      expect(qml.data.length).toBe(1);
+      const elem1 = qml.data[0];
+      expect(elem1.$classname).toBe("[ModuleFailSomeComponent]");
+      expect(!elem1.data).toBe(false);
+      if (elem1.data) {
+        expect(elem1.data.length).toBe(0);
+      }
+    }
   });
   it("module imports are local to file, should fail 2", function() {
-    var f = function() {
-      load("LocalToFile/ModuleFail2", this.div);
-    };
-    expect(f.bind(this)).toThrowError("No constructor found for WebSocket");
+    var qml = load("LocalToFile/ModuleFail2", this.div);
+    expect(!qml.data).toBe(false);
+    if (qml.data) {
+      expect(qml.data.length).toBe(1);
+      const elem1 = qml.data[0];
+      expect(elem1.$classname).toBe("[ModuleFailSomeComponent]");
+      expect(!elem1.data).toBe(false);
+      if (elem1.data) {
+        expect(elem1.data.length).toBe(0);
+      }
+    }
   });
   it("directory imports are local to file, should fail", function() {
     var f = function() {
       load("LocalToFile/DirectoryFail", this.div);
     };
-    expect(f.bind(this)).toThrowError("No constructor found for ImportMe");
+    const x = QmlWeb.resolveBasePath("/");
+    expect(f.bind(this)).toThrowError("QML class or constructor not found : "+x.uri+"tests/QMLEngine/qml/ImportLocalToFile/ImportMe.qml");
   });
   it("can find local Component assigned to property when in another directory",
   function() {

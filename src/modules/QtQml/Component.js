@@ -199,6 +199,10 @@ class QMLComponent {
       QmlWeb.helpers.copy(this.meta, meta.clazz);
       cons = QmlWeb.constructors[this.meta.$class];
     } else {
+      if (meta.$file) {
+        throw new Error("QML class or constructor not found : "+meta.$file);
+      }
+
       QmlWeb.helpers.copy(this.meta, meta);
       if (this.meta.$class !== "Component" || this.meta._constructor !== QMLComponent) {
         throw new Error("Assertion failed. Component element $class:"+meta.$class+" !== 'Component' || QMLComponent !== "+(this.meta._constructor?this.meta._constructor.name:"<null>"));
