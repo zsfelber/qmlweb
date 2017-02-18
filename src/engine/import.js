@@ -163,7 +163,7 @@ function loadImport(entry, component) {
       // 3. Js file, don't need qmldir
     } else {
       // 4. qt-style lookup for qualified module
-      const probableDirs = [curBaseUrl].concat(importPathList());
+      const probableDirs = [curBaseUrl].concat(QmlWeb.importPathList());
       var diredName = name.replace(/\./g, "/");
       qrcName = "qrc:/"+diredName;
 
