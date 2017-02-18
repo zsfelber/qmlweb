@@ -4,10 +4,6 @@ QmlWeb.engine = null;
 
 QmlWeb.useShadowDom = true;
 
-const geometryProperties = {
-  "width":1, "height":1, "fill":1, "x":1, "y":1, "left":1, "right":1, "top":1, "bottom":1
-};
-
 
 // QML engine. EXPORTED.
 class QMLEngine {
@@ -389,7 +385,7 @@ class QMLEngine {
 
     QmlWeb.log("processPendingOperations : "+this.pendingOperations.length);
 
-    var i=0,a=0,ae=0,a1=0,a2=0,b=0,e=0,w=0;
+    var i=0,a=0,ae=0,a1=0,b=0,e=0,w=0;
     let info = {}, warning = {}, error = {};
     while (this.pendingOperations.stack.length > 0) {
       const op = this.pendingOperations.stack.shift();
@@ -415,26 +411,8 @@ class QMLEngine {
 
             property.update(op.flags, op.declaringItem, op.oldVal);
 
-            if (geometryProperties[property.name]) {
-              a2++;
-              mode+=":a2";
-              // It is possible that bindings with these names was already evaluated
-              // during eval of other bindings but in that case $updateHGeometry and
-              // $updateVGeometry could be blocked during their eval.
-              // So we call them explicitly, just in case.
-              const { obj, changed } = property;
-              if (obj.$updateHGeometry &&
-                  changed.isConnected(obj, obj.$updateHGeometry)) {
-                obj.$updateHGeometry(property.value, property.value, property.name);
-              }
-              if (obj.$updateVGeometry &&
-                  changed.isConnected(obj, obj.$updateVGeometry)) {
-                obj.$updateVGeometry(property.value, property.value, property.name);
-              }
-            } else {
-              a1++;
-              mode+=":a1";
-            }
+            a1++;
+            mode+=":a";
           }
         } else {
           b++;
@@ -472,7 +450,7 @@ class QMLEngine {
       i++;
     }
 
-    QmlWeb.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+a2+","+ae)+") functions:"+b+"  Info:",info, "   Warning("+w+"):",warning, "   Error("+e+"):",error);
+    QmlWeb.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+ae)+") functions:"+b+"  Info:",info, "   Warning("+w+"):",warning, "   Error("+e+"):",error);
   }
 
   static dumpErr() {

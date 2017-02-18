@@ -1,3 +1,8 @@
+const geometryProperties = {
+  "width":1, "height":1, "fill":1, "x":1, "y":1, "left":1, "right":1, "top":1, "bottom":1
+};
+
+
 class Item {
   constructor(meta) {
     QmlWeb.superAndInitMeta(this, meta);
@@ -72,10 +77,10 @@ class Item {
 
     // childrenRect property
     this.childrenRect = new QmlWeb.QObject(this, {attached:true, info:"childrenRect"});
-    createProperty("real", this.childrenRect, "x", readOnly:true);
-    createProperty("real", this.childrenRect, "y", readOnly:true);
-    createProperty("real", this.childrenRect, "width", readOnly:true);
-    createProperty("real", this.childrenRect, "height", readOnly:true);
+    createProperty("real", this.childrenRect, "x", {readOnly:true});
+    createProperty("real", this.childrenRect, "y", {readOnly:true});
+    createProperty("real", this.childrenRect, "width", {readOnly:true});
+    createProperty("real", this.childrenRect, "height", {readOnly:true});
 
     this.rotationChanged.connect(this, this.$updateTransform);
     this.scaleChanged.connect(this, this.$updateTransform);
@@ -316,6 +321,35 @@ class Item {
   }
   Component$onCompleted_() {
     this.$calculateOpacity();
+
+    // TODO gz
+
+    for (const p in geometryProperties) {
+
+      if (this.pendingUpdateH && this.pendingUpdateV) break;
+
+      // It is possible that bindings with these names was already evaluated
+      // during eval of other bindings but in that case $updateHGeometry and
+      // $updateVGeometry could be blocked during their eval.
+      // So we call them explicitly, just in case.
+      const property = this.$properties[p];
+      if (!(property.updateState & QmlWeb.QMLPropertyState.Uninitialized)) {
+        if (!this.pendingUpdateH && property.changed.isConnected(this, this.$updateHGeometry)) {
+          this.pendingUpdateH = p;
+        }
+        if (!this.pendingUpdateV && property.changed.isConnected(this, this.$updateVGeometry)) {
+          this.pendingUpdateV = p;
+        }
+      }
+    }
+
+    if (this.pendingUpdateH) {
+      this.$updateHGeometry(0, 0, this.pendingUpdateH, true);
+    }
+    if (this.pendingUpdateV) {
+      this.$updateVGeometry(0, 0, this.pendingUpdateV, true);
+    }
+
   }
   getImplStyle() {
     return this.fcss ? this.fcss : (this.impl ? this.fcss = QmlWeb.createStyle(this.impl.style) : null);
@@ -346,11 +380,22 @@ class Item {
       this.$isUsingImplicitHeight = true;
     }
   }
-  $updateHGeometry(newVal, oldVal, propName) {
+  $updateHGeometry(newVal, oldVal, propName, oncompl) {
     const anchors = this.anchors || this;
     if (this.$updatingHGeometry) {
       return;
     }
+    if (!oncompl && !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Running)) {
+      // resulting too expensive cyclic calls at init time:
+      if (propName === "width") {
+        this.pendingUpdateH = "width";
+      } else if (!this.pendingUpdateH) {
+        this.pendingUpdateH = true;
+      }
+      return;
+    }
+
+    delete this.pendingUpdateH;
     this.$updatingHGeometry = true;
 
     const flags = QmlWeb.Signal.UniqueConnection;
@@ -445,11 +490,22 @@ class Item {
 
     if (this.parent) this.$updateChildrenRect(this.parent);
   }
-  $updateVGeometry(newVal, oldVal, propName) {
+  $updateVGeometry(newVal, oldVal, propName, oncompl) {
     const anchors = this.anchors || this;
     if (this.$updatingVGeometry) {
       return;
     }
+    if (!oncompl && !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Running)) {
+      // resulting too expensive cyclic calls at init time:
+      if (propName === "height") {
+        this.pendingUpdateV = "height";
+      } else if (!this.pendingUpdateV) {
+        this.pendingUpdateV = true;
+      }
+      return;
+    }
+
+    delete this.pendingUpdateV;
     this.$updatingVGeometry = true;
 
     const flags = QmlWeb.Signal.UniqueConnection;
@@ -561,11 +617,11 @@ class Item {
       minY = Math.min(minX, child.y);
     }
 
-    const c = component.$properties.childrenRect;
-    c.x.set(minX, QmlWeb.QMLProperty.Privileged);
-    c.y.set(minY, QmlWeb.QMLProperty.Privileged);
-    c.width.set(maxWidth, QmlWeb.QMLProperty.Privileged);
-    c.height.set(maxHeight, QmlWeb.QMLProperty.Privileged);
+    const c = component.childrenRect.$properties;
+    c.x.set(minX, QmlWeb.QMLPropertyFlags.Privileged);
+    c.y.set(minY, QmlWeb.QMLPropertyFlags.Privileged);
+    c.width.set(maxWidth, QmlWeb.QMLPropertyFlags.Privileged);
+    c.height.set(maxHeight, QmlWeb.QMLPropertyFlags.Privileged);
   }
 };
 
