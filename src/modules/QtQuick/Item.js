@@ -72,10 +72,10 @@ class Item {
 
     // childrenRect property
     this.childrenRect = new QmlWeb.QObject(this, {attached:true, info:"childrenRect"});
-    createProperty("real", this.childrenRect, "x"); // TODO ro
-    createProperty("real", this.childrenRect, "y"); // TODO ro
-    createProperty("real", this.childrenRect, "width"); // TODO ro
-    createProperty("real", this.childrenRect, "height"); // TODO ro
+    createProperty("real", this.childrenRect, "x", readOnly:true);
+    createProperty("real", this.childrenRect, "y", readOnly:true);
+    createProperty("real", this.childrenRect, "width", readOnly:true);
+    createProperty("real", this.childrenRect, "height", readOnly:true);
 
     this.rotationChanged.connect(this, this.$updateTransform);
     this.scaleChanged.connect(this, this.$updateTransform);
@@ -556,15 +556,16 @@ class Item {
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
       maxWidth = Math.max(maxWidth, child.x + child.width);
-      maxHeight = Math.max(maxHeight, child.y + child.heighth);
+      maxHeight = Math.max(maxHeight, child.y + child.height);
       minX = Math.min(minX, child.x);
       minY = Math.min(minX, child.y);
     }
 
-    component.childrenRect.x = minX;
-    component.childrenRect.y = minY;
-    component.childrenRect.width = maxWidth;
-    component.childrenRect.height = maxHeight;
+    const c = component.$properties.childrenRect;
+    c.x.set(minX, QmlWeb.QMLProperty.Privileged);
+    c.y.set(minY, QmlWeb.QMLProperty.Privileged);
+    c.width.set(maxWidth, QmlWeb.QMLProperty.Privileged);
+    c.height.set(maxHeight, QmlWeb.QMLProperty.Privileged);
   }
 };
 

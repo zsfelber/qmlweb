@@ -47,9 +47,10 @@ describe("QMLEngine.bindings", function() {
   });
 
   // must have exactly 1 call of changed signal
+  // NOTE gz changed, constant precompiled and no Binding in my QmlWeb for an expression like 3+3
   it("RecursiveInit3", function() {
     var qml = load("RecursiveInit3", this.div);
-    expect(qml.log).toBe("Fly to planet N6!");
+    expect(qml.log).toBe("Fly to planet N36!");
   });
 
   // must have exactly 0 call of changed signal

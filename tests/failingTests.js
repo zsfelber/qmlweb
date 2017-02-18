@@ -9,7 +9,7 @@ window.failingTests = {
       "SignalDisconnect"
     ],
     bindings: [
-      "RecursiveInit3"
+      /*"RecursiveInit3"*/
     ],
     properties: [
       "alias to id with same name",

@@ -15,8 +15,8 @@ function loadQmlFile(file, div, opts) {
 }
 
 function prefixedQmlLoader(prefix) {
-  return function(file, opts) {
-    return loadQmlFile("/base/tests/" + prefix + file + ".qml", opts);
+  return function(file, div, opts) {
+    return loadQmlFile("/base/tests/" + prefix + file + ".qml", div, opts);
   };
 }
 

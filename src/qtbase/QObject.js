@@ -37,6 +37,7 @@ class QObject {
         this.$component = parent.$component;
         this.$context = parent.$context;
       }
+      this.$attached_as = meta.$info;
     }
 
     if (parent && parent.$tidyupList) {
