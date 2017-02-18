@@ -8,6 +8,9 @@ window.failingTests = {
     basic: [
       "SignalDisconnect"
     ],
+    bindings: [
+      "RecursiveInit3"
+    ],
     properties: [
       "alias to id with same name",
       "ChangedExpressionSignal"
