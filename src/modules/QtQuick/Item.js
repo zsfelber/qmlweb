@@ -1,7 +1,12 @@
-const geometryProperties = {
-  "width":1, "height":1, "fill":1, "x":1, "y":1, "left":1, "right":1, "top":1, "bottom":1
+
+const initGeomProperties = {
+  "width":1, "height":1, "x":1, "y":1, "z":1, "visible":1, "clip":1
 };
 
+const otherGeometryProperties = {
+  "":{"left":1, "right":1, "top":1, "bottom":1},
+  "anhors":{"fill":1},
+};
 
 class Item {
   constructor(meta) {
@@ -322,17 +327,27 @@ class Item {
 
     // TODO gz
 
-    let i = 0;
-    for (const p in geometryProperties) {
-
-      if (i>=2 && this.pendingUpdateH && this.pendingUpdateV) break;
+    for (const p in initGeomProperties) {
 
       // It is possible that bindings with these names was already evaluated
       // during eval of other bindings  (in case of bound property).
-      // We mark geometry dirty here if such non-bound property has initialized.
-      // And we still need to prioritize##en 'width' or 'height' (see $updateH/Vgeom impl why).
+
+      // We manage unbound properties here (those initialized with constant and not a QMLBinding)
+      // 1)We mark geometry dirty here if such non-bound property has initialized.
+      // 2)And we still need to prioritize##en 'width' or 'height' (see $updateH/Vgeom impl why).
+      // 3)+ We call $onVisibleChanged_  $onClipChanged ... slots because "changed" was not fired,
+      //   but don't call second and other slots which trigger $updateHGeometry/$updateVGeometry
+
       const property = this.$properties[p];
-      if (!(property.updateState & QmlWeb.QMLPropertyState.Uninitialized)) {
+
+      if (!(property.updateState & QmlWeb.QMLPropertyState.Uninitialized) && !property.binding) {
+
+        const changedYesButNoUpdateHVgeom = property.changed.$signal.connectedSlots[0];
+        QmlWeb.Signal.$execute(changedYesButNoUpdateHVgeom, [property.value, 0, p]);
+
+        if (this.pendingUpdateH && this.pendingUpdateV) {
+          continue;
+        }
         if (!this.pendingUpdateH && property.changed.isConnected(this, this.$updateHGeometry)) {
           this.pendingUpdateH = p;
         }
@@ -340,12 +355,34 @@ class Item {
           this.pendingUpdateV = p;
         }
       }
-      i++;
     }
-    QmlWeb.setStyle(this.css, "left", `${this.x}px`);
-    QmlWeb.setStyle(this.css, "top", `${this.y}px`);
-    QmlWeb.setStyle(this.css, "width", this.width ? `${this.width}px` : "auto");
-    QmlWeb.setStyle(this.css, "height", this.height ? `${this.height}px` : "auto");
+
+    for (const a in otherGeometryProperties) {
+      if (this.pendingUpdateH && this.pendingUpdateV) {
+        break;
+      }
+      // 1)We mark geometry dirty here if such non-bound property has initialized.
+      const ap = otherGeometryProperties[a];
+      const owner = a ? this[a] : this;
+      for (const p in ap) {
+        const property = owner.$properties[p];
+
+        if (!(property.updateState & QmlWeb.QMLPropertyState.Uninitialized) && !property.binding) {
+          if (!this.pendingUpdateH && property.changed.isConnected(this, this.$updateHGeometry)) {
+            this.pendingUpdateH = p;
+          }
+          if (!this.pendingUpdateV && property.changed.isConnected(this, this.$updateVGeometry)) {
+            this.pendingUpdateV = p;
+          }
+        }
+        if (this.pendingUpdateH && this.pendingUpdateV) {
+          break;
+        }
+      }
+    }
+
+    //   We filtered multiple $updateHGeometry and $updateVGeometry calls during the whole startup,
+    //   and call each one for each instance only once (if required ).
 
     if (this.pendingUpdateH) {
       this.$updateHGeometry(0, 0, this.pendingUpdateH, true);
