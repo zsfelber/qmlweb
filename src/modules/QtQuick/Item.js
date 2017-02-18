@@ -94,8 +94,6 @@ class Item {
 
     this.spacing = 0;
     this.$revertActions = [];
-    QmlWeb.setStyle(this.css, "left", `${this.x}px`);
-    QmlWeb.setStyle(this.css, "top", `${this.y}px`);
   }
   $onParentChanged_(newParent, oldParent, propName) {
     this.$updateHGeometry(newParent, oldParent, propName);
@@ -324,14 +322,15 @@ class Item {
 
     // TODO gz
 
+    let i = 0;
     for (const p in geometryProperties) {
 
-      if (this.pendingUpdateH && this.pendingUpdateV) break;
+      if (i>=2 && this.pendingUpdateH && this.pendingUpdateV) break;
 
       // It is possible that bindings with these names was already evaluated
-      // during eval of other bindings but in that case $updateHGeometry and
-      // $updateVGeometry could be blocked during their eval.
-      // So we call them explicitly, just in case.
+      // during eval of other bindings  (in case of bound property).
+      // We mark geometry dirty here if such non-bound property has initialized.
+      // And we still need to prioritize##en 'width' or 'height' (see $updateH/Vgeom impl why).
       const property = this.$properties[p];
       if (!(property.updateState & QmlWeb.QMLPropertyState.Uninitialized)) {
         if (!this.pendingUpdateH && property.changed.isConnected(this, this.$updateHGeometry)) {
@@ -341,7 +340,12 @@ class Item {
           this.pendingUpdateV = p;
         }
       }
+      i++;
     }
+    QmlWeb.setStyle(this.css, "left", `${this.x}px`);
+    QmlWeb.setStyle(this.css, "top", `${this.y}px`);
+    QmlWeb.setStyle(this.css, "width", this.width ? `${this.width}px` : "auto");
+    QmlWeb.setStyle(this.css, "height", this.height ? `${this.height}px` : "auto");
 
     if (this.pendingUpdateH) {
       this.$updateHGeometry(0, 0, this.pendingUpdateH, true);
