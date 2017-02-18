@@ -54,10 +54,6 @@ function resolveBasePath(uri) {
 }
 
 function importSearchPaths(component) {
-  const engine = QmlWeb.engine;
-  if (!engine.componentImportPaths) {
-    return [];
-  }
   const paths = component.componentImportPaths;
   if (!paths) {
     return [];
@@ -66,10 +62,6 @@ function importSearchPaths(component) {
 }
 
 function qualifiedImportPath(component, qualifier) {
-  const engine = QmlWeb.engine;
-  if (!engine.componentImportPaths) {
-    return "";
-  }
   const paths = component.componentImportPaths;
   if (!paths || !paths.qualified) {
     return "";
