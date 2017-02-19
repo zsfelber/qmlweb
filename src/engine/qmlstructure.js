@@ -464,7 +464,7 @@ convertToEngine.walkers = {
     const impl = op+""+JSON.stringify(val);
     try {
       var result = eval(impl);
-      QmlWeb.log("constant: "+result);
+      QmlWeb.log("constant: "+impl+" -> "+result);
       return result;
     } catch (err) {
       QmlWeb.error("Eval error:"+impl);
@@ -480,7 +480,7 @@ convertToEngine.walkers = {
     const impl = JSON.stringify(val1)+""+op+""+JSON.stringify(val2);
     try {
       var result = eval(impl);
-      QmlWeb.log("constant: "+result);
+      QmlWeb.log("constant: "+impl+" -> "+result);
       return result;
     } catch (err) {
       QmlWeb.error("Eval error:"+impl);
@@ -498,7 +498,7 @@ convertToEngine.walkers = {
     const impl = JSON.stringify(val1)+"?"+JSON.stringify(val2)+":"+JSON.stringify(val3);
     try {
       var result = eval(impl);
-      QmlWeb.log("constant: "+result);
+      QmlWeb.log("constant: "+impl+" -> "+result);
       return result;
     } catch (err) {
       QmlWeb.error("Eval error:"+impl);
