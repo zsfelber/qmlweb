@@ -208,8 +208,8 @@ class QMLProperty {
           // binding/set
           newVal = this.value;
           // NOTE valParentObj/bindingCtxObj is passed through property.set, its in the descendant level in object type hierarchy (proto chain),
-          // NOTE we pass this.valParentObj too, it is necessary in case of newVal is a Binding or a closure function() itself
-          this.binding.set(this.bindingCtxObj, newVal, flags, this.valParentObj);
+          // NOTE we don't pass this.valParentObj as valParentObj because it only belongs to this property and not to newVal or another property
+          this.binding.set(this.bindingCtxObj, newVal, flags);
         } else {
           // this.binding/get
           pushed = QMLProperty.pushEvaluatingProperty(this);
@@ -391,8 +391,10 @@ class QMLProperty {
   set(newVal, flags, valParentObj) {
 
     const pushed = QmlWeb.QMLProperty.pushEvalStack();
-    // main entry 2/2 of valParentObj! nowhere else passed
-    this.valParentObj = valParentObj;
+    if (valParentObj) {
+      // main entry 2/2 of valParentObj! nowhere else passed
+      this.valParentObj = valParentObj;
+    }
 
     try {
 
@@ -422,8 +424,10 @@ class QMLProperty {
       }
 
       if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
-        // main entry 2/2 of bindingCtxObj! nowhere else passed
-        this.bindingCtxObj = valParentObj;
+        if (valParentObj) {
+          // main entry 2/2 of bindingCtxObj! nowhere else passed
+          this.bindingCtxObj = valParentObj;
+        }
 
         needSend = this.binding !== newVal;
         this.binding = newVal;

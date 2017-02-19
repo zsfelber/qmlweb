@@ -24,7 +24,7 @@ class Repeater extends Item {
     this.$applyModel();
   }
   $onDelegateChanged() {
-    this.delegate.init();
+    //TODO gz  this.delegate.init();
     this.$applyModel();
   }
   $onParentChanged() {
@@ -99,7 +99,7 @@ class Repeater extends Item {
       item.$properties.model.set(
         modelData,
         QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
-        scope
+        item
       );
     }
   }
@@ -149,7 +149,7 @@ class Repeater extends Item {
       // // TODO gz obsolete : scope
       // const scope = {
       //   $object: newItem,
-      //   $context: this.model.$context
+      //   $context: ...
       // };
 
       if (typeof model === "number" || model instanceof Array) {
@@ -174,7 +174,7 @@ class Repeater extends Item {
           modelData[roleName] = roleData;
           newItem.$properties[roleName].set(
             roleData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
-            scope
+            newItem
           );
         }
         if (typeof newItem.$properties.model === "undefined") {
@@ -182,7 +182,7 @@ class Repeater extends Item {
         }
         newItem.$properties.model.set(
           modelData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
-          scope
+          newItem
         );
       }
 

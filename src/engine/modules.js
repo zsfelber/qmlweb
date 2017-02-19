@@ -140,14 +140,14 @@ function applyAttachedObjects(type, name, proto) {
     The code of `getAttachedObject` checks whether $Component internal
     variable exist, and creates it if it absent.
     Then, `getAttachedObject` adds self "completed" signal to global
-    `engine.completedSignals`.
+    engine.pendingOperations.stack/map["C:"+componentId].
     That is how completed handlers gathered into global list. This list then
     is called by `engine.callCompletedSignals`.
 
     p.s. At the moment, Repeater and Loader manually call
     `Component.completed` signals on objects they create.
     At the same time, those signals are still pushed to
-    `engine.completedSignals` by getAttachedObject.
+    engine.pendingOperations.stack/map["C:"+componentId] by getAttachedObject.
   */
 
   if (type.getAttachedObject && !proto.hasOwnProperty(name)) {

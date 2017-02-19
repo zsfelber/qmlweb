@@ -406,9 +406,9 @@ class QMLComponent {
     const item = this.$createObject(parent, properties);
 
     if (item instanceof QmlWeb.ItemBase) {
-      item.$properties.parent.set(parent, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+      item.$properties.parent.set(parent, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, item);
     } else if (item instanceof QmlWeb.QtObject) {
-      item.$properties.container.set(parent, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+      item.$properties.container.set(parent, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, item);
     } else if (item instanceof QMLComponent) {
       item.$component = this;
     }
