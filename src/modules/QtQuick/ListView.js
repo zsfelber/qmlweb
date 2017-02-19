@@ -8,7 +8,7 @@ QmlWeb.registerQmlType({
     spacing: "real",
     currentIndex: "int"
   }
-}, class ListView extends Repeater{
+}, class ListView extends Repeater {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, ListView);
@@ -18,7 +18,7 @@ QmlWeb.registerQmlType({
     this.spacingChanged.connect(this, this.$styleChanged);
     this._childrenInserted.connect(this, this.$applyStyleOnItem);
   }
-  container() {
+  repeaterContainer() {
     return this;
   }
   $applyStyleOnItem($item) {

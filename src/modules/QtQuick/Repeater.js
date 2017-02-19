@@ -14,7 +14,7 @@ class Repeater extends Item {
     this.delegateChanged.connect(this, this.$onDelegateChanged);
     this.parentChanged.connect(this, this.$onParentChanged);
   }
-  container() {
+  repeaterContainer() {
     return this.parent;
   }
   itemAt(index) {
@@ -209,7 +209,7 @@ class Repeater extends Item {
     }
 
     if (index > 0) {
-      this.container().childrenChanged();
+      this.repeaterContainer().childrenChanged();
     }
 
     for (let i = endIndex; i < this.$items.length; i++) {
