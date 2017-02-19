@@ -22,9 +22,10 @@ QmlWeb.registerQmlType({
     color: { type: "color", initialValue: "white" },
     radius: "real"
   }
-}, class {
+}, class Rectangle extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     const createProperty = QmlWeb.createProperty;
     this.border = new QmlWeb.QObject(this, {attached:true, info:"border"});

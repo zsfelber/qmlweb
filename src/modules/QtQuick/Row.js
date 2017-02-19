@@ -6,9 +6,10 @@ QmlWeb.registerQmlType({
   properties: {
     layoutDirection: "enum"
   }
-}, class {
+}, class Row extends Positioner {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.layoutChildren();

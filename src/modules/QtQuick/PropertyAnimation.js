@@ -12,9 +12,10 @@ QmlWeb.registerQmlType({
     target: "QtObject",
     targets: "list"
   }
-}, class {
+}, class PropertyAnimation extends Animation {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     const createProperty = QmlWeb.createProperty;
     this.easing = new QmlWeb.QObject(this, {attached:true, info:"easing"});

@@ -13,9 +13,10 @@ QmlWeb.registerQmlType({
     paused: "bool",
     running: "bool"
   }
-}, class {
+}, class Animation extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
   }
   restart() {
     this.stop();

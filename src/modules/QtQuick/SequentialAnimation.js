@@ -7,9 +7,10 @@ QmlWeb.registerQmlType({
     animations: "list"
   },
   defaultProperty: "animations"
-}, class {
+}, class SequentialAnimation extends Animation {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.animationsChanged.connect(this, this.$onAnimatonsChanged);
 

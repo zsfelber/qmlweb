@@ -24,9 +24,10 @@ QmlWeb.registerQmlType({
    positionChanged: [{ type: "variant", name: "mouse" }],
    propagateComposedEvents: "bool"
   }
-}, class {
+}, class MouseArea extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     QmlWeb.setStyle(this.css, "pointerEvents", "all");
 

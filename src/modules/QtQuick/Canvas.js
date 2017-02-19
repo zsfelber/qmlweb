@@ -21,9 +21,10 @@ QmlWeb.registerQmlType({
     paint: [{ type: "var", name: "region" }],
     painted: []
   }
-}, class {
+}, class Canvas extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
   }
   cancelRequestAnimationFrame(/*handle*/) {
     return false;

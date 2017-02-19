@@ -16,9 +16,10 @@ QmlWeb.registerQmlType({
     fetched: [],
     saved: []
   }
-}, class {
+}, class RestModel extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.attributes = this.getAttributes();
     this.runningRequests = 0;

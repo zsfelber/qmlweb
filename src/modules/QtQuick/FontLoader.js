@@ -11,9 +11,10 @@ QmlWeb.registerQmlType({
     source: "url",
     status: "enum" // FontLoader.Null
   }
-}, class {
+}, class FontLoader extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.$domStyle = document.createElement("style");
     this.$lastName = "";

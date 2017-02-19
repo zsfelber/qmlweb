@@ -19,9 +19,10 @@ QmlWeb.registerQmlType({
     accepted: [],
     activated: [{ type: "int", name: "index" }]
   }
-}, class {
+}, class ComboBox extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     QmlWeb.setStyle(this.css, "pointerEvents", "auto");
     this.name = "QMLComboBox";

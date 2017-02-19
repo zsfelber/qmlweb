@@ -21,9 +21,10 @@ QmlWeb.registerQmlType({
     source: "url",
     status: { type: "enum", initialValue: 1 } // Image.Null
   }
-}, class {
+}, class Image extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     const createProperty = QmlWeb.createProperty;
 

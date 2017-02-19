@@ -10,9 +10,10 @@ QmlWeb.registerQmlType({
   signals: {
     clicked: []
   }
-}, class {
+}, class Button extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.Component.completed.connect(this, this.Component$onCompleted);
     this.textChanged.connect(this, this.$onTextChanged);

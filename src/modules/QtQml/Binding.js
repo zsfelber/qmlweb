@@ -9,9 +9,11 @@ QmlWeb.registerQmlType({
     value: { type: "var", initialValue: undefined },
     when: { type: "bool", initialValue: true }
   }
-}, class {
+}, class Binding extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.$property = undefined;
 

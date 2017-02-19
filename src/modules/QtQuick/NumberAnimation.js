@@ -6,9 +6,10 @@ QmlWeb.registerQmlType({
   properties: {
     fps: {type:"int", initialValue:60}
   }
-}, class {
+}, class NumberAnimation extends PropertyAnimation {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.$elapsed = 0;
     this.$startTime = 0;

@@ -15,9 +15,10 @@ QmlWeb.registerQmlType({
     height: "int",
     width: "int"
   }
-}, class {
+}, class Screen extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     // TODO: rewrite as an attached object and forbid constructing
     this.Component.completed.connect(this, this.Component$onCompleted);

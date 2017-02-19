@@ -19,9 +19,10 @@ QmlWeb.registerQmlType({
     progress: "real",
     status: { type: "enum", initialValue: 1 } // BorderImage.Null
   }
-}, class {
+}, class BorderImage extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     const createProperty = QmlWeb.createProperty;
     this.border = new QmlWeb.QObject(this, {attached:true, info:"border"});

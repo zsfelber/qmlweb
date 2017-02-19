@@ -3,9 +3,10 @@ QmlWeb.registerQmlType({
   name: "Column",
   versions: /.*/,
   baseClass: "Positioner"
-}, class {
+}, class Column extends Positioner {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
   }
   layoutChildren() {
     let curPos = 0;

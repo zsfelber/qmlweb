@@ -10,9 +10,10 @@ QmlWeb.registerQmlType({
     animations: "list"
   },
   defaultProperty: "animations"
-}, class {
+}, class ParallelAnimation extends Animation {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.$runningAnimations = 0;
 

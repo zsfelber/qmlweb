@@ -8,9 +8,10 @@ QmlWeb.registerQmlType({
     enabled: { type: "bool", initialValue: true }
   },
   defaultProperty: "animation"
-}, class {
+}, class Beahvior extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
     this.$on = meta.$on;
 
     this.animationChanged.connect(this, this.$onAnimationChanged);

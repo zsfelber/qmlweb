@@ -22,9 +22,10 @@ QmlWeb.registerQmlType({
     deviceDiscovered: [{ type: "string", name: "device" }],
     serviceDiscovered: [{ type: "string", name: "device" }]
   }
-}, class {
+}, class BluetoothDiscoveryModel extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     // TODO: implementation based on navigator.bluetooth
   }

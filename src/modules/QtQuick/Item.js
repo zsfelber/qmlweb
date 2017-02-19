@@ -8,9 +8,10 @@ const otherGeometryProperties = {
   "anchors":{"fill":1},
 };
 
-class Item {
+class Item extends ItemBase {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     if (!this.dom) { // Create a dom element for this item.
       this.dom = document.createElement(meta.tagName || "div");

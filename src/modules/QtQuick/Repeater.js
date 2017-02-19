@@ -12,9 +12,10 @@ QmlWeb.registerQmlType({
     _childrenInserted: []
   },
   defaultProperty: "delegate"
-}, class {
+}, class Repeater extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     //this.parent = meta.parent;
     // TODO: some (all ?) of the components including Repeater needs to know own
@@ -53,8 +54,6 @@ QmlWeb.registerQmlType({
     if (!this.delegate || !this.parent) {
       return;
     }
-                           // TODO
-    const appropriateLevelObj = this.delegate.
 
     const model = this.$getModel();
     if (model instanceof QmlWeb.JSItemModel) {
@@ -157,9 +156,6 @@ QmlWeb.registerQmlType({
     const createProperty = QmlWeb.createProperty;
     const model = this.$getModel();
     let index;
-
-    // TODO
-    let realParent = this.$properties.delegate.obj;
 
     for (index = startIndex; index < endIndex; index++) {
       const newItem = this.delegate.$createObject(this.parent);

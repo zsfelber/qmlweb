@@ -15,9 +15,10 @@ QmlWeb.registerQmlType({
   signals: {
     loaded: []
   },
-}, class {
+}, class Loader extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.$sourceUrl = "";
 

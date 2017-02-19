@@ -1,6 +1,7 @@
-class ItemBase {
+class ItemBase extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.elementAdd.connect(this, this.$onElementAdd);
     this.elementRemove.connect(this, this.$onElementRemove);

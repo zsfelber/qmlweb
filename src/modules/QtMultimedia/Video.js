@@ -44,9 +44,10 @@ QmlWeb.registerQmlType({
     playing: [],
     stopped: []
   }
-}, class {
+}, class Video extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.$runningEventListener = 0;
 

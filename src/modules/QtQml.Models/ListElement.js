@@ -3,8 +3,9 @@ QmlWeb.registerQmlType({
   name: "ListElement",
   versions: /^2\./,
   baseClass: "QtQuick.ListElement"
-}, class {
+}, class MListElement extends ListElement {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
   }
 });

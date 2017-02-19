@@ -8,9 +8,10 @@ QmlWeb.registerQmlType({
     explicit: "bool",
     restoreEntryValues: { type: "bool", initialValue: true }
   }
-}, class {
+}, class PropertyChanges extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.$actions = [];
   }

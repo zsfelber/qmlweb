@@ -6,9 +6,10 @@ QmlWeb.registerQmlType({
   properties: {
     spacing: "int"
   }
-}, class {
+}, class Positioner extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.childrenChanged.connect(this, this.$onChildrenChanged);
     this.spacingChanged.connect(this, this.layoutChildren);

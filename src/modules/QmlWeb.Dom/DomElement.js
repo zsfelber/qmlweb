@@ -6,10 +6,11 @@ QmlWeb.registerQmlType({
   properties: {
     tagName: { type: "string", initialValue: "div" }
   }
-}, class {
+}, class DomElement extends Item {
   constructor(meta) {
     meta.tagName = meta.tagName;
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     // TODO: support properties, styles, perhaps changing the tagName
   }

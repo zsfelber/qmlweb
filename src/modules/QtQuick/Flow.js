@@ -10,9 +10,10 @@ QmlWeb.registerQmlType({
     flow: "enum", // Flow.LeftToRight
     layoutDirection: "enum" // Flow.LeftToRight
   }
-}, class {
+}, class Flow extends Positioner {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);

@@ -22,9 +22,10 @@ QmlWeb.registerQmlType({
     styleColor: "color",
     maximumLineCount: "int" //TODO dummy
   }
-}, class {
+}, class Text extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     const fc = this.impl = document.createElement("span");
     this.fcss = QmlWeb.createStyle(fc.style);

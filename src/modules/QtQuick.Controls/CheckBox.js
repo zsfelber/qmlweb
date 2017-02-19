@@ -8,9 +8,10 @@ QmlWeb.registerQmlType({
     checked: "bool",
     color: "color"
   }
-}, class {
+}, class CheckBox extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.impl = document.createElement("label");
     this.impl.className = "qmllabel"

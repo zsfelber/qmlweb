@@ -35,9 +35,10 @@ QmlWeb.registerQmlType({
 
     colorGroup: {type:"enum", initialValue:0}
   }
-}, class {
+}, class SystemPalette extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.colorGroupChanged.connect(this, this.$onColorGroupChanged);
 

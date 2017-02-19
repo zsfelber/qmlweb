@@ -8,9 +8,10 @@ QmlWeb.registerQmlType({
     spacing: "real",
     currentIndex: "int"
   }
-}, class {
+}, class ListView extends Repeater{
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
     this.modelChanged.connect(this, this.$styleChanged);
     this.delegateChanged.connect(this, this.$styleChanged);
     this.orientationChanged.connect(this, this.$styleChanged);

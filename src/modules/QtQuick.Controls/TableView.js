@@ -8,9 +8,10 @@ QmlWeb.registerQmlType({
   },
   signals: {
   }
-}, class {
+}, class TableView extends Rectangle {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
   }
 

@@ -8,9 +8,10 @@ QmlWeb.registerQmlType({
   },
   signals: {
   }
-}, class {
+}, class FileDialog extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
   }
 

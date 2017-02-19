@@ -13,9 +13,10 @@ QmlWeb.registerQmlType({
     tagFound: [],
     tagRemoved: []
   }
-}, class {
+}, class NearField extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     // TODO: implementation based on Web NFC API
   }

@@ -33,9 +33,10 @@ QmlWeb.registerQmlType({
       { type: "string", name: "errorString" }
     ]
   }
-}, class {
+}, class Camera extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     // TODO: impl
   }

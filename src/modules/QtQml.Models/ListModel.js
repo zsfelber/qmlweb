@@ -4,8 +4,9 @@ QmlWeb.registerQmlType({
   versions: /^2\./,
   baseClass: "QtQuick.ListModel",
   defaultProperty: "$items"
-}, class {
+}, class MListModel extends ListModel {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
   }
 });

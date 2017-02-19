@@ -15,9 +15,10 @@ QmlWeb.registerQmlType({
     source: "variant",
     sourceRect: "rect"
   }
-}, class {
+}, class VideoOutput extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     // TODO: impl
   }

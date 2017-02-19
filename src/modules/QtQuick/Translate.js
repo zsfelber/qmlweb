@@ -7,9 +7,10 @@ QmlWeb.registerQmlType({
     x: "real",
     y: "real"
   }
-}, class {
+}, class Translate extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.xChanged.connect(this.$parent, this.$parent.$updateTransform);
     this.yChanged.connect(this.$parent, this.$parent.$updateTransform);

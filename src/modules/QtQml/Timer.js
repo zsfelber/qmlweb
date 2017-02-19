@@ -14,9 +14,10 @@ QmlWeb.registerQmlType({
   signals: {
     triggered: []
   }
-}, class {
+}, class Timer extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.$properties.container.set(this.$parent, QmlWeb.QMLPropertyFlags.ReasonInit);
 

@@ -46,9 +46,10 @@ QmlWeb.registerQmlType({
     playing: [],
     stopped: []
   }
-}, class {
+}, class MediaPlayer extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     // TODO: impl
   }

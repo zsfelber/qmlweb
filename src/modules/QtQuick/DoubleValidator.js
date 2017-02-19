@@ -13,9 +13,10 @@ QmlWeb.registerQmlType({
     // DoubleValidator.ScientificNotation
     notation: { type: "enum", initialValue: 2 }
   }
-}, class {
+}, class DoubleValidator extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
     this.$standardRegExp = /^(-|\+)?\s*[0-9]+(\.[0-9]+)?$/;
     this.$scientificRegExp = /^(-|\+)?\s*[0-9]+(\.[0-9]+)?(E(-|\+)?[0-9]+)?$/;
   }

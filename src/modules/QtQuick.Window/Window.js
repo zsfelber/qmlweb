@@ -21,9 +21,10 @@ QmlWeb.registerQmlType({
   signals: {
     closing: [{ type: "CloseEvent", name: "close" }]
   }
-}, class {
+}, class Window extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.colorChanged.connect(this, this.$onColorChanged);
   }

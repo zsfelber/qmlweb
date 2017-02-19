@@ -3,9 +3,10 @@ QmlWeb.registerQmlType({
   name: "ListElement",
   versions: /.*/,
   baseClass: "QtQml.QtObject"
-}, class {
+}, class ListElement extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     const createProperty = QmlWeb.createProperty;
     for (const i in meta) {

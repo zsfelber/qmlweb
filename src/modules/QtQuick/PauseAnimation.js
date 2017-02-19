@@ -6,9 +6,10 @@ QmlWeb.registerQmlType({
   properties: {
     duration: { type: "int", initialValue: 250 }
   }
-}, class {
+}, class PauseAnimation extends Animation {
    constructor(meta) {
-     QmlWeb.superAndInitMeta(this, meta);
+     super(meta);
+    QmlWeb.initMeta(this, meta);
 
      this.runningChanged.connect(this, this.$onRunningChanged);
    }

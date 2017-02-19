@@ -9,9 +9,10 @@ QmlWeb.registerQmlType({
       horizontalOffset: "int",
       verticalOffset: "int"
    }
-}, class {
+}, class DropShadow extends Filter {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
    this.radiusChanged.connect(this, this.$update);
    this.colorChanged.connect(this, this.$update);

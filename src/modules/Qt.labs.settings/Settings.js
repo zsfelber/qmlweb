@@ -6,9 +6,10 @@ QmlWeb.registerQmlType({
   properties: {
     category: "string"
   }
-}, class {
+}, class Settings extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     if (typeof window.localStorage === "undefined") {
       return;

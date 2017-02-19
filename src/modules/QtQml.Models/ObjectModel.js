@@ -6,9 +6,10 @@ QmlWeb.registerQmlType({
   properties: {
     count: {type:"alias", path:["children", "length"], overrideType:"int", readOnly:true}
   },
-}, class {
+}, class ObjectModel extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
   }
   get(index) {
     return this.children[index];

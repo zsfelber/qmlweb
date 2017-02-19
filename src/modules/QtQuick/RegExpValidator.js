@@ -6,9 +6,10 @@ QmlWeb.registerQmlType({
   properties: {
     regExp: "var"
   }
-}, class {
+}, class RegExpValidator extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
   }
   validate(string) {
     if (!this.regExp) return true;

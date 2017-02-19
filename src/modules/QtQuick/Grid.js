@@ -12,9 +12,10 @@ QmlWeb.registerQmlType({
     flow: "enum",
     layoutDirection: "enum"
   }
-}, class {
+}, class Grid extends Positioner {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.columnsChanged.connect(this, this.layoutChildren);
     this.rowsChanged.connect(this, this.layoutChildren);

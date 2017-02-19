@@ -6,9 +6,10 @@ QmlWeb.registerQmlType({
   properties: {
     target: "QtObject",
   }
-}, class extends QmlWeb.QObject {
+}, class Font extends QtObject {
   constructor(parent, meta) {
     super(parent, meta); // TODO: superAndInitMeta support?
+    QmlWeb.initMeta(this, meta);
     this.Font = global.Font; // TODO: make a sane enum
     this.target = this.$parent;
 

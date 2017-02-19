@@ -19,9 +19,10 @@ QmlWeb.registerQmlType({
   signals: {
     textMessageReceived: [{ type: "string", name: "message" }]
   }
-}, class {
+}, class WebSocket extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.$socket = undefined;
     this.$reconnect = false;

@@ -10,9 +10,10 @@ QmlWeb.registerQmlType({
     style: "Component",
     toolBar: "Item"
   }
-}, class {
+}, class ApplicationWindow extends Window {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     // TODO
   }

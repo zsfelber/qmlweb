@@ -8,9 +8,10 @@ QmlWeb.registerQmlType({
     $items: "list"
   },
   defaultProperty: "$items"
-}, class {
+}, class ListModel extends QtObject {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     this.$firstItem = true;
     this.$itemsChanged.connect(this, this.$on$itemsChanged);

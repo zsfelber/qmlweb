@@ -14,9 +14,10 @@ QmlWeb.registerQmlType({
     timestamp: "date",
     label: "string"
   }
-}, class {
+}, class GeoLocation extends Item {
   constructor(meta) {
-    QmlWeb.superAndInitMeta(this, meta);
+    super(meta);
+    QmlWeb.initMeta(this, meta);
 
     if (!navigator.geolocation) {
       return;
