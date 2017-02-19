@@ -1,12 +1,3 @@
-function inherit(constructor, baseClass) {
-  const oldProto = constructor.prototype;
-  constructor.prototype = Object.create(baseClass.prototype);
-  Object.getOwnPropertyNames(oldProto).forEach(prop => {
-    constructor.prototype[prop] = oldProto[prop];
-  });
-  constructor.prototype.constructor = baseClass;
-}
-
 
 function initMeta(self, meta, constructor) {
   const info = constructor.$qmlTypeInfo;
@@ -261,7 +252,6 @@ function addElementToPageContexts(item, id, ctx) {
 }
 
 
-QmlWeb.inherit = inherit;
 QmlWeb.initMeta = initMeta;
 QmlWeb.construct = construct;
 QmlWeb.createComponentAndElement = createComponentAndElement;

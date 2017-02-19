@@ -21,9 +21,6 @@ class QMLEngine {
     // Cached parsed JS files (post-QmlWeb.jsparse)
     this.js = {};
 
-    // List of Component.completed signals
-    this.completedSignals = [];
-
     // Current operation state of the engine (Idle, init, etc.)
     this.operationState = QmlWeb.QMLOperationState.Idle;
 

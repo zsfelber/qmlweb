@@ -31,8 +31,8 @@ class Repeater extends Item {
     this.$applyModel();
   }
   $getModel() {
-    const QMLListModel = QmlWeb.getConstructor("QtQuick", "2.0", "ListModel");
-    return this.model instanceof QMLListModel ?
+    //const QMLListModel = QmlWeb.getConstructor("QtQuick", "2.0", "ListModel");
+    return this.model instanceof ListModel ?
             this.model.$model :
             this.model;
   }
@@ -81,18 +81,18 @@ class Repeater extends Item {
     for (let index = startIndex; index <= endIndex; index++) {
       const item = this.$items[index];
       const modelData = item.$properties.model;
-     // TODO gz obsolete : scope
-      const scope = {
-        $object: item,
-        $context: this.model.$context
-      };
+      // // TODO gz obsolete : scope
+      // const scope = {
+      //   $object: item,
+      //   $context: this.model.$context
+      // };
       for (const i in roleNames) {
         const roleName = roleNames[i];
         const roleData = model.data(index, roleName);
         item.$properties[roleName].set(
           roleData,
           QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
-          scope
+          item
         );
         modelData[roleName] = roleData;
       }
@@ -146,11 +146,11 @@ class Repeater extends Item {
     for (index = startIndex; index < endIndex; index++) {
       const newItem = this.delegate.$createObject(this.parent);
       createProperty("int", newItem, "index", { initialValue: index });
-     // TODO gz obsolete : scope
-      const scope = {
-        $object: newItem,
-        $context: this.model.$context
-      };
+      // // TODO gz obsolete : scope
+      // const scope = {
+      //   $object: newItem,
+      //   $context: this.model.$context
+      // };
 
       if (typeof model === "number" || model instanceof Array) {
         if (typeof newItem.$properties.modelData === "undefined") {
@@ -160,7 +160,7 @@ class Repeater extends Item {
                       model[index] :
                       typeof model === "number" ? index : "undefined";
         newItem.$properties.modelData.set(value, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
-                                          scope);
+                                          newItem);
       } else {
         // QML exposes a "model" property in the scope that contains all role
         // data.
@@ -224,8 +224,10 @@ class Repeater extends Item {
     }
   }
   $removeChildProperties(child) {
-    const signals = QmlWeb.engine.completedSignals;
-    signals.splice(signals.indexOf(child.Component.completed), 1);
+    const pendingOps = QmlWeb.engine.pendingOperations;
+    const op = pendingOps.map["C:"+child.Component.$componentId];
+    // TODO store index
+    pendingOps.stack.splice(pendingOps.indexOf(op), 1);
     for (let i = 0; i < child.children.length; i++) {
       this.$removeChildProperties(child.children[i]);
     }

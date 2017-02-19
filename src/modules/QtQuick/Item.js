@@ -140,14 +140,14 @@ class Item extends ItemBase {
     // before we fetch the values because properties can be interdependent.
     for (const i in actions) {
       const action = actions[i];
-      // TODO gz obsolete : scope
-      const scope = {
-        action: action,
-        $object: action.target,
-        $context: (newState ? newState.$context : action.target.$context)
-      };
+      // // TODO gz obsolete : scope
+      // const scope = {
+      //   action: action,
+      //   $object: action.target,
+      //   $context: (newState ? newState.$context : action.target.$context)
+      // };
       action.target.$properties[action.property].set(
-        action.value, QmlWeb.QMLPropertyFlags.ReasonUser, scope
+        action.value, QmlWeb.QMLPropertyFlags.ReasonUser, action.target
       );
     }
     for (const i in actions) {

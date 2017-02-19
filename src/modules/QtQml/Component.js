@@ -379,11 +379,13 @@ class QMLComponent {
         // NOTE one level of supertype hierarchy, QObject's component first (recursively) :
         // NOTE not possible even trying to emit 'completed' right now, because we are before "applyProperties"
         // and so unable to determine whether a called property exists and not yet initialiazed or it doesn't exist at all.
-        QmlWeb.engine.pendingOperations.stack.push({
+        const itm = {
           fun:QMLComponent.complete,
           thisObj:this,
           info:"Pending component.complete (waiting to initialization) : "+(this.context?this.context:this)
-        });
+        };
+        QmlWeb.engine.pendingOperations.stack.push(itm);
+        QmlWeb.engine.pendingOperations.map["C:"+this.$componentId] = itm;
       } else {
         this.status = QmlWeb.Component.Ready;
       }

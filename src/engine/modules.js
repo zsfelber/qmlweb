@@ -22,8 +22,6 @@ const objectAttachors = {
 // All object constructors
 QmlWeb.constructors = modules.Main;
 
-const dependants = {};
-
 // Helper. Adds a type to the constructor list
 function registerGlobalQmlType(name, type) {
   const constructors = QmlWeb.constructors;
@@ -40,34 +38,6 @@ function registerGlobalQmlType(name, type) {
 function registerQmlType(options, constructor) {
   if (constructor !== undefined) {
     options.constructor = constructor;
-  }
-
-  if (typeof options.baseClass === "string") {
-    // TODO: Does not support version specification (yet?)
-    let baseModule;
-    let baseName;
-    const dot = options.baseClass.lastIndexOf(".");
-    if (dot === -1) {
-      baseModule = options.module;
-      baseName = options.baseClass;
-    } else {
-      baseModule = options.baseClass.substring(0, dot);
-      baseName = options.baseClass.substring(dot + 1);
-    }
-    const found = (modules[baseModule] || [])
-                    .filter(descr => descr.name === baseName);
-    if (found.length > 0) {
-      // Ok, we found our base class
-      options.baseClass = found[0].constructor;
-    } else {
-      // Base class not found, delay the loading
-      const baseId = [baseModule, baseName].join(".");
-      if (!dependants.hasOwnProperty(baseId)) {
-        dependants[baseId] = [];
-      }
-      dependants[baseId].push(options);
-      return;
-    }
   }
 
   const descriptor = typeof options === "function" ? {
@@ -97,15 +67,6 @@ function registerQmlType(options, constructor) {
 
   registerModuleClassDescriptor(descriptor);
 
-  if (typeof descriptor.baseClass !== "undefined") {
-    QmlWeb.inherit(descriptor.constructor, descriptor.baseClass);
-  }
-
-  const id = [descriptor.module, descriptor.name].join(".");
-  if (dependants.hasOwnProperty(id)) {
-    dependants[id].forEach(opt => registerQmlType(opt));
-    dependants[id].length = 0;
-  }
 }
 
 function registerQmlImport(module, name, versions, constructor) {
