@@ -1,24 +1,4 @@
-QmlWeb.registerQmlType({
-  module: "QtWebView",
-  name: "WebView",
-  versions: /^1\./,
-  baseClass: "QtQuick.Item",
-  properties: {
-    canGoBack: "bool", // TODO
-    canGoForward: "bool", // TODO
-    loadProgress: "int",
-    loading: "bool",
-    title: "string",
-    url: "url"
-  },
-  signals: {
-    /* // TODO
-    loadingChanged: [
-      { type: "WebViewLoadRequest", name: "loadRequest" }
-    ]
-    */
-  }
-}, class WebView extends Item {
+class WebView extends Item {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, WebView);
@@ -50,4 +30,28 @@ QmlWeb.registerQmlType({
     this.loading = true;
     this.impl.src = newVal;
   }
+}
+
+QmlWeb.registerQmlType({
+  module: "QtWebView",
+  name: "WebView",
+  versions: /^1\./,
+  baseClass: "QtQuick.Item",
+  properties: {
+    canGoBack: "bool", // TODO
+    canGoForward: "bool", // TODO
+    loadProgress: "int",
+    loading: "bool",
+    title: "string",
+    url: "url"
+  },
+  signals: {
+    /* // TODO
+    loadingChanged: [
+      { type: "WebViewLoadRequest", name: "loadRequest" }
+    ]
+    */
+  },
+  constructor:WebView
 });
+

@@ -1,9 +1,5 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "ListElement",
-  versions: /.*/,
-  baseClass: "QtQml.QtObject"
-}, class ListElement extends QtObject {
+
+class ListElement extends QtObject {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, ListElement);
@@ -16,4 +12,13 @@ QmlWeb.registerQmlType({
     }
     QmlWeb.applyProperties(meta, this);
   }
+}
+
+QmlWeb.registerQmlType({
+  module: "QtQuick",
+  name: "ListElement",
+  versions: /.*/,
+  baseClass: "QtQml.QtObject",
+  constructor:ListElement
 });
+

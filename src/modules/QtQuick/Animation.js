@@ -1,20 +1,3 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Animation",
-  versions: /.*/,
-  baseClass: "QtQml.QtObject",
-  enums: {
-    Animation: { Infinite: -1 },
-    Easing: QmlWeb.Easing
-  },
-  properties: {
-    alwaysRunToEnd: "bool",
-    loops: { type: "int", initialValue: 1 },
-    paused: "bool",
-    running: "bool"
-  },
-  constructor:Animation
-});
 
 class Animation extends QtObject {
   constructor(meta) {
@@ -42,3 +25,21 @@ class Animation extends QtObject {
     QmlWeb.log("Unbound method for", this);
   }
 }
+
+QmlWeb.registerQmlType({
+  module: "QtQuick",
+  name: "Animation",
+  versions: /.*/,
+  baseClass: "QtQml.QtObject",
+  enums: {
+    Animation: { Infinite: -1 },
+    Easing: QmlWeb.Easing
+  },
+  properties: {
+    alwaysRunToEnd: "bool",
+    loops: { type: "int", initialValue: 1 },
+    paused: "bool",
+    running: "bool"
+  },
+  constructor:Animation
+});

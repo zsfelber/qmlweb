@@ -1,18 +1,4 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Repeater",
-  versions: /.*/,
-  baseClass: "Item",
-  properties: {
-    delegate: "Component",
-    model: { type: "variant", initialValue: 0 },
-    count: "int"
-  },
-  signals: {
-    _childrenInserted: []
-  },
-  defaultProperty: "delegate"
-}, class Repeater extends Item {
+class Repeater extends Item {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, Repeater);
@@ -244,4 +230,22 @@ QmlWeb.registerQmlType({
       this.$removeChildProperties(child.children[i]);
     }
   }
+}
+
+QmlWeb.registerQmlType({
+  module: "QtQuick",
+  name: "Repeater",
+  versions: /.*/,
+  baseClass: "Item",
+  properties: {
+    delegate: "Component",
+    model: { type: "variant", initialValue: 0 },
+    count: "int"
+  },
+  signals: {
+    _childrenInserted: []
+  },
+  defaultProperty: "delegate",
+  constructor:Repeater
 });
+

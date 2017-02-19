@@ -1,3 +1,16 @@
+
+class Window extends Item {
+  constructor(meta) {
+    super(meta);
+    QmlWeb.initMeta(this, meta, Window);
+
+    this.colorChanged.connect(this, this.$onColorChanged);
+  }
+  $onColorChanged(newVal) {
+    QmlWeb.setStyle(this.css, "backgroundColor", newVal);
+  }
+}
+
 QmlWeb.registerQmlType({
   module: "QtQuick.Window",
   name: "Window",
@@ -23,15 +36,3 @@ QmlWeb.registerQmlType({
   },
   constructor:Window
 });
-
-class Window extends Item {
-  constructor(meta) {
-    super(meta);
-    QmlWeb.initMeta(this, meta, Window);
-
-    this.colorChanged.connect(this, this.$onColorChanged);
-  }
-  $onColorChanged(newVal) {
-    QmlWeb.setStyle(this.css, "backgroundColor", newVal);
-  }
-}

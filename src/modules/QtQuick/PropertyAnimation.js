@@ -1,19 +1,3 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "PropertyAnimation",
-  versions: /.*/,
-  baseClass: "Animation",
-  properties: {
-    duration: { type: "int", initialValue: 250 },
-    from: "real",
-    to: "real",
-    properties: "string",
-    property: "string",
-    target: "QtObject",
-    targets: "list"
-  },
-  constructor:PropertyAnimation
-});
 class PropertyAnimation extends Animation {
   constructor(meta) {
     super(meta);
@@ -97,3 +81,20 @@ class PropertyAnimation extends Animation {
     }
   }
 }
+
+QmlWeb.registerQmlType({
+  module: "QtQuick",
+  name: "PropertyAnimation",
+  versions: /.*/,
+  baseClass: "Animation",
+  properties: {
+    duration: { type: "int", initialValue: 250 },
+    from: "real",
+    to: "real",
+    properties: "string",
+    property: "string",
+    target: "QtObject",
+    targets: "list"
+  },
+  constructor:PropertyAnimation
+});

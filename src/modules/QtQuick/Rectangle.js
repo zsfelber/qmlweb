@@ -13,17 +13,6 @@ var defaultRectStyle = QmlWeb.helpers.mergeObjects(QmlWeb.defaultItemStyle, {
    backgroundColor: "white"
 });
 
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Rectangle",
-  versions: /.*/,
-  baseClass: "Item",
-  properties: {
-    color: { type: "color", initialValue: "white" },
-    radius: "real"
-  },
-  constructor:Rectangle
-});
 class Rectangle extends Item {
   constructor(meta) {
     super(meta);
@@ -76,3 +65,15 @@ class Rectangle extends Item {
     }
   }
 }
+
+QmlWeb.registerQmlType({
+  module: "QtQuick",
+  name: "Rectangle",
+  versions: /.*/,
+  baseClass: "Item",
+  properties: {
+    color: { type: "color", initialValue: "white" },
+    radius: "real"
+  },
+  constructor:Rectangle
+});

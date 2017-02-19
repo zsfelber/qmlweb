@@ -1,12 +1,5 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Positioner",
-  versions: /.*/,
-  baseClass: "Item",
-  properties: {
-    spacing: "int"
-  }
-}, class Positioner extends Item {
+
+class Positioner extends Item {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, Positioner);
@@ -25,4 +18,15 @@ QmlWeb.registerQmlType({
       child.visibleChanged.connect(this, this.layoutChildren, flags);
     }
   }
+}
+
+QmlWeb.registerQmlType({
+  module: "QtQuick",
+  name: "Positioner",
+  versions: /.*/,
+  baseClass: "Item",
+  properties: {
+    spacing: "int"
+  },
+  constructor:Positioner
 });

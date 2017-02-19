@@ -1,14 +1,5 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "ListModel",
-  versions: /.*/,
-  baseClass: "QtQml.QtObject",
-  properties: {
-    count: "int",
-    $items: "list"
-  },
-  defaultProperty: "$items"
-}, class ListModel extends QtObject {
+
+class ListModel extends QtObject {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, ListModel);
@@ -89,4 +80,18 @@ QmlWeb.registerQmlType({
     this.$items[index][property] = value;
     this.$model.dataChanged(index, index);
   }
+}
+
+QmlWeb.registerQmlType({
+  module: "QtQuick",
+  name: "ListModel",
+  versions: /.*/,
+  baseClass: "QtQml.QtObject",
+  properties: {
+    count: "int",
+    $items: "list"
+  },
+  defaultProperty: "$items",
+  constructor:ListModel
 });
+

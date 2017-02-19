@@ -1,28 +1,3 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Image",
-  versions: /.*/,
-  baseClass: "Item",
-  enums: {
-    Image: {
-      Stretch: 1, PreserveAspectFit: 2, PreserveAspectCrop: 3,
-      Tile: 4, TileVertically: 5, TileHorizontally: 6,
-
-      Null: 1, Ready: 2, Loading: 3, Error: 4
-    }
-  },
-  properties: {
-    asynchronous: { type: "bool", initialValue: true },
-    cache: { type: "bool", initialValue: true },
-    smooth: { type: "bool", initialValue: true },
-    fillMode: { type: "enum", initialValue: 1 }, // Image.Stretch
-    mirror: "bool",
-    progress: "real",
-    source: "url",
-    status: { type: "enum", initialValue: 1 } // Image.Null
-  },
-  constructor:Image
-});
 
 class Image extends Item {
   constructor(meta) {
@@ -120,3 +95,29 @@ class Image extends Item {
     }
   }
 }
+
+QmlWeb.registerQmlType({
+  module: "QtQuick",
+  name: "Image",
+  versions: /.*/,
+  baseClass: "Item",
+  enums: {
+    Image: {
+      Stretch: 1, PreserveAspectFit: 2, PreserveAspectCrop: 3,
+      Tile: 4, TileVertically: 5, TileHorizontally: 6,
+
+      Null: 1, Ready: 2, Loading: 3, Error: 4
+    }
+  },
+  properties: {
+    asynchronous: { type: "bool", initialValue: true },
+    cache: { type: "bool", initialValue: true },
+    smooth: { type: "bool", initialValue: true },
+    fillMode: { type: "enum", initialValue: 1 }, // Image.Stretch
+    mirror: "bool",
+    progress: "real",
+    source: "url",
+    status: { type: "enum", initialValue: 1 } // Image.Null
+  },
+  constructor:Image
+});

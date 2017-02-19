@@ -1,12 +1,5 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "NumberAnimation",
-  versions: /.*/,
-  baseClass: "PropertyAnimation",
-  properties: {
-    fps: {type:"int", initialValue:60}
-  }
-}, class NumberAnimation extends PropertyAnimation {
+
+class NumberAnimation extends PropertyAnimation {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, NumberAnimation);
@@ -84,4 +77,15 @@ QmlWeb.registerQmlType({
     }
     QmlWeb.engine.$removeTicker(this);
   }
+}
+
+QmlWeb.registerQmlType({
+  module: "QtQuick",
+  name: "NumberAnimation",
+  versions: /.*/,
+  baseClass: "PropertyAnimation",
+  properties: {
+    fps: {type:"int", initialValue:60}
+  },
+  constructor:NumberAnimation
 });
