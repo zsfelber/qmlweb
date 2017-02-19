@@ -38,15 +38,14 @@ const Component = {
 const QMLComponentFlags = {
   // determine automatically whether Nested or Root (Super is not possible)
   // at every ($)createObject
-  Factory : 1,
-  Super : 2,
-  Nested : 4,
-  Root : 8,
-  Element : 16,
-  LoadImports : 32,
-  Flat : 64,
+  Factory : 0,
+  Super : 1,
+  Nested : 2,
+  Root : 4,
+  Element : 8,
+  LoadImports : 16,
+  Flat : 32,
 
-  Factory_mnem : "f",
   Super_mnem : "S",
   Nested_mnem : "N",
   Root_mnem : "R",

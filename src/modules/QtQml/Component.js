@@ -12,12 +12,9 @@ class QMLComponent {
     this.flags = flags;
     this.createFlags = this.flags & (QmlWeb.QMLComponentFlags.Root|QmlWeb.QMLComponentFlags.Nested|QmlWeb.QMLComponentFlags.Super);
 
-    // // init now, otherwise it's Lazy
-    // if (this.createFlags) {
-      // no component = is import root
-      const loaderComponent = QmlWeb.engine.$component;
-      this.init(loaderComponent);
-    // }
+    // no component = is import root
+    const loaderComponent = QmlWeb.engine.$component;
+    this.init(loaderComponent);
 
   }
 
@@ -49,7 +46,7 @@ class QMLComponent {
     // see also QObject.createChild()->Object.create() in classes.construct
     // see also Object.create in QMLContext.createChild
     if (loaderComponent) {
-      if ((this.flags&QmlWeb.QMLComponentFlags.Factory?1:0)+(this.flags&QmlWeb.QMLComponentFlags.Super?1:0)+(this.flags&QmlWeb.QMLComponentFlags.Nested?1:0)!==1) {
+      if ((this.flags&QmlWeb.QMLComponentFlags.Super?1:0)+(this.flags&QmlWeb.QMLComponentFlags.Nested?1:0) > 1) {
         throw new Error("Assertion failed : component either factory nested or super  It is "+QmlWeb.QMLComponentFlags.toString(this.flags));
       }
 
@@ -104,7 +101,8 @@ class QMLComponent {
           throw new Error("No component file");
         }
 
-      } else if (this.flags&QmlWeb.QMLComponentFlags.Nested) {
+      } else {
+        // Nested or Factory
 
         this.loaderComponent = loaderComponent;
         this.topComponent = this;
@@ -116,8 +114,6 @@ class QMLComponent {
         this.context.nestedLevel = this.nestedLevel;
         // inherit page top $pageElements :
         this.context.$pageElements = loaderComponent.context.$pageElements;
-
-      } else { // Factory !
       }
 
       //QmlWeb.warn("Component  "+this.context);
@@ -336,6 +332,7 @@ class QMLComponent {
 
   $createObject(parent, properties = {}) {
     const engine = QmlWeb.engine;
+    const oldFlags = this.flags;
     const oldCreateFlags = this.createFlags;
     // change base path to current component base path
     const oldState = engine.operationState;
@@ -399,6 +396,7 @@ class QMLComponent {
     } finally {
       engine.$component = prevComponent;
       engine.operationState = oldState;
+      this.flags = oldFlags;
       this.createFlags = oldCreateFlags;
     }
     return item;
