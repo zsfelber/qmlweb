@@ -12,12 +12,12 @@ class QMLComponent {
     this.flags = flags;
     this.createFlags = this.flags & (QmlWeb.QMLComponentFlags.Root|QmlWeb.QMLComponentFlags.Nested|QmlWeb.QMLComponentFlags.Super);
 
-    // init now, otherwise it's Lazy
-    if (this.createFlags) {
+    // // init now, otherwise it's Lazy
+    // if (this.createFlags) {
       // no component = is import root
       const loaderComponent = QmlWeb.engine.$component;
       this.init(loaderComponent);
-    }
+    // }
 
   }
 
@@ -49,8 +49,9 @@ class QMLComponent {
     // see also QObject.createChild()->Object.create() in classes.construct
     // see also Object.create in QMLContext.createChild
     if (loaderComponent) {
-      if (!(this.flags&QmlWeb.QMLComponentFlags.Super)===!(this.flags&QmlWeb.QMLComponentFlags.Nested))
-        throw new Error("Assertion failed : either meta.nested or meta.super  It is "+((this.flags&QmlWeb.QMLComponentFlags.Super)?"both":"neither")+" "+this);
+      if ((this.flags&QmlWeb.QMLComponentFlags.Factory?1:0)+(this.flags&QmlWeb.QMLComponentFlags.Super?1:0)+(this.flags&QmlWeb.QMLComponentFlags.Nested?1:0)!==1) {
+        throw new Error("Assertion failed : component either factory nested or super  It is "+QmlWeb.QMLComponentFlags.toString(this.flags));
+      }
 
       if (this.flags&QmlWeb.QMLComponentFlags.Nested) {
         this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
@@ -103,7 +104,7 @@ class QMLComponent {
           throw new Error("No component file");
         }
 
-      } else { // Nested !
+      } else if (this.flags&QmlWeb.QMLComponentFlags.Nested) {
 
         this.loaderComponent = loaderComponent;
         this.topComponent = this;
@@ -116,6 +117,7 @@ class QMLComponent {
         // inherit page top $pageElements :
         this.context.$pageElements = loaderComponent.context.$pageElements;
 
+      } else { // Factory !
       }
 
       //QmlWeb.warn("Component  "+this.context);

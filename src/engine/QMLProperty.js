@@ -119,14 +119,14 @@ class QMLProperty {
           this.value = QmlWeb.createComponent({
             clazz: val,
             $file: val.$file
-          }, QmlWeb.QMLComponentFlags.LazyOrFactory);
+          }, QmlWeb.QMLComponentFlags.Factory);
         } else if (constructors[this.type] === QMLComponent) {
           // User declared Component type but assigned Element directly (eg initialized a delegate)
 
           this.value = QmlWeb.createComponent({
             clazz: val,
             $file: val.$file
-          }, QmlWeb.QMLComponentFlags.LazyOrFactory|QmlWeb.QMLComponentFlags.Flat);
+          }, QmlWeb.QMLComponentFlags.Factory|QmlWeb.QMLComponentFlags.Flat);
         } else {
           // NOTE gz : key entry point 2 of QmlWeb.construct
           // all the other ones just forward these
