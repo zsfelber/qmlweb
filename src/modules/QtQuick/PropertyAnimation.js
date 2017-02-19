@@ -11,8 +11,10 @@ QmlWeb.registerQmlType({
     property: "string",
     target: "QtObject",
     targets: "list"
-  }
-}, class PropertyAnimation extends Animation {
+  },
+  constructor:PropertyAnimation
+});
+class PropertyAnimation extends Animation {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, PropertyAnimation);
@@ -94,4 +96,4 @@ QmlWeb.registerQmlType({
       this.$targets.push(this.target);
     }
   }
-});
+}

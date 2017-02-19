@@ -21,8 +21,10 @@ QmlWeb.registerQmlType({
   properties: {
     color: { type: "color", initialValue: "white" },
     radius: "real"
-  }
-}, class Rectangle extends Item {
+  },
+  constructor:Rectangle
+});
+class Rectangle extends Item {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, Rectangle);
@@ -73,4 +75,4 @@ QmlWeb.registerQmlType({
       QmlWeb.setStyle(css, "borderWidth", `${border}px`, defaultRectStyle);
     }
   }
-});
+}

@@ -262,7 +262,6 @@ function addElementToPageContexts(item, id, ctx) {
 
 
 QmlWeb.inherit = inherit;
-QmlWeb.superAndInitMeta = superAndInitMeta;
 QmlWeb.initMeta = initMeta;
 QmlWeb.construct = construct;
 QmlWeb.createComponentAndElement = createComponentAndElement;

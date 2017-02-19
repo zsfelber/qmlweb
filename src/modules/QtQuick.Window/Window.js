@@ -20,8 +20,11 @@ QmlWeb.registerQmlType({
   },
   signals: {
     closing: [{ type: "CloseEvent", name: "close" }]
-  }
-}, class Window extends Item {
+  },
+  constructor:Window
+});
+
+class Window extends Item {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, Window);
@@ -31,4 +34,4 @@ QmlWeb.registerQmlType({
   $onColorChanged(newVal) {
     QmlWeb.setStyle(this.css, "backgroundColor", newVal);
   }
-});
+}

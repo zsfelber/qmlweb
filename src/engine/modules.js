@@ -12,7 +12,7 @@ const modules = {
     enum: QmlWeb.qmlNumber,
     url: QmlWeb.qmlUrl,
     variant: QmlWeb.qmlVariant,
-    var: QmlWeb.qmlVariant
+    "var": QmlWeb.qmlVariant
   }
 };
 

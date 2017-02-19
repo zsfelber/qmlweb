@@ -12,8 +12,11 @@ QmlWeb.registerQmlType({
     loops: { type: "int", initialValue: 1 },
     paused: "bool",
     running: "bool"
-  }
-}, class Animation extends QtObject {
+  },
+  constructor:Animation
+});
+
+class Animation extends QtObject {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, Animation);
@@ -38,4 +41,4 @@ QmlWeb.registerQmlType({
     // To be overridden
     QmlWeb.log("Unbound method for", this);
   }
-});
+}

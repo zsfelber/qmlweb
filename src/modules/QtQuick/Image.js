@@ -20,8 +20,11 @@ QmlWeb.registerQmlType({
     progress: "real",
     source: "url",
     status: { type: "enum", initialValue: 1 } // Image.Null
-  }
-}, class Image extends Item {
+  },
+  constructor:Image
+});
+
+class Image extends Item {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, Image);
@@ -116,4 +119,4 @@ QmlWeb.registerQmlType({
       QmlWeb.setCssClass(this.impl, "smooth", "qmluglyimg");
     }
   }
-});
+}
