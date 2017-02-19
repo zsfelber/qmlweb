@@ -1,5 +1,9 @@
 import QtQuick 2.0
 
 Item {
-  property var aFunction: function(){}
+  property string checkBindingCtxProp : "mobydick";
+
+  property var aFunction: function() {
+    return checkBindingCtxProp;
+  }
 }

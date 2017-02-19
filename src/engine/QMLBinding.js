@@ -124,7 +124,7 @@ class QMLBinding {
       }
       if (match && src[src.length-1]==='}') {
         if (!this.flags) {
-          throw new Error("Binding is effectively a function but declared to expression : "+(this.info?this.info:src));
+          QmlWeb.warn("Binding is effectively a function but declared to expression : "+(this.info?this.info:src));
         }
         src = src.substring(match[0].length-1);
         if (!stripargs) {
@@ -165,12 +165,16 @@ class QMLBinding {
 
     // .call is needed for `this` support
     try {
-      if (!this.implGet) {
+      if (!this.implGet && !this.implRun) {
         var os = QmlWeb.objToStringSafe(obj);
-        QmlWeb.warn("Binding/get error  compiled:"+this.compiled+"  no compiled getter  this:"+os+"   src:\n"+this.src);
+        QmlWeb.warn("Binding/get error  compiled:"+this.compiled+"  no compiled getter/runner  this:"+os+"   src:\n"+this.src);
         return;
       }
-      return this.implGet.call(obj);
+      if (this.implGet) {
+        return this.implGet.call(obj);
+      } else {
+        return this.run.bind({binding:this, bindingObj:obj});
+      }
     } catch (err) {
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
         var os = QmlWeb.objToStringSafe(obj);

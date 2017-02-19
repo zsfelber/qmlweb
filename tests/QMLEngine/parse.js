@@ -19,6 +19,9 @@ describe("QMLEngine.parse", function() {
   it("can parse a function assigned to a var property", function() {
     var qml = load("FunctionVar", this.div);
     expect(typeof qml.aFunction).toBe("function");
+    if (qml.aFunction instanceof Function) {
+      expect(qml.aFunction()).toBe("mobydick");
+    }
   });
 
   it("can define signals from a QML component", function() {
