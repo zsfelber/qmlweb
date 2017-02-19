@@ -11,54 +11,7 @@ var defaultTextareaStyle = {
   margin  : "0px"
 };
 
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "TextEdit",
-  versions: /.*/,
-  baseClass: "Item",
-  properties: {
-    activeFocusOnPress: { type: "bool", initialValue: true },
-    baseUrl: "url",
-    canPaste: "bool",
-    canRedo: "bool",
-    canUndo: "bool",
-    color: { type: "color", initialValue: "white" },
-    contentHeight: "real",
-    contentWidth: "real",
-    cursorDelegate: "Component",
-    cursorPosition: "int",
-    cursorRectangle: "rect",
-    cursorVisible: { type: "bool", initialValue: true },
-    effectiveHorizontalAlignment: "enum",
-    horizontalAlignment: "enum",
-    hoveredLink: "string",
-    inputMethodComposing: "bool",
-    inputMethodHints: "enum",
-    length: "int",
-    lineCount: "int",
-    mouseSelectionMode: "enum",
-    persistentSelection: "bool",
-    readOnly: "bool",
-    renderType: "enum",
-    selectByKeyboard: { type: "bool", initialValue: true },
-    selectByMouse: "bool",
-    selectedText: "string",
-    selectedTextColor: { type: "color", initialValue: "yellow" },
-    selectionColor: { type: "color", initialValue: "pink" },
-    selectionEnd: "int",
-    selectionStart: "int",
-    text: "string",
-    textDocument: "TextDocument",
-    textFormat: "enum",
-    textMargin: "real",
-    verticalAlignment: "enum",
-    wrapMode: "enum"
-  },
-  signals: {
-    linkActivated: [{ type: "string", name: "link" }],
-    linkHovered: [{ type: "string", name: "link" }]
-  }
-}, class TextEdit extends Item {
+class TextEdit extends Item {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, TextEdit);
@@ -193,4 +146,55 @@ QmlWeb.registerQmlType({
   $getLineCount() {
     return this.text.split(/\n/).length;
   }
+}
+
+
+QmlWeb.registerQmlType({
+  module: "QtQuick",
+  name: "TextEdit",
+  versions: /.*/,
+  baseClass: "Item",
+  properties: {
+    activeFocusOnPress: { type: "bool", initialValue: true },
+    baseUrl: "url",
+    canPaste: "bool",
+    canRedo: "bool",
+    canUndo: "bool",
+    color: { type: "color", initialValue: "white" },
+    contentHeight: "real",
+    contentWidth: "real",
+    cursorDelegate: "Component",
+    cursorPosition: "int",
+    cursorRectangle: "rect",
+    cursorVisible: { type: "bool", initialValue: true },
+    effectiveHorizontalAlignment: "enum",
+    horizontalAlignment: "enum",
+    hoveredLink: "string",
+    inputMethodComposing: "bool",
+    inputMethodHints: "enum",
+    length: "int",
+    lineCount: "int",
+    mouseSelectionMode: "enum",
+    persistentSelection: "bool",
+    readOnly: "bool",
+    renderType: "enum",
+    selectByKeyboard: { type: "bool", initialValue: true },
+    selectByMouse: "bool",
+    selectedText: "string",
+    selectedTextColor: { type: "color", initialValue: "yellow" },
+    selectionColor: { type: "color", initialValue: "pink" },
+    selectionEnd: "int",
+    selectionStart: "int",
+    text: "string",
+    textDocument: "TextDocument",
+    textFormat: "enum",
+    textMargin: "real",
+    verticalAlignment: "enum",
+    wrapMode: "enum"
+  },
+  signals: {
+    linkActivated: [{ type: "string", name: "link" }],
+    linkHovered: [{ type: "string", name: "link" }]
+  },
+  constructor:TextEdit
 });

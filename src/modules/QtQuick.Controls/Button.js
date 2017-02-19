@@ -1,16 +1,4 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick.Controls",
-  name: "Button",
-  versions: /.*/,
-  baseClass: "QtQuick.Item",
-  properties: {
-    text: "string",
-    enabled: { type: "bool", initialValue: true }
-  },
-  signals: {
-    clicked: []
-  }
-}, class Button extends Item {
+class Button extends Item {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, Button);
@@ -41,4 +29,19 @@ QmlWeb.registerQmlType({
     this.impl.disabled = !newVal;
   }
 
+}
+
+QmlWeb.registerQmlType({
+  module: "QtQuick.Controls",
+  name: "Button",
+  versions: /.*/,
+  baseClass: "QtQuick.Item",
+  properties: {
+    text: "string",
+    enabled: { type: "bool", initialValue: true }
+  },
+  signals: {
+    clicked: []
+  },
+  constructor:Button
 });
