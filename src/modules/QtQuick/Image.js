@@ -1,8 +1,8 @@
 
-class Image extends Item {
+class QImage extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Image);
+    QmlWeb.initMeta(this, meta, QImage);
 
     const createProperty = QmlWeb.createProperty;
 
@@ -119,5 +119,5 @@ QmlWeb.registerQmlType({
     source: "url",
     status: { type: "enum", initialValue: 1 } // Image.Null
   },
-  constructor:Image
+  constructor:QImage
 });

@@ -8,7 +8,7 @@ QmlWeb.registerQmlType({
     enabled: { type: "bool", initialValue: true }
   },
   defaultProperty: "animation"
-}, class Beahvior extends QtObject {
+}, class Behavior extends QtObject {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta, Behavior);
