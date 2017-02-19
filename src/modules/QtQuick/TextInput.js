@@ -16,7 +16,7 @@ QmlWeb.registerQmlType({
   signals: {
     accepted: []
   }
-}, class {
+}, class TextInput extends Item {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta);

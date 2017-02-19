@@ -58,7 +58,7 @@ QmlWeb.registerQmlType({
     linkActivated: [{ type: "string", name: "link" }],
     linkHovered: [{ type: "string", name: "link" }]
   }
-}, class {
+}, class TextEdit extends Item {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta);

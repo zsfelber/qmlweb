@@ -9,7 +9,7 @@ QmlWeb.registerQmlType({
   signals: {
     // TODO
   }
-}, class {
+}, class WebEngineView extends WebView {
   constructor(meta) {
     super(meta);
     QmlWeb.initMeta(this, meta);
