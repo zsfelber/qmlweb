@@ -11,7 +11,7 @@ QmlWeb.registerQmlType({
 }, class Scale extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Scale);
     this.target = this.$parent;
 
     const createProperty = QmlWeb.createProperty;

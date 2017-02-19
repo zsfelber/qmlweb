@@ -11,7 +11,7 @@ QmlWeb.registerQmlType({
 }, class ToolButton extends Button {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, ToolButton);
 
   }
 

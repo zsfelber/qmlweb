@@ -6,7 +6,7 @@ QmlWeb.registerQmlType({
 }, class ListElement extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, ListElement);
 
     const createProperty = QmlWeb.createProperty;
     for (const i in meta) {

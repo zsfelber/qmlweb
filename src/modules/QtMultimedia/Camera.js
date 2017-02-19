@@ -36,7 +36,7 @@ QmlWeb.registerQmlType({
 }, class Camera extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Camera);
 
     // TODO: impl
   }

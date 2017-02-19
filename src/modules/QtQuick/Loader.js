@@ -18,7 +18,7 @@ QmlWeb.registerQmlType({
 }, class Loader extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Loader);
 
     this.$sourceUrl = "";
 

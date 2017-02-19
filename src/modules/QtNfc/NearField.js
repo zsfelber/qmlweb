@@ -16,7 +16,7 @@ QmlWeb.registerQmlType({
 }, class NearField extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, NearField);
 
     // TODO: implementation based on Web NFC API
   }

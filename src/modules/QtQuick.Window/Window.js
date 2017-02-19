@@ -24,7 +24,7 @@ QmlWeb.registerQmlType({
 }, class Window extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Window);
 
     this.colorChanged.connect(this, this.$onColorChanged);
   }

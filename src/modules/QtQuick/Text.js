@@ -25,7 +25,7 @@ QmlWeb.registerQmlType({
 }, class Text extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Text);
 
     const fc = this.impl = document.createElement("span");
     this.fcss = QmlWeb.createStyle(fc.style);

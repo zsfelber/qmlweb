@@ -14,7 +14,7 @@ QmlWeb.registerQmlType({
 }, class FontLoader extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, FontLoader);
 
     this.$domStyle = document.createElement("style");
     this.$lastName = "";

@@ -13,7 +13,7 @@ QmlWeb.registerQmlType({
 }, class Transition extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Transition);
 
     this.$item = this.$parent;
   }

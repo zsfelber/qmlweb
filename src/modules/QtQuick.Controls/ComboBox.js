@@ -22,7 +22,7 @@ QmlWeb.registerQmlType({
 }, class ComboBox extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, ComboBox);
 
     QmlWeb.setStyle(this.css, "pointerEvents", "auto");
     this.name = "QMLComboBox";

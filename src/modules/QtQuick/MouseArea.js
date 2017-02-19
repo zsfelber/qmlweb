@@ -27,7 +27,7 @@ QmlWeb.registerQmlType({
 }, class MouseArea extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, MouseArea);
 
     QmlWeb.setStyle(this.css, "pointerEvents", "all");
 

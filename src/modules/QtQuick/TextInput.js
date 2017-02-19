@@ -19,7 +19,7 @@ QmlWeb.registerQmlType({
 }, class TextInput extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, TextInput);
 
     const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
     this.font = new QMLFont(this);

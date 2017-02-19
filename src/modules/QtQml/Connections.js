@@ -10,7 +10,7 @@ QmlWeb.registerQmlType({
 }, class Connections extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Connections);
     this.target = this.$parent;
     this.$connections = {};
 

@@ -15,7 +15,7 @@ QmlWeb.registerQmlType({
 }, class PropertyAnimation extends Animation {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, PropertyAnimation);
 
     const createProperty = QmlWeb.createProperty;
     this.easing = new QmlWeb.QObject(this, {attached:true, info:"easing"});

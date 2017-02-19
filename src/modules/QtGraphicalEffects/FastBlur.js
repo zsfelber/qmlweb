@@ -9,7 +9,7 @@ QmlWeb.registerQmlType({
 }, class FastBlur extends Filter {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, FastBlur);
 
      this.radiusChanged.connect(this, this.$update);
   }

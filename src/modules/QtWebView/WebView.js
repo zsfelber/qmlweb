@@ -21,7 +21,7 @@ QmlWeb.registerQmlType({
 }, class WebView extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, WebView);
 
     this.urlChanged.connect(this, this.$onUrlChanged);
 

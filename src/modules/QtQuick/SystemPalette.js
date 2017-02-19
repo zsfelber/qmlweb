@@ -38,7 +38,7 @@ QmlWeb.registerQmlType({
 }, class SystemPalette extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, SystemPalette);
 
     this.colorGroupChanged.connect(this, this.$onColorGroupChanged);
 

@@ -49,7 +49,7 @@ QmlWeb.registerQmlType({
 }, class MediaPlayer extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, MediaPlayer);
 
     // TODO: impl
   }

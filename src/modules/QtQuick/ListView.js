@@ -11,7 +11,7 @@ QmlWeb.registerQmlType({
 }, class ListView extends Repeater{
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, ListView);
     this.modelChanged.connect(this, this.$styleChanged);
     this.delegateChanged.connect(this, this.$styleChanged);
     this.orientationChanged.connect(this, this.$styleChanged);

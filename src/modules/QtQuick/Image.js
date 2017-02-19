@@ -24,7 +24,7 @@ QmlWeb.registerQmlType({
 }, class Image extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Image);
 
     const createProperty = QmlWeb.createProperty;
 

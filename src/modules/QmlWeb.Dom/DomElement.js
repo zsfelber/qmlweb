@@ -10,7 +10,7 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     meta.tagName = meta.tagName;
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, DomElement);
 
     // TODO: support properties, styles, perhaps changing the tagName
   }

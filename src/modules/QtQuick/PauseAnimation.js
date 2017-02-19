@@ -9,7 +9,7 @@ QmlWeb.registerQmlType({
 }, class PauseAnimation extends Animation {
    constructor(meta) {
      super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, PauseAnimation);
 
      this.runningChanged.connect(this, this.$onRunningChanged);
    }

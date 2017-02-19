@@ -10,7 +10,7 @@ QmlWeb.registerQmlType({
 }, class Rotation extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Rotation);
     this.target = this.$parent;
 
     const createProperty = QmlWeb.createProperty;

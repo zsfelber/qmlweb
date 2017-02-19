@@ -15,7 +15,7 @@ QmlWeb.registerQmlType({
 }, class Grid extends Positioner {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Grid);
 
     this.columnsChanged.connect(this, this.layoutChildren);
     this.rowsChanged.connect(this, this.layoutChildren);

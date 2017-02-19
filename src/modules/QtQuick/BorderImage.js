@@ -22,7 +22,7 @@ QmlWeb.registerQmlType({
 }, class BorderImage extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, BorderImage);
 
     const createProperty = QmlWeb.createProperty;
     this.border = new QmlWeb.QObject(this, {attached:true, info:"border"});

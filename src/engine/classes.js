@@ -7,26 +7,6 @@ function inherit(constructor, baseClass) {
   constructor.prototype.constructor = baseClass;
 }
 
-function superAndInitMeta(self, meta) {
-
-  // NOTE
-  // meta._constructor : this class
-  // self.constructor : superclass
-
-  const constructor = meta._constructor;
-  const csontsructor = constructor.prototype.constructor;
-
-  if (csontsructor === Object.prototype) {
-    throw new Error("csontsructor === Object.prototype");
-  }
-
-  meta._constructor = csontsructor;
-
-  csontsructor.call(self, meta);
-
-  if (meta.$context && !self.$context) throw new Error("Instantiantion error, no context !");
-  initMeta(self, meta, constructor);
-}
 
 function initMeta(self, meta, constructor) {
   const info = constructor.$qmlTypeInfo;
@@ -180,9 +160,8 @@ function constructSuper(meta, parent) {
   var clinfo = QmlWeb.resolveClassImport(meta.$class);
 
   if (clinfo.classConstructor) {
-    // NOTE class from module/qmldir cache:
+    // NOTE internal class, module/qmldir cache:
     meta.parent = parent;
-    meta._constructor = clinfo.classConstructor;
     item = new clinfo.classConstructor(meta);
   } else {
     if (meta.id) {

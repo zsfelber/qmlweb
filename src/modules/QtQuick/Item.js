@@ -11,7 +11,7 @@ const otherGeometryProperties = {
 class Item extends ItemBase {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Item);
 
     if (!this.dom) { // Create a dom element for this item.
       this.dom = document.createElement(meta.tagName || "div");

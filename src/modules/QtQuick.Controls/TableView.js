@@ -11,7 +11,7 @@ QmlWeb.registerQmlType({
 }, class TableView extends Rectangle {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, TableView);
 
   }
 

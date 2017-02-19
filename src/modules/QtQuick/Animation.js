@@ -16,7 +16,7 @@ QmlWeb.registerQmlType({
 }, class Animation extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Animation);
   }
   restart() {
     this.stop();

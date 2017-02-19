@@ -11,7 +11,7 @@ QmlWeb.registerQmlType({
 }, class ListModel extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, ListModel);
 
     this.$firstItem = true;
     this.$itemsChanged.connect(this, this.$on$itemsChanged);

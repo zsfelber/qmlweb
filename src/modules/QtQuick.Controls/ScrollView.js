@@ -17,7 +17,7 @@ QmlWeb.registerQmlType({
 }, class ScrollView extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, ScrollView);
 
     QmlWeb.setStyle(this.css, "pointerEvents", "auto");
     this.setupFocusOnDom(this.dom);

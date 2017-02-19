@@ -6,6 +6,6 @@ QmlWeb.registerQmlType({
 }, class AnimatedImage extends Image {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, AnimatedImage);
   }
 });

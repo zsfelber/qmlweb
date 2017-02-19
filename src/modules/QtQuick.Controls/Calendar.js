@@ -11,7 +11,7 @@ QmlWeb.registerQmlType({
 }, class Calendar extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Calendar);
 
   }
 

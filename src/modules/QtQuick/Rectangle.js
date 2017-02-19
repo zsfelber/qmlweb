@@ -25,7 +25,7 @@ QmlWeb.registerQmlType({
 }, class Rectangle extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Rectangle);
 
     const createProperty = QmlWeb.createProperty;
     this.border = new QmlWeb.QObject(this, {attached:true, info:"border"});

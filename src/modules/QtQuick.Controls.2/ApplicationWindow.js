@@ -15,7 +15,7 @@ QmlWeb.registerQmlType({
 }, class ApplicationWindow2 extends Window {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, ApplicationWindow2);
 
     const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
     this.font = new QMLFont(this);

@@ -6,7 +6,7 @@ QmlWeb.registerQmlType({
 }, class TextArea extends TextEdit {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, TextArea);
     const textarea = this.impl;
 
     QmlWeb.setStyle(this.tacss, "padding", "5px", defaultTextareaStyle);

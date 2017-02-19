@@ -13,7 +13,7 @@ QmlWeb.registerQmlType({
 }, class ParallelAnimation extends Animation {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, ParallelAnimation);
 
     this.$runningAnimations = 0;
 

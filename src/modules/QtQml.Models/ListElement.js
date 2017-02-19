@@ -6,6 +6,6 @@ QmlWeb.registerQmlType({
 }, class MListElement extends ListElement {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, MListElement);
   }
 });

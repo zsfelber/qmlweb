@@ -15,7 +15,7 @@ QmlWeb.registerQmlType({
 }, class Repeater extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Repeater);
 
     //this.parent = meta.parent;
     // TODO: some (all ?) of the components including Repeater needs to know own

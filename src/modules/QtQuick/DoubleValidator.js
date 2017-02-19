@@ -16,7 +16,7 @@ QmlWeb.registerQmlType({
 }, class DoubleValidator extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, DoubleValidator);
     this.$standardRegExp = /^(-|\+)?\s*[0-9]+(\.[0-9]+)?$/;
     this.$scientificRegExp = /^(-|\+)?\s*[0-9]+(\.[0-9]+)?(E(-|\+)?[0-9]+)?$/;
   }

@@ -11,7 +11,7 @@ QmlWeb.registerQmlType({
 }, class SpinBox extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, SpinBox);
 
   }
 

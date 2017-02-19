@@ -6,7 +6,7 @@ QmlWeb.registerQmlType({
 }, class Column extends Positioner {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta);
+    QmlWeb.initMeta(this, meta, Column);
   }
   layoutChildren() {
     let curPos = 0;
