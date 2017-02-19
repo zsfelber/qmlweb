@@ -153,7 +153,7 @@ class QMLComponent {
     if (this.flags & QmlWeb.QMLComponentFlags.Nested) {
 
       // Nested item top level uses loader Component imports:
-      this.bindImports(loaderComponent);
+      this.redirectImports(this.loaderComponent);
 
     } else {
 
@@ -287,10 +287,10 @@ class QMLComponent {
     }
   }
 
-  bindImports(sourceComponent) {
-    //QmlWeb.warn("bindImports : binding imports...  "+this+"  ==> "+sourceComponent);
+  redirectImports(sourceComponent) {
+    //QmlWeb.warn("redirectImports : binding imports...  "+this+"  ==> "+sourceComponent);
     if (this.boundImportComponent) {
-      QmlWeb.warn("bindImports : rebind imports from   "+this+"  ==> "+sourceComponent + "   (2nd) ~~~ to ~~>   " +this.boundImportComponent);
+      QmlWeb.warn("redirectImports : rebind imports from   "+this+"  ==> "+sourceComponent + "   (2nd) ~~~ to ~~>   " +this.boundImportComponent);
     }
     if (this.boundImportComponent === sourceComponent) {
       return ;
@@ -300,7 +300,7 @@ class QMLComponent {
         this.moduleConstructors&&!QmlWeb.isEmpty(this.moduleConstructors) ||
         this.ctxQmldirs&&!QmlWeb.isEmpty(this.ctxQmldirs) ||
         this.componentImportPaths&&!QmlWeb.isEmpty(this.componentImportPaths) ) {
-      QmlWeb.warn("bindImports : imports already loaded, of : "+this+", now rebinding imports to another Component");
+      QmlWeb.warn("redirectImports : imports already loaded, of : "+this+", now rebinding imports to another Component");
     }
 
     this.boundImportComponent = sourceComponent;
@@ -345,15 +345,18 @@ class QMLComponent {
 
       // Lazy init :
       if (!this.createFlags) {
-        let loaderComponent;
         if (parent) {
           this.createFlags = QmlWeb.QMLComponentFlags.Nested;
-          loaderComponent = parent.$component;
+
+          // (1) Nested item top level uses loader Component imports  see(2) :
+          this.redirectImports(this.loaderComponent);
+
         } else {
           this.createFlags = QmlWeb.QMLComponentFlags.Root;
+          // (2) Clear import redirections if any (may be after (1) ) :
+          this.redirectImports(null);
         }
         this.flags |= this.createFlags;
-        this.init(loaderComponent);
       }
 
       engine.operationState |= QmlWeb.QMLOperationState.System;

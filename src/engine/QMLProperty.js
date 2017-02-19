@@ -80,7 +80,6 @@ class QMLProperty {
   // conversion required.
   $setVal(val, flags) {
     var prevComponent = QmlWeb.engine.$component;
-    var prevImport = 0;
 
     try {
       const isch = flags & QmlWeb.QMLPropertyFlags.SetChildren;
@@ -143,9 +142,6 @@ class QMLProperty {
       }
 
     } finally {
-      if (prevImport) {
-        QmlWeb.engine.$component.bindImports(prevImport);
-      }
       QmlWeb.engine.$component = prevComponent;
     }
   }
