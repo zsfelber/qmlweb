@@ -409,7 +409,7 @@ class QMLEngine {
             op.errors.push("Property state is invalid : update has not finished : "+property);
           } else {
 
-            property.update(op.flags, op.declaringItem, op.oldVal);
+            property.update(op.flags, op.oldVal);
 
             a1++;
             mode+=":a";

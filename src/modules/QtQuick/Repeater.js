@@ -37,6 +37,7 @@ QmlWeb.registerQmlType({
     this.$applyModel();
   }
   $onDelegateChanged() {
+    this.delegate.init();
     this.$applyModel();
   }
   $onParentChanged() {
@@ -52,6 +53,9 @@ QmlWeb.registerQmlType({
     if (!this.delegate || !this.parent) {
       return;
     }
+                           // TODO
+    const appropriateLevelObj = this.delegate.
+
     const model = this.$getModel();
     if (model instanceof QmlWeb.JSItemModel) {
       const flags = QmlWeb.Signal.UniqueConnection;
@@ -153,6 +157,10 @@ QmlWeb.registerQmlType({
     const createProperty = QmlWeb.createProperty;
     const model = this.$getModel();
     let index;
+
+    // TODO
+    let realParent = this.$properties.delegate.obj;
+
     for (index = startIndex; index < endIndex; index++) {
       const newItem = this.delegate.$createObject(this.parent);
       createProperty("int", newItem, "index", { initialValue: index });

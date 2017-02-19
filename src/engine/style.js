@@ -9,7 +9,9 @@ var defaultItemStyle = {
   borderWidth: "0px",
   borderStyle: "solid",
   borderColor: "black",
-  opacity: 1
+  opacity: 1,
+  visibility: "inherit",
+  overflow: "visible"
 };
 
 function createStyle(css) {

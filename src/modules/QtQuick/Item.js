@@ -5,7 +5,7 @@ const initGeomProperties = {
 
 const otherGeometryProperties = {
   "":{"left":1, "right":1, "top":1, "bottom":1},
-  "anhors":{"fill":1},
+  "anchors":{"fill":1},
 };
 
 class Item {

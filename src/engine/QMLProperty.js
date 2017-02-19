@@ -39,7 +39,8 @@ class QMLProperty {
     }
 
     this.stacks = QMLProperty;
-    this.obj = obj;
+    this.propDeclObj = obj;
+    this.bindingCtxObj = obj;
     this.$rootComponent = obj.$component ? obj.$component.$root : {};
     this.name = name;
     this.options = options;
@@ -66,34 +67,25 @@ class QMLProperty {
 
   // Called by update and set to actually set this.value, performing any type
   // conversion required.
-  $setVal(val, flags, declaringItem) {
+  $setVal(val, flags) {
     var prevComponent = QmlWeb.engine.$component;
     var prevImport = 0;
-    var parentObj;
 
     try {
       const isch = flags & QmlWeb.QMLPropertyFlags.SetChildren;
-      if (isch) {
 
-        // NOTE declaringItem is passed only along with SetChildren
-        // declaringItem !== this.obj.$component
-        // declaringItem means : the QML where the current child element (val) is declared
-        // what this.obj.$component is here : the QML supertype where the default property (eg"data") defined (eg"ItemBase")
+      // NOTE bindingCtxObj is passed through property.set, its in the descendant level in object type hierarchy (proto chain),
+      // eg. passed along with SetChildren
 
-        if (!declaringItem) {
-          throw new Error("declaringItem not specified with SetChildren flag : "+this.obj);
-        }
-        // childObj.loaderComponent should be declaringItem.$component
-        QmlWeb.engine.$component = declaringItem.$component;
-        parentObj = declaringItem;
-      } else {
-        QmlWeb.engine.$component = this.obj.$component;
-        parentObj = this.obj;
-      }
+      // childObj.loaderComponent should be bindingCtxObj.$component
+      // this.propDeclObj.$component : the QML supertype where the default property (eg"data") defined (eg"ItemBase")
+      // it's the supertype, but the correct parent is the actual type here:
+      QmlWeb.engine.$component = this.bindingCtxObj.$component;
 
-      const constructors = this.obj.$component ? this.obj.$component.moduleConstructors : QmlWeb.constructors;
+      const constructors = QmlWeb.constructors;
+
       if (constructors[this.type] === QmlWeb.qmlList) {
-        // SetChildren that is in init mode : we merge the subclasses items and don't clear it every time
+        // SetChildren (used in init mode only) : we merge the subclasses items and don't clear it every time
         // otherwise : clear it, most important when this is the default property, otherwise it just appends new entries
         if (!isch) {
           // TODO cleanup (garbage collector now, but is it enough?). when isch/!isch?
@@ -101,20 +93,23 @@ class QMLProperty {
         }
 
         // NOTE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
-        var tmp = QmlWeb.qmlList(val, parentObj, QmlWeb.QMLComponentFlags.Nested);
+        var tmp = QmlWeb.qmlList(val, this.bindingCtxObj, QmlWeb.QMLComponentFlags.Nested);
 
         // Otherwise, we trust containerChanged/onAddElement
         if (!isch) {
           this.value = tmp;
         }
       } else if (val instanceof QmlWeb.QMLMetaElement) {
-        // Root element or nested Component element ?
         if (constructors[val.$class] === QMLComponent) {
+          // Root element or nested Component element ?
+
           this.value = QmlWeb.createComponent({
             clazz: val,
             $file: val.$file
           }, QmlWeb.QMLComponentFlags.LazyOrFactory);
         } else if (constructors[this.type] === QMLComponent) {
+          // User declared Component type but assigned Element directly (eg initialized a delegate)
+
           this.value = QmlWeb.createComponent({
             clazz: val,
             $file: val.$file
@@ -124,7 +119,7 @@ class QMLProperty {
           // all the other ones just forward these
           // Call to here comes from
           // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
-          this.value = QmlWeb.createComponentAndElement({clazz:val}, parentObj, QmlWeb.QMLComponentFlags.Nested);
+          this.value = QmlWeb.createComponentAndElement({clazz:val}, this.bindingCtxObj, QmlWeb.QMLComponentFlags.Nested);
         }
       } else if (val instanceof Object || val === undefined || val === null) {
         this.value = val;
@@ -146,7 +141,7 @@ class QMLProperty {
   resetAnimation(oldVal) {
     this.animation.running = false;
     this.animation.$actions = [{
-      target: this.animation.target || this.obj,
+      target: this.animation.target || this.propDeclObj,
       property: this.animation.property || this.name,
       from: this.animation.from || oldVal,
       to: this.animation.to || this.value
@@ -169,7 +164,7 @@ class QMLProperty {
 
   // Updater recalculates the value of a property if one of the dependencies
   // changed
-  update(flags, declaringItem, oldVal) {
+  update(flags, oldVal) {
 
     const origState = this.updateState;
     this.updateState &= ~QmlWeb.QMLPropertyState.DirtyAll;
@@ -199,14 +194,17 @@ class QMLProperty {
         if (origState & QmlWeb.QMLPropertyState.BoundSet) {
           // binding/set
           newVal = this.value;
-          this.binding.set(this.obj, newVal, flags, declaringItem);
+          // NOTE bindingCtxObj is passed through property.set, its in the descendant level in object type hierarchy (proto chain),
+          // NOTE we don't pass this.bindingCtxObj as bindingCtxObj (argument 4) here to the bound property too, because it's the
+          // current binding context, and doesn't belong to binding target, at all
+          this.binding.set(this.bindingCtxObj, newVal, flags);
         } else {
           // this.binding/get
           pushed = QMLProperty.pushEvaluatingProperty(this);
 
           if (oldVal === undefined) oldVal = this.value;
-          newVal = this.binding.get(this.obj);
-          this.$setVal(newVal, flags, declaringItem);
+          newVal = this.binding.get(this.bindingCtxObj);
+          this.$setVal(newVal, flags);
         }
       } else {
         newVal = this.value;
@@ -378,9 +376,10 @@ class QMLProperty {
   }
 
   // Define setter
-  set(newVal, flags, declaringItem) {
+  set(newVal, flags, bindingCtxObj) {
 
     const pushed = QmlWeb.QMLProperty.pushEvalStack();
+    this.bindingCtxObj = bindingCtxObj;
 
     try {
 
@@ -424,7 +423,7 @@ class QMLProperty {
           desiredState = QmlWeb.QMLPropertyState.NonBoundSet;
         }
         if (newVal !== oldVal) {
-          this.$setVal(newVal, flags, declaringItem);
+          this.$setVal(newVal, flags);
         } else {
           needSend = false;
         }
@@ -442,13 +441,12 @@ class QMLProperty {
             if (itm = QmlWeb.engine.pendingOperations.map[this.$propertyId]) {
               // NOTE not setting oldValue here, keeping the oldest one
               itm.flags = flags;
-              itm.declaringItem = declaringItem;
               itm.info+=" "+QmlWeb.QMLPropertyFlags.toString(flags);
             } else {
               itm = {
                 property:this,
                 info:this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
-                flags, declaringItem, oldVal
+                flags, oldVal
                 };
               QmlWeb.engine.pendingOperations.map[this.$propertyId] = itm;
               // triggers update at Starting stage:
@@ -467,7 +465,10 @@ class QMLProperty {
   }
 
   toString(detail) {
-    var os = objToStringSafe(this.obj, detail);
+    var os = objToStringSafe(this.propDeclObj, detail);
+    if (this.propDeclObj !== this.bindingCtxObj) {
+      os += "(val:"+objToStringSafe(this.bindingCtxObj)+")"
+    }
 
     // $base because to avoid infinite loops for overriden toString:
     return os+" . prop:"+this.name+(detail?"#"+this.$propertyId:"")+
