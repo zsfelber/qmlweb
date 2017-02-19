@@ -183,7 +183,7 @@ class QMLBinding {
     }
   }
 
-  set(obj, value, flags, bindingCtxObj) {
+  set(obj, value, flags, valParentObj) {
     var prevComponent = QmlWeb.engine.$component;
     QmlWeb.engine.$component = obj.$component;
 
@@ -194,7 +194,7 @@ class QMLBinding {
         QmlWeb.warn("Binding/set error  compiled:"+this.compiled+"  no compiled setter  this:"+os+" value:"+value+" flags:"+flags+" src:\n"+this.src);
         return;
       }
-      this.implSet.call(obj, value, flags, bindingCtxObj);
+      this.implSet.call(obj, value, flags, valParentObj);
     } catch (err) {
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
         var os = QmlWeb.objToStringSafe(obj);
@@ -385,7 +385,7 @@ class QMLBinding {
 
         if (this.src) {
 
-          return new Function("$$__value", "$$__flags", "$$__bindingCtxObj", `
+          return new Function("$$__value", "$$__flags", "$$__valParentObj", `
             ${vvith} {
               var obj = ${this.src};
               if (!obj) {
@@ -399,7 +399,7 @@ class QMLBinding {
                 prop = obj.$properties${fp};
 
               if (prop) {
-                prop.set($$__value, $$__flags | QmlWeb.QMLPropertyFlags.ThroughBinding, $$__bindingCtxObj);
+                prop.set($$__value, $$__flags | QmlWeb.QMLPropertyFlags.ThroughBinding, $$__valParentObj);
               } else {
                 if (obj.$context.$pageElements${fp}) {
                   throw new Error("Writable/Bidirectional binding write error : target property '${this.src} ${fp}' is an element, considered readonly.");
@@ -411,7 +411,7 @@ class QMLBinding {
           `);
         } else {
 
-          return new Function("$$__value", "$$__flags", "$$__bindingCtxObj", `
+          return new Function("$$__value", "$$__flags", "$$__valParentObj", `
             ${vvith} {
               var prop = this.${props}${fp};
 
@@ -419,7 +419,7 @@ class QMLBinding {
                 if (prop.readOnly) {
                   throw new Error("Writable/Bidirectional binding write error : target property '${fp}' is read-only.");
                 } else {
-                  prop.set($$__value, $$__flags | QmlWeb.QMLPropertyFlags.ThroughBinding, $$__bindingCtxObj);
+                  prop.set($$__value, $$__flags | QmlWeb.QMLPropertyFlags.ThroughBinding, $$__valParentObj);
                 }
               } else {
                 if (this.$context.$pageElements${fp}) {
@@ -433,14 +433,14 @@ class QMLBinding {
         }
       } else if (this.src instanceof Object) {
         var thisObj = this.src;
-        return function($$__value, $$__flags, $$__bindingCtxObj) {
+        return function($$__value, $$__flags, $$__valParentObj) {
           var prop = thisObj[fp];
 
           if (prop) {
             if (prop.readOnly) {
               throw new Error("Writable/Bidirectional binding write error : target property '"+fp+"' is read-only.");
             } else {
-              prop.set($$__value, $$__flags | QmlWeb.QMLPropertyFlags.ThroughBinding, $$__bindingCtxObj);
+              prop.set($$__value, $$__flags | QmlWeb.QMLPropertyFlags.ThroughBinding, $$__valParentObj);
             }
           } else {
             if (this.$context.$pageElements[fp]) {

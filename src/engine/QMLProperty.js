@@ -39,8 +39,19 @@ class QMLProperty {
     }
 
     this.stacks = QMLProperty;
+
+    // NOTE
+    // propDeclObj : where the property declared in prototype chain
+    // bindingCtxObj : where the binding is initialized (holding the binding evaluation context)
+    // valParentObj : where the value is recently passed to property.set
+
+    // sole entry 1/1 of propDeclObj! nowhere else passed
     this.propDeclObj = obj;
+    // main entry 1/2 of bindingCtxObj! nowhere else passed
     this.bindingCtxObj = obj;
+    // main entry 1/2 of valParentObj! nowhere else passed
+    this.valParentObj = obj;
+
     this.$rootComponent = obj.$component ? obj.$component.$root : {};
     this.name = name;
     this.options = options;
@@ -74,13 +85,15 @@ class QMLProperty {
     try {
       const isch = flags & QmlWeb.QMLPropertyFlags.SetChildren;
 
-      // NOTE bindingCtxObj is passed through property.set, its in the descendant level in object type hierarchy (proto chain),
+      // NOTE valParentObj(/bindingCtxObj) is passed through property.set, its in the descendant level in object type hierarchy (proto chain),
       // eg. passed along with SetChildren
 
-      // childObj.loaderComponent should be bindingCtxObj.$component
+      // childObj.loaderComponent should be valParentObj.$component
+
       // this.propDeclObj.$component : the QML supertype where the default property (eg"data") defined (eg"ItemBase")
-      // it's the supertype, but the correct parent is the actual type here:
-      QmlWeb.engine.$component = this.bindingCtxObj.$component;
+      // this.bindingCtxObj.$component : the QML supertype where the current binding is initialized
+      // these may be the supertype(s) of the actual parent here:
+      QmlWeb.engine.$component = this.valParentObj.$component;
 
       const constructors = QmlWeb.constructors;
 
@@ -93,7 +106,7 @@ class QMLProperty {
         }
 
         // NOTE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
-        var tmp = QmlWeb.qmlList(val, this.bindingCtxObj, QmlWeb.QMLComponentFlags.Nested);
+        var tmp = QmlWeb.qmlList(val, this.valParentObj, QmlWeb.QMLComponentFlags.Nested);
 
         // Otherwise, we trust containerChanged/onAddElement
         if (!isch) {
@@ -119,7 +132,7 @@ class QMLProperty {
           // all the other ones just forward these
           // Call to here comes from
           // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
-          this.value = QmlWeb.createComponentAndElement({clazz:val}, this.bindingCtxObj, QmlWeb.QMLComponentFlags.Nested);
+          this.value = QmlWeb.createComponentAndElement({clazz:val}, this.valParentObj, QmlWeb.QMLComponentFlags.Nested);
         }
       } else if (val instanceof Object || val === undefined || val === null) {
         this.value = val;
@@ -194,10 +207,9 @@ class QMLProperty {
         if (origState & QmlWeb.QMLPropertyState.BoundSet) {
           // binding/set
           newVal = this.value;
-          // NOTE bindingCtxObj is passed through property.set, its in the descendant level in object type hierarchy (proto chain),
-          // NOTE we don't pass this.bindingCtxObj as bindingCtxObj (argument 4) here to the bound property too, because it's the
-          // current binding context, and doesn't belong to binding target, at all
-          this.binding.set(this.bindingCtxObj, newVal, flags);
+          // NOTE valParentObj/bindingCtxObj is passed through property.set, its in the descendant level in object type hierarchy (proto chain),
+          // NOTE we pass this.valParentObj too, it is necessary in case of newVal is a Binding or a closure function() itself
+          this.binding.set(this.bindingCtxObj, newVal, flags, this.valParentObj);
         } else {
           // this.binding/get
           pushed = QMLProperty.pushEvaluatingProperty(this);
@@ -376,10 +388,11 @@ class QMLProperty {
   }
 
   // Define setter
-  set(newVal, flags, bindingCtxObj) {
+  set(newVal, flags, valParentObj) {
 
     const pushed = QmlWeb.QMLProperty.pushEvalStack();
-    this.bindingCtxObj = bindingCtxObj;
+    // main entry 2/2 of valParentObj! nowhere else passed
+    this.valParentObj = valParentObj;
 
     try {
 
@@ -409,10 +422,14 @@ class QMLProperty {
       }
 
       if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
+        // main entry 2/2 of bindingCtxObj! nowhere else passed
+        this.bindingCtxObj = valParentObj;
+
         needSend = this.binding !== newVal;
         this.binding = newVal;
         desiredState = QmlWeb.QMLPropertyState.NeedsUpdate;
       } else {
+
         if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
           desiredState = QmlWeb.QMLPropertyState.BoundSet;
           needSend = true;
@@ -467,7 +484,10 @@ class QMLProperty {
   toString(detail) {
     var os = objToStringSafe(this.propDeclObj, detail);
     if (this.propDeclObj !== this.bindingCtxObj) {
-      os += "(val:"+objToStringSafe(this.bindingCtxObj)+")"
+      os += "(b:"+objToStringSafe(this.bindingCtxObj)+")"
+    }
+    if (this.bindingCtxObj !== this.valParentObj) {
+      os += "(v:"+objToStringSafe(this.valParentObj)+")"
     }
 
     // $base because to avoid infinite loops for overriden toString:
