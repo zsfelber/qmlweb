@@ -495,10 +495,12 @@ class QMLBinding {
     }
 
     // see note(IIFE) ^^^
-    return eval(`(function noname(${this.args}) {
-      ${vvith} return (function() {
+    // $$__arguments also prevents overwriting function args by 'with' scopes
+    return eval(`(function _${this.$bindingId}() {
+      var $$__arguments = arguments;
+      ${vvith} return (function(${this.args}) {
         ${this.src}
-      }).apply(this);
+      }).apply(this, $$__arguments);
     })`);
   }
 
