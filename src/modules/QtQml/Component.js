@@ -374,7 +374,8 @@ class QMLComponent {
         const itm = {
           fun:QMLComponent.complete,
           thisObj:this,
-          info:"Pending component.complete (waiting to initialization) : "+(this.context?this.context:this)
+          info:"Pending component.complete (waiting to initialization) : "+(this.context?this.context:this),
+          opId:"C:"+this.$componentId
         };
         QmlWeb.engine.pendingOperations.stack.push(itm);
         QmlWeb.engine.pendingOperations.map["C:"+this.$componentId] = itm;

@@ -173,9 +173,9 @@ class QMLProperty {
 
   // Updater recalculates the value of a property if one of the dependencies
   // changed
-  update(flags, oldVal) {
+  update(flags, oldVal, state = 0) {
 
-    const origState = this.updateState;
+    const origState = this.updateState | state;
     this.updateState &= ~QmlWeb.QMLPropertyState.DirtyAll;
     this.updateState |= QmlWeb.QMLPropertyState.Updating;
 
@@ -400,7 +400,7 @@ class QMLProperty {
       let fwdUpdate = !(this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
 
       let oldVal = this.value;
-      let addedState=0, replacedState=0;
+      let state=0;
 
       if (flags & QmlWeb.QMLPropertyFlags.ResetBinding) {
         this.binding = null;
@@ -409,9 +409,6 @@ class QMLProperty {
       if (newVal === undefined) {
         if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
           newVal = QMLProperty.typeInitialValues[this.type];
-          if (oldVal === undefined) {
-            oldVal = newVal;
-          }
         }
       } else if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
         if (valParentObj) {
@@ -421,23 +418,21 @@ class QMLProperty {
 
         fwdUpdate = this.binding !== newVal;
         this.binding = newVal;
-        newVal = oldVal;
-        addedState = QmlWeb.QMLPropertyState.NeedsUpdate;
-        replacedState = QmlWeb.QMLPropertyState.BoundSet;
+        state = QmlWeb.QMLPropertyState.NeedsUpdate;
       }
 
-      if (!addedState) {
+      if (!state) {
         if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
-          addedState = QmlWeb.QMLPropertyState.BoundSet;
+          state = QmlWeb.QMLPropertyState.BoundSet;
           fwdUpdate = true;
         } else {
           if (!(flags & QmlWeb.QMLPropertyFlags.ReasonAnimation)) {
             this.binding = null;
           }
-          addedState = QmlWeb.QMLPropertyState.NonBoundSet;
-          replacedState = QmlWeb.QMLPropertyState.NeedsUpdate;
+          state = QmlWeb.QMLPropertyState.NonBoundSet;
         }
         if (newVal !== oldVal) {
+          this.updateState &= ~QmlWeb.QMLPropertyState.Uninitialized;
           this.$setVal(newVal, flags);
         } else {
           fwdUpdate = false;
@@ -446,31 +441,27 @@ class QMLProperty {
 
       if (fwdUpdate) {
 
-        this.updateState &= ~replacedState;
-        this.updateState |= addedState;
-
         if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
 
           if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
               (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
-            let itm;
-            if (itm = QmlWeb.engine.pendingOperations.map[this.$propertyId]) {
-              if (oldVal!==newVal) {
-                this.updateState &= ~QmlWeb.QMLPropertyState.Uninitialized;
-              }
-              // NOTE not setting oldValue here, keeping the oldest one
-              itm.flags = flags;
-              itm.info+=" "+QmlWeb.QMLPropertyFlags.toString(flags);
+            let itm = QmlWeb.engine.pendingOperations.map[this.$propertyId];
+            let opId, idx;
+            if (itm) {
+              opId = this.$propertyId+":"+(idx=++itm.idx);
             } else {
-              itm = {
-                property:this,
-                info:this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
-                flags, oldVal
-                };
-              QmlWeb.engine.pendingOperations.map[this.$propertyId] = itm;
-              // triggers update at Starting stage:
-              QmlWeb.engine.pendingOperations.stack.push(itm);
+              opId = this.$propertyId;
+              idx = 0;
             }
+
+            itm = {
+              property:this,
+              info:this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
+              flags, state, oldVal, opId, idx
+              };
+            QmlWeb.engine.pendingOperations.map[opId] = itm;
+            // triggers update at Starting stage:
+            QmlWeb.engine.pendingOperations.stack.push(itm);
           }
 
         } else {
