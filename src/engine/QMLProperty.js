@@ -317,17 +317,24 @@ class QMLProperty {
           throw new Error(`Init time, cannot update : Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
         //}
         // otherwise : return uninitialized value (undefined, [] or so) finally
-      } else if (this.updateState & QmlWeb.QMLPropertyState.Uninitialized) {
-        if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
-          if (engine.currentPendingOp) {
-            if (engine.currentPendingOp.property===this) {
-
-            } else {
-
-            }
+      } else if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
+          if (!engine.currentPendingOp) {
+            throw new Error("Assertion failed : no engine.currentPendingOp  "+this);
           }
-          QmlWeb.engine.pendingOperations.map[this.$propertyId]
-          let itms = QmlWeb.engine.pendingOperations.map[this.$propertyId];
+          if (engine.currentPendingOp.property===this) {
+
+          } else {
+            const itms = QmlWeb.engine.pendingOperations.map[this.$propertyId];
+            if (itms) {
+              const itms2 = itms.slice(0);
+              delete this.pendingOperations.map[this.$propertyId];
+              itms.splice(0, itms.length);
+
+              itms2.forEach(engine.processOp, engine);
+              invalidityFlags = this.updateState & QmlWeb.QMLPropertyState.InvalidityFlags;
+            }
+            // otherwise : return uninitialized value (undefined, [] or so) finally
+          }
         }
       } else if (this.binding || (this.updateState & QmlWeb.QMLPropertyState.NonBoundSet)) {
         try {
