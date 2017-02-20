@@ -179,6 +179,7 @@ class QMLProperty {
     this.updateState &= ~QmlWeb.QMLPropertyState.DirtyAll;
     this.updateState |= QmlWeb.QMLPropertyState.Updating;
 
+    let needSend = !(origState & QmlWeb.QMLPropertyState.Uninitialized);
     let newVal;
 
     var pushed;
@@ -255,9 +256,11 @@ class QMLProperty {
     }
 
     try {
-      if (this.binding ? (origState & QmlWeb.QMLPropertyState.BoundSet ? false : newVal !== oldVal) :
-                    (origState & QmlWeb.QMLPropertyState.NonBoundSet ? newVal !== oldVal : e("Assertion failed : no binding/read/update"))  ) {
-        this.sendChanged(oldVal, newVal);
+      if (needSend) {
+        if (this.binding ? (origState & QmlWeb.QMLPropertyState.BoundSet ? false : newVal !== oldVal) :
+                      (origState & QmlWeb.QMLPropertyState.NonBoundSet ? newVal !== oldVal : e("Assertion failed : no binding/read/update"))  ) {
+          this.sendChanged(oldVal, newVal);
+        }
       }
     } catch (err2) {
       QmlWeb.err("Assertion failed : update / "+this+" . changed threw error : "+err2.message);
@@ -269,11 +272,13 @@ class QMLProperty {
     }
   }
 
-  updateLater() {
+  updateBindingLater() {
     if (this.binding) {
       if (this.animation || (this.changed.$signal.connectedSlots && this.changed.$signal.connectedSlots.length>this.childEvalTreeConnections)) {
+        this.updateState = QmlWeb.QMLPropertyState.NeedsUpdate;
         this.update();
       } else {
+        // lazy load for inactive properties :
         this.updateState = QmlWeb.QMLPropertyState.NeedsUpdate;
       }
 
@@ -291,9 +296,6 @@ class QMLProperty {
       // } else if ((this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
       //   ...
       // }
-
-    } else  {
-      this.updateState = QmlWeb.QMLPropertyState.NeedsUpdate;
     }
   }
 
@@ -341,7 +343,7 @@ class QMLProperty {
         // New property dependency detected :
         con = this.changed.connect(
           parent,
-          QMLProperty.prototype.updateLater,
+          QMLProperty.prototype.updateBindingLater,
           QmlWeb.Signal.UniqueConnection
         );
         con.isInternal = true;
@@ -399,56 +401,53 @@ class QMLProperty {
         throw new Error(`property '${this.name}' has read only access`);
       }
 
-      let needSend = !(this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
-
-      if (newVal === undefined) {
-        if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
-          newVal = QMLProperty.typeInitialValues[this.type];
-        }
-      } else {
-        //if (newVal instanceof Array) {
-        //  newVal = newVal.slice(); // Copies the array
-        //}
-        this.updateState &= ~QmlWeb.QMLPropertyState.Uninitialized;
-      }
+      let fwdUpdate = !(this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
 
       let oldVal = this.value;
-      let desiredState;
+      let addedState=0, replacedState=0;
 
       if (flags & QmlWeb.QMLPropertyFlags.ResetBinding) {
         this.binding = null;
       }
 
-      if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
+      if (newVal === undefined) {
+        if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
+          newVal = QMLProperty.typeInitialValues[this.type];
+        }
+      } else if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
         if (valParentObj) {
           // main entry 2/2 of bindingCtxObj! nowhere else passed
           this.bindingCtxObj = valParentObj;
         }
 
-        needSend = this.binding !== newVal;
+        fwdUpdate = this.binding !== newVal;
         this.binding = newVal;
-        desiredState = QmlWeb.QMLPropertyState.NeedsUpdate;
-      } else {
+        addedState = QmlWeb.QMLPropertyState.NeedsUpdate;
+        replacedState = QmlWeb.QMLPropertyState.BoundSet;
+      }
 
+      if (!addedState) {
         if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
-          desiredState = QmlWeb.QMLPropertyState.BoundSet;
-          needSend = true;
+          addedState = QmlWeb.QMLPropertyState.BoundSet;
+          fwdUpdate = true;
         } else {
           if (!(flags & QmlWeb.QMLPropertyFlags.ReasonAnimation)) {
             this.binding = null;
           }
-          desiredState = QmlWeb.QMLPropertyState.NonBoundSet;
+          addedState = QmlWeb.QMLPropertyState.NonBoundSet;
+          replacedState = QmlWeb.QMLPropertyState.NeedsUpdate;
         }
         if (newVal !== oldVal) {
           this.$setVal(newVal, flags);
         } else {
-          needSend = false;
+          fwdUpdate = false;
         }
       }
 
-      if (needSend) {
+      if (fwdUpdate) {
 
-        this.updateState = desiredState;
+        this.updateState &= ~replacedState;
+        this.updateState |= addedState;
 
         if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
 
