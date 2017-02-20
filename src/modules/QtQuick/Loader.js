@@ -8,8 +8,10 @@ QmlWeb.registerQmlType({
     asynchronous: "bool",
     item: "var",
     progress: "real",
-    source: "url",
-    sourceComponent: "Component",
+    // null to remove "Uninitialized" state
+    source: { type: "url", initialValue: null },
+    // null to remove "Uninitialized" state
+    sourceComponent: { type: "Component", initialValue: null },
     status: { type: "enum", initialValue: 1 }
   },
   signals: {

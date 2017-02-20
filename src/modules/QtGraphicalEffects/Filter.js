@@ -35,6 +35,7 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   baseClass: "QtQuick.Item",
   properties: {
+     // null to remove "Uninitialized" state
      source: { type: "var", initialValue: null }
   },
   constructor:Filter

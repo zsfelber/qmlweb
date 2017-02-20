@@ -242,6 +242,7 @@ QmlWeb.registerQmlType({
   baseClass: "Item",
   properties: {
     delegate: "Component",
+    // 0 to remove "Uninitialized" state
     model: { type: "variant", initialValue: 0 },
     count: "int"
   },

@@ -4,6 +4,7 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
+    // null to remove "Uninitialized" state
     target: { type: "QtObject", initialValue: null },
     property: { type: "string", initialValue: "" },
     value: { type: "var", initialValue: undefined },
