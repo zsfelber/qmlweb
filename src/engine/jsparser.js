@@ -1,5 +1,5 @@
 // Load resolved file and parse as JavaScript
-function importJavascript(file) {
+function importJavascript(file, importAlias, contextMap) {
   const engine = QmlWeb.engine;
 
   const uri = QmlWeb.$parseURI(file);
@@ -13,7 +13,7 @@ function importJavascript(file) {
   /* it is cached to handle multiple includes of one */
   if ($p.$qmlJsIncludes === undefined) {
     $p.$qmlJsIncludes = {};
-  } else if (jsBinding = $p.$qmlJsIncludes[uri]) {
+  } else if (jsBinding = $p.$qmlJsIncludes[uri.uri]) {
     return jsBinding;
   }
 
@@ -34,18 +34,38 @@ function importJavascript(file) {
   // Remove any ".pragma" statements, as they are not valid JavaScript
   jsData.source = jsData.source.replace(/\.pragma.*(?:\r\n|\r|\n)/, "\n");
 
-  jsBinding = new QmlWeb.QMLBinding(`(contextMap){
+  jsBinding = new QmlWeb.QMLBinding(`(){
     ${jsData.source}
-    ${jsData.exports.map(sym => `contextMap.${sym} = ${sym};`).join("")}
+    ${jsData.exports.map(sym => `$$_contextMap.${sym} = ${sym};`).join("")}
   }`, undefined, QMLBindingFlags.ImplFunction);
 
-  $p.$qmlJsIncludes[uri] = jsBinding;
+  if (!contextMap) {
+    jsBinding.contextMap = contextMap = {};
+  }
+
+  $p.$qmlJsIncludes[uri.uri] = jsBinding;
+  $p.$$_importAlias = importAlias;
+  $p.$$_contextMap = contextMap;
 
   jsBinding.compile();
-
   jsBinding.boundRun = jsBinding.run.bind({binding:jsBinding, bindingObj:owner});
-  jsBinding.contextMap = {};
-  jsBinding.boundRun(jsBinding.contextMap);
+  jsBinding.boundRun();
+
+  if (importAlias) {
+    const $a = $p[importAlias];
+    if ($a) {
+      if ($a !== contextMap) {
+        console.warn("Merging same-named import aliases : "+importAlias+"  in context: "+$c.$info);
+        QmlWeb.helpers.copy($a, contextMap);
+      }
+    } else {
+      $p[importAlias] = contextMap;
+    }
+  } else {
+    QmlWeb.helpers.copy($p, contextMap);
+  }
+  delete $p.$$_contextMap;
+  delete $p.$$_importAlias;
 
   return jsBinding;
 }

@@ -314,19 +314,10 @@ class QMLComponent {
       const importDesc = this.$jsImports[i];
 
       const uri = QmlWeb.$resolvePath(importDesc[1], this.$basePathUrl);
-      const jsBinding = QmlWeb.importJavascript(uri);
+      const jsBinding = QmlWeb.importJavascript(uri, importDesc[3]);
 
       if (!jsBinding) {
-        QmlWeb.log("Component.loadJsImports: failed to import JavaScript",
-          importDesc[1]);
-        continue;
-      }
-
-      const $p = this.$context.$pageContext;
-      if (importDesc[3]) {
-        $p[importDesc[3]] = jsBinding.contextMap;
-      } else {
-        QmlWeb.helpers.copy($p, jsBinding.contextMap);
+        QmlWeb.error("Component.loadJsImports: failed to import JavaScript", importDesc[1]);
       }
     }
   }

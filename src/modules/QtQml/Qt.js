@@ -36,21 +36,23 @@ const Qt = {
   },
 
   include(path, importAlias) {
+    let contextMap;
+    if (!importAlias) {
+      const $c = QmlWeb.engine.$component.$context;
+      const $p = $c.$pageContext;
+      // recursive import alias ( see :
+      //   tests/QMLEngine/qml/importTestInclude.js
+      //   jsparser.js/importJavascript : $$_importAlias, $$_contextMap
+      // )
+      importAlias = $p.$$_importAlias;
+      contextMap = $p.$$_contextMap;
+    }
 
     const uri = QmlWeb.$resolvePath(path);
-    const jsBinding = QmlWeb.importJavascript(uri);
+    const jsBinding = QmlWeb.importJavascript(uri, importAlias, contextMap);
 
     if (!jsBinding) {
       QmlWeb.error("Qt.include: Unable to load JavaScript module:", uri, path);
-      return;
-    }
-
-    const $c = QmlWeb.engine.$component.$context;
-    const $p = $c.$pageContext;
-    if (importAlias) {
-      $p[importAlias] = jsBinding.contextMap;
-    } else {
-      QmlWeb.helpers.copy($p, jsBinding.contextMap);
     }
   },
 
