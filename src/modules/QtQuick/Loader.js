@@ -52,25 +52,32 @@ QmlWeb.registerQmlType({
       this.$sourceUrl = fileName;
       return;
     }
-    const nameIsUrl = fileName.startsWith("//") || name.indexOf(":/") >= 0;
+    const nameIsUrl = fileName.startsWith("//") || fileName.indexOf(":/") >= 0;
     if (!nameIsUrl) {
       QmlWeb.warn("Loader.$onSourceChanged  Not an absolute resource id:"+fileName);
     }
 
-    const clazz = QmlWeb.resolveClass(fileName);
+    var prevComponent = QmlWeb.engine.$component;
 
-    const qmlComponent = QmlWeb.createComponent({
-      clazz: clazz,
-      $file: clazz.$file
-    });
+    try {
+      QmlWeb.engine.$component = this.$component;
+      const clazz = QmlWeb.resolveClass(fileName);
 
-    this.$sourceUrl = fileName;
-    // in QMLProperty.setVal  :: } else if (val instanceof Object  ... this.value = val;
-    // resulting   this.sourceComponent===qmlComponent
-    this.sourceComponent = qmlComponent;
+      const qmlComponent = QmlWeb.createComponent({
+        clazz: clazz,
+        $file: clazz.$file
+      });
 
-    if (!qmlComponent || this.sourceComponent !== qmlComponent) {
-      throw new Error("Assertion failed Loader: !qmlComponent || this.sourceComponent!==qmlComponent : "+this.toString(true));
+      this.$sourceUrl = fileName;
+      // in QMLProperty.setVal  :: } else if (val instanceof Object  ... this.value = val;
+      // resulting   this.sourceComponent===qmlComponent
+      this.sourceComponent = qmlComponent;
+
+      if (!qmlComponent || this.sourceComponent !== qmlComponent) {
+        throw new Error("Assertion failed Loader: !qmlComponent || this.sourceComponent!==qmlComponent : "+this.toString(true));
+      }
+    } finally {
+      QmlWeb.engine.$component = prevComponent;
     }
   }
 
