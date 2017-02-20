@@ -34,17 +34,18 @@ function importJavascript(file) {
   // Remove any ".pragma" statements, as they are not valid JavaScript
   jsData.source = jsData.source.replace(/\.pragma.*(?:\r\n|\r|\n)/, "\n");
 
-  const contextMap = {};
-  jsBinding = new QmlWeb.QMLBinding(`(){
+  jsBinding = new QmlWeb.QMLBinding(`(contextMap){
     ${jsData.source}
     ${jsData.exports.map(sym => `contextMap.${sym} = ${sym};`).join("")}
   }`, undefined, QMLBindingFlags.ImplFunction);
 
   $p.$qmlJsIncludes[uri] = jsBinding;
 
+  jsBinding.compile();
+
   jsBinding.boundRun = jsBinding.run.bind({binding:jsBinding, bindingObj:owner});
-  jsBinding.contextMap = contextMap;
-  jsBinding.boundRun();
+  jsBinding.contextMap = {};
+  jsBinding.boundRun(jsBinding.contextMap);
 
   return jsBinding;
 }
