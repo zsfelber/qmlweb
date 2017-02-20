@@ -3,7 +3,7 @@ describe("QMLEngine.imports", function() {
   var load = prefixedQmlLoader("QMLEngine/qml/Import");
 
   it("Javascript", function() {
-    load("Javascript", this.div);
+    var qml = load("Javascript", this.div);
     var div = this.div.children[0];
     expect(div.offsetWidth).toBe(20);
     expect(div.offsetHeight).toBe(10);

@@ -46,6 +46,8 @@ class QmlWebHelpers {
     });
     return result;
   }
+
+
 }
 
 QmlWeb.helpers = QmlWebHelpers;

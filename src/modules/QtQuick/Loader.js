@@ -55,23 +55,23 @@ QmlWeb.registerQmlType({
       QmlWeb.warn("Loader.$onSourceChanged  Not an absolute resource id:"+fileName);
     }
 
-    let clazz;
-    clazz = QmlWeb.resolveClass(fileName);
+    const clazz = QmlWeb.resolveClass(fileName);
 
-    // TODO something
-    //QmlWeb.helpers.copy(this, QmlWeb.engine.rootContext);
+    const qmlComponent = QmlWeb.createComponent({
+      clazz: clazz,
+      $file: clazz.$file
+    });
 
-    const meta = { clazz: clazz,
-                   context: this,//TODO gz   ignored.  gz uses loaderComponent.context or rootContext
-                   $file: clazz.$file
-                           };
-
-    const qmlComponent = QmlWeb.createComponent(meta, QmlWeb.QMLComponentFlags.LoadImports);
-
-    const loadedComponent = this.$createComponentObject(qmlComponent, this);
-    this.sourceComponent = loadedComponent;
     this.$sourceUrl = fileName;
+    // in QMLProperty.setVal  :: } else if (val instanceof Object  ... this.value = val;
+    // resulting   this.sourceComponent===qmlComponent
+    this.sourceComponent = qmlComponent;
+
+    if (!qmlComponent || this.sourceComponent !== qmlComponent) {
+      throw new Error("Assertion failed Loader: !qmlComponent || this.sourceComponent!==qmlComponent : "+this.toString(true));
+    }
   }
+
   $onSourceComponentChanged(newItem) {
     if (!this.active) return;
     this.$unload();
@@ -81,14 +81,14 @@ QmlWeb.registerQmlType({
       return;
     }
 
-    const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-    let qmlComponent = newItem;
-    if (newItem instanceof QMLComponent) {
-      qmlComponent = newItem.$createObject(this /*---{}, this*/);
-    }
-    qmlComponent.parent = this;
-    this.item = qmlComponent;
+    this.item = newItem.$createObject(this/*parent*/);
     this.$updateGeometry();
+
+    if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+      // We don't call those on first creation, as they will be called
+      // by the regular creation-procedures at the right time.
+      QmlWeb.engine.processPendingOperations();
+    }
     if (this.item) {
       this.loaded();
     }
@@ -112,16 +112,6 @@ QmlWeb.registerQmlType({
         this.$callOnCompleted(child.$tidyupList[i]);
       }
     }
-  }
-  $createComponentObject(qmlComponent, parent) {
-    const newComponent = qmlComponent.createObject(parent);
-    if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
-      // We don't call those on first creation, as they will be called
-      // by the regular creation-procedures at the right time.
-      QmlWeb.engine.processPendingOperations();
-      this.$callOnCompleted(newComponent);
-    }
-    return newComponent;
   }
   $updateGeometry() {
     // Loader size doesn't exist
