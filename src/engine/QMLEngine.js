@@ -421,14 +421,18 @@ class QMLEngine {
           e++;
           error["#"+i+mode+"!!"+op.info] = op;
           op.err = op.errors[0];
-          if (op.err.err !== undefined)
+          if (op.err.err !== undefined) {
+            op.errprop = op.err.prop;
             op.err = op.err.err;
+          }
         } else if (op.warnings.length) {
           w++;
           warning["#"+i+mode+"!"+op.info] = op;
           op.warn = op.warnings[0];
-          if (op.warn.err !== undefined)
+          if (op.warn.err !== undefined) {
+            op.warnprop = op.warn.prop;
             op.warn = op.warn.err;
+          }
         } else {
           info["#"+i+mode+":"+op.info] = op;
         }
