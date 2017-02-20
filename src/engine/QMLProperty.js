@@ -179,7 +179,6 @@ class QMLProperty {
     this.updateState &= ~QmlWeb.QMLPropertyState.DirtyAll;
     this.updateState |= QmlWeb.QMLPropertyState.Updating;
 
-    let needSend = !(origState & QmlWeb.QMLPropertyState.Uninitialized);
     let newVal;
 
     var pushed;
@@ -256,11 +255,8 @@ class QMLProperty {
     }
 
     try {
-      if (needSend) {
-        if (this.binding ? (origState & QmlWeb.QMLPropertyState.BoundSet ? false : newVal !== oldVal) :
-                      (origState & QmlWeb.QMLPropertyState.NonBoundSet ? newVal !== oldVal : e("Assertion failed : no binding/read/update"))  ) {
-          this.sendChanged(oldVal, newVal);
-        }
+      if (oldVal!==newVal && !(origState & QmlWeb.QMLPropertyState.Uninitialized)) {
+        this.sendChanged(oldVal, newVal);
       }
     } catch (err2) {
       QmlWeb.err("Assertion failed : update / "+this+" . changed threw error : "+err2.message);
@@ -413,6 +409,9 @@ class QMLProperty {
       if (newVal === undefined) {
         if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
           newVal = QMLProperty.typeInitialValues[this.type];
+          if (oldVal === undefined) {
+            oldVal = newVal;
+          }
         }
       } else if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
         if (valParentObj) {
@@ -422,6 +421,7 @@ class QMLProperty {
 
         fwdUpdate = this.binding !== newVal;
         this.binding = newVal;
+        newVal = oldVal;
         addedState = QmlWeb.QMLPropertyState.NeedsUpdate;
         replacedState = QmlWeb.QMLPropertyState.BoundSet;
       }
@@ -455,6 +455,9 @@ class QMLProperty {
               (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
             let itm;
             if (itm = QmlWeb.engine.pendingOperations.map[this.$propertyId]) {
+              if (oldVal!==newVal) {
+                this.updateState &= ~QmlWeb.QMLPropertyState.Uninitialized;
+              }
               // NOTE not setting oldValue here, keeping the oldest one
               itm.flags = flags;
               itm.info+=" "+QmlWeb.QMLPropertyFlags.toString(flags);
