@@ -191,7 +191,8 @@ class Repeater extends Item {
       // parent must be set after the roles have been added to newItem scope in
       // case we are outside of QMLOperationState.System and parentChanged has
       // any side effects that result in those roleNames being referenced.
-      newItem.parent = this.parent;
+      // ($createObject does this)
+      //newItem.parent = this.parent;
 
       // TODO debug this. Without check to System, Completed sometimes called
       // twice.. But is this check correct?
