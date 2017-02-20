@@ -30,10 +30,7 @@ describe("QMLEngine.basic", function() {
     expect(qml.inner1).toBe(qml.current + "foo/bar");
     expect(qml.inner2).toBe(qml.current + "foo/bar/");
     expect(qml.inner3).toBe(qml.current + "foo/foo/lol/");
-    //if (isDebug())
-      expect(qml.absolute).toBe(x.uri + "foo/bar");
-    //else // document.create("<A>").href is just not working as expected:
-    //  expect(qml.absolute).toBe("http://foo/bar");
+    expect(qml.absolute).toBe(x.uri + "foo/bar");
     expect(qml.full).toBe("http://example.com/bar");
   });
 

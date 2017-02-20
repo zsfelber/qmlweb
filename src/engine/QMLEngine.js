@@ -380,7 +380,7 @@ class QMLEngine {
     // all pending operataions at once during "Starting" stage
     //
 
-    QmlWeb.log("processPendingOperations : "+this.pendingOperations.stack.length);invalidityFlags
+    QmlWeb.log("processPendingOperations : " + this.pendingOperations.stack.length);
 
     var i=0,a=0,ae=0,a1=0,b=0,e=0,w=0;
     let info = {}, warning = {}, error = {};
