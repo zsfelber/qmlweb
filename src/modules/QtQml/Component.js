@@ -22,24 +22,6 @@ class QMLComponent {
   init(loaderComponent) {
     const engine = QmlWeb.engine;
 
-    if ( this.flags & QmlWeb.QMLComponentFlags.Nested ) {
-
-      // NOTE on the top of a Nested Component's loader hierarchy, we have to insert 1 extra level of Components into
-      // chains, changing $class from the "superclass" to the current again (but with Super Component flag):
-      // No infinite loop, because component.flags is not Nested the next time  :
-
-      if (this.meta.$name && this.meta.$name !== this.meta.$class+".qml") {
-        throw new Error("Nested Component meta should not define a superclass other than (meta.$name : "+this.meta.$name+")  super: meta.$class:"+this.meta.$class);
-      }
-      this.$name = this.meta.$name = this.meta.$class + ".qml";
-
-      //var cl = /(^.*?)\.qml/.exec(this.meta.$name)[1];
-      //var cl = this.meta.$class;
-      //QmlWeb.log("Nested Element top Component inserted  $class =  superclass:"+this.meta.$class+" -> actual:"+cl);
-      //this.$class = this.meta.$class = cl;
-    }
-
-
     // NOTE making a new level of $context inheritance :
     // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
     // NOTE gz  object is prototyped from bottom to top, in terms of [type]->[supertype] relationship
@@ -50,9 +32,6 @@ class QMLComponent {
         throw new Error("Assertion failed : component either factory nested or super  It is "+QmlWeb.QMLComponentFlags.toString(this.flags));
       }
 
-      if (this.flags&QmlWeb.QMLComponentFlags.Nested) {
-        this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
-      }
       if (this.flags&QmlWeb.QMLComponentFlags.Root) {
         throw new Error("Invalid root Component construction (a loader Component is found) : "+this);
       }
@@ -81,8 +60,8 @@ class QMLComponent {
         if (this.loaderComponent) {
 
           if (loaderComponent.flags & QmlWeb.QMLComponentFlags.Nested) {
-            if (loaderComponent.$file) {
-              throw new Error("Loader Component $file mismatch (should not be set in loader of Nested but) : "+loaderComponent.$file+" vs "+this.$file);
+            if (loaderComponent.$file && loaderComponent.$file !== this.$file) {
+              throw new Error("Loader Component $file mismatch : "+loaderComponent.$file+" vs "+this.$file);
             }
           }
           this.meta.$context = this.context = this.loaderComponent.context.createChild(
@@ -111,7 +90,7 @@ class QMLComponent {
         this.$root = loaderComponent.$root;
 
         this.meta.$context = this.context = loaderComponent.context.createChild(loaderComponent.toString(undefined, true)+" -> "+this.toString(undefined, true), true);
-        this.context.nestedLevel = this.nestedLevel;
+        this.context.nestedLevel = this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
         // inherit page top $pageElements and $pageContext :
         this.context.$pageElements = loaderComponent.context.$pageElements;
         this.context.$pageContext = loaderComponent.context.$pageContext;
@@ -350,6 +329,23 @@ class QMLComponent {
           this.redirectImports(null);
         }
         this.flags |= this.createFlags;
+      }
+
+      if ( this.flags & QmlWeb.QMLComponentFlags.Nested ) {
+
+        // NOTE on the top of a Nested Component's loader hierarchy, we have to insert 1 extra level of Components into
+        // chains, changing $class from the "superclass" to the current again (but with Super Component flag):
+        // No infinite loop, because component.flags is not Nested the next time  :
+
+        if (this.meta.$name && this.meta.$name !== this.meta.$class+".qml") {
+          throw new Error("Nested Component meta should not define a superclass other than (meta.$name : "+this.meta.$name+")  super: meta.$class:"+this.meta.$class);
+        }
+        this.$name = this.meta.$name = this.meta.$class + ".qml";
+
+        //var cl = /(^.*?)\.qml/.exec(this.meta.$name)[1];
+        //var cl = this.meta.$class;
+        //QmlWeb.log("Nested Element top Component inserted  $class =  superclass:"+this.meta.$class+" -> actual:"+cl);
+        //this.$class = this.meta.$class = cl;
       }
 
       engine.operationState |= QmlWeb.QMLOperationState.System;

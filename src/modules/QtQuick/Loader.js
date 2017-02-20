@@ -52,21 +52,20 @@ QmlWeb.registerQmlType({
       this.$sourceUrl = fileName;
       return;
     }
-    const nameIsUrl = fileName.startsWith("//") || fileName.indexOf(":/") >= 0;
-    if (!nameIsUrl) {
-      QmlWeb.warn("Loader.$onSourceChanged  Not an absolute resource id:"+fileName);
-    }
 
     var prevComponent = QmlWeb.engine.$component;
 
     try {
       QmlWeb.engine.$component = this.$component;
-      const clazz = QmlWeb.resolveClass(fileName);
+      const path = QmlWeb.resolveBasePath(fileName);
+      let $class = path.file;
+      if (/\.qml$/.test($class)) {
+        $class = $class.substring(0, $class.length-4);
+      }
 
       const qmlComponent = QmlWeb.createComponent({
-        clazz: clazz,
-        $file: clazz.$file
-      });
+        clazz: {$class, $file: fileName}
+      }, QmlWeb.QMLComponentFlags.Nested);
 
       this.$sourceUrl = fileName;
       // in QMLProperty.setVal  :: } else if (val instanceof Object  ... this.value = val;

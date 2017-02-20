@@ -174,7 +174,7 @@ function createComponentAndElement(meta, parent, flags) {
 
   // NOTE 1 : class component from meta. meta may be resolved superclass info (Super: from resolveClassImport)
   // or QMLElement directly (Nested : in form {clazz:element_meta}):
-  // NOTE 2 : LoadImports only works for Super and not for Nested
+  // NOTE 2 : LoadImports is only interpreted with Super and not with Nested (so ignored in latter case)
   const component = QmlWeb.createComponent(meta, flags |= QmlWeb.QMLComponentFlags.LoadImports);
 
   if (!component) {
