@@ -372,6 +372,69 @@ class QMLEngine {
     }
   }
 
+  processOp(op) {
+    this.currentPendingOp = op;
+
+    op.errors = [];
+    op.warnings = [];
+    let mode=":"+op.opId;
+
+    const property = op.property;
+
+    try {
+      if (property) {
+        this.a++;
+        if (property.updateState & QmlWeb.QMLPropertyState.Updating) {
+          this.ae++;
+          mode+=":ae";
+          op.errors.push("Property state is invalid : update has not finished : "+property);
+        } else {
+
+          property.update(op.flags, op.oldVal, op.state);
+
+          this.a1++;
+          mode+=":a";
+        }
+      } else {
+        this.b++;
+        mode+=":b";
+        op.fun.apply(op.thisObj, op.args);
+      }
+
+      if (op.errors.length) {
+        this.e++;
+        this.error["#"+this.i+mode+"!!"+op.info] = op;
+        op.err = op.errors[0];
+        if (op.err.err !== undefined) {
+          op.errprop = op.err.prop;
+          op.err = op.err.err;
+        }
+      } else if (op.warnings.length) {
+        this.w++;
+        this.warning["#"+this.i+mode+"!"+op.info] = op;
+        op.warn = op.warnings[0];
+        if (op.warn.err !== undefined) {
+          op.warnprop = op.warn.prop;
+          op.warn = op.warn.err;
+        }
+      } else {
+        this.info["#"+this.i+mode+":"+op.info] = op;
+      }
+
+    } catch (err) {
+      if (err.ctType==="UninitializedEvaluation") {
+        this.w++;
+        this.warning["#"+this.i+mode+"!"+op.info] = op;
+      } else {
+        this.e++;
+        this.error["#"+this.i+mode+"!!"+op.info] = op;
+      }
+      op.err = err;
+    }
+
+    this.i++;
+  }
+
   processPendingOperations() {
     // Initialize property bindings
     //
@@ -382,76 +445,20 @@ class QMLEngine {
 
     QmlWeb.log("processPendingOperations : " + this.pendingOperations.stack.length);
 
-    var i=0,a=0,ae=0,a1=0,b=0,e=0,w=0;
-    let info = {}, warning = {}, error = {};
+    this.i=0; this.a=0; this.ae=0; this.a1=0; this.b=0; this.e=0; this.w=0;
+    this.info = {}; this.warning = {}; this.error = {};
     while (this.pendingOperations.stack.length > 0) {
       const op = this.pendingOperations.stack.shift();
-      op.errors = [];
-      op.warnings = [];
-      this.currentPendingOp = op;
-      let mode="";
-      if (op.opId) {
-        mode=":"+op.opId;
-        delete this.pendingOperations.map[op.opId];
+      if (op instanceof Array) {
+        op.forEach(this.processOp, this);
+        op = op[0];
+      } else {
+        this.processOp(op);
       }
-
-      const property = op.property;
-
-      try {
-        if (property) {
-          a++;
-          if (property.updateState & QmlWeb.QMLPropertyState.Updating) {
-            ae++;
-            mode+=":ae";
-            op.errors.push("Property state is invalid : update has not finished : "+property);
-          } else {
-
-            property.update(op.flags, op.oldVal, op.state);
-
-            a1++;
-            mode+=":a";
-          }
-        } else {
-          b++;
-          mode+=":b";
-          op.fun.apply(op.thisObj, op.args);
-        }
-
-        if (op.errors.length) {
-          e++;
-          error["#"+i+mode+"!!"+op.info] = op;
-          op.err = op.errors[0];
-          if (op.err.err !== undefined) {
-            op.errprop = op.err.prop;
-            op.err = op.err.err;
-          }
-        } else if (op.warnings.length) {
-          w++;
-          warning["#"+i+mode+"!"+op.info] = op;
-          op.warn = op.warnings[0];
-          if (op.warn.err !== undefined) {
-            op.warnprop = op.warn.prop;
-            op.warn = op.warn.err;
-          }
-        } else {
-          info["#"+i+mode+":"+op.info] = op;
-        }
-
-      } catch (err) {
-        if (err.ctType==="UninitializedEvaluation") {
-          w++;
-          warning["#"+i+mode+"!"+op.info] = op;
-        } else {
-          e++;
-          error["#"+i+mode+"!!"+op.info] = op;
-        }
-        op.err = err;
-      }
-
-      i++;
+      delete this.pendingOperations.map[op.opId];
     }
 
-    QmlWeb.log("processPendingOperations : done  total:"+i+" properties:"+a+"("+(a1+","+ae)+") functions:"+b+"  Info:",info, "   Warning("+w+"):",warning, "   Error("+e+"):",error);
+    QmlWeb.log("processPendingOperations : done  total:"+this.i+" properties:"+this.a+"("+(this.a1+","+this.ae)+") functions:"+this.b+"  Info:",this.info, "   Warning("+this.w+"):",this.warning, "   Error("+this.e+"):",this.error);
   }
 
   static dumpErr() {

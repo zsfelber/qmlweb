@@ -301,19 +301,34 @@ class QMLProperty {
     // defer exceptions, because it is still correct to register current eval tree state :
     let error;
 
+    const engine = QmlWeb.engine;
+
     // Algo back-infects the dependent (eval tree 'parent') properties with 'this' invalidity :
     let invalidityFlags = this.updateState & QmlWeb.QMLPropertyState.InvalidityFlags;
 
-    if (this.updateState & QmlWeb.QMLPropertyState.Updating) {
-      QmlWeb.error(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this, "  recordedStack:", QMLProperty.recordStack());
-      error = new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this);
-    } else if (invalidityFlags) {
-      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
-        if (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate) {
+    if (invalidityFlags) {
+
+      if (this.updateState & QmlWeb.QMLPropertyState.Updating) {
+        QmlWeb.error(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this, "  recordedStack:", QMLProperty.recordStack());
+        error = new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this);
+      } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
+        //if (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate) {
           // not possible to update at init stage :
           throw new Error(`Init time, cannot update : Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
-        }
+        //}
         // otherwise : return uninitialized value (undefined, [] or so) finally
+      } else if (this.updateState & QmlWeb.QMLPropertyState.Uninitialized) {
+        if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
+          if (engine.currentPendingOp) {
+            if (engine.currentPendingOp.property===this) {
+
+            } else {
+
+            }
+          }
+          QmlWeb.engine.pendingOperations.map[this.$propertyId]
+          let itms = QmlWeb.engine.pendingOperations.map[this.$propertyId];
+        }
       } else if (this.binding || (this.updateState & QmlWeb.QMLPropertyState.NonBoundSet)) {
         try {
           this.update();
@@ -323,7 +338,6 @@ class QMLProperty {
         }
       }
     }
-
 
     // If this call to the getter is due to a property that is dependant on thisQMLPropertyState
     // one, we need it to take track of changes
@@ -445,23 +459,22 @@ class QMLProperty {
 
           if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
               (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
-            let itm = QmlWeb.engine.pendingOperations.map[this.$propertyId];
-            let opId, idx;
-            if (itm) {
-              opId = this.$propertyId+":"+(idx=++itm.idx);
-            } else {
-              opId = this.$propertyId;
-              idx = 0;
+
+            // triggers update at Starting stage:
+            let itms = QmlWeb.engine.pendingOperations.map[this.$propertyId];
+            if (!itms) {
+              QmlWeb.engine.pendingOperations.map[this.$propertyId] = itms = [];
+              QmlWeb.engine.pendingOperations.stack.push(itms);
             }
 
-            itm = {
+            const itm = {
               property:this,
               info:this+" "+QmlWeb.QMLPropertyFlags.toString(flags),
-              flags, state, oldVal, opId, idx
+              flags, state, oldVal, opId:this.$propertyId
               };
-            QmlWeb.engine.pendingOperations.map[opId] = itm;
-            // triggers update at Starting stage:
-            QmlWeb.engine.pendingOperations.stack.push(itm);
+
+            itms.push(itm);
+
           }
 
         } else {
