@@ -112,8 +112,9 @@ class QMLComponent {
 
         this.meta.$context = this.context = loaderComponent.context.createChild(loaderComponent.toString(undefined, true)+" -> "+this.toString(undefined, true), true);
         this.context.nestedLevel = this.nestedLevel;
-        // inherit page top $pageElements :
+        // inherit page top $pageElements and $pageContext :
         this.context.$pageElements = loaderComponent.context.$pageElements;
+        this.context.$pageContext = loaderComponent.context.$pageContext;
       }
 
       //QmlWeb.warn("Component  "+this.context);
@@ -237,27 +238,6 @@ class QMLComponent {
 
   }
 
-  finalizeImports() {
-    const engine = QmlWeb.engine;
-    for (let i = 0; i < this.$jsImports.length; ++i) {
-      const importDesc = this.$jsImports[i];
-      const js = QmlWeb.loadJS($resolvePath(importDesc[1], this.$basePathUrl));
-
-      if (!js) {
-        QmlWeb.log("Component.finalizeImports: failed to import JavaScript",
-          importDesc[1]);
-        continue;
-      }
-
-      if (importDesc[3] !== "") {
-        this.$object.$context[importDesc[3]] = {};
-        QmlWeb.importJavascriptInContext(js, this.$object.$context[importDesc[3]]);
-      } else {
-        QmlWeb.importJavascriptInContext(js, this.$object.$conteximpt);
-      }
-    }
-  }
-
   initImports() {
     this.$jsImports = [];
     this.moduleConstructors = Object.create(QmlWeb.constructors);
@@ -275,7 +255,7 @@ class QMLComponent {
 
     if (this.$imports) {
       for (let i = 0; i < this.$imports.length; ++i) {
-        _add_imp(this.$imports[i]);
+        _add_imp.call(this, this.$imports[i]);
       }
     }
 
@@ -329,6 +309,28 @@ class QMLComponent {
     }
   }
 
+  loadJsImports() {
+    for (let i = 0; i < this.$jsImports.length; ++i) {
+      const importDesc = this.$jsImports[i];
+
+      const uri = QmlWeb.$resolvePath(importDesc[1], this.$basePathUrl);
+      const jsBinding = QmlWeb.importJavascript(uri);
+
+      if (!jsBinding) {
+        QmlWeb.log("Component.loadJsImports: failed to import JavaScript",
+          importDesc[1]);
+        continue;
+      }
+
+      const $p = this.$context.$pageContext;
+      if (importDesc[3]) {
+        $p[importDesc[3]] = jsBinding.contextMap;
+      } else {
+        QmlWeb.helpers.copy($p, jsBinding.contextMap);
+      }
+    }
+  }
+
 
   $createObject(parent, properties = {}) {
     const engine = QmlWeb.engine;
@@ -372,10 +374,11 @@ class QMLComponent {
       // see QObject.constructor()
       this.context.$ownerObject = item;
       item.$pageElements = this.context.$pageElements;
+      item.$pageContext = this.context.$pageContext;
       item.$info = this.context.$info;
 
 
-      this.finalizeImports();
+      this.loadJsImports();
 
       if (item.isComponentAttached) {
         // NOTE one level of supertype hierarchy, QObject's component first (recursively) :

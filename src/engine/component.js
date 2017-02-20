@@ -21,9 +21,11 @@ class QMLContext {
     // we use "this", $pageElements and loader context in evaluation, as all the variable names other than elements
     // are either in "this"(and supers) or in parent(ie loader) context,
 
-    // init always to blank
-    childContext.$pageElements = {};
-    childContext.$ownerObject = null;
+    if (!nested) {
+      childContext.$pageElements = {};
+      childContext.$pageContext = Object.create(childContext.$pageElements);
+      childContext.$pageContext.$top = childContext;
+    }
 
     return childContext;
   }

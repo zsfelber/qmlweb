@@ -23,6 +23,7 @@ class QObject {
         this.$context.$ownerObject = this;
 
         this.$pageElements = this.$context.$pageElements;
+        this.$pageContext = this.$context.$pageContext;
         this.$info = this.$context.$info;
       }
     }

@@ -50,44 +50,6 @@ function loadClass(file) {
   return clazz;
 }
 
-// Load resolved file and parse as JavaScript
-function loadJS(file) {
-  const engine = QmlWeb.engine;
-  if (file in engine.js) {
-    return engine.js[file];
-  }
-
-  const uri = QmlWeb.$parseURI(file);
-  if (!uri) {
-    return undefined;
-  }
-
-  let jsData;
-  if (uri.scheme === "qrc:/") {
-    jsData = QmlWeb.qrc[uri.path];
-  } else {
-    QmlWeb.loadParser();
-    jsData = QmlWeb.jsparse(QmlWeb.getUrlContents(file));
-  }
-
-  if (!jsData) {
-    return undefined;
-  }
-
-  // Remove any ".pragma" statements, as they are not valid JavaScript
-  jsData.source = jsData.source.replace(/\.pragma.*(?:\r\n|\r|\n)/, "\n");
-
-  const contextSetter = new Function("$context", `
-    with(QmlWeb) with ($context) {
-      ${jsData.source}
-    }
-    ${jsData.exports.map(sym => `$context.${sym} = ${sym};`).join("")}
-  `);
-
-  engine.js[file] = contextSetter;
-
-  return contextSetter;
-}
 
 
 
@@ -219,6 +181,5 @@ function readQmlDir(url) {
 
 
 QmlWeb.loadClass = loadClass;
-QmlWeb.loadJS = loadJS;
 QmlWeb.getUrlContents = getUrlContents;
 QmlWeb.readQmlDir = readQmlDir;

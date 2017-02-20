@@ -35,30 +35,23 @@ const Qt = {
     return new QmlWeb.QSizeF(width, height);
   },
 
-  include(path) {
+  include(path, importAlias) {
 
-    // TODO gz (engine)basePath
     const uri = QmlWeb.$resolvePath(path);
+    const jsBinding = QmlWeb.importJavascript(uri);
 
-    /* Handle recursive includes */
-    if (QmlWeb.engine.$component.$qmlJsIncludes === undefined) {
-      QmlWeb.engine.$component.$qmlJsIncludes = [];
-    }
-
-    if (QmlWeb.engine.$component.$qmlJsIncludes.indexOf(uri) >= 0) {
+    if (!jsBinding) {
+      QmlWeb.error("Qt.include: Unable to load JavaScript module:", uri, path);
       return;
     }
 
-    QmlWeb.engine.$component.$qmlJsIncludes.push(uri);
-
-    const js = QmlWeb.loadJS(uri);
-
-    if (!js) {
-      QmlWeb.error("Unable to load JavaScript module:", uri, path);
-      return;
+    const $c = QmlWeb.engine.$component.$context;
+    const $p = $c.$pageContext;
+    if (importAlias) {
+      $p[importAlias] = jsBinding.contextMap;
+    } else {
+      QmlWeb.helpers.copy($p, jsBinding.contextMap);
     }
-
-    QmlWeb.importJavascriptInContext(js, QmlWeb.engine.$component);
   },
 
   // Qt.binding

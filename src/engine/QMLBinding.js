@@ -286,10 +286,11 @@ class QMLBinding {
       // NOTE necessary to use $context.$ownerObject instead of 'this' directly because of attached objects
       // see QObject() QMLComponent.getAttachedObject()
 
+      // removed: with(($$lf=($$o=$$c.$ownerObject).$leaf)!==$$o?$$lf(.$noalias):{}) with($$o(.$noalias))
       if (this.flags & QmlWeb.QMLBindingFlags.Alias) {
-        vvith = "var c=this.$context,o,lf; with(QmlWeb) with(c.loaderContext) with((lf=(o=c.$ownerObject).$leaf)!==o?lf.$noalias:{}) with(c.$pageElements) with(o.$noalias)";
+        vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.loaderContext) with($$c.$pageContext) with($$o.$noalias)";
       } else {
-        vvith = "var c=this.$context,o,lf; with(QmlWeb) with(c.loaderContext) with((lf=(o=c.$ownerObject).$leaf)!==o?lf:{})          with(c.$pageElements) with(o)";
+        vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.loaderContext) with($$c.$pageContext) with($$o)";
       }
     }
     return vvith;

@@ -9,6 +9,15 @@ function setupGetter(obj, propName, func, owner, enumerable=false) {
   });
 }
 
+function setupValue(obj, propName, func, owner, enumerable=false) {
+  Object.defineProperty(obj, propName, {
+    value: func,
+    owner: owner,
+    configurable: true,
+    enumerable
+  });
+}
+
 function setupSetter(obj, propName, func, owner, enumerable=false) {
   Object.defineProperty(obj, propName, {
     set: func,

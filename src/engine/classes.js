@@ -237,7 +237,7 @@ function addElementToPageContexts(item, id, ctx) {
   if (id in ctx) {
     QmlWeb.warn("Context entry overriden by Element : "+id+" object:"+item);
 
-    QmlWeb.setupGetter(ctx, id, () => item, ctx);
+    QmlWeb.setupValue(ctx, id, item, ctx);
   } else {
     // always put nothing but self to inheritable context (only self of elements, but all properties) :
     ctx[id] = item;
