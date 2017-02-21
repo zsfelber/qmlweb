@@ -164,8 +164,7 @@ class QMLProperty {
   }
 
 
-  // update reevaluates the get/set binding, stores or emits the value of the property as determined which is
-  // needed from this.updateState
+  // 'update' reevaluates the get/set binding, stores or emits the value of the property, as determined from this.updateState
   update(flags, oldVal) {
 
     const origState = this.updateState;
@@ -214,7 +213,7 @@ class QMLProperty {
 
           if (oldVal === undefined) oldVal = this.value;
           newVal = this.binding.get(this.bindingCtxObj);
-          this.$setVal(newVal, flags);
+          newVal = this.$setVal(newVal, flags);
           this.updateState &= ~QmlWeb.QMLPropertyState.BoundGet;
         } else {
           throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid update state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  Binding:"+this.binding);
@@ -255,15 +254,11 @@ class QMLProperty {
     }
 
     try {
-      if (oldVal!==newVal) {
-        if (origState & QmlWeb.QMLPropertyState.Uninitialized) {
-          this.updateState &= ~QmlWeb.QMLPropertyState.Uninitialized;
-        } else {
-          if (this.updateState & QmlWeb.QMLPropertyState.Uninitialized) {
-            throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  Property became Uninitialized meanwhile but value seems changed!");
-          }
-          this.sendChanged(oldVal, newVal);
+      if (oldVal!==newVal && !(origState & QmlWeb.QMLPropertyState.Uninitialized)) {
+        if (this.updateState & QmlWeb.QMLPropertyState.Uninitialized) {
+          throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  Property became Uninitialized meanwhile but value seems changed!");
         }
+        this.sendChanged(oldVal, newVal);
       }
     } catch (err2) {
       if (err2 instanceof QmlWeb.FatalError) throw err2;

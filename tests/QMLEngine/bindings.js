@@ -3,7 +3,7 @@ describe("QMLEngine.bindings", function() {
   var load = prefixedQmlLoader("QMLEngine/qml/Bindings");
 
   it("NoSrc", function() {
-    load("NoSrc", this.div);
+    var qml = load("NoSrc", this.div);
     var div = this.div.children[0];
     expect(div.offsetWidth).toBe(10);
     expect(div.offsetHeight).toBe(12);
