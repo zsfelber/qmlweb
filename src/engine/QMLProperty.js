@@ -298,6 +298,7 @@ class QMLProperty {
     const engine = QmlWeb.engine;
 
     // Algo back-infects the dependent (eval tree 'parent') properties with 'this' invalidity :
+    // here , relevant flags are Uninitialized, BoundGet
     let invalidityFlags = this.updateState & QmlWeb.QMLPropertyState.InvalidityFlags;
 
     if (invalidityFlags) {
@@ -333,13 +334,12 @@ class QMLProperty {
       }
 
       if (this.binding || (this.updateState & QmlWeb.QMLPropertyState.NonBoundSet)) {
-          try {
-            this.update();
-            invalidityFlags = 0;
-          } catch (err) {
-            if (err instanceof QmlWeb.FatalError) throw err;
-            error = err;
-          }
+        try {
+          this.update();
+          invalidityFlags = 0;
+        } catch (err) {
+          if (err instanceof QmlWeb.FatalError) throw err;
+          error = err;
         }
       }
     }
