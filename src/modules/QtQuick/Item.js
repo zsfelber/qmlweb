@@ -341,7 +341,7 @@ class Item extends ItemBase {
 
       const property = this.$properties[p];
 
-      if (!(property.updateState & QmlWeb.QMLPropertyState.Uninitialized) && !property.binding) {
+      if (!(property.updateState & QmlWeb.QMLPropertyState.Uninitialized)) {
 
         const changedYesButNoUpdateHVgeom = property.changed.$signal.connectedSlots[0];
         QmlWeb.Signal.$execute(changedYesButNoUpdateHVgeom, [property.value, 0, p]);
