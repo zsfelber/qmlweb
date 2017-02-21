@@ -305,7 +305,7 @@ class QMLProperty {
       // otherwise (Uninitialized) : return uninitialized this.value (undefined, [] or so) finally (as it is intended to be undefined,null or so)
     } else {
 
-      let did = 0;
+      let toUpdate = 1;
 
       if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
         if (!engine.currentPendingOp) {
@@ -318,7 +318,7 @@ class QMLProperty {
           const itms = engine.pendingOperations.map[this.$propertyId];
           if (itms) {
             try {
-              did = 1;
+              toUpdate = 0;
               itms.forEach(engine.processOp, engine);
             } catch (err) {
               if (err instanceof QmlWeb.FatalError) throw err;
@@ -328,13 +328,15 @@ class QMLProperty {
               itms.splice(0, itms.length);
             }
           }
+        } else {
+          toUpdate = 0;
         }
       } else if (engine.pendingOperations.map.hasOwnProperty(this.$propertyId)) {
         throw new QmlWeb.AssertionError(`Assertion failed. pendingOperation/property filled at runtime : `, this);
       }
 
       const dirty = this.updateState & QmlWeb.QMLPropertyState.Changed;
-      if (!did && dirty) {
+      if (toUpdate && dirty) {
         if (dirty !== QmlWeb.QMLPropertyState.BoundGet) {
           throw new QmlWeb.AssertionError("Assertion failed : "+this+" . get   Invalid state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  Property setter dirty state invalid at Runtime, only valid in Init/Starting state through pendingOperations queue!");
         }
@@ -397,7 +399,7 @@ class QMLProperty {
 
     if (invalidityFlags) {
       if (invalidityFlags & QmlWeb.QMLPropertyState.Uninitialized) {
-        if (engine.operationState & QmlWeb.QMLOperationState.Starting) {QMLPropertyState
+        if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
           // This 'get' is directed to an unitialized property
           engine.currentPendingOp.warnings.push({loc:"get",
                                                 err:`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)} -> ${QmlWeb.QMLPropertyState.toString(this.updateState)}`,
@@ -429,6 +431,9 @@ class QMLProperty {
     if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
 
       let fwdUpdate;
+      if (newVal === undefined && flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
+        newVal = QMLProperty.typeInitialValues[this.type];
+      }
       if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
         fwdUpdate = this.binding !== newVal;
         if (fwdUpdate) {
