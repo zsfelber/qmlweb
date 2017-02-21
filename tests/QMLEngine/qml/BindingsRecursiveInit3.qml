@@ -31,4 +31,8 @@ Item {
   Text {
     text: log
   }
+
+  Component.onCompleted: {
+    launch();
+  }
 }

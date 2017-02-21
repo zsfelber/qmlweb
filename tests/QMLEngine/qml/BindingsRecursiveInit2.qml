@@ -30,4 +30,8 @@ Item {
     text: "retarget!"
     onClicked: retarget()
   }
+
+  Component.onCompleted: {
+    launch();
+  }
 }
