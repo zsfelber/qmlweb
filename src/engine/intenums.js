@@ -97,6 +97,7 @@ const QMLPropertyState = {
   BoundSet : 8,
   NonBoundSet : 16,
   InvalidityFlags : 2 | 4,
+  Changed : 31-1-2,
   Dirty : 31-2,
   DirtyAll : 31,
 

@@ -294,8 +294,35 @@ class QMLProperty {
 
     // defer exceptions, because it is still correct to register current eval tree state :
     let error;
-
     const engine = QmlWeb.engine;
+
+    if (engine.operationState & QmlWeb.QMLOperationState.Init) {
+    } else {
+      if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
+        if (!engine.currentPendingOp) {
+          throw new QmlWeb.AssertionError("Assertion failed : no engine.currentPendingOp  "+this);
+        }
+        if (engine.currentPendingOp.property !== this) {
+          const itms = engine.pendingOperations.map[this.$propertyId];
+          if (itms) {
+            const itms2 = itms.slice(0);
+            delete this.pendingOperations.map[this.$propertyId];
+            itms.splice(0, itms.length);
+
+            itms2.forEach(engine.processOp, engine);
+          }
+        }
+      }
+
+      if (this.updateState & QmlWeb.QMLPropertyState.Changed) {
+        try {
+          this.update();
+        } catch (err) {
+          if (err instanceof QmlWeb.FatalError) throw err;
+          error = err;
+        }
+      }
+    }
 
     // Algo back-infects the dependent (eval tree 'parent') properties with 'this' invalidity :
     // here , relevant flags are Uninitialized, BoundGet
@@ -313,27 +340,7 @@ class QMLProperty {
         }
         // in case Valid/BoundSet/NonBoundSet: this.value is ok, return this.value
         // otherwise (Uninitialized) : return uninitialized this.value (undefined, [] or so) finally (as it is intended to be undefined,null or so)
-      } else if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
-        if (!engine.currentPendingOp) {
-          throw new QmlWeb.AssertionError("Assertion failed : no engine.currentPendingOp  "+this);
-        }
-        if (engine.currentPendingOp.property===this) {
-
-        } else {
-          const itms = QmlWeb.engine.pendingOperations.map[this.$propertyId];
-          if (itms) {
-            const itms2 = itms.slice(0);
-            delete this.pendingOperations.map[this.$propertyId];
-            itms.splice(0, itms.length);
-
-            itms2.forEach(engine.processOp, engine);
-            invalidityFlags = this.updateState & QmlWeb.QMLPropertyState.InvalidityFlags;
-          }
-          // otherwise : return uninitialized value (undefined, [] or so) finally
-        }
-      }
-
-      if (this.binding || (this.updateState & QmlWeb.QMLPropertyState.NonBoundSet)) {
+      } else if (this.binding && (this.updateState & QmlWeb.QMLPropertyState.NonBoundSet)) {
         try {
           this.update();
           invalidityFlags = 0;
@@ -381,11 +388,11 @@ class QMLProperty {
 
     if (invalidityFlags) {
       if (invalidityFlags & QmlWeb.QMLPropertyState.Uninitialized) {
-        if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
+        if (engine.operationState & QmlWeb.QMLOperationState.Starting) {QMLPropertyState
           // This 'get' is directed to an unitialized property
-          QmlWeb.engine.currentPendingOp.warnings.push({loc:"get",
-                                                        err:`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)} -> ${QmlWeb.QMLPropertyState.toString(this.updateState)}`,
-                                                        prop:this});
+          engine.currentPendingOp.warnings.push({loc:"get",
+                                                err:`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)} -> ${QmlWeb.QMLPropertyState.toString(this.updateState)}`,
+                                                prop:this});
         }
       } else {
         throw new QmlWeb.PendingEvaluation(`Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)} -> ${QmlWeb.QMLPropertyState.toString(this.updateState)}`, this);
