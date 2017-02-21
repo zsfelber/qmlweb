@@ -375,6 +375,7 @@ class QMLEngine {
   }
 
   processOp(op) {
+    const oldP = this.currentPendingOp;
     this.currentPendingOp = op;
 
     op.errors = [];
@@ -433,6 +434,8 @@ class QMLEngine {
         this.error["#"+this.i+mode+"!!"+op.info] = op;
       }
       op.err = err;
+    } finally {
+      this.currentPendingOp = oldP;
     }
 
     this.i++;

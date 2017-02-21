@@ -297,24 +297,46 @@ class QMLProperty {
     const engine = QmlWeb.engine;
 
     if (engine.operationState & QmlWeb.QMLOperationState.Init) {
+      if (this.updateState & QmlWeb.QMLPropertyState.BoundGet) {
+        // not possible to update at init stage :
+        throw new QmlWeb.AssertionError(`Assertion failed. Init time, cannot update : Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(this.updateState)}`, this);
+      }
+      // in case Valid/BoundSet/NonBoundSet: this.value is ok, return this.value
+      // otherwise (Uninitialized) : return uninitialized this.value (undefined, [] or so) finally (as it is intended to be undefined,null or so)
     } else {
       if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
         if (!engine.currentPendingOp) {
           throw new QmlWeb.AssertionError("Assertion failed : no engine.currentPendingOp  "+this);
         }
+        let did = 0;
+        // we take this property from queue and update it immediately,
+        // if it has been found and not being already processed.
+        // otherwise just don't do anything here:
         if (engine.currentPendingOp.property !== this) {
           const itms = engine.pendingOperations.map[this.$propertyId];
           if (itms) {
-            const itms2 = itms.slice(0);
-            delete this.pendingOperations.map[this.$propertyId];
-            itms.splice(0, itms.length);
-
-            itms2.forEach(engine.processOp, engine);
+            try {
+              itms.forEach(engine.processOp, engine);
+              did = 1;
+            } catch (err) {
+              if (err instanceof QmlWeb.FatalError) throw err;
+              error = err;
+            } finally {
+              delete this.pendingOperations.map[this.$propertyId];
+              itms.splice(0, itms.length);
+            }
           }
         }
+      } else if (engine.pendingOperations.map.hasOwnProperty(this.$propertyId)) {
+        throw new QmlWeb.AssertionError(`Assertion failed. pendingOperation/property filled at runtime : `, this);
       }
 
-      if (this.updateState & QmlWeb.QMLPropertyState.Changed) {
+      const dirty = this.updateState & QmlWeb.QMLPropertyState.Changed;
+      if (!did && dirty) {
+        if (dirty !== QmlWeb.QMLPropertyState.BoundGet) {
+          throw new QmlWeb.AssertionError("Assertion failed : "+this+" . get   Invalid state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  Property setter dirty state invalid at Runtime, only valid in Init/Starting state through pendingOperations queue!");
+        }
+
         try {
           this.update();
         } catch (err) {
@@ -333,21 +355,6 @@ class QMLProperty {
       if (this.updateState & QmlWeb.QMLPropertyState.Updating) {
         QmlWeb.error(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this, "  recordedStack:", QMLProperty.recordStack());
         error = new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this);
-      } else if (engine.operationState & QmlWeb.QMLOperationState.Init) {
-        if (this.updateState & QmlWeb.QMLPropertyState.BoundGet) {
-          // not possible to update at init stage :
-          throw new QmlWeb.AssertionError(`Assertion failed. Init time, cannot update : Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
-        }
-        // in case Valid/BoundSet/NonBoundSet: this.value is ok, return this.value
-        // otherwise (Uninitialized) : return uninitialized this.value (undefined, [] or so) finally (as it is intended to be undefined,null or so)
-      } else if (this.binding && (this.updateState & QmlWeb.QMLPropertyState.NonBoundSet)) {
-        try {
-          this.update();
-          invalidityFlags = 0;
-        } catch (err) {
-          if (err instanceof QmlWeb.FatalError) throw err;
-          error = err;
-        }
       }
     }
 
