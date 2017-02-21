@@ -162,7 +162,7 @@ class QMLProperty {
     var pushed;
     try {
 
-      if (origState & (QmlWeb.QMLPropertyState.NeedsUpdate|QmlWeb.QMLPropertyState.NonBoundSet))  {
+      if (origState & (QmlWeb.QMLPropertyState.BoundGet|QmlWeb.QMLPropertyState.NonBoundSet))  {
         this.obsoleteConnections = this.evalTreeConnections;
         // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
         this.evalTreeConnections = {};
@@ -192,7 +192,7 @@ class QMLProperty {
           // NOTE valParentObj/bindingCtxObj is passed through property.set, its in the descendant level in object type hierarchy (proto chain),
           // NOTE we don't pass this.valParentObj as valParentObj because it only belongs to this property and not to newVal or another property
           this.binding.set(this.bindingCtxObj, newVal, flags);
-        } else if (origState & QmlWeb.QMLPropertyState.NeedsUpdate)  {
+        } else if (origState & QmlWeb.QMLPropertyState.BoundGet)  {
           // this.binding/get
           pushed = QMLProperty.pushEvaluatingProperty(this);
 
@@ -260,11 +260,11 @@ class QMLProperty {
   updateBindingLater() {
     if (this.binding) {
       if (this.animation || (this.changed.$signal.connectedSlots && this.changed.$signal.connectedSlots.length>this.childEvalTreeConnections)) {
-        this.updateState = QmlWeb.QMLPropertyState.NeedsUpdate;
+        this.updateState = QmlWeb.QMLPropertyState.BoundGet;
         this.update();
       } else {
         // lazy load for inactive properties :
-        this.updateState = QmlWeb.QMLPropertyState.NeedsUpdate;
+        this.updateState = QmlWeb.QMLPropertyState.BoundGet;
       }
 
       // nothing to do with bidirectional binding here,
@@ -300,11 +300,11 @@ class QMLProperty {
       if (this.updateState & QmlWeb.QMLPropertyState.Updating) {
         QmlWeb.error(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this, "  recordedStack:", QMLProperty.recordStack());
         error = new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this);
-      } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
-        //if (this.updateState & QmlWeb.QMLPropertyState.NeedsUpdate) {
+      } else if (engine.operationState & QmlWeb.QMLOperationState.Init) {
+        if (this.updateState & QmlWeb.QMLPropertyState.BoundGet) {
           // not possible to update at init stage :
           throw new QmlWeb.AssertionError(`Assertion failed. Init time, cannot update : Binding get in invalid state : ${QmlWeb.QMLPropertyState.toString(invalidityFlags)}`, this);
-        //}
+        }
         // otherwise : return uninitialized value (undefined, [] or so) finally
       } else if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
         if (!engine.currentPendingOp) {
@@ -402,17 +402,24 @@ class QMLProperty {
       throw new Error(`property '${this.name}' has read only access`);
     }
 
-    let fwdUpdate = !(this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
     const oldVal = this.value;
 
     if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
 
+      let fwdUpdate;
       if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
         fwdUpdate = this.binding !== newVal;
       } else if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
         fwdUpdate = newVal !== oldVal;
+      } else if (newVal !== oldVal) {
+        if (this.updateState & QmlWeb.QMLPropertyState.Uninitialized) {
+          this.updateState &= ~QmlWeb.QMLPropertyState.Uninitialized;
+          this.$setVal(newVal, flags);
+        } else {
+          fwdUpdate = true;
+        }
       } else {
-        fwdUpdate &= newVal !== oldVal;
+        fwdUpdate = false;
       }
 
       if (fwdUpdate) {
@@ -475,7 +482,7 @@ class QMLProperty {
 
         fwdUpdate = this.binding !== newVal;
         this.binding = newVal;
-        state = QmlWeb.QMLPropertyState.NeedsUpdate;
+        state = QmlWeb.QMLPropertyState.BoundGet;
       }
 
       if (!state) {
