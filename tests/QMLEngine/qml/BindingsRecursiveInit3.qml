@@ -1,6 +1,8 @@
 import QtQuick 2.2
 
 Item {
+  id: item;
+
   width: 400
   property int intA: {
     for (var i=0,s=0; i<nine(); i++) s+=four();
@@ -16,12 +18,10 @@ Item {
     log = log + "Fly to planet N" + intA + "!"; 
   }
 
+  property var four : log.four;
+
   function nine() {
     return three()*three();
-  }
-
-  function four() {
-    return (nine()-three())*2/3;
   }
 
   function three() {
@@ -30,6 +30,10 @@ Item {
 
   Text {
     text: log
+
+    function four() {
+      return (item.nine()-item.three())*2/3;
+    }
   }
 
   Component.onCompleted: {
