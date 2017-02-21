@@ -14,7 +14,7 @@ QmlWeb.registerQmlType({
   },
   properties: {
     color: { type: "color", initialValue: "black" },
-    text: "string",
+    text: { type: "string", initialValue: ""},
     lineHeight: "real",
     wrapMode: { type: "enum", initialValue: 0 }, // Text.NoWrap
     horizontalAlignment: { type: "enum", initialValue: 1 }, // Text.AlignLeft
