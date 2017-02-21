@@ -304,11 +304,13 @@ class QMLProperty {
       // in case Valid/BoundSet/NonBoundSet: this.value is ok, return this.value
       // otherwise (Uninitialized) : return uninitialized this.value (undefined, [] or so) finally (as it is intended to be undefined,null or so)
     } else {
+
+      let did = 0;
+
       if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
         if (!engine.currentPendingOp) {
           throw new QmlWeb.AssertionError("Assertion failed : no engine.currentPendingOp  "+this);
         }
-        let did = 0;
         // we take this property from queue and update it immediately,
         // if it has been found and not being already processed.
         // otherwise just don't do anything here:
@@ -316,8 +318,8 @@ class QMLProperty {
           const itms = engine.pendingOperations.map[this.$propertyId];
           if (itms) {
             try {
-              itms.forEach(engine.processOp, engine);
               did = 1;
+              itms.forEach(engine.processOp, engine);
             } catch (err) {
               if (err instanceof QmlWeb.FatalError) throw err;
               error = err;
