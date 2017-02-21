@@ -413,9 +413,12 @@ class QMLComponent {
   toString(name, short) {
     if (this.$name && this.$id && this.$name.toUpperCase()===this.$id.toUpperCase()+".QML") {
       name = this.$id;
+    } else if (this.$class && this.$id && this.$class.toUpperCase()===this.$id.toUpperCase()) {
+      name = "cl:"+this.$id;
     } else {
       if (!name) name = this.$name;
       if (!name) name = this.$file;
+      if (!name) name = "cl:"+this.$class;
       if (this.$id) name += ":"+this.$id;
     }
     var c = QmlWeb.QMLComponentFlags.toString(this.flags);

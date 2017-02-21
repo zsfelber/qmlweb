@@ -25,9 +25,9 @@ class QMLProperty {
 
     // sole entry 1/1 of propDeclObj! nowhere else passed
     this.propDeclObj = obj;
-    // main entry 1/2 of bindingCtxObj! nowhere else passed
+    // main entry 1/2 of this.bindingCtxObj! nowhere else passed
     this.bindingCtxObj = obj;
-    // main entry 1/2 of valParentObj! nowhere else passed
+    // main entry 1/2 of this.valParentObj! nowhere else passed
     this.valParentObj = obj;
 
     this.$rootComponent = obj.$component ? obj.$component.$root : {};
@@ -56,7 +56,7 @@ class QMLProperty {
 
   // Called by update and set to actually set this.value, performing any type
   // conversion required.
-  $setVal(val, flags) {
+  $setVal(newVal, flags, valParentObj) {
     var prevComponent = QmlWeb.engine.$component;
 
     try {
@@ -64,6 +64,11 @@ class QMLProperty {
 
       // NOTE valParentObj(/bindingCtxObj) is passed through property.set, its in the descendant level in object type hierarchy (proto chain),
       // eg. passed along with SetChildren
+
+      if (valParentObj) {
+        // main entry 2/2 of this.valParentObj! nowhere else passed
+        this.valParentObj = valParentObj;
+      }
 
       // childObj.loaderComponent should be valParentObj.$component
 
@@ -74,6 +79,14 @@ class QMLProperty {
 
       const constructors = QmlWeb.constructors;
 
+      if (newVal === undefined) {
+        if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
+          newVal = QMLProperty.typeInitialValues[this.type];
+        }
+      } else {
+        this.updateState &= ~QmlWeb.QMLPropertyState.Uninitialized;
+      }
+
       if (constructors[this.type] === QmlWeb.qmlList) {
         // SetChildren (used in init mode only) : we merge the subclasses items and don't clear it every time
         // otherwise : clear it, most important when this is the default property, otherwise it just appends new entries
@@ -83,41 +96,43 @@ class QMLProperty {
         }
 
         // NOTE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
-        var tmp = QmlWeb.qmlList(val, this.valParentObj, QmlWeb.QMLComponentFlags.Nested);
+        var tmp = QmlWeb.qmlList(newVal, this.valParentObj, QmlWeb.QMLComponentFlags.Nested);
 
         // Otherwise, we trust containerChanged/onAddElement
         if (!isch) {
           this.value = tmp;
         }
-      } else if (val instanceof QmlWeb.QMLMetaElement) {
-        if (constructors[val.$class] === QMLComponent) {
+      } else if (newVal instanceof QmlWeb.QMLMetaElement) {
+        if (constructors[newVal.$class] === QMLComponent) {
           // Root element or nested Component element ?
 
           this.value = QmlWeb.createComponent({
-            clazz: val,
-            $file: val.$file
+            clazz: newVal,
+            $file: newVal.$file
           });
         } else if (constructors[this.type] === QMLComponent) {
           // User declared Component type but assigned Element directly (eg initialized a delegate)
 
           this.value = QmlWeb.createComponent({
-            clazz: val,
-            $file: val.$file
+            clazz: newVal,
+            $file: newVal.$file
           }, QmlWeb.QMLComponentFlags.Flat);
         } else {
           // NOTE gz : key entry point 2 of QmlWeb.construct
           // all the other ones just forward these
           // Call to here comes from
           // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
-          this.value = QmlWeb.createComponentAndElement({clazz:val}, this.valParentObj, QmlWeb.QMLComponentFlags.Nested);
+          this.value = QmlWeb.createComponentAndElement({clazz:newVal}, this.valParentObj, QmlWeb.QMLComponentFlags.Nested);
         }
-      } else if (val instanceof Object || val === undefined || val === null) {
-        this.value = val;
+      } else if (newVal instanceof Object || newVal === undefined || newVal === null) {
+        this.value = newVal;
       } else if (constructors[this.type].plainType) {
-        this.value = constructors[this.type](val);
+        this.value = constructors[this.type](newVal);
       } else {
-        this.value = new constructors[this.type](val);
+        this.value = new constructors[this.type](newVal);
       }
+
+      return this.value;
 
     } finally {
       QmlWeb.engine.$component = prevComponent;
@@ -428,33 +443,29 @@ class QMLProperty {
 
     const oldVal = this.value;
 
-    if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
+    const origState = this.updateState;
+    let fwdUpdate;
 
-      let fwdUpdate;
-      if (newVal === undefined && flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
-        newVal = QMLProperty.typeInitialValues[this.type];
+    if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
+      fwdUpdate = this.binding !== newVal;
+      if (fwdUpdate) {
+        this.updateState |= QmlWeb.QMLPropertyState.BoundGet;
       }
-      if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
-        fwdUpdate = this.binding !== newVal;
-        if (fwdUpdate) {
-          this.updateState |= QmlWeb.QMLPropertyState.BoundGet;
-        }
-      } else if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
-        fwdUpdate = newVal !== oldVal;
-        if (fwdUpdate) {
+    } else {
+      newVal = this.$setVal(newVal, flags, valParentObj);
+      fwdUpdate = newVal !== oldVal;
+      if (fwdUpdate) {
+        if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
           this.updateState |= QmlWeb.QMLPropertyState.BoundSet;
-        }
-      } else if (newVal !== oldVal) {
-        if (this.updateState & QmlWeb.QMLPropertyState.Uninitialized) {
-          this.updateState &= ~QmlWeb.QMLPropertyState.Uninitialized;
-          this.$setVal(newVal, flags);
+        } else if (origState & QmlWeb.QMLPropertyState.Uninitialized) {
+          fwdUpdate = false;
         } else {
-          fwdUpdate = true;
           this.updateState |= QmlWeb.QMLPropertyState.NonBoundSet;
         }
-      } else {
-        fwdUpdate = false;
       }
+    }
+
+    if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
 
       if (fwdUpdate) {
         if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
@@ -475,7 +486,7 @@ class QMLProperty {
 
         }
       }
-    } else {
+    } else if (fwdUpdate) {
       this.$set(newVal, flags, valParentObj);
     }
   }
@@ -486,73 +497,29 @@ class QMLProperty {
     if (this.readOnly && !(flags & QmlWeb.QMLPropertyFlags.Privileged)) {
       throw new Error(`property '${this.name}' has read only access`);
     }
+    if (engine.operationState & QmlWeb.QMLOperationState.Init) {
+      throw new QmlWeb.AssertionError(`Assertion failed. Init time, cannot invoke $set: `, this);
+    }
 
-    let fwdUpdate = !(this.updateState & QmlWeb.QMLPropertyState.Uninitialized);
     const oldVal = this.value;
     const pushed = QmlWeb.QMLProperty.pushEvalStack();
 
     try {
 
-      if (valParentObj) {
-        // main entry 2/2 of valParentObj! nowhere else passed
-        this.valParentObj = valParentObj;
-      }
-
-      let newState=0, initOk=0;
-
       if (flags & QmlWeb.QMLPropertyFlags.ResetBinding) {
         this.binding = null;
       }
 
-      if (newVal === undefined) {
-        if (flags & QmlWeb.QMLPropertyFlags.ReasonInit) {
-          newVal = QMLProperty.typeInitialValues[this.type];
-        }
-      } else if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
+      if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
         if (valParentObj) {
-          // main entry 2/2 of bindingCtxObj! nowhere else passed
+          // main entry 2/2 of this.bindingCtxObj! nowhere else passed
           this.bindingCtxObj = valParentObj;
         }
 
-        if (newVal !== this.binding) {
-          fwdUpdate = true;
-          this.binding = newVal;
-          newState = QmlWeb.QMLPropertyState.BoundGet;
-          initOk = 1;
-        } else {
-          fwdUpdate = false;
-        }
+        this.binding = newVal;
       }
 
-      if (!initOk) {
-        if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
-          fwdUpdate = true;
-          if (newVal !== oldVal) {
-            this.$setVal(newVal, flags);
-            newState = QmlWeb.QMLPropertyState.BoundSet;
-          } else {
-            fwdUpdate = false;
-          }
-        } else {
-          if (!(flags & QmlWeb.QMLPropertyFlags.ReasonAnimation)) {
-            this.binding = null;
-          }
-          if (newVal !== oldVal) {
-            this.$setVal(newVal, flags);
-            newState = QmlWeb.QMLPropertyState.NonBoundSet;
-          } else {
-            fwdUpdate = false;
-          }
-        }
-      }
-
-      if (newState) {
-        this.updateState = newState;
-      }
-
-      if (fwdUpdate) {
-        this.update(flags);
-      }
+      this.update(flags);
 
     } finally {
       if (pushed) QmlWeb.QMLProperty.popEvalStack();

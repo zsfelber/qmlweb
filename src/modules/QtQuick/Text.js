@@ -63,7 +63,7 @@ QmlWeb.registerQmlType({
     this.Component.completed.connect(this, this.Component$onCompleted);
   }
   $onColorChanged(newVal) {
-    QmlWeb.setStyle(getImplStyle(), "color", new QmlWeb.QColor(newVal), {});
+    QmlWeb.setStyle(this.getImplStyle(), "color", new QmlWeb.QColor(newVal), {});
   }
   $onTextChanged(newVal) {
     this.impl.innerHTML = newVal;
@@ -73,7 +73,7 @@ QmlWeb.registerQmlType({
     this.$updateImplicit();
   }
   $onLineHeightChanged(newVal) {
-    QmlWeb.setStyle(getImplStyle(), "lineHeight", `${newVal}px`, {});
+    QmlWeb.setStyle(this.getImplStyle(), "lineHeight", `${newVal}px`, {});
     this.$updateImplicit();
   }
   $onStyleChanged(newVal) {

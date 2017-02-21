@@ -350,13 +350,13 @@ class QMLBinding {
       }
 
       // see note(IIFE) ^^^
-      return new Function(`
+      return eval(`(function _${this.$bindingId}_get() {
         ${vvith} {
           return (function() {
             ${ (this.flags&QmlWeb.QMLBindingFlags.ImplFunction) ? "return function"+src+";" : (this.flags&QmlWeb.QMLBindingFlags.ImplBlock) ? src : "return "+src+";"}
           }).apply(this);
         }
-      `);
+      })`);
     } else if (this.src instanceof Object) {
       var thisObj = this.src;
       if (this.property) {
@@ -410,7 +410,7 @@ class QMLBinding {
         if (this.src) {
 
           // see note(IIFE) ^^^
-          return new Function("$$__value", "$$__flags", "$$__valParentObj", `
+          return eval(`(function _${this.$bindingId}_set1($$__value, $$__flags, $$__valParentObj) {
             ${vvith} {
               (function() {
                 var obj = ${this.src};
@@ -435,11 +435,11 @@ class QMLBinding {
                 }
               }).apply(this);
             }
-          `);
+          })`);
         } else {
 
           // see note(IIFE) ^^^
-          return new Function("$$__value", "$$__flags", "$$__valParentObj", `
+          return eval(`(function _${this.$bindingId}_set2($$__value, $$__flags, $$__valParentObj) {
             ${vvith} {
               (function() {
                 var prop = this.${props}${fp};
@@ -459,11 +459,11 @@ class QMLBinding {
                 }
               }).apply(this);
             }
-          `);
+          })`);
         }
       } else if (this.src instanceof Object) {
         var thisObj = this.src;
-        return function($$__value, $$__flags, $$__valParentObj) {
+        return function _set3($$__value, $$__flags, $$__valParentObj) {
           var prop = thisObj[fp];
 
           if (prop) {
@@ -499,7 +499,7 @@ class QMLBinding {
 
     // see note(IIFE) ^^^
     // $$__arguments also prevents overwriting function args by 'with' scopes
-    return eval(`(function _${this.$bindingId}() {
+    return eval(`(function _${this.$bindingId}_run() {
       var $$__arguments = arguments;
       ${vvith} return (function(${this.args}) {
         ${this.src}
