@@ -474,7 +474,7 @@ class QMLProperty {
           }
 
           const itm = {
-            property:this, opId:this.$propertyId, newVal, flags, valParentObj
+            property:this, opId:this.$propertyId, oldVal, newVal, flags, valParentObj
           };
 
           itms.push(itm);
@@ -486,7 +486,7 @@ class QMLProperty {
     }
   }
 
-  $set(newVal, flags, valParentObj) {
+  $set(newVal, oldVal, flags, valParentObj) {
 
     flags = flags || QmlWeb.QMLPropertyFlags.ReasonUser;
     if (this.readOnly && !(flags & QmlWeb.QMLPropertyFlags.Privileged)) {
@@ -496,7 +496,6 @@ class QMLProperty {
       throw new QmlWeb.AssertionError(`Assertion failed. Init time, cannot invoke $set: `, this);
     }
 
-    const oldVal = this.value;
     const pushed = QmlWeb.QMLProperty.pushEvalStack();
 
     try {
@@ -514,7 +513,7 @@ class QMLProperty {
         this.binding = newVal;
       }
 
-      this.update(flags);
+      this.update(flags, oldVal);
 
     } finally {
       if (pushed) QmlWeb.QMLProperty.popEvalStack();
