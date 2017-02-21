@@ -29,7 +29,7 @@ class QMLComponent {
     // see also Object.create in QMLContext.createChild
     if (loaderComponent) {
       if ((this.flags&QmlWeb.QMLComponentFlags.Super?1:0)+(this.flags&QmlWeb.QMLComponentFlags.Nested?1:0) > 1) {
-        throw new Error("Assertion failed : component either factory nested or super  It is "+QmlWeb.QMLComponentFlags.toString(this.flags));
+        throw new QmlWeb.AssertionError("Assertion failed : component either factory nested or super  It is "+QmlWeb.QMLComponentFlags.toString(this.flags));
       }
 
       if (this.flags&QmlWeb.QMLComponentFlags.Root) {
@@ -138,7 +138,7 @@ class QMLComponent {
     } else {
 
       if (this.moduleConstructors) {
-        throw new Error("Assertion failed. Super/Root Component : imports filled.  "+this+"  "+this.context);
+        throw new QmlWeb.AssertionError("Assertion failed. Super/Root Component : imports filled.  "+this+"  "+this.context);
       }
 
       this.initImports();
@@ -146,11 +146,11 @@ class QMLComponent {
 
     if (this.$file) {
       if (!this.$basePathUrl) {
-        throw new Error("Assertion failed. No component basePath present.  "+this+"  "+this.context);
+        throw new QmlWeb.AssertionError("Assertion failed. No component basePath present.  "+this+"  "+this.context);
       }
     }
     if (!this.moduleConstructors) {
-      throw new Error("Assertion failed. Component : no imports.  "+this+"  "+this.context);
+      throw new QmlWeb.AssertionError("Assertion failed. Component : no imports.  "+this+"  "+this.context);
     }
 
     //QmlWeb.log(this.context.toString());
@@ -169,7 +169,7 @@ class QMLComponent {
 
         if (meta.$file !== meta.clazz.$file) {
           if (!meta.clazz.$file.endsWith(meta.$file)) {
-            throw new Error("Assertion failed. $file-s in Component and class differ :  meta.$file:'"+meta.$file+"' === meta.clazz.$file:'"+meta.clazz.$file+"'");
+            throw new QmlWeb.AssertionError("Assertion failed. $file-s in Component and class differ :  meta.$file:'"+meta.$file+"' === meta.clazz.$file:'"+meta.clazz.$file+"'");
           }
         }
       }
@@ -183,7 +183,7 @@ class QMLComponent {
 
       QmlWeb.helpers.copy(this.meta, meta);
       if (this.meta.$class !== "Component" || this.meta._constructor !== QMLComponent) {
-        throw new Error("Assertion failed. Component element $class:"+meta.$class+" !== 'Component' || QMLComponent !== "+(this.meta._constructor?this.meta._constructor.name:"<null>"));
+        throw new QmlWeb.AssertionError("Assertion failed. Component element $class:"+meta.$class+" !== 'Component' || QMLComponent !== "+(this.meta._constructor?this.meta._constructor.name:"<null>"));
       }
       cons = this.meta._constructor;
     }

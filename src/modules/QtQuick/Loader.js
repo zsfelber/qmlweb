@@ -73,7 +73,7 @@ QmlWeb.registerQmlType({
       this.sourceComponent = qmlComponent;
 
       if (!qmlComponent || this.sourceComponent !== qmlComponent) {
-        throw new Error("Assertion failed Loader: !qmlComponent || this.sourceComponent!==qmlComponent : "+this.toString(true));
+        throw new QmlWeb.AssertionError("Assertion failed Loader: !qmlComponent || this.sourceComponent!==qmlComponent : "+this.toString(true));
       }
     } finally {
       QmlWeb.engine.$component = prevComponent;

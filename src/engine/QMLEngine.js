@@ -128,6 +128,7 @@ class QMLEngine {
         try {
           val();
         } catch (err) {
+          if (err instanceof QmlWeb.FatalError) throw err;
           if (!err.ctType) {
             QmlWeb.warn("Error in startup script : ", err);
           } else {
@@ -139,6 +140,7 @@ class QMLEngine {
         try {
           this.$startTicker(val);
         } catch (err) {
+          if (err instanceof QmlWeb.FatalError) throw err;
           if (!err.ctType) {
             QmlWeb.warn("Startup error in ticker : ", err);
           } else {
@@ -387,10 +389,10 @@ class QMLEngine {
         if (property.updateState & QmlWeb.QMLPropertyState.Updating) {
           this.ae++;
           mode+=":ae";
-          op.errors.push("Property state is invalid : update has not finished : "+property);
+          op.errors.push("Property state is invalid : initialization failed : "+property);
         } else {
 
-          property.update(op.flags, op.oldVal, op.state);
+          property.$set(op.newVal, op.flags, op.valParentObj);
 
           this.a1++;
           mode+=":a";
@@ -422,6 +424,7 @@ class QMLEngine {
       }
 
     } catch (err) {
+      if (err instanceof QmlWeb.FatalError) throw err;
       if (err.ctType==="UninitializedEvaluation") {
         this.w++;
         this.warning["#"+this.i+mode+"!"+op.info] = op;

@@ -166,6 +166,7 @@ function applyProperties(metaObject, item) {
   QmlWeb.engine.$component = item.$component;
 
   function _hand_err(err, i) {
+    if (err instanceof QmlWeb.FatalError) throw err;
     if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
          || ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
       QmlWeb.warn("Cannot apply property : "+item+" . "+i+"  opstate:"+QmlWeb.QMLOperationState.toString(QmlWeb.engine.operationState));

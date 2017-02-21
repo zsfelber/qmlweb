@@ -23,6 +23,7 @@ function initMeta(self, meta, constructor) {
         try {
           QmlWeb.createProperty(desc.type, self, name, desc);
         } catch (err) {
+          if (err instanceof QmlWeb.FatalError) throw err;
           if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
                || ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
             QmlWeb.warn("Cannot create object property from module definition : "+self.$classname+"("+self.$objectId+") . "+name+"  opstate:"+
@@ -104,7 +105,7 @@ function construct(meta, parent, flags) {
     ctx.$ownerObject = item;
 
     if (!component.loaderComponent===!(flags & QmlWeb.QMLComponentFlags.Root)) {
-      throw new Error("Assertion failed. No Loader + Root or Root + Loader : "+component+"  ctx:"+ctx);
+      throw new QmlWeb.AssertionError("Assertion failed. No Loader + Root or Root + Loader : "+component+"  ctx:"+ctx);
     }
 
     // Finalize instantiation over supertype item :

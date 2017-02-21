@@ -177,6 +177,7 @@ class Signal {
     try {
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
+      if (err instanceof QmlWeb.FatalError) throw err;
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
            || ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
         if (desc.binding) {

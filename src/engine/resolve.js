@@ -47,7 +47,7 @@ function resolveBasePath(uri) {
     this.$basePathUrlA.href = uri;
     pu = $parseURIlong(this.$basePathUrlA.href);
     if (!pu) {
-      throw new Error("Assertion failed : <A> element href should be absolute url, but it is : ("+uri+" ->) "+this.$basePathUrlA.href)
+      throw new QmlWeb.AssertionError("Assertion failed : <A> element href should be absolute url, but it is : ("+uri+" ->) "+this.$basePathUrlA.href)
     }
   }
   return pu;
