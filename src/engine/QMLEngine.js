@@ -454,7 +454,7 @@ class QMLEngine {
     this.i=0; this.a=0; this.ae=0; this.a1=0; this.b=0; this.e=0; this.w=0;
     this.info = {}; this.warning = {}; this.error = {};
     while (this.pendingOperations.stack.length > 0) {
-      const op = this.pendingOperations.stack.shift();
+      let op = this.pendingOperations.stack.shift();
       if (op instanceof Array) {
         op.forEach(this.processOp, this);
         op = op[0];
