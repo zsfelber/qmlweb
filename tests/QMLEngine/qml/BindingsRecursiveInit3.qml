@@ -18,7 +18,7 @@ Item {
     log = log + "Fly to planet N" + intA + "!"; 
   }
 
-  property var four : log.four;
+  property var four : txt.four;
 
   function nine() {
     return three()*three();
@@ -29,6 +29,7 @@ Item {
   }
 
   Text {
+    id: txt
     text: log
 
     function four() {
