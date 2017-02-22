@@ -7,48 +7,48 @@ describe("QMLEngine.qrc", function() {
 
   /* Put some stuff into QmlWeb.qrc, this is what gulp-qmlweb does */
   var qrc_files = [
-    ["/Basic.qml",
+    ["", "Basic.qml",
       "import QtQuick 2.0\n Item { property int value: 42 }"
     ],
-    ["/SomeDir/SomeFile.qml",
+    ["SomeDir", "SomeFile.qml",
       "import QtQuick 2.0\n Item { property int value: 43 }"
     ],
-    ["/QMLImportRelative.qml",
+    ["", "QMLImportRelative.qml",
       'import QtQuick 2.0\n import "SomeDir"\n SomeFile { }'
     ],
-    ["/QMLImportRelativeQualified.qml",
+    ["", "QMLImportRelativeQualified.qml",
       'import QtQuick 2.0\n import "SomeDir" as SomeDir\n SomeDir.SomeFile { }'
     ],
-    ["/SomeDir/QMLImportRelativeDots.qml",
+    ["SomeDir", "QMLImportRelativeDots.qml",
       'import QtQuick 2.0\n import "../SomeDir/../SomeDir/./"\n SomeFile { }'
     ],
-    ["/SomeDir/QMLImportRelativeDotsQualified.qml",
+    ["SomeDir", "QMLImportRelativeDotsQualified.qml",
       'import QtQuick 2.0\n import "../SomeDir/../SomeDir/./" as SomeDir\n' +
       "SomeDir.SomeFile { }"
     ],
-    ["/QMLImportAbsolute.qml",
+    ["", "QMLImportAbsolute.qml",
       'import QtQuick 2.0\n import "/SomeDir"\n SomeFile { }'
     ],
-    ["/QMLImportAbsoluteQualified.qml",
+    ["", "QMLImportAbsoluteQualified.qml",
       'import QtQuick 2.0\n import "/SomeDir" as SomeDir\n SomeDir.SomeFile { }'
     ],
-    ["/SomeDir/QMLImportLocal.qml",
+    ["SomeDir", "QMLImportLocal.qml",
       "import QtQuick 2.0\n SomeFile { }"
     ],
-    ["/JavaScriptImport.qml",
+    ["", "JavaScriptImport.qml",
       'import QtQuick 2.0\n import "JavaScript.js" as JSModule\n' +
       "Item { property int value: JSModule.value }"
     ],
-    ["/JavaScript.js",
+    ["", "JavaScript.js",
       "var value = 44;"
     ],
-    ["/LoaderRelative.qml",
+    ["", "LoaderRelative.qml",
       'import QtQuick 2.0\n Loader { source: "SomeDir/SomeFile.qml" }'
     ],
-    ["/LoaderAbsolute.qml",
+    ["", "LoaderAbsolute.qml",
       'import QtQuick 2.0\n Loader { source: "/SomeDir/SomeFile.qml" }'
     ],
-    ["/SomeDir/LoaderRelativeDots.qml",
+    ["SomeDir", "LoaderRelativeDots.qml",
       'import QtQuick 2.0\n Loader { source: "../SomeDir/./SomeFile.qml" }'
     ]
   ];
@@ -57,18 +57,19 @@ describe("QMLEngine.qrc", function() {
 
   for (var i in qrc_files) {
     const path = qrc_files[i][0];
-    const str = qrc_files[i][1];
+    const name = qrc_files[i][1];
+    const str = qrc_files[i][2];
 
     var data;
-    if (path.match(/\.qml$/) !== null) {
+    if (name.match(/\.qml$/) !== null) {
       data = QmlWeb.parse(str, QmlWeb.parse.QMLDocument);
-    } else if (path.match(/\.js$/) !== null) {
+    } else if (name.match(/\.js$/) !== null) {
       data = QmlWeb.jsparse(str);
     } else {
       data = str;
     }
 
-    QmlWeb.qrc[path] = data;
+    QmlWeb.addQrc(path, name, data);
   }
 
   it("basic", function() {

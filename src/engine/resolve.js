@@ -240,7 +240,7 @@ function $parseURI(uri) {
 
 function $parseURIlong(uri) {
   //                        scheme            host     :port   path           file
-  const match = uri.match(/^([^/:]*:[/])([/]?)([^/:]*)(:(\d*)?)([/]|[/].*?[/])([^/]*)$/);
+  const match = uri.match(/^([^/:]*:[/])([/]?)([^/:]*)(:(\d*))?([/]|[/].+?[/])([^/]*)$/);
   if (match) {
     if (match[2]===undefined) match[2]="";
     if (match[4]===undefined) match[4]="";

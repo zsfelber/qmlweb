@@ -31,10 +31,16 @@ QmlWeb.qrcModules = {};
 QmlWeb.qrc = {};
 
 QmlWeb.addQrc = function(module, name, impl) {
+  const rxm = /^[/]+([/].*)$/.exec(module);
+  if (rxm) {
+    module = rxm[1];
+  }
+
   var murl = "qrc:/"+module;
+
   var m = QmlWeb.qrcModules[murl];
   if (!m) {
-    QmlWeb.qrcModules[murl] = m = {};
+    QmlWeb.qrcModules[murl] = QmlWeb.qrcModules["/"+murl] = m = {};
   }
   var match=/(.*)\.qml$/.exec(name);
   var className;
