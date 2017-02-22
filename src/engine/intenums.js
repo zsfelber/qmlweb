@@ -93,20 +93,18 @@ const QMLPropertyState = {
   Valid : 0,
   Updating : 1,
   Uninitialized : 2,
-  BoundGet : 4,
-  BoundSet : 8,
-  NonBoundSet : 16,
+  LoadFromBinding : 4,
+  ValueSaved : 8,
   InvalidityFlags : 2 | 4,
-  Changed : 31-1-2,
-  Dirty : 31-2,
-  DirtyAll : 31,
+  Changed : 15-1-2,
+  Dirty : 15-2,
+  DirtyAll : 15,
 
   Valid_mnem : "ok",
-  BoundGet_mnem : "!",
+  LoadFromBinding_mnem : "!",
   Updating_mnem : "~",
   Uninitialized_mnem : "-",
-  NonBoundSet_mnem : ">",
-  BoundSet_mnem : ">*",
+  ValueSaved_mnem : ">",
 
   toString: function(flags, mnem = true) {
     return humanize.call(QMLPropertyState, flags, mnem);

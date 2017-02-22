@@ -393,7 +393,7 @@ class QMLEngine {
           op.errors.push("Property state is invalid : initialization failed : "+property);
         } else {
 
-          property.$set(op.newVal, op.oldVal, op.flags, op.valParentObj);
+          property.$set(op.newVal, op.oldVal, op.flags, op.valParentObj, op);
 
           this.a1++;
           mode+=":a";
@@ -454,14 +454,17 @@ class QMLEngine {
     this.i=0; this.a=0; this.ae=0; this.a1=0; this.b=0; this.e=0; this.w=0;
     this.info = {}; this.warning = {}; this.error = {};
     while (this.pendingOperations.stack.length > 0) {
-      let op = this.pendingOperations.stack.shift();
+      let op = this.pendingOperations.stack.shift(), opId;
       if (op instanceof Array) {
         op.forEach(this.processOp, this);
-        op = op[0];
+        opId = op[0].opId;
+        op.splice(0, op.length);
+        op.$cleared = true;
       } else {
         this.processOp(op);
+        opId = op.opId;
       }
-      delete this.pendingOperations.map[op.opId];
+      delete this.pendingOperations.map[opId];
     }
 
     QmlWeb.log("processPendingOperations : done  total:"+this.i+" properties:"+this.a+"("+(this.a1+","+this.ae)+") functions:"+this.b+"  Info:",this.info, "   Warning("+this.w+"):",this.warning, "   Error("+this.e+"):",this.error);
