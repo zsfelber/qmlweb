@@ -37,6 +37,7 @@ describe("QMLEngine.properties", function() {
   });
 
   it("alias propagates it's changed signal back to referenced property",
+    // NOTE gz modified slightly, this QmlWeb version doesn't connect alias signals but properties only
     function() {
       var qml = load("AliasChangedBack", this.div);
       qml.go();
