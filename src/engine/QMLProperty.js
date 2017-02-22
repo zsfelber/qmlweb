@@ -460,9 +460,10 @@ class QMLProperty {
       }
     }
 
-    if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
+    if (fwdUpdate) {
 
-      if (fwdUpdate) {
+      if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) {
+
         if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Remote) ||
             (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
 
@@ -480,9 +481,10 @@ class QMLProperty {
           itms.push(itm);
 
         }
+
+      } else {
+        this.$set(newVal, oldVal, flags, valParentObj);
       }
-    } else if (fwdUpdate) {
-      this.$set(newVal, flags, valParentObj);
     }
   }
 
@@ -511,6 +513,8 @@ class QMLProperty {
         }
 
         this.binding = newVal;
+      } else if (this.binding && !(this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional) && !(flags & QmlWeb.QMLPropertyFlags.ReasonAnimation)) {
+        this.binding = null;
       }
 
       this.update(flags, oldVal);
