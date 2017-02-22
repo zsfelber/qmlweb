@@ -68,14 +68,34 @@ class QMLProperty {
       if (valParentObj) {
         // main entry 2/2 of this.valParentObj! nowhere else passed
         this.valParentObj = valParentObj;
-      }
 
-      // childObj.loaderComponent should be valParentObj.$component
+        // childObj.loaderComponent should be valParentObj.$component
+
+
+      } else {
+        if (prevComponent && prevComponent.$context.$ownerObject.$objectId === this.propDeclObj.$objectId) {
+
+          // entry condition means : if   we are accessing this prop from a binding  in (some subtype of) current object:
+          // then, using current binding context (and set current parent obj)
+
+          // see tests/PropertiesUrl.qml and look at 'properties_url_import.remoteSet = "remoteSet.png"' :
+
+          this.valParentObj = prevComponent.$context.$ownerObject;
+
+        } else {
+
+          // otherwise we add current bindingCtxObj's component to stack (if a binding exists, otherwise adding its variable's content
+          // which points to this.propDeclObj )
+
+          this.valParentObj = this.bindingCtxObj;
+        }
+      }
 
       // this.propDeclObj.$component : the QML supertype where the default property (eg"data") defined (eg"ItemBase")
       // this.bindingCtxObj.$component : the QML supertype where the current binding is initialized
-      // these may be the supertype(s) of the actual parent here:
+      // these may be the supertype(s) of the actual parent (this.valParentObj) here:
       QmlWeb.engine.$component = this.valParentObj.$component;
+
 
       const constructors = QmlWeb.constructors;
 
@@ -534,6 +554,8 @@ class QMLProperty {
 
       if (flags & QmlWeb.QMLPropertyFlags.ResetBinding) {
         this.binding = null;
+        // reset this.bindingCtxObj
+        this.bindingCtxObj = this.propDeclObj;
       }
 
       if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
@@ -545,6 +567,8 @@ class QMLProperty {
         this.binding = newVal;
       } else if (this.binding && !(this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional) && !(flags & QmlWeb.QMLPropertyFlags.ReasonAnimation)) {
         this.binding = null;
+        // reset this.bindingCtxObj
+        this.bindingCtxObj = this.propDeclObj;
       }
 
       if (queueItem) {
