@@ -95,14 +95,14 @@ describe("QMLEngine.properties", function() {
 
   it("Url", function() {
     var qml = load("Url", this.div);
-    expect(qml.localBindingSimple).toBe(
-      QmlWeb.engine.$basePathUrl.baseUri + "PropertiesUrlDir/localBindingSimple.png");
+    expect(qml.localNonBoundSimple).toBe(
+      QmlWeb.engine.$basePathUrl.baseUri + "PropertiesUrlDir/localNonBoundSimple.png");
     expect(qml.localBinding).toBe(
       QmlWeb.engine.$basePathUrl.baseUri + "PropertiesUrlDir/localBinding.png");
     expect(qml.localSet).toBe(
       QmlWeb.engine.$basePathUrl.baseUri + "PropertiesUrlDir/localSet.png");
-    expect(qml.remoteBindingSimple).toBe(
-      QmlWeb.engine.$basePathUrl.baseUri + "remoteBindingSimple.png");
+    expect(qml.remoteNonBoundSimple).toBe(
+      QmlWeb.engine.$basePathUrl.baseUri + "remoteNonBoundSimple.png");
     expect(qml.remoteBinding).toBe(
       QmlWeb.engine.$basePathUrl.baseUri + "remoteBinding.png");
     expect(qml.remoteSet).toBe(QmlWeb.engine.$basePathUrl.baseUri + "remoteSet.png");
@@ -117,14 +117,14 @@ describe("QMLEngine.properties", function() {
 
   it("Url exception safe", function() {
     var qml = load("UrlExceptionSafe", this.div);
-    expect(qml.localBindingSimple).toBe(
-      QmlWeb.engine.$basePathUrl.baseUri + "PropertiesUrlDir/localBindingSimple.png");
+    expect(qml.localNonBoundSimple).toBe(
+      QmlWeb.engine.$basePathUrl.baseUri + "PropertiesUrlDir/localNonBoundSimple.png");
     expect(qml.localBinding).toBe(
       QmlWeb.engine.$basePathUrl.baseUri + "PropertiesUrlDir/localBinding.png");
     expect(qml.localSet).toBe(
       QmlWeb.engine.$basePathUrl.baseUri + "PropertiesUrlDir/localSet.png");
-    expect(qml.remoteBindingSimple).toBe(
-      QmlWeb.engine.$basePathUrl.baseUri + "remoteBindingSimple.png");
+    expect(qml.remoteNonBoundSimple).toBe(
+      QmlWeb.engine.$basePathUrl.baseUri + "remoteNonBoundSimple.png");
     expect(qml.remoteBinding).toBe(
       QmlWeb.engine.$basePathUrl.baseUri + "remoteBinding.png");
     expect(qml.remoteSet).toBe(QmlWeb.engine.$basePathUrl.baseUri + "remoteSet.png");

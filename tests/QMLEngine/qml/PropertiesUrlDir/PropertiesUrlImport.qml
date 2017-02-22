@@ -1,12 +1,14 @@
 import QtQuick 2.0
 
 Item {
-  property url localBindingSimple: "localBindingSimple.png"
-  property url localBinding: "local" + "Binding.png"
+  property url localNonBoundSimple: "localNonBoundSimple.png"
+  property url localBinding: "local" + localBindingPng
+  property string localBindingPng : "Binding.png"
   property url localSet
-  property url remoteBindingSimple
+  property url remoteNonBoundSimple
   property url remoteBinding
   property url remoteSet
+  property string remoteBindingPng
   Component.onCompleted: {
     localSet = "localSet.png"
   }
@@ -17,7 +19,7 @@ Item {
   onRemoteSetChanged: {
       return
   }
-  onRemoteBindingSimpleChanged: {
+  onRemoteNonBoundSimpleChanged: {
       return
   }
   onRemoteBindingChanged: {
