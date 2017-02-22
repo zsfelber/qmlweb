@@ -62,7 +62,7 @@ class QMLProperty {
     try {
       const isch = flags & QmlWeb.QMLPropertyFlags.SetChildren;
 
-      // NOTE valParentObj(/bindingCtxObj) is passed through property.$set, its in the descendant level in object type hierarchy (proto chain),
+      // NOTE valParentObj(/bindingCtxObj) is passed through property.set,$set or $setVal, its in the descendant level in object type hierarchy (proto chain),
       // eg. passed along with SetChildren
 
       if (valParentObj) {
@@ -165,7 +165,7 @@ class QMLProperty {
 
 
   // 'update' reevaluates the get/set binding, stores or emits the value of the property, as determined from this.updateState
-  update(flags, oldVal) {
+  update(flags, oldVal, valParentObj) {
 
     const origState = this.updateState;
     this.updateState |= QmlWeb.QMLPropertyState.Updating;
@@ -189,7 +189,7 @@ class QMLProperty {
 
           // binding/set
           newVal = this.value;
-          // NOTE valParentObj/bindingCtxObj is passed through property.$set, its in the descendant level in object type hierarchy (proto chain),
+          // NOTE valParentObj/bindingCtxObj is passed through property.set,$set or $setVal, its in the descendant level in object type hierarchy (proto chain),
           // NOTE we don't pass this.valParentObj as valParentObj because it only belongs to this property and not to newVal or another property
           this.binding.set(this.bindingCtxObj, newVal, flags);
           this.updateState &= ~QmlWeb.QMLPropertyState.ValueSaved;
@@ -205,7 +205,7 @@ class QMLProperty {
 
           if (oldVal === undefined) oldVal = this.value;
           newVal = this.binding.get(this.bindingCtxObj);
-          newVal = this.$setVal(newVal, flags);
+          newVal = this.$setVal(newVal, flags, valParentObj);
           this.updateState &= ~QmlWeb.QMLPropertyState.LoadFromBinding;
 
         } else {
@@ -554,7 +554,7 @@ class QMLProperty {
         }
       }
 
-      this.update(flags, oldVal);
+      this.update(flags, oldVal, valParentObj);
 
       if (queueItem && queueItem.queueItems.length) {
         this.updateState |= queueItem.queueItems.dirty_seq[0];
