@@ -279,15 +279,28 @@ class QMLProperty {
     }
   }
 
-  // slot bound to signal 'when one of the dependencies changed', triggers an immediate or schedules a lazy update :
+  static fwdLazy(con) {
+    if (!(con.slotObj instanceof QMLProperty)) {
+      throw new QmlWeb.AssertionError("Assertion failed in ",this,", not a QMLProperty in connectedSlots connection when they should all be : ", con);
+    }
+    if (con.slotObj.binding) {
+      con.slotObj.updateState |= QmlWeb.QMLPropertyState.LoadFromBinding;
+    } else {
+      console.warn("Binding removed from connection.", this,"  connection : ", con);
+    }
+  }
+
+  // slot bound to signal 'when one of the dependencies changed', triggers an immediate update or schedules a lazy update :
   updateBindingLater() {
     if (this.binding) {
       if (this.animation || (this.changed.$signal.connectedSlots && this.changed.$signal.connectedSlots.length>this.childEvalTreeConnections)) {
         this.updateState = QmlWeb.QMLPropertyState.LoadFromBinding;
         this.update();
       } else {
-        // lazy load for inactive properties :
+        // lazy load for inactive properties (and its dependencies):
         this.updateState = QmlWeb.QMLPropertyState.LoadFromBinding;
+
+        this.changed.$signal.connectedSlots.forEach(QMLProperty.fwdLazy, this);
       }
 
       // nothing to do with bidirectional binding here,
