@@ -96,16 +96,16 @@ describe("QMLEngine.properties", function() {
   it("Url", function() {
     var qml = load("Url", this.div);
     expect(qml.localBindingSimple).toBe(
-      QmlWeb.engine.$basePathUrl + "PropertiesUrlDir/localBindingSimple.png");
+      QmlWeb.engine.$basePathUrl.baseUri + "PropertiesUrlDir/localBindingSimple.png");
     expect(qml.localBinding).toBe(
-      QmlWeb.engine.$basePathUrl + "PropertiesUrlDir/localBinding.png");
+      QmlWeb.engine.$basePathUrl.baseUri + "PropertiesUrlDir/localBinding.png");
     expect(qml.localSet).toBe(
-      QmlWeb.engine.$basePathUrl + "PropertiesUrlDir/localSet.png");
+      QmlWeb.engine.$basePathUrl.baseUri + "PropertiesUrlDir/localSet.png");
     expect(qml.remoteBindingSimple).toBe(
-      QmlWeb.engine.$basePathUrl + "remoteBindingSimple.png");
+      QmlWeb.engine.$basePathUrl.baseUri + "remoteBindingSimple.png");
     expect(qml.remoteBinding).toBe(
-      QmlWeb.engine.$basePathUrl + "remoteBinding.png");
-    expect(qml.remoteSet).toBe(QmlWeb.engine.$basePathUrl + "remoteSet.png");
+      QmlWeb.engine.$basePathUrl.baseUri + "remoteBinding.png");
+    expect(qml.remoteSet).toBe(QmlWeb.engine.$basePathUrl.baseUri + "remoteSet.png");
     expect(qml.http).toBe("http://http-url");
     /* Get the base address of the URL */
     const a = document.createElement("a");
@@ -118,15 +118,15 @@ describe("QMLEngine.properties", function() {
   it("Url exception safe", function() {
     var qml = load("UrlExceptionSafe", this.div);
     expect(qml.localBindingSimple).toBe(
-      QmlWeb.engine.$basePathUrl + "PropertiesUrlDir/localBindingSimple.png");
+      QmlWeb.engine.$basePathUrl.baseUri + "PropertiesUrlDir/localBindingSimple.png");
     expect(qml.localBinding).toBe(
-      QmlWeb.engine.$basePathUrl + "PropertiesUrlDir/localBinding.png");
+      QmlWeb.engine.$basePathUrl.baseUri + "PropertiesUrlDir/localBinding.png");
     expect(qml.localSet).toBe(
-      QmlWeb.engine.$basePathUrl + "PropertiesUrlDir/localSet.png");
+      QmlWeb.engine.$basePathUrl.baseUri + "PropertiesUrlDir/localSet.png");
     expect(qml.remoteBindingSimple).toBe(
-      QmlWeb.engine.$basePathUrl + "remoteBindingSimple.png");
+      QmlWeb.engine.$basePathUrl.baseUri + "remoteBindingSimple.png");
     expect(qml.remoteBinding).toBe(
-      QmlWeb.engine.$basePathUrl + "remoteBinding.png");
-    expect(qml.remoteSet).toBe(QmlWeb.engine.$basePathUrl + "remoteSet.png");
+      QmlWeb.engine.$basePathUrl.baseUri + "remoteBinding.png");
+    expect(qml.remoteSet).toBe(QmlWeb.engine.$basePathUrl.baseUri + "remoteSet.png");
   });
 });

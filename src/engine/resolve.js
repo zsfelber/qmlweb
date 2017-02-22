@@ -245,14 +245,17 @@ function $parseURIlong(uri) {
     if (match[2]===undefined) match[2]="";
     if (match[4]===undefined) match[4]="";
     const au = match[3]+match[4];
+    const scheme = au ? match[1]+match[2] : match[1];
+    const path = au ? match[6] : match[2]+match[6];
     return {
       uri: uri,
-      scheme: au ? match[1]+match[2] : match[1],
+      baseUri: scheme + au + path,
+      scheme: scheme,
       prefix: match[2],
       host: match[3],
       authority: au,
       port: match[5],
-      path: au ? match[6] : match[2]+match[6],
+      path: path,
       file: match[7],
     };
   }
