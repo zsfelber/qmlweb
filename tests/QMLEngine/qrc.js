@@ -10,7 +10,7 @@ describe("QMLEngine.qrc", function() {
     ["", "Basic.qml",
       "import QtQuick 2.0\n Item { property int value: 42 }"
     ],
-    ["SomeDir", "SomeFile.qml",
+    ["/SomeDir", "SomeFile.qml",
       "import QtQuick 2.0\n Item { property int value: 43 }"
     ],
     ["", "QMLImportRelative.qml",
@@ -19,10 +19,10 @@ describe("QMLEngine.qrc", function() {
     ["", "QMLImportRelativeQualified.qml",
       'import QtQuick 2.0\n import "SomeDir" as SomeDir\n SomeDir.SomeFile { }'
     ],
-    ["SomeDir", "QMLImportRelativeDots.qml",
+    ["/SomeDir", "QMLImportRelativeDots.qml",
       'import QtQuick 2.0\n import "../SomeDir/../SomeDir/./"\n SomeFile { }'
     ],
-    ["SomeDir", "QMLImportRelativeDotsQualified.qml",
+    ["/SomeDir", "QMLImportRelativeDotsQualified.qml",
       'import QtQuick 2.0\n import "../SomeDir/../SomeDir/./" as SomeDir\n' +
       "SomeDir.SomeFile { }"
     ],
@@ -32,7 +32,7 @@ describe("QMLEngine.qrc", function() {
     ["", "QMLImportAbsoluteQualified.qml",
       'import QtQuick 2.0\n import "/SomeDir" as SomeDir\n SomeDir.SomeFile { }'
     ],
-    ["SomeDir", "QMLImportLocal.qml",
+    ["/SomeDir", "QMLImportLocal.qml",
       "import QtQuick 2.0\n SomeFile { }"
     ],
     ["", "JavaScriptImport.qml",
@@ -48,7 +48,7 @@ describe("QMLEngine.qrc", function() {
     ["", "LoaderAbsolute.qml",
       'import QtQuick 2.0\n Loader { source: "/SomeDir/SomeFile.qml" }'
     ],
-    ["SomeDir", "LoaderRelativeDots.qml",
+    ["/SomeDir", "LoaderRelativeDots.qml",
       'import QtQuick 2.0\n Loader { source: "../SomeDir/./SomeFile.qml" }'
     ]
   ];
