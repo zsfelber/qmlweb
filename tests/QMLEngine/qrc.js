@@ -62,7 +62,7 @@ describe("QMLEngine.qrc", function() {
 
     var data;
     if (name.match(/\.qml$/) !== null) {
-      data = QmlWeb.parse(str, QmlWeb.parse.QMLDocument);
+      data = QmlWeb.parseQML(str, path+"/"+name);
     } else if (name.match(/\.js$/) !== null) {
       data = QmlWeb.jsparse(str);
     } else {

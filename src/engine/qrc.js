@@ -50,7 +50,7 @@ QmlWeb.addQrc = function(module, name, impl) {
     className = name;
   }
   m[className] = "qrc:/"+module+"/"+name;
-  QmlWeb.qrc[module+"/"+name] = impl;
+  QmlWeb.qrc["/"+module+"/"+name] = QmlWeb.qrc[module+"/"+name] = impl;
   impl.$class = "Component";
   impl.$name = name;
 }
