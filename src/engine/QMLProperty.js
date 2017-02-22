@@ -49,7 +49,7 @@ class QMLProperty {
     // object.
     this.$tidyupList = [];
 
-    this.$propertyId = ++propertyIds;
+    this.$objectId = this.$propertyId = ++propertyIds;
     this.evalTreeConnections = {};
     this.childEvalTreeConnections = 0;
   }

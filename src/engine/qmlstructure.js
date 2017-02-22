@@ -220,6 +220,7 @@ function serializeObj(object, path, backrefs, dups, pos) {
       if (object instanceof QMLMetaElement && "$children"===propname && prop instanceof Array && !prop.length) continue;
       if (top && "$class"===propname) continue;
       if (object instanceof QMLSignalDefinition && "parameters"===propname && prop instanceof Array && !prop.length) continue;
+      if (object instanceof QMLBinding && ["$objectId","$bindingId"].indexOf(propname)>=0) continue;
       if ("flags"===propname) {
         if (object instanceof QMLMethod) continue;
         else if (object instanceof QMLBinding && !prop) continue;

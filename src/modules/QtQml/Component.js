@@ -3,7 +3,7 @@ let componentIds = 0;
 class QMLComponent {
   constructor(meta, flags) {
 
-    this.$componentId = ++componentIds;
+    this.$objectId = this.$componentId = ++componentIds;
     this.$properties = {};
     QmlWeb.initMeta(this, {}, QMLComponent);
 

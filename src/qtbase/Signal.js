@@ -2,7 +2,7 @@ let signalIds = 0;
 
 class Signal {
   constructor(name, params = [], options = {}) {
-    this.$signalId = ++signalIds;
+    this.$objectId = this.$signalId = ++signalIds;
     this.$name = name;
     this.connectedSlots = [];
     this.obj = options.obj;

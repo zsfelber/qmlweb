@@ -80,6 +80,8 @@ class QMLBinding {
     // it may also fine tune other aspects, like bidirectionality of binding or
     // whether it is an alias
 
+    this.$objectId = this.$bindingId = ++bindingIds;
+
     // If flags is not passed, we decide it here.
     // If it is a block, we require a return statement. If it is a
     // formal code block it could though also be a object definition, so we need to
@@ -255,10 +257,6 @@ class QMLBinding {
    * Compile binding. Afterwards you may call binding.eval/get/set/run to evaluate.
    */
   compile() {
-    if (!this.$bindingId) {
-      this.$bindingId = ++bindingIds;
-    }
-
     this.compiled = true;
 
     if (this.flags & QmlWeb.QMLBindingFlags.User) {
