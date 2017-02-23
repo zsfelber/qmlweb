@@ -5,36 +5,46 @@
  * Removes dot segments in given path component, as described in
  * RFC 3986, section 5.2.4.
  *
+  // Remove duplicate slashes and dot segments in the path
+
  * @param {string} path A non-empty path component.
  * @return {string} Path component with removed dot segments.
  */
-function removeDotSegments(path) {
-  // path.startsWith("/") is not supported in some browsers
-  let leadingSlash = path && path[0] === "/";
+function normalizePath(path) {
+  // path.starts/endsWith("/") is not supported in some browsers
   const segments = path.split("/");
   const out = [];
+  const back = [];
+  let root = "";
 
-  for (let pos = 0; pos < segments.length;) {
-    const segment = segments[pos++];
+  let trailingSlash = 0;
+  for (let pos = 0; pos < segments.length; pos++) {
+    const segment = segments[pos];
 
     if (segment === ".") {
-      if (leadingSlash && pos === segments.length) {
-        out.push("");
-      }
+      trailingSlash = false;
     } else if (segment === "..") {
-      if (out.length > 1 || out.length === 1 && out[0] !== "") {
+      if (out.length) {
         out.pop();
+      } else {
+        back.unshift("..");
       }
-      if (leadingSlash && pos === segments.length) {
-        out.push("");
-      }
-    } else {
+      trailingSlash = false;
+    } else if (segment !== "") {
       out.push(segment);
-      leadingSlash = true;
+      trailingSlash = false;
+    } else {
+      if (pos === 0) {
+        root = "/";
+      }
+      trailingSlash = true;
     }
   }
+  if (trailingSlash) {
+    out.push("");
+  }
 
-  return out.join("/");
+  return root + back.concat(out).join("/");
 }
 
 function resolveBasePath(uri) {
@@ -290,11 +300,18 @@ function $resolvePath(file, basePathUrl) {
   } else {
     path = `${path}${file}`;
   }
-
+  let url;
   // Remove duplicate slashes and dot segments in the path
-  path = removeDotSegments(path.replace(/([^:][/])[/]+/g, "$1"));
+  if (!basePathUrl.port) {
+    path = `${basePathUrl.authority}${path}`;
+    path = normalizePath(path);
+    url = `${basePathUrl.scheme}${path}`;
+  } else {
+    path = normalizePath(path);
+    url = `${basePathUrl.scheme}${basePathUrl.authority}${path}`;
+  }
 
-  return `${basePathUrl.scheme}${basePathUrl.authority}${path}`;
+  return url;
 }
 
 // Return a DOM-valid path to load the image (fileURL is an already-resolved
@@ -380,7 +397,7 @@ function $instanceOf(o, typestring, component) {
 }
 
 
-QmlWeb.removeDotSegments = removeDotSegments;
+QmlWeb.normalizePath = normalizePath;
 
 QmlWeb.resolveBasePath = resolveBasePath;
 
