@@ -238,7 +238,7 @@ function $parseUrl(uri, allowLocal) {
     if (match[1]===undefined) match[1]="";
     if (match[2]===undefined) match[2]="";
     if (match[4]===undefined) match[4]="";
-    const pref = match[2]?"//":"";                 // leading slash (omit unnecessary ones)
+    const pref = match[2].length>=2?"//":"";       // leading slash (omit unnecessary ones)
                                                    // htpp://a.com/a -> /     qrc:/a/b/c -> ''      qrc:///a/b/c -> /       qrc://localhost:8080/b/c -> /
                                                    // a/b/c -> ''             /a/b/c -> ''          //a/b/c -> /
     const au0 = match[3]+match[4];                 // host:port or path first
