@@ -170,7 +170,7 @@ class QMLComponent {
         if (meta.$file !== meta.clazz.$file) {
           const uri1 = QmlWeb.$parseUrl(meta.$file, true), uri2 = QmlWeb.$parseUrl(meta.clazz.$file, true);
           if (!uri1 || !uri2 || uri1.path !== uri2.path) {
-            if (!QmlWeb.isTesting || !uri1 || !uri2 || (uri1.path !== "/base"+uri2.path && uri2.path !== "/base"+uri1.path)) {
+            if (!QmlWeb.isTesting || !uri1 || !uri2 || (uri1.path !== "/"+uri2.path && uri2.path !== "/"+uri1.path && uri1.path !== "/base"+uri2.path && uri2.path !== "/base"+uri1.path)) {
               console.warn((QmlWeb.isTesting?"testing  ":"")+"$file-s in Component and class differ :  meta.$file:'"+meta.$file+"' === meta.clazz.$file:'"+meta.clazz.$file+"'  paths:"+(uri1?uri1.path:"<null>")+" vs "+(uri2?uri2.path:"<null>"));
             }
           }

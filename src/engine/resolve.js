@@ -238,13 +238,14 @@ function $parseUrl(uri, allowLocal) {
     if (match[1]===undefined) match[1]="";
     if (match[2]===undefined) match[2]="";
     if (match[4]===undefined) match[4]="";
-    const pref = match[2].length>=2?"//":"";       // leading slash (omit unnecessary ones)
+    const abs = match[2].length>=2;
+    const pref = abs?"//":pref;                    // leading slash (omit unnecessary ones)
                                                    // htpp://a.com/a -> /     qrc:/a/b/c -> ''      qrc:///a/b/c -> /       qrc://localhost:8080/b/c -> /
                                                    // a/b/c -> ''             /a/b/c -> ''          //a/b/c -> /
     const au0 = match[3]+match[4];                 // host:port or path first
-    const au = pref ? au0 : "";                    // host:port
+    const au = abs ? au0 : "";                     // host:port
     const scheme = match[1];                       // htpp:  qrc:
-    const path = au ? match[6] : au0+match[6];     // htpp://a.com/a -> a     qrc:/a/b/c -> a/b/c   qrc:///a/b/c -> /a/b/c   qrc://localhost:8080/b/c -> /b/c
+    const path = abs ? match[6] : au0+match[6];    // htpp://a.com/a -> a     qrc:/a/b/c -> a/b/c   qrc:///a/b/c -> /a/b/c   qrc://localhost:8080/b/c -> /b/c
                                                    // a/b/c -> a/b/c          /a/b/c -> /a/b/c      //a/b/c -> /a/b/c
     const file = match[7];
     const buri0 = scheme + pref + au;
