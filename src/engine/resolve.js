@@ -249,25 +249,36 @@ function $parseURL(uri) {
 }
 
 function $parseURLlong(uri, allowLocal) {
-  //                        scheme             host     :port   path           file
-  const match = uri.match(/^([^/:]*:[/])?([/]?)([^/:]*)(:(\d*))?([/]|[/].+?[/])([^/]*)$/);
+  //                        scheme           host     :port   path           file
+  const match = uri.match(/^([^/:]*:)?([/]*?)([^/:]*)(:(\d*))?([/]|[/].+?[/])([^/]*)$/);
   if (match && (match[1] || allowLocal)) {
+    if (match[1]===undefined) match[1]="";
     if (match[2]===undefined) match[2]="";
     if (match[4]===undefined) match[4]="";
-    const au = match[3]+match[4];
-    const scheme = au ? match[1]+match[2] : match[1];
-    const path = au ? match[6] : match[2]+match[6];
-    return {
+    const pref = match[2];                         // leading slash(es)
+                                                   // htpp://a.com/a -> /     qrc:/a/b/c -> ''      qrc:///a/b/c -> //       qrc://localhost:8080/b/c -> /
+                                                   // a/b/c -> ''             /a/b/c -> ''          //a/b/c -> '/'
+    const au0 = match[3]+match[4];                 // host:port or path first
+    const au = pref.length>=2 ? au0 : "";          // host:port
+    const scheme = match[1];                       // htpp:  qrc:
+    const path = au ? match[6] : pref+au0+match[6];// htpp://a.com/a -> a     qrc:/a/b/c -> a/b/c   qrc:///a/b/c -> /a/b/c   qrc://localhost:8080/b/c -> /b/c
+                                                   // a/b/c -> a/b/c          /a/b/c -> /a/b/c      //a/b/c -> /a/b/c
+    const url = {
       uri: uri,
       baseUri: scheme + au + path,
       scheme: scheme,
-      prefix: match[2],
+      prefix: pref,
       host: match[3],
       authority: au,
       port: match[5],
       path: path,
       file: match[7],
     };
+    if (url.port && !au) {
+      console.warn("Bad url, missing leading '/' after scheme (first tag with port number interpreted as file path item) : "+uri);
+    }
+
+    return url;
   }
   return undefined;
 }
@@ -302,14 +313,8 @@ function $resolvePath(file, basePathUrl) {
   }
   let url;
   // Remove duplicate slashes and dot segments in the path
-  if (!basePathUrl.port) {
-    path = `${basePathUrl.authority}${path}`;
-    path = normalizePath(path);
-    url = `${basePathUrl.scheme}${path}`;
-  } else {
-    path = normalizePath(path);
-    url = `${basePathUrl.scheme}${basePathUrl.authority}${path}`;
-  }
+  path = normalizePath(path);
+  url = `${basePathUrl.scheme}${basePathUrl.authority}${path}`;
 
   return url;
 }
@@ -321,7 +326,7 @@ function $resolveImageURL(fileURL) {
   // If we are within the resource system, look up a "real" path that can be
   // used by the DOM. If not found, return the path itself without the
   // "qrc:/" scheme.
-  if (uri && uri.scheme === "qrc:/") {
+  if (uri && (uri.scheme === "qrc:")) {
     return QmlWeb.qrc[uri.path] || uri.path;
   }
 

@@ -57,8 +57,8 @@ QmlWeb.registerQmlType({
 
     try {
       QmlWeb.engine.$component = this.$component;
-      const path = QmlWeb.resolveBasePath(fileName);
-      let $class = path.file;
+      const url = QmlWeb.resolveBasePath(fileName);
+      let $class = url.path + url.file;
       if (/\.qml$/.test($class)) {
         $class = $class.substring(0, $class.length-4);
       }

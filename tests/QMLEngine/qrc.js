@@ -10,7 +10,7 @@ describe("QMLEngine.qrc", function() {
     ["", "Basic.qml",
       "import QtQuick 2.0\n Item { property int value: 42 }"
     ],
-    ["/SomeDir", "SomeFile.qml",
+    ["SomeDir", "SomeFile.qml",
       "import QtQuick 2.0\n Item { property int value: 43 }"
     ],
     ["", "QMLImportRelative.qml",
@@ -19,10 +19,10 @@ describe("QMLEngine.qrc", function() {
     ["", "QMLImportRelativeQualified.qml",
       'import QtQuick 2.0\n import "SomeDir" as SomeDir\n SomeDir.SomeFile { }'
     ],
-    ["/SomeDir", "QMLImportRelativeDots.qml",
+    ["SomeDir", "QMLImportRelativeDots.qml",
       'import QtQuick 2.0\n import "../SomeDir/../SomeDir/./"\n SomeFile { }'
     ],
-    ["/SomeDir", "QMLImportRelativeDotsQualified.qml",
+    ["SomeDir", "QMLImportRelativeDotsQualified.qml",
       'import QtQuick 2.0\n import "../SomeDir/../SomeDir/./" as SomeDir\n' +
       "SomeDir.SomeFile { }"
     ],
@@ -32,7 +32,7 @@ describe("QMLEngine.qrc", function() {
     ["", "QMLImportAbsoluteQualified.qml",
       'import QtQuick 2.0\n import "/SomeDir" as SomeDir\n SomeDir.SomeFile { }'
     ],
-    ["/SomeDir", "QMLImportLocal.qml",
+    ["SomeDir", "QMLImportLocal.qml",
       "import QtQuick 2.0\n SomeFile { }"
     ],
     ["", "JavaScriptImport.qml",
@@ -48,7 +48,7 @@ describe("QMLEngine.qrc", function() {
     ["", "LoaderAbsolute.qml",
       'import QtQuick 2.0\n Loader { source: "/SomeDir/SomeFile.qml" }'
     ],
-    ["/SomeDir", "LoaderRelativeDots.qml",
+    ["SomeDir", "LoaderRelativeDots.qml",
       'import QtQuick 2.0\n Loader { source: "../SomeDir/./SomeFile.qml" }'
     ]
   ];
@@ -73,63 +73,63 @@ describe("QMLEngine.qrc", function() {
   }
 
   it("basic", function() {
-    var qml = loadQmlFile("qrc:///Basic.qml", this.div);
+    var qml = loadQmlFile("qrc:/Basic.qml", this.div);
     expect(qml.value).toBe(42);
   });
 
   it("QML import relative", function() {
-    var qml = loadQmlFile("qrc:///QMLImportRelative.qml", this.div);
+    var qml = loadQmlFile("qrc:/QMLImportRelative.qml", this.div);
     expect(qml.value).toBe(43);
   });
 
   it("QML import relative qualified", function() {
-    var qml = loadQmlFile("qrc:///QMLImportRelativeQualified.qml", this.div);
+    var qml = loadQmlFile("qrc:/QMLImportRelativeQualified.qml", this.div);
     expect(qml.value).toBe(43);
   });
 
   it("QML import relative dots", function() {
-    var qml = loadQmlFile("qrc:///SomeDir/QMLImportRelativeDots.qml", this.div);
+    var qml = loadQmlFile("qrc:/SomeDir/QMLImportRelativeDots.qml", this.div);
     expect(qml.value).toBe(43);
   });
 
   it("QML import relative dots qualified", function() {
-    var qml = loadQmlFile("qrc:///SomeDir/QMLImportRelativeDotsQualified.qml",
+    var qml = loadQmlFile("qrc:/SomeDir/QMLImportRelativeDotsQualified.qml",
       this.div);
     expect(qml.value).toBe(43);
   });
 
   it("QML import absolute", function() {
-    var qml = loadQmlFile("qrc:///QMLImportAbsolute.qml", this.div);
+    var qml = loadQmlFile("qrc:/QMLImportAbsolute.qml", this.div);
     expect(qml.value).toBe(43);
   });
 
   it("QML import absolute qualified", function() {
-    var qml = loadQmlFile("qrc:///QMLImportAbsoluteQualified.qml", this.div);
+    var qml = loadQmlFile("qrc:/QMLImportAbsoluteQualified.qml", this.div);
     expect(qml.value).toBe(43);
   });
 
   it("QML import local", function() {
-    var qml = loadQmlFile("qrc:///SomeDir/QMLImportLocal.qml", this.div);
+    var qml = loadQmlFile("qrc:/SomeDir/QMLImportLocal.qml", this.div);
     expect(qml.value).toBe(43);
   });
 
   it("JavaScript import", function() {
-    var qml = loadQmlFile("qrc:///JavaScriptImport.qml", this.div);
+    var qml = loadQmlFile("qrc:/JavaScriptImport.qml", this.div);
     expect(qml.value).toBe(44);
   });
 
   it("Loader relative", function() {
-    var qml = loadQmlFile("qrc:///LoaderRelative.qml", this.div);
+    var qml = loadQmlFile("qrc:/LoaderRelative.qml", this.div);
     expect(qml.item.value).toBe(43);
   });
 
   it("Loader absolute", function() {
-    var qml = loadQmlFile("qrc:///LoaderAbsolute.qml", this.div);
+    var qml = loadQmlFile("qrc:/LoaderAbsolute.qml", this.div);
     expect(qml.item.value).toBe(43);
   });
 
   it("Loader relative dots", function() {
-    var qml = loadQmlFile("qrc:///SomeDir/LoaderRelativeDots.qml", this.div);
+    var qml = loadQmlFile("qrc:/SomeDir/LoaderRelativeDots.qml", this.div);
     expect(qml.item.value).toBe(43);
   });
 });

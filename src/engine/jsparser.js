@@ -20,7 +20,7 @@ function importJavascript(file, importAlias, contextMap) {
   const owner = $p.$top.$ownerObject;
 
   let jsData;
-  if (uri.scheme === "qrc:/") {
+  if (uri.scheme === "qrc:") {
     jsData = QmlWeb.qrc[uri.path];
   } else {
     QmlWeb.loadParser();

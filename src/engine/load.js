@@ -8,7 +8,7 @@ function loadClass(file) {
   }
 
   let clazz;
-  if (uri.scheme === "qrc:/") {
+  if (uri.scheme === "qrc:") {
     let t0 = clazz;
     clazz = QmlWeb.qrc[uri.path];
     if (!clazz) {
@@ -131,7 +131,7 @@ function readQmlDir(url) {
   }
 
   let qmldir;
-  if (parsedUrl.scheme === "qrc:/") {
+  if (parsedUrl.scheme === "qrc:") {
     qmldir = QmlWeb.qrc[parsedUrl.path];
   } else {
     qmldir = getUrlContents(qmldirFileUrl, true) || undefined;

@@ -1,6 +1,7 @@
 // We need to disable Shadow DOM isolation for tests, as we inspect
 // the DOM contents of QML elements through .children
 QmlWeb.useShadowDom = false;
+QmlWeb.isTesting = true;
 
 var engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
 
