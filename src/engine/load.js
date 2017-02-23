@@ -1,7 +1,7 @@
 // Load resolved file, parse and construct as Component class (.qml)
 function loadClass(file) {
 
-  const uri = QmlWeb.$parseURI(file);
+  const uri = QmlWeb.$parseURL(file);
   if (!uri) {
     QmlWeb.warn("qmlweb loadClass: Empty url :", file);
     return undefined;
@@ -124,7 +124,7 @@ function readQmlDir(url) {
   // Q1: when this happen?
   const qmldirFileUrl = url.length > 0 ? `${url}/qmldir` : "qmldir";
 
-  const parsedUrl = QmlWeb.$parseURI(qmldirFileUrl);
+  const parsedUrl = QmlWeb.$parseURL(qmldirFileUrl);
   if (!parsedUrl) {
     QmlWeb.warn("Unable to parse directory url : "+qmldirFileUrl);
     return false;

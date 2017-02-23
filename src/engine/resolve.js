@@ -48,14 +48,14 @@ function normalizePath(path) {
 }
 
 function resolveBasePath(uri) {
-  let pu = $parseURIlong(uri);
+  let pu = $parseURLlong(uri);
   if (!pu) {
     if (!this.$basePathUrlA) {
       // Create an anchor element to get the absolute path from the DOM
       this.$basePathUrlA = document.createElement("a");
     }
     this.$basePathUrlA.href = uri;
-    pu = $parseURIlong(this.$basePathUrlA.href);
+    pu = $parseURLlong(this.$basePathUrlA.href);
     if (!pu) {
       throw new QmlWeb.AssertionError("Assertion failed : <A> element href should be absolute url, but it is : ("+uri+" ->) "+this.$basePathUrlA.href)
     }
@@ -153,7 +153,7 @@ function resolveImport(name) {
   // If the Component is not found, and it is not a URL, look for "name" in
   // this context's importSearchPaths
   if (!clazz) {
-    const nameIsUrl = $parseURI(name) !== undefined;
+    const nameIsUrl = $parseURL(name) !== undefined;
     if (!nameIsUrl) {
       const moreDirs = importSearchPaths(loaderComponent);
       for (let i = 0; i < moreDirs.length; i++) {
@@ -231,7 +231,7 @@ function resolveClassImport(name) {
 }
 
 // This parses the full URL into scheme and path
-function $parseURI(uri) {
+function $parseURL(uri) {
   //                        scheme      fullpath
   const match = uri.match(/^([^/]*?:[/])(.*)$/);
   if (match) {
@@ -248,10 +248,10 @@ function $parseURI(uri) {
   return undefined;
 }
 
-function $parseURIlong(uri) {
-  //                        scheme            host     :port   path           file
-  const match = uri.match(/^([^/:]*:[/])([/]?)([^/:]*)(:(\d*))?([/]|[/].+?[/])([^/]*)$/);
-  if (match) {
+function $parseURLlong(uri, allowLocal) {
+  //                        scheme             host     :port   path           file
+  const match = uri.match(/^([^/:]*:[/])?([/]?)([^/:]*)(:(\d*))?([/]|[/].+?[/])([^/]*)$/);
+  if (match && (match[1] || allowLocal)) {
     if (match[2]===undefined) match[2]="";
     if (match[4]===undefined) match[4]="";
     const au = match[3]+match[4];
@@ -289,7 +289,7 @@ function $resolvePath(file, basePathUrl) {
     return file;
   }
 
-  //const basePathURI = $parseURI(basePath);
+  //const basePathURI = $parseURL(basePath);
   if (!basePathUrl) {
     return file;
   }
@@ -317,7 +317,7 @@ function $resolvePath(file, basePathUrl) {
 // Return a DOM-valid path to load the image (fileURL is an already-resolved
 // URL)
 function $resolveImageURL(fileURL) {
-  const uri = $parseURI(fileURL);
+  const uri = $parseURL(fileURL);
   // If we are within the resource system, look up a "real" path that can be
   // used by the DOM. If not found, return the path itself without the
   // "qrc:/" scheme.
@@ -362,7 +362,7 @@ function $instanceOf(o, typestring, component) {
   case "time":
     return typeof(o) === "date";
   case "url":
-    return typeof(o) === "string" ? $parseURI(o) : false;
+    return typeof(o) === "string" ? $parseURL(o) : false;
   case "RegExp":
     if (o instanceof RegExp) return true;
     else break;
@@ -417,9 +417,9 @@ QmlWeb.resolveImport = resolveImport;
 QmlWeb.resolveClassImport = resolveClassImport;
 
 // This parses the full URL into scheme and path
-QmlWeb.$parseURI = $parseURI;
+QmlWeb.$parseURL = $parseURL;
 
-QmlWeb.$parseURIlong = $parseURIlong;
+QmlWeb.$parseURLlong = $parseURLlong;
 
 // Return a path to load the file
 QmlWeb.$resolvePath = $resolvePath;
