@@ -60,9 +60,9 @@ describe("QMLEngine.qrc", function() {
     const str = qrc_files[i][1];
 
     var data;
-    if (name.match(/\.qml$/) !== null) {
+    if (path.match(/\.qml$/) !== null) {
       data = QmlWeb.parseQML(str, path);
-    } else if (name.match(/\.js$/) !== null) {
+    } else if (path.match(/\.js$/) !== null) {
       data = QmlWeb.jsparse(str);
     } else {
       data = str;
