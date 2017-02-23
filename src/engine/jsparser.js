@@ -2,7 +2,7 @@
 function importJavascript(file, importAlias, contextMap) {
   const engine = QmlWeb.engine;
 
-  const url = QmlWeb.$parseURL(file);
+  const url = QmlWeb.$parseUrl(file);
   if (!url) {
     return undefined;
   }

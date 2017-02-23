@@ -31,7 +31,7 @@ QmlWeb.qrcModules = {};
 QmlWeb.qrc = {};
 
 QmlWeb.addQrc = function(path, impl) {
-  const url = QmlWeb.$parseUrl(path);
+  const url = QmlWeb.$parseUrl(path, true);
 
   var m = QmlWeb.qrcModules[url.baseUri];
   if (!m) {

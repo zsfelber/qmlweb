@@ -48,14 +48,14 @@ function normalizePath(path) {
 }
 
 function resolveBasePath(uri) {
-  let pu = $parseURL(uri);
+  let pu = $parseUrl(uri);
   if (!pu) {
     if (!this.$basePathUrlA) {
       // Create an anchor element to get the absolute path from the DOM
       this.$basePathUrlA = document.createElement("a");
     }
     this.$basePathUrlA.href = uri;
-    pu = $parseURL(this.$basePathUrlA.href);
+    pu = $parseUrl(this.$basePathUrlA.href);
     if (!pu) {
       throw new QmlWeb.AssertionError("Assertion failed : <A> element href should be absolute url, but it is : ("+uri+" ->) "+this.$basePathUrlA.href)
     }
@@ -231,7 +231,7 @@ function resolveClassImport(name) {
 }
 
 // URL parser method
-function $parseURL(uri, allowLocal) {
+function $parseUrl(uri, allowLocal) {
   //                        scheme    pref  host     :port   path           file
   const match = uri.match(/^([^/:]+:)?([/]*)([^/:]*)(:(\d*))?([/]|[/].+?[/])([^/]*)$/);
   if (match && (match[1] || allowLocal)) {
@@ -311,7 +311,7 @@ function $resolvePath(file, basePathUrl) {
 // Return a DOM-valid path to load the image (fileURL is an already-resolved
 // URL)
 function $resolveImageURL(fileURL) {
-  const url = $parseURL(fileURL);
+  const url = $parseUrl(fileURL);
   // If we are within the resource system, look up a "real" path that can be
   // used by the DOM. If not found, return the path itself without the
   // "qrc:/" scheme.
@@ -356,7 +356,7 @@ function $instanceOf(o, typestring, component) {
   case "time":
     return typeof(o) === "date";
   case "url":
-    return typeof(o) === "string" ? $parseURL(o) : false;
+    return typeof(o) === "string" ? $parseUrl(o) : false;
   case "RegExp":
     if (o instanceof RegExp) return true;
     else break;
@@ -411,9 +411,9 @@ QmlWeb.resolveImport = resolveImport;
 QmlWeb.resolveClassImport = resolveClassImport;
 
 // This parses the full URL into scheme and path
-QmlWeb.$parseURL = $parseURL;
+QmlWeb.$parseUrl = $parseUrl;
 
-QmlWeb.$parseURL = $parseURL;
+QmlWeb.$parseUrl = $parseUrl;
 
 // Return a path to load the file
 QmlWeb.$resolvePath = $resolvePath;
