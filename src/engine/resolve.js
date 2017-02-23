@@ -262,6 +262,7 @@ function $parseUrl(uri, allowLocal) {
       port: match[5],
       path: path,
       file: file,
+      path2: path + file
     };
     if (url.port && !au) {
       console.warn("Bad url, missing leading '/' after scheme (first tag with port number interpreted as file path item) : "+uri);
@@ -316,7 +317,7 @@ function $resolveImageURL(fileURL) {
   // used by the DOM. If not found, return the path itself without the
   // "qrc:/" scheme.
   if (url && (url.scheme === "qrc:")) {
-    return QmlWeb.qrc[url.path] || url.path;
+    return QmlWeb.qrc[url.path2] || url.path2;
   }
 
   // Something we can't parse, just pass it through
