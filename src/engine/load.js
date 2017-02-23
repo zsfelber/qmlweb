@@ -151,8 +151,10 @@ function readQmlDir(url) {
     const parsedPathUrl = QmlWeb.$parseURL(path);
     if (parsedPathUrl) {
       return parsedPathUrl.uri;
-    } else {
+    } else if (path[0]==="/"){
       return `${parsedUrl.baseUri0}${path}`;
+    } else {
+      return `${parsedUrl.baseUri}${path}`;
     }
   }
 

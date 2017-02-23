@@ -30,30 +30,23 @@ More details here: http://doc.qt.io/qt-5/qml-url.html
 QmlWeb.qrcModules = {};
 QmlWeb.qrc = {};
 
-QmlWeb.addQrc = function(module, name, impl) {
-  const rxm = /^[/]+([/].*)$/.exec(module);
-  if (rxm) {
-    module = rxm[1];
-  }
+QmlWeb.addQrc = function(path, impl) {
+  const url = QmlWeb.$parseUrl(path);
 
-  const murl = "qrc:/"+module;
-  const mfurl = murl+"/"+name;
-  const fname = module+"/"+name;
-
-  var m = QmlWeb.qrcModules[murl];
+  var m = QmlWeb.qrcModules[url.baseUri];
   if (!m) {
-    QmlWeb.qrcModules[murl] = QmlWeb.qrcModules["qrc://"+module] = m = {};
+    QmlWeb.qrcModules[url.baseUri] = m = {};
   }
-  var match=/(.*)\.qml$/.exec(name);
+  var match=/(.*)\.qml$/.exec(url.file);
   var className;
   if (match) {
     className = match[1];
   } else {
-    className = name;
+    className = url.file;
   }
-  m[className] = mfurl;
-  QmlWeb.qrc["/"+fname] = QmlWeb.qrc[fname] = impl;
+  m[className] = url.uri;
+  QmlWeb.qrc[url.path + url.file] = impl;
   impl.$class = "Component";
-  impl.$name = name;
-  impl.$file = mfurl;
+  impl.$name = className;
+  impl.$file = url.uri;
 }
