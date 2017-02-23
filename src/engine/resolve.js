@@ -22,14 +22,14 @@ function normalizePath(path) {
     const segment = segments[pos];
 
     if (segment === ".") {
-      trailingSlash = false;
+      trailingSlash = true;
     } else if (segment === "..") {
       if (out.length) {
         out.pop();
       } else {
         back.unshift("..");
       }
-      trailingSlash = false;
+      trailingSlash = true;
     } else if (segment !== "") {
       out.push(segment);
       trailingSlash = false;
