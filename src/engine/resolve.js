@@ -246,6 +246,7 @@ function $parseURL(uri, allowLocal) {
     const scheme = match[1];                       // htpp:  qrc:
     const path = au ? match[6] : au0+match[6];     // htpp://a.com/a -> a     qrc:/a/b/c -> a/b/c   qrc:///a/b/c -> /a/b/c   qrc://localhost:8080/b/c -> /b/c
                                                    // a/b/c -> a/b/c          /a/b/c -> /a/b/c      //a/b/c -> /a/b/c
+    const file = match[7];
     const buri0 = scheme + pref + au;
     const buri = buri0 + path;
     uri = buri + file;
@@ -260,7 +261,7 @@ function $parseURL(uri, allowLocal) {
       authority: au,
       port: match[5],
       path: path,
-      file: match[7],
+      file: file,
     };
     if (url.port && !au) {
       console.warn("Bad url, missing leading '/' after scheme (first tag with port number interpreted as file path item) : "+uri);
