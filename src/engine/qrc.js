@@ -36,11 +36,13 @@ QmlWeb.addQrc = function(module, name, impl) {
     module = rxm[1];
   }
 
-  var murl = "qrc:/"+module;
+  const murl = "qrc:/"+module;
+  const mfurl = murl+"/"+name;
+  const fname = module+"/"+name;
 
   var m = QmlWeb.qrcModules[murl];
   if (!m) {
-    QmlWeb.qrcModules[murl] = QmlWeb.qrcModules["/"+murl] = m = {};
+    QmlWeb.qrcModules[murl] = QmlWeb.qrcModules["qrc://"+module] = m = {};
   }
   var match=/(.*)\.qml$/.exec(name);
   var className;
@@ -49,8 +51,9 @@ QmlWeb.addQrc = function(module, name, impl) {
   } else {
     className = name;
   }
-  m[className] = "qrc:/"+module+"/"+name;
-  QmlWeb.qrc["/"+module+"/"+name] = QmlWeb.qrc[module+"/"+name] = impl;
+  m[className] = mfurl;
+  QmlWeb.qrc["/"+fname] = QmlWeb.qrc[fname] = impl;
   impl.$class = "Component";
   impl.$name = name;
+  impl.$file = mfurl;
 }

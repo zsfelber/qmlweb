@@ -175,12 +175,15 @@ function loadImport(entry, component) {
         }
       }
     }
+    if (content) {
+      content.qmldir = true;
+    }
 
     // NOTE Making precompiled qrc entries available in imports :
     var qrcModule = QmlWeb.qrcModules[qrcName];
     if (qrcModule) {
       if (!content) {
-        content = {};
+        content = {qmldir:false};
       }
       content.qrcs = qrcModule;
     }
@@ -190,11 +193,11 @@ function loadImport(entry, component) {
   }
 
   /* If there is no qmldir, add these directories to the list of places to
-    * search for components (within this import scope). "noqmldir" is
+    * search for components (within this import scope). "qmldir:false" is
     * inserted into the qmldir cache to avoid future attempts at fetching
     * the qmldir file, but we always need to the call to
     * "addComponentImportPath" for these sorts of directories. */
-  if (!content || content === "noqmldir") {
+  if (!content || !content.qmldir) {
     if (nameIsDir) {
       if (entry[3]) {
         /* Use entry[1] directly, as we don't want to include the
@@ -207,8 +210,10 @@ function loadImport(entry, component) {
       }
     }
 
-    engine.qmldirsContents[name] = "noqmldir";
-    return;
+    if (!content) {
+      content = {qmldir:false};
+      engine.qmldirsContents[name] = content;
+    }
   }
 
   // NOTE we copy it to current component namespace (import context):

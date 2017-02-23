@@ -168,9 +168,7 @@ class QMLComponent {
         //  meta.clazz.$file = meta.clazz.$file.toString();
 
         if (meta.$file !== meta.clazz.$file) {
-          if (!meta.clazz.$file.endsWith(meta.$file)) {
-            throw new QmlWeb.AssertionError("Assertion failed. $file-s in Component and class differ :  meta.$file:'"+meta.$file+"' === meta.clazz.$file:'"+meta.clazz.$file+"'");
-          }
+          console.warn("$file-s in Component and class differ :  meta.$file:'"+meta.$file+"' === meta.clazz.$file:'"+meta.clazz.$file+"'");
         }
       }
 

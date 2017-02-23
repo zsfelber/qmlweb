@@ -19,9 +19,10 @@ function loadClass(file) {
     // QmlWeb.qrc contains pre-parsed Component objects, but they still need
     // convertToEngine called on them.
     if (!clazz.$class) {
-       QmlWeb.warn("Using legacy semi-pre-parsed qrc is deprecated : "+src);
-       clazz = QmlWeb.convertToEngine(clazz);
-       clazz.$name = t0.$name;
+      QmlWeb.warn("Using legacy semi-pre-parsed qrc is deprecated : "+src);
+      clazz = QmlWeb.convertToEngine(clazz);
+      clazz.$name = t0.$name;
+      clazz.$file = file;
     }
   } else {
     const src = QmlWeb.getUrlContents(file, true);
@@ -32,6 +33,7 @@ function loadClass(file) {
 
     QmlWeb.log("qmlweb loadClass: Loading file:", file);
     clazz = QmlWeb.parseQML(src, file);
+    clazz.$file = file;
   }
 
   if (!clazz) {
@@ -45,7 +47,6 @@ function loadClass(file) {
     return undefined;
   }
 
-  clazz.$file = file;
 
   return clazz;
 }
