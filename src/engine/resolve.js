@@ -48,14 +48,14 @@ function normalizePath(path) {
 }
 
 function resolveBasePath(uri) {
-  let pu = $parseURLlong(uri);
+  let pu = $parseURL(uri);
   if (!pu) {
     if (!this.$basePathUrlA) {
       // Create an anchor element to get the absolute path from the DOM
       this.$basePathUrlA = document.createElement("a");
     }
     this.$basePathUrlA.href = uri;
-    pu = $parseURLlong(this.$basePathUrlA.href);
+    pu = $parseURL(this.$basePathUrlA.href);
     if (!pu) {
       throw new QmlWeb.AssertionError("Assertion failed : <A> element href should be absolute url, but it is : ("+uri+" ->) "+this.$basePathUrlA.href)
     }
@@ -230,38 +230,21 @@ function resolveClassImport(name) {
   }
 }
 
-// This parses the full URL into scheme and path
-function $parseURL(uri) {
-  //                        scheme      fullpath
-  const match = uri.match(/^([^/]*?:[/])(.*)$/);
-  if (match) {
-    return {
-      uri: uri,
-      scheme: match[1],
-      host: "",
-      authority: "",
-      port: "",
-      path: match[2],
-      file: ""
-    };
-  }
-  return undefined;
-}
-
-function $parseURLlong(uri, allowLocal) {
-  //                        scheme           host     :port   path           file
-  const match = uri.match(/^([^/:]*:)?([/]*?)([^/:]*)(:(\d*))?([/]|[/].+?[/])([^/]*)$/);
+// URL parser method
+function $parseURL(uri, allowLocal) {
+  //                        scheme    pref   host     :port   path           file
+  const match = uri.match(/^([^/:]+:)?([/]*?)([^/:]*)(:(\d*))?([/]|[/].+?[/])([^/]*)$/);
   if (match && (match[1] || allowLocal)) {
     if (match[1]===undefined) match[1]="";
     if (match[2]===undefined) match[2]="";
     if (match[4]===undefined) match[4]="";
-    const pref = match[2];                         // leading slash(es)
-                                                   // htpp://a.com/a -> /     qrc:/a/b/c -> ''      qrc:///a/b/c -> //       qrc://localhost:8080/b/c -> /
-                                                   // a/b/c -> ''             /a/b/c -> ''          //a/b/c -> '/'
+    const pref = match[2]?"/":"";                  // leading slash (omit unnecessary ones)
+                                                   // htpp://a.com/a -> /     qrc:/a/b/c -> ''      qrc:///a/b/c -> /       qrc://localhost:8080/b/c -> /
+                                                   // a/b/c -> ''             /a/b/c -> ''          //a/b/c -> /
     const au0 = match[3]+match[4];                 // host:port or path first
-    const au = pref.length>=2 ? au0 : "";          // host:port
+    const au = pref ? au0 : "";                    // host:port
     const scheme = match[1];                       // htpp:  qrc:
-    const path = au ? match[6] : pref+au0+match[6];// htpp://a.com/a -> a     qrc:/a/b/c -> a/b/c   qrc:///a/b/c -> /a/b/c   qrc://localhost:8080/b/c -> /b/c
+    const path = au ? match[6] : au0+match[6];     // htpp://a.com/a -> a     qrc:/a/b/c -> a/b/c   qrc:///a/b/c -> /a/b/c   qrc://localhost:8080/b/c -> /b/c
                                                    // a/b/c -> a/b/c          /a/b/c -> /a/b/c      //a/b/c -> /a/b/c
     const url = {
       uri: uri,
@@ -314,7 +297,7 @@ function $resolvePath(file, basePathUrl) {
   let url;
   // Remove duplicate slashes and dot segments in the path
   path = normalizePath(path);
-  url = `${basePathUrl.scheme}${basePathUrl.authority}${path}`;
+  url = `${basePathUrl.scheme}${basePathUrl.prefix}${basePathUrl.authority}${path}`;
 
   return url;
 }
@@ -424,7 +407,7 @@ QmlWeb.resolveClassImport = resolveClassImport;
 // This parses the full URL into scheme and path
 QmlWeb.$parseURL = $parseURL;
 
-QmlWeb.$parseURLlong = $parseURLlong;
+QmlWeb.$parseURL = $parseURL;
 
 // Return a path to load the file
 QmlWeb.$resolvePath = $resolvePath;
