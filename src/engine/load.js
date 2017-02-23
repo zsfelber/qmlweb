@@ -1,18 +1,18 @@
 // Load resolved file, parse and construct as Component class (.qml)
 function loadClass(file) {
 
-  const uri = QmlWeb.$parseURL(file);
-  if (!uri) {
+  const url = QmlWeb.$parseURL(file);
+  if (!url) {
     QmlWeb.warn("qmlweb loadClass: Empty url :", file);
     return undefined;
   }
 
   let clazz;
-  if (uri.scheme === "qrc:") {
+  if (url.scheme === "qrc:") {
     let t0 = clazz;
-    clazz = QmlWeb.qrc[uri.path];
+    clazz = QmlWeb.qrc[url.path];
     if (!clazz) {
-      QmlWeb.warn("qmlweb loadClass: Empty qrc entry :", uri.path);
+      QmlWeb.warn("qmlweb loadClass: Empty qrc entry :", url.path);
       return undefined;
     }
 
@@ -148,10 +148,12 @@ function readQmlDir(url) {
   // In that case, item path is meant to be absolute, and we have no need to
   // prefix it with base url
   function makeurl(path) {
-    if (path.indexOf(":/") > 0) {
-      return path;
+    const parsedPathUrl = QmlWeb.$parseURL(path);
+    if (parsedPathUrl) {
+      return parsedPathUrl.uri;
+    } else {
+      return `${parsedUrl.baseUri0}${path}`;
     }
-    return `${url}/${path}`;
   }
 
   const lines = qmldir.split(/\r?\n/);

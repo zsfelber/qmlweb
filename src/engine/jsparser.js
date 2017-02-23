@@ -2,8 +2,8 @@
 function importJavascript(file, importAlias, contextMap) {
   const engine = QmlWeb.engine;
 
-  const uri = QmlWeb.$parseURL(file);
-  if (!uri) {
+  const url = QmlWeb.$parseURL(file);
+  if (!url) {
     return undefined;
   }
 
@@ -13,18 +13,18 @@ function importJavascript(file, importAlias, contextMap) {
   /* it is cached to handle multiple includes of one */
   if ($p.$qmlJsIncludes === undefined) {
     $p.$qmlJsIncludes = {};
-  } else if (jsBinding = $p.$qmlJsIncludes[uri.uri]) {
+  } else if (jsBinding = $p.$qmlJsIncludes[url.uri]) {
     return jsBinding;
   }
 
   const owner = $p.$top.$ownerObject;
 
   let jsData;
-  if (uri.scheme === "qrc:") {
-    jsData = QmlWeb.qrc[uri.path];
+  if (url.scheme === "qrc:") {
+    jsData = QmlWeb.qrc[url.path];
   } else {
     QmlWeb.loadParser();
-    jsData = QmlWeb.jsparse(QmlWeb.getUrlContents(file));
+    jsData = QmlWeb.jsparse(QmlWeb.getUrlContents(url.uri));
   }
 
   if (!jsData) {
@@ -43,7 +43,7 @@ function importJavascript(file, importAlias, contextMap) {
     jsBinding.contextMap = contextMap = {};
   }
 
-  $p.$qmlJsIncludes[uri.uri] = jsBinding;
+  $p.$qmlJsIncludes[url.uri] = jsBinding;
   $p.$$_importAlias = importAlias;
   $p.$$_contextMap = contextMap;
 

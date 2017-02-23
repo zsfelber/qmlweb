@@ -128,7 +128,7 @@ function loadImport(entry, component) {
   let name = entry[1];
 
   // is it url to remote resource
-  const nameIsUrl = name.startsWith("//") || name.indexOf(":/") >= 0;
+  const nameIsUrl = /^(\w+):/.test(name)||name.startsWith("//");
   // is it a module name, e.g. QtQuick, QtQuick.Controls, etc
   const nameIsQualifiedModuleName = entry[4];
   // is it a js file

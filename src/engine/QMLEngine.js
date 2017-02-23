@@ -169,8 +169,8 @@ class QMLEngine {
     if (operationFlags & QmlWeb.QMLOperationState.Remote) {
       if (serverWsAddress !== undefined) {
         if (/^\d+$/.test(serverWsAddress)) {
-          var uri = QmlWeb.$parseURL(window.location.href);
-          wsUrl = "ws://"+uri.host+":"+(serverWsAddress?serverWsAddress:uri.port);
+          var url = QmlWeb.$parseURL(window.location.href);
+          wsUrl = "ws://"+url.host+":"+(serverWsAddress?serverWsAddress:url.port);
         } else {
           if (/^ws:[/]/.test(serverWsAddress)) {
             wsUrl = serverWsAddress;

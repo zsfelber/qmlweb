@@ -153,7 +153,7 @@ function resolveImport(name) {
   // If the Component is not found, and it is not a URL, look for "name" in
   // this context's importSearchPaths
   if (!clazz) {
-    const nameIsUrl = $parseURL(name) !== undefined;
+    const nameIsUrl = /^(\w+):/.test(name)||name.startsWith("//");
     if (!nameIsUrl) {
       const moreDirs = importSearchPaths(loaderComponent);
       for (let i = 0; i < moreDirs.length; i++) {
@@ -246,9 +246,14 @@ function $parseURL(uri, allowLocal) {
     const scheme = match[1];                       // htpp:  qrc:
     const path = au ? match[6] : au0+match[6];     // htpp://a.com/a -> a     qrc:/a/b/c -> a/b/c   qrc:///a/b/c -> /a/b/c   qrc://localhost:8080/b/c -> /b/c
                                                    // a/b/c -> a/b/c          /a/b/c -> /a/b/c      //a/b/c -> /a/b/c
+    const buri0 = scheme + pref + au;
+    const buri = buri0 + path;
+    uri = buri + file;
+
     const url = {
       uri: uri,
-      baseUri: scheme + au + path,
+      baseUri0: buri0,
+      baseUri: buri,
       scheme: scheme,
       prefix: pref,
       host: match[3],
@@ -268,36 +273,36 @@ function $parseURL(uri, allowLocal) {
 
 // Return a path to load the file
 function $resolvePath(file, basePathUrl) {
+  if (file && (/^(\w+):/.test(file)||file.startsWith("//"))) {
+    return file;
+  }
+
   if (!basePathUrl) {
     basePathUrl = QmlWeb.engine.$component.$basePathUrl;
   }
-  if (file===undefined || file===null) {
-    if (basePathUrl) {
-      file = basePathUrl.file;
-    }
-  }
 
-  // probably, replace :// with :/ ?
-  if (!file || file.indexOf(":/") !== -1 || file.startsWith("data:") ||
-    file.startsWith("blob:")) {
-    return file;
-  }
-
-  //const basePathURI = $parseURL(basePath);
   if (!basePathUrl) {
     return file;
   }
 
-  let path = basePathUrl.path;
+  if (file===undefined || file===null) {
+    file = basePathUrl.file;
+  }
+
+  if (!file) {
+    return file;
+  }
+
+  let path;
   if (file && file.charAt(0) === "/") {
     path = file;
   } else {
-    path = `${path}${file}`;
+    path = `${basePathUrl.path}${file}`;
   }
   let url;
   // Remove duplicate slashes and dot segments in the path
   path = normalizePath(path);
-  url = `${basePathUrl.scheme}${basePathUrl.prefix}${basePathUrl.authority}${path}`;
+  url = `${basePathUrl.baseUri0}${path}`;
 
   return url;
 }
@@ -305,12 +310,12 @@ function $resolvePath(file, basePathUrl) {
 // Return a DOM-valid path to load the image (fileURL is an already-resolved
 // URL)
 function $resolveImageURL(fileURL) {
-  const uri = $parseURL(fileURL);
+  const url = $parseURL(fileURL);
   // If we are within the resource system, look up a "real" path that can be
   // used by the DOM. If not found, return the path itself without the
   // "qrc:/" scheme.
-  if (uri && (uri.scheme === "qrc:")) {
-    return QmlWeb.qrc[uri.path] || uri.path;
+  if (url && (url.scheme === "qrc:")) {
+    return QmlWeb.qrc[url.path] || url.path;
   }
 
   // Something we can't parse, just pass it through
