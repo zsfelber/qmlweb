@@ -68,7 +68,7 @@ describe("QMLEngine.qrc", function() {
       data = str;
     }
 
-    QmlWeb.addQrc(path, name, data);
+    QmlWeb.addQrc(path, data);
   }
 
   it("basic", function() {

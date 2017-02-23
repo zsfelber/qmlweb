@@ -9,7 +9,6 @@ function loadClass(file) {
 
   let clazz;
   if (url.scheme === "qrc:") {
-    let t0 = clazz;
     clazz = QmlWeb.qrc[url.path2];
     if (!clazz) {
       QmlWeb.warn("qmlweb loadClass: Empty qrc entry :", url.path);
@@ -19,7 +18,8 @@ function loadClass(file) {
     // QmlWeb.qrc contains pre-parsed Component objects, but they still need
     // convertToEngine called on them.
     if (!clazz.$class) {
-      QmlWeb.warn("Using legacy semi-pre-parsed qrc is deprecated : "+src);
+      QmlWeb.warn("Using legacy semi-pre-parsed qrc is deprecated : "+file);
+      let t0 = clazz;
       clazz = QmlWeb.convertToEngine(clazz);
       clazz.$name = t0.$name;
       clazz.$file = file;
