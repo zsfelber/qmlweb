@@ -162,8 +162,8 @@ function createProperty(type, obj, propName, options) {
  */
 function applyProperties(metaObject, item) {
   const QMLProperty = QmlWeb.QMLProperty;
-  var prevComponent = QmlWeb.engine.$component;
-  QmlWeb.engine.$component = item.$component;
+  var prevEvalObj = QmlWeb.engine.$evaluatedObj;
+  QmlWeb.engine.$evaluatedObj = item;
 
   function _hand_err(err, i) {
     if (err instanceof QmlWeb.FatalError) throw err;
@@ -224,7 +224,7 @@ function applyProperties(metaObject, item) {
       }
     }
   } finally {
-    QmlWeb.engine.$component = prevComponent;
+    QmlWeb.engine.$evaluatedObj = prevEvalObj;
   }
 }
 

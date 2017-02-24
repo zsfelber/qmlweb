@@ -140,7 +140,7 @@ function resolveClass(file) {
 
 function resolveImport(name) {
   const engine = QmlWeb.engine;
-  const loaderComponent = engine.$component;
+  const loaderComponent = engine.$evaluatedObj;
 
   let file = $resolvePath(name);
 
@@ -173,7 +173,7 @@ function resolveImport(name) {
 }
 
 function resolveClassImport(name) {
-  const loaderComponent = QmlWeb.engine.$component;
+  const loaderComponent = QmlWeb.engine.$evaluatedObj;
   const engine = QmlWeb.engine;
   // Load component from file. Please look at import.js for main notes.
   // Actually, we have to use that order:
@@ -302,7 +302,7 @@ function $resolvePath(file, basePathUrl) {
   }
 
   if (!basePathUrl) {
-    basePathUrl = QmlWeb.engine.$component.$basePathUrl;
+    basePathUrl = QmlWeb.engine.$evaluatedObj.$basePathUrl;
   }
 
   if (!basePathUrl) {

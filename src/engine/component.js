@@ -1,7 +1,8 @@
 
 class QMLContext {
-  constructor() {
-    this.$inheritedProperties = this;
+  constructor(inheritedProperties) {
+    this.$inheritedProperties = inheritedProperties;
+    this.self = {};
   }
 
   nameForObject(obj) {
@@ -16,6 +17,7 @@ class QMLContext {
   createChild(info, componentFlags) {
     const childContext = Object.create(this);
     childContext.$info = info;
+    childContext.self = {};
 
     // see properties.createProperty /
     // namespace setting in QMLBinding with(...) -s / QObject.$noalias.createChild / components.js.createChild :

@@ -51,12 +51,166 @@ class QtObject extends QmlWeb.QObject {
   }
 
   $onContainerChanged_(newContainer, oldContainer, propName) {
-    if (oldContainer) oldContainer.elementRemove(this);
-    if (newContainer) newContainer.elementAdd(this);
+    if (oldContainer) {
+      oldContainer.elementRemove(this);
+    }
+    this.purgeParentContext(oldContainer);
+
+    if (newContainer) {
+      newContainer.elementAdd(this);
+    }
+    this.inheritParentContext(newContainer);
   }
+
   getAttributes() {
     return this.$attributes;
   }
+
+  inheritParentContext(parent) {
+    const engine = QmlWeb.engine;
+
+    // NOTE making a new level of $context inheritance :
+    // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
+    // NOTE gz  object is prototyped from bottom to top, in terms of [type]->[supertype] relationship
+    // see also QObject.createChild()->Object.create() in classes.construct
+    // see also Object.create in QMLContext.createChild
+
+    // #scope hierarchy:
+    // see also component.js/QMLContext.createChild
+
+    if (parent) {
+      if ((this.$componentCreateFlags&QmlWeb.QMLComponentFlags.Super?1:0)+(this.$componentCreateFlags&QmlWeb.QMLComponentFlags.Nested?1:0) > 1) {
+        throw new QmlWeb.AssertionError("Assertion failed : component either factory nested or super  It is "+QmlWeb.QMLComponentFlags.toString(this.$componentCreateFlags));
+      }
+
+      if (this.$componentCreateFlags&QmlWeb.QMLComponentFlags.Root) {
+        throw new Error("Invalid root Component construction (a loader Component is found) : "+this);
+      }
+
+      if (this.$componentCreateFlags&QmlWeb.QMLComponentFlags.Super) {
+
+        const loaderFlags = parent.$componentCreateFlags;
+
+        if (loaderFlags & QmlWeb.QMLComponentFlags.Super) {
+
+          this.$parentCtxObject = parent.$parentCtxObject;
+
+        } else if (loaderFlags & QmlWeb.QMLComponentFlags.Root) {
+
+          if (parent.parent) {
+            throw new Error("Nested Component parent is Root but has loader : "+parent+"  its loader:"+parent.parent);
+          }
+          this.$parentCtxObject = parent;
+
+          this.$componentCreateFlags |= QmlWeb.QMLComponentFlags.FirstSuper;
+
+        } else if (loaderFlags & QmlWeb.QMLComponentFlags.Nested) {
+
+          if (this.$component.loaderComponent.$file && this.$component.loaderComponent.$file !== this.$component.$file) {
+            throw new Error("Loader Component $file mismatch : "+this.$component.loaderComponent.$file+" vs "+this.$component.$file);
+          }
+
+          this.$parentCtxObject = parent;
+
+          this.$componentCreateFlags |= QmlWeb.QMLComponentFlags.FirstSuper;
+
+        } else {
+          throw new Error("Invalid loader Component flags of Super : "+this+"  loader:"+parent);
+        }
+
+
+        if (this.$parentCtxObject) {
+
+          this.$context = this.$parentCtxObject.$context.createChild(
+                                        parent.$component.toString(undefined, true) +" -> " +this.$component.toString(undefined, true), this.$componentCreateFlags);
+
+          if (this.$parentCtxObject.$componentCreateFlags & QmlWeb.QMLComponentFlags.Super) {
+            throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.$context)
+          }
+        } else {
+
+          this.$context = engine._rootContext.createChild(parent.toString(undefined, true) + " .. " +this.$component.toString(undefined, true), this.$componentCreateFlags);
+
+        }
+
+        if (!this.$file) {
+          throw new Error("No component file");
+        }
+
+      } else {
+        // Nested or Factory
+
+        this.parent = parent;
+        this.$parentCtxObject = parent;
+        this.$root = parent.$root;
+
+        this.$context = parent.context.createChild(parent.toString(undefined, true)+" -> "+this.$component.toString(undefined, true), this.$componentCreateFlags);
+        this.$context.nestedLevel = this.nestedLevel = (parent.nestedLevel||0)+1;
+      }
+
+      //QmlWeb.warn("Component  "+this.$context);
+    } else {
+      this.parent = null;
+      this.$parentCtxObject = null;
+      this.$root = this;
+
+      this.$context = engine._rootContext.createChild(this.$component.toString(undefined, true));
+
+      //QmlWeb.warn("Component  "+this);
+      if (this.$componentCreateFlags&QmlWeb.QMLComponentFlags.Nested) {
+        throw new Error("Component is nested but no loader Component.");
+      }
+      if (this.$componentCreateFlags&QmlWeb.QMLComponentFlags.Super) {
+        QmlWeb.warn("Component is super but no loader Component : "+this);
+      }
+      if (!(this.$componentCreateFlags&QmlWeb.QMLComponentFlags.Root)) {
+        throw new Error("Component has no loader but Root flag is not set : "+this);
+      }
+    }
+
+    this.$context.component = this;
+    this.$context.loaderContext = this.parent ? this.parent.context : engine._rootContext;
+    this.$context.parentContext = this.$parentCtxObject ? this.$parentCtxObject.$context : engine._rootContext;
+
+    // !!! see QMLBinding
+    this.$context = this.$context;
+    this.$component = this;
+
+    if (!this.$context) {
+      throw new Error("No component context");
+    }
+
+    if (this.$componentCreateFlags & QmlWeb.QMLComponentFlags.Nested) {
+
+      // Nested item top level uses loader Component imports:
+      this.redirectImports(this.parent);
+
+    } else {
+
+      if (this.moduleConstructors) {
+        throw new QmlWeb.AssertionError("Assertion failed. Super/Root Component : imports filled.  "+this+"  "+this.$context);
+      }
+
+      this.initImports();
+    }
+
+    if (this.$file) {
+      if (!this.$basePathUrl) {
+        throw new QmlWeb.AssertionError("Assertion failed. No component basePath present.  "+this+"  "+this.$context);
+      }
+    }
+    if (!this.moduleConstructors) {
+      throw new QmlWeb.AssertionError("Assertion failed. Component : no imports.  "+this+"  "+this.$context);
+    }
+
+    //QmlWeb.log(this.$context.toString());
+  }
+
+  purgeParentContext(parent) {
+    // TODO gz
+    // purge obsolete QMLContext if needed
+  }
+
 };
 
 QmlWeb.registerQmlType({

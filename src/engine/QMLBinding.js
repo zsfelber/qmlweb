@@ -168,8 +168,8 @@ class QMLBinding {
   }*/
 
   get(obj) {
-    var prevComponent = QmlWeb.engine.$component;
-    QmlWeb.engine.$component = obj.$component;
+    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
+    QmlWeb.engine.$evaluatedObj = obj;
 
     // .call is needed for `this` support
     try {
@@ -195,13 +195,13 @@ class QMLBinding {
       err.srcdumpok = 1;
       throw err;
     } finally {
-      QmlWeb.engine.$component = prevComponent;
+      QmlWeb.engine.$evaluatedObj = prevEvalObj;
     }
   }
 
   set(obj, value, flags, valParentObj) {
-    var prevComponent = QmlWeb.engine.$component;
-    QmlWeb.engine.$component = obj.$component;
+    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
+    QmlWeb.engine.$evaluatedObj = obj;
 
     // .call is needed for `this` support
     try {
@@ -222,14 +222,14 @@ class QMLBinding {
       err.srcdumpok = 1;
       throw err;
     } finally {
-      QmlWeb.engine.$component = prevComponent;
+      QmlWeb.engine.$evaluatedObj = prevEvalObj;
     }
   }
 
   // this == connection : var connection = Signal.connect(...); binding.run.call(connection, ...);
   run() {
-    var prevComponent = QmlWeb.engine.$component;
-    QmlWeb.engine.$component = this.bindingObj.$component;
+    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
+    QmlWeb.engine.$evaluatedObj = this.bindingObj.$component;
 
     try {
       if (!this.binding.implRun) {
@@ -249,7 +249,7 @@ class QMLBinding {
       err.srcdumpok = 1;
       throw err;
     } finally {
-      QmlWeb.engine.$component = prevComponent;
+      QmlWeb.engine.$evaluatedObj = prevEvalObj;
     }
   }
 
@@ -302,9 +302,9 @@ class QMLBinding {
 
       // removed: with(($$lf=($$o=$$c.$ownerObject).$leaf)!==$$o?$$lf(.$noalias):{}) with($$o(.$noalias))
       if (this.flags & QmlWeb.QMLBindingFlags.Alias) {
-        vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext.$inheritedProperties) with($$c.$pageContext) with($$o.$noalias) with($$c)";
+        vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext?$$c.parentContext.$inheritedProperties:{}) with($$c.$pageContext) with($$o.$noalias) with($$c.self)";
       } else {
-        vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext.$inheritedProperties) with($$c.$pageContext) with($$o) with($$c)";
+        vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext?$$c.parentContext.$inheritedProperties:{}) with($$c.$pageContext) with($$o) with($$c.self)";
       }
     }
     return vvith;

@@ -57,7 +57,7 @@ class QMLProperty {
   // Called by update and set to actually set this.value, performing any type
   // conversion required.
   $setVal(newVal, flags, valParentObj) {
-    var prevComponent = QmlWeb.engine.$component;
+    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
 
     try {
       const isch = flags & QmlWeb.QMLPropertyFlags.SetChildren;
@@ -73,14 +73,14 @@ class QMLProperty {
 
 
       } else {
-        if (prevComponent && prevComponent.$context.$ownerObject.$objectId === this.propDeclObj.$objectId) {
+        if (prevEvalObj && prevEvalObj.$context.$ownerObject.$objectId === this.propDeclObj.$objectId) {
 
           // entry condition means : if   we are accessing this prop from a binding  in (some subtype of) current object:
           // then, using current binding context (and set current parent obj)
 
           // see tests/PropertiesUrl.qml and look at 'properties_url_import.remoteSet = "remoteSet.png"' :
 
-          this.valParentObj = prevComponent.$context.$ownerObject;
+          this.valParentObj = prevEvalObj.$context.$ownerObject;
 
         } else {
 
@@ -94,7 +94,7 @@ class QMLProperty {
       // this.propDeclObj.$component : the QML supertype where the default property (eg"data") defined (eg"ItemBase")
       // this.bindingCtxObj.$component : the QML supertype where the current binding is initialized
       // these may be the supertype(s) of the actual parent (this.valParentObj) here:
-      QmlWeb.engine.$component = this.valParentObj.$component;
+      QmlWeb.engine.$evaluatedObj = this.valParentObj;
 
 
       const constructors = QmlWeb.constructors;
@@ -155,7 +155,7 @@ class QMLProperty {
       return this.value;
 
     } finally {
-      QmlWeb.engine.$component = prevComponent;
+      QmlWeb.engine.$evaluatedObj = prevEvalObj;
     }
   }
 

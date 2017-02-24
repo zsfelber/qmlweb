@@ -53,10 +53,10 @@ QmlWeb.registerQmlType({
       return;
     }
 
-    var prevComponent = QmlWeb.engine.$component;
+    var prevComponent = QmlWeb.engine.$evaluatedObj;
 
     try {
-      QmlWeb.engine.$component = this.$component;
+      QmlWeb.engine.$evaluatedObj = this.$component;
       const url = QmlWeb.resolveBasePath(fileName);
       let $class = url.path + url.file;
       if (/\.qml$/.test($class)) {
@@ -76,7 +76,7 @@ QmlWeb.registerQmlType({
         throw new QmlWeb.AssertionError("Assertion failed Loader: !qmlComponent || this.sourceComponent!==qmlComponent : "+this.toString(true));
       }
     } finally {
-      QmlWeb.engine.$component = prevComponent;
+      QmlWeb.engine.$evaluatedObj = prevComponent;
     }
   }
 

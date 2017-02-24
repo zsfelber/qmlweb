@@ -31,7 +31,8 @@ class QMLEngine {
 
     // Root object of the engine
     this.rootObject = null;
-    this.rootContext = new QmlWeb.QMLContext();
+    this.rootContext = {};
+    this._rootContext = new QmlWeb.QMLContext(this.rootContext);
 
     // Base path of qml engine (used for resource loading)
     // used in tests only

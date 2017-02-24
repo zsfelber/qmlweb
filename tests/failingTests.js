@@ -9,12 +9,14 @@ window.failingTests = {
       // "SignalDisconnect"
     ],
     bindings: [
+      // "RecursiveInit3"
     ],
     properties: [
       // "alias to id with same name",
       // "ChangedExpressionSignal"
     ],
     scope: [
+      // "object id should override same-named property of base object",
       // not sure is needed
       "can reference inherited properties from parent (upflow)"
     ]
@@ -41,3 +43,4 @@ window.failingTests = {
     ]
   }
 };
+

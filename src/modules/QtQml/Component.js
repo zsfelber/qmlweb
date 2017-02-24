@@ -13,155 +13,7 @@ class QMLComponent {
     this.createFlags = this.flags & (QmlWeb.QMLComponentFlags.Root|QmlWeb.QMLComponentFlags.Nested|QmlWeb.QMLComponentFlags.Super);
 
     // no component = is import root
-    const loaderComponent = QmlWeb.engine.$component;
-    this.init(loaderComponent);
-
-  }
-
-
-  init(loaderComponent) {
-    const engine = QmlWeb.engine;
-
-    // NOTE making a new level of $context inheritance :
-    // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
-    // NOTE gz  object is prototyped from bottom to top, in terms of [type]->[supertype] relationship
-    // see also QObject.createChild()->Object.create() in classes.construct
-    // see also Object.create in QMLContext.createChild
-
-    // #scope hierarchy:
-    // see also component.js/QMLContext.createChild
-
-    if (loaderComponent) {
-      if ((this.flags&QmlWeb.QMLComponentFlags.Super?1:0)+(this.flags&QmlWeb.QMLComponentFlags.Nested?1:0) > 1) {
-        throw new QmlWeb.AssertionError("Assertion failed : component either factory nested or super  It is "+QmlWeb.QMLComponentFlags.toString(this.flags));
-      }
-
-      if (this.flags&QmlWeb.QMLComponentFlags.Root) {
-        throw new Error("Invalid root Component construction (a loader Component is found) : "+this);
-      }
-
-      if (this.flags&QmlWeb.QMLComponentFlags.Super) {
-
-        loaderComponent.$base = this;
-        this.$leaf = loaderComponent.$leaf;
-        this.$root = loaderComponent.$root;
-
-        if (loaderComponent.flags & QmlWeb.QMLComponentFlags.Super) {
-
-          this.loaderComponent = loaderComponent.loaderComponent;
-
-        } else if (loaderComponent.flags & QmlWeb.QMLComponentFlags.Root) {
-
-          if (loaderComponent.loaderComponent) {
-            throw new Error("Nested Component parent is Root but has loader : "+loaderComponent+"  its loader:"+loaderComponent.loaderComponent);
-          }
-          this.loaderComponent = loaderComponent;
-
-        } else if (loaderComponent.flags & QmlWeb.QMLComponentFlags.Nested) {
-
-          if (loaderComponent.$file && loaderComponent.$file !== this.$file) {
-            throw new Error("Loader Component $file mismatch : "+loaderComponent.$file+" vs "+this.$file);
-          }
-
-          this.loaderComponent = loaderComponent;
-          this.flags |= QmlWeb.QMLComponentFlags.FirstSuper;
-
-        } else {
-          throw new Error("Invalid loader Component flags of Super : "+this+"  loader:"+loaderComponent);
-        }
-
-        this.parentComponent = loaderComponent.parentComponent;
-
-        if (this.parentComponent) {
-
-          this.meta.$context = this.context = this.parentComponent.context.createChild(
-                                        this.loaderComponent.toString(undefined, true) +" -> " +this.toString(undefined, true)), this.flags;
-
-          if (this.loaderComponent.flags & QmlWeb.QMLComponentFlags.Super) {
-            throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.context)
-          }
-        } else {
-
-          this.meta.$context = this.context = engine.rootContext.createChild(loaderComponent.toString(undefined, true) + " .. " +this.toString(undefined, true), this.flags);
-
-        }
-
-        if (!this.$file) {
-          throw new Error("No component file");
-        }
-
-      } else {
-        // Nested or Factory
-
-        this.loaderComponent = loaderComponent;
-        this.parentComponent = loaderComponent;
-        this.$base = this;
-        this.$leaf = this;
-        this.$root = loaderComponent.$root;
-
-        this.meta.$context = this.context = loaderComponent.context.createChild(loaderComponent.toString(undefined, true)+" -> "+this.toString(undefined, true), this.flags);
-        this.context.nestedLevel = this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
-      }
-
-      //QmlWeb.warn("Component  "+this.context);
-    } else {
-      this.loaderComponent = null;
-      this.parentComponent = null;
-      this.$base = this;
-      this.$leaf = this;
-      this.$root = this;
-
-      this.meta.$context = this.context = engine.rootContext.createChild(this.toString(undefined, true));
-
-      //QmlWeb.warn("Component  "+this);
-      if (this.flags&QmlWeb.QMLComponentFlags.Nested) {
-        throw new Error("Component is nested but no loader Component.");
-      }
-      if (this.flags&QmlWeb.QMLComponentFlags.Super) {
-        QmlWeb.warn("Component is super but no loader Component : "+this);
-      }
-      if (!(this.flags&QmlWeb.QMLComponentFlags.Root)) {
-        throw new Error("Component has no loader but Root flag is not set : "+this);
-      }
-    }
-
-    this.context.component = this;
-    this.context.loaderContext = this.loaderComponent ? this.loaderComponent.context : engine.rootContext;
-    this.context.parentContext = this.parentComponent ? this.parentComponent.context : engine.rootContext;
-
-    // !!! see QMLBinding
-    this.$context = this.context;
-    this.$component = this;
-
-    if (!this.context) {
-      throw new Error("No component context");
-    }
-
-    if (this.flags & QmlWeb.QMLComponentFlags.Nested) {
-
-      // Nested item top level uses loader Component imports:
-      this.redirectImports(this.loaderComponent);
-
-    } else {
-
-      if (this.moduleConstructors) {
-        throw new QmlWeb.AssertionError("Assertion failed. Super/Root Component : imports filled.  "+this+"  "+this.context);
-      }
-
-      this.initImports();
-    }
-
-    if (this.$file) {
-      if (!this.$basePathUrl) {
-        throw new QmlWeb.AssertionError("Assertion failed. No component basePath present.  "+this+"  "+this.context);
-      }
-    }
-    if (!this.moduleConstructors) {
-      throw new QmlWeb.AssertionError("Assertion failed. Component : no imports.  "+this+"  "+this.context);
-    }
-
-    //QmlWeb.log(this.context.toString());
-
+    this.loaderComponent = QmlWeb.engine.$evaluatedObj.$component;
   }
 
   copyMeta(meta, flags) {
@@ -318,7 +170,7 @@ class QMLComponent {
     const oldCreateFlags = this.createFlags;
     // change base path to current component base path
     const oldState = engine.operationState;
-    const prevComponent = engine.$component;
+    const prevEvalObj = engine.$evaluatedObj;
 
     let item;
     try {
@@ -359,7 +211,7 @@ class QMLComponent {
       }
 
       engine.operationState |= QmlWeb.QMLOperationState.System;
-      engine.$component = this;
+
 
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)
@@ -398,7 +250,7 @@ class QMLComponent {
       this.status = QmlWeb.Component.Error;
       throw err;
     } finally {
-      engine.$component = prevComponent;
+      engine.$evaluatedObj = prevEvalObj;
       engine.operationState = oldState;
       this.flags = oldFlags;
       this.createFlags = oldCreateFlags;

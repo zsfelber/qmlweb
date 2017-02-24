@@ -7,7 +7,7 @@ function importJavascript(file, importAlias, contextMap) {
     return undefined;
   }
 
-  const $c = QmlWeb.engine.$component.$context;
+  const $c = QmlWeb.engine.$evaluatedObj.$context;
   const $p = $c.$pageContext;
   let jsBinding;
   /* it is cached to handle multiple includes of one */
