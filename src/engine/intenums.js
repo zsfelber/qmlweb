@@ -45,6 +45,7 @@ const QMLComponentFlags = {
   Element : 8,
   LoadImports : 16,
   Flat : 32,
+  FirstSuper : 64,
 
   Super_mnem : "S",
   Nested_mnem : "N",
@@ -52,6 +53,7 @@ const QMLComponentFlags = {
   Element_mnem : "e",
   LoadImports_mnem : "i",
   Flat_mnem : "_",
+  FirstSuper_mnem : "1st",
 
   toString: function(flags, mnem = true) {
     return humanize.call(QMLComponentFlags, flags, mnem);

@@ -1,6 +1,7 @@
 
 class QMLContext {
   constructor() {
+    this.$inheritedProperties = this;
   }
 
   nameForObject(obj) {
@@ -12,7 +13,7 @@ class QMLContext {
     return undefined;
   }
 
-  createChild(info, nested) {
+  createChild(info, nestedOrFirstSuper) {
     const childContext = Object.create(this);
     childContext.$info = info;
 
@@ -21,7 +22,12 @@ class QMLContext {
     // we use "this", $pageElements and loader context in evaluation, as all the variable names other than elements
     // are either in "this"(and supers) or in parent(ie loader) context,
 
-    if (!nested) {
+    if (QmlWeb.QMLComponentFlags.Nested & nestedOrFirstSuper) {
+      childContext.$inheritedProperties = Object.create(childContext.$inheritedProperties);
+    } else if (QmlWeb.QMLComponentFlags.FirstSuper & nestedOrFirstSuper) {
+      childContext.$inheritedProperties = Object.create(childContext.$inheritedProperties);
+    } else {
+      childContext.$inheritedProperties = {};
       childContext.$pageElements = {};
       childContext.$pageContext = Object.create(childContext.$pageElements);
       childContext.$pageContext.$top = childContext;

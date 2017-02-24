@@ -148,7 +148,7 @@ function createProperty(type, obj, propName, options) {
     // noalias only matters in context in this object's alias bindings to prevent it to access
     // only this object' aliases : not the parent (or inherited/supertype) aliases (at least in my interpretation).
     //
-    QmlWeb.setupGetterSetter(ctx, propName, getter, setter, prop);
+    QmlWeb.setupGetterSetter(ctx.$inheritedProperties, propName, getter, setter, prop);
   }
 
 

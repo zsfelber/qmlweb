@@ -45,12 +45,13 @@ class QMLComponent {
         if (loaderComponent.flags & QmlWeb.QMLComponentFlags.Super) {
 
           this.loaderComponent = loaderComponent.loaderComponent;
-          this.topComponent = loaderComponent.topComponent;
+          this.parentComponent = null;
 
         } else if (loaderComponent.flags & (QmlWeb.QMLComponentFlags.Root|QmlWeb.QMLComponentFlags.Nested)) {
 
+          this.flags |= QmlWeb.QMLComponentFlags.FirstSuper;
           this.loaderComponent = loaderComponent;
-          this.topComponent = this;
+          this.parentComponent = loaderComponent;
 
         } else {
           throw new Error("Invalid loader Component flags of Super : "+this+"  loader:"+loaderComponent);
@@ -65,14 +66,14 @@ class QMLComponent {
             }
           }
           this.meta.$context = this.context = this.loaderComponent.context.createChild(
-                                        this.loaderComponent.toString(undefined, true) +" -> " +this.toString(undefined, true));
+                                        this.loaderComponent.toString(undefined, true) +" -> " +this.toString(undefined, true)), QmlWeb.QMLComponentFlags.FirstSuper&this.flags;
 
           if (this.loaderComponent.flags & QmlWeb.QMLComponentFlags.Super) {
             throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.context)
           }
         } else {
 
-          this.meta.$context = this.context = engine.rootContext.createChild(loaderComponent.toString(undefined, true) + " .. " +this.toString(undefined, true));
+          this.meta.$context = this.context = engine.rootContext.createChild(loaderComponent.toString(undefined, true) + " .. " +this.toString(undefined, true), QmlWeb.QMLComponentFlags.FirstSuper&this.flags);
 
         }
 
@@ -84,12 +85,11 @@ class QMLComponent {
         // Nested or Factory
 
         this.loaderComponent = loaderComponent;
-        this.topComponent = this;
         this.$base = this;
         this.$leaf = this;
         this.$root = loaderComponent.$root;
 
-        this.meta.$context = this.context = loaderComponent.context.createChild(loaderComponent.toString(undefined, true)+" -> "+this.toString(undefined, true), true);
+        this.meta.$context = this.context = loaderComponent.context.createChild(loaderComponent.toString(undefined, true)+" -> "+this.toString(undefined, true), QmlWeb.QMLComponentFlags.Nested);
         this.context.nestedLevel = this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
         // inherit page top $pageElements and $pageContext :
         this.context.$pageElements = loaderComponent.context.$pageElements;
@@ -99,7 +99,7 @@ class QMLComponent {
       //QmlWeb.warn("Component  "+this.context);
     } else {
       this.loaderComponent = null;
-      this.topComponent = this;
+      this.parentComponent = null;
       this.$base = this;
       this.$leaf = this;
       this.$root = this;
@@ -120,7 +120,7 @@ class QMLComponent {
 
     this.context.component = this;
     this.context.loaderContext = this.loaderComponent ? this.loaderComponent.context : engine.rootContext;
-    this.context.topContext = this.topComponent ? this.topComponent.context : null;
+    this.context.parentContext = this.parentComponent ? this.parentComponent.context : engine.rootContext;
 
     // !!! see QMLBinding
     this.$context = this.context;

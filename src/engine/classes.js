@@ -240,7 +240,7 @@ function addElementToPageContexts(item, id, ctx) {
 
     QmlWeb.setupValue(ctx, id, item, ctx);
   } else {
-    // always put nothing but self to inheritable context (only self of elements, but all properties) :
+    // always put nothing but self to primary context (only self but no child elements nor properties) :
     ctx[id] = item;
   }
 
