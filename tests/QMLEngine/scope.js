@@ -1,5 +1,5 @@
 function contextVariable(obj, name) {
-  return obj.$context[name];
+  return obj.$pageContext[name];
 }
 
 describe("QMLEngine.scope", function() {
@@ -9,6 +9,7 @@ describe("QMLEngine.scope", function() {
     var qml = load("Root", this.div);
     var parentItem = contextVariable(qml, "parentItem");
     expect(parentItem).not.toBe(undefined);
+    parentItem = parentItem.__proto__;
     expect(parentItem.$context).not.toBe(undefined);
     var childA = contextVariable(parentItem, "childA");
     expect(childA).not.toBe(undefined);
@@ -23,6 +24,16 @@ describe("QMLEngine.scope", function() {
     var qml = load("Upflow", this.div);
     var child = contextVariable(qml, "child");
     expect(child.thisFoo).toBe(15);
+  });
+
+  it("can reference container properties (dynamic scope)", function() {
+    var qml = load("Dynamic", this.div);
+    var child = contextVariable(qml, "child");
+    var dynfoo = child.__proto__;
+    expect(dynfoo.id).toBe("dynfoo");
+    expect(dynfoo.footxt).toBe("not found : undefined");
+    var child2 = contextVariable(dynfoo, "child");
+    expect(child2.footxt).toBe("found it is : 15");
   });
 
   it("can reference sibling items by id", function() {

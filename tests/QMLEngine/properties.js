@@ -22,6 +22,13 @@ describe("QMLEngine.properties", function() {
     expect(typeof qml.theUndefined).toEqual("undefined");
   });
 
+  it("redelclared property name separated from base type", function() {
+    var qml = load("Override", this.div);
+    expect(qml.prop).toEqual(34567);
+    expect(qml.propalias2).toEqual(34567);
+    expect(qml.propalias).toEqual(12345);
+  });
+
   it("can be aliased", function() {
     var qml = load("Alias", this.div);
     expect(qml.childX).toBe(125);
@@ -53,6 +60,12 @@ describe("QMLEngine.properties", function() {
   it("alias to id with same name", function() {
     var qml = load("AliasToIdSameName", this.div);
     expect(qml.child.x).toBe(125);
+  });
+
+  it("alias doesn't see same object aliases", function() {
+    var qml = load("AliasHidesProperty", this.div);
+    expect(qml.prop).toBe(345678);
+    expect(qml.prop2).toBe(12345);
   });
 
 

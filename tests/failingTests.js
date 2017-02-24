@@ -16,7 +16,9 @@ window.failingTests = {
       "ChangedExpressionSignal"
     ],
     scope: [
-      "object id should override same-named property of base object"
+      "object id should override same-named property of base object",
+      // not sure is needed
+      "can reference inherited properties from parent (upflow)"
     ]
   },
   QtQml: {
