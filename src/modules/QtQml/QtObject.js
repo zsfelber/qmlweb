@@ -122,14 +122,16 @@ class QtObject extends QmlWeb.QObject {
         if (this.$parentCtxObject) {
 
           this.$context = this.$parentCtxObject.$context.createChild(
-                                        parent.$component.toString(undefined, true) +" -> " +this.$component.toString(undefined, true), this.$componentCreateFlags);
+              parent.$component.toString(undefined, true) +" -> " +this.$component.toString(undefined, true), this.$componentCreateFlags);
 
           if (this.$parentCtxObject.$componentCreateFlags & QmlWeb.QMLComponentFlags.Super) {
             throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.$context)
           }
+
         } else {
 
-          this.$context = engine._rootContext.createChild(parent.toString(undefined, true) + " .. " +this.$component.toString(undefined, true), this.$componentCreateFlags);
+          this.$context = engine._rootContext.createChild(
+              parent.$component.toString(undefined, true) + " .. " +this.$component.toString(undefined, true), this.$componentCreateFlags);
 
         }
 
@@ -140,19 +142,16 @@ class QtObject extends QmlWeb.QObject {
       } else {
         // Nested or Factory
 
-        this.parent = parent;
         this.$parentCtxObject = parent;
-        this.$root = parent.$root;
-
-        this.$context = parent.context.createChild(parent.toString(undefined, true)+" -> "+this.$component.toString(undefined, true), this.$componentCreateFlags);
         this.$context.nestedLevel = this.nestedLevel = (parent.nestedLevel||0)+1;
+
+        this.$context = this.$parentCtxObject.context.createChild(
+              parent.$component.toString(undefined, true)+" -> "+this.$component.toString(undefined, true), this.$componentCreateFlags);
       }
 
       //QmlWeb.warn("Component  "+this.$context);
     } else {
-      this.parent = null;
       this.$parentCtxObject = null;
-      this.$root = this;
 
       this.$context = engine._rootContext.createChild(this.$component.toString(undefined, true));
 
