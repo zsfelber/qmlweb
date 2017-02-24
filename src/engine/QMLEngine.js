@@ -170,7 +170,7 @@ class QMLEngine {
       if (serverWsAddress !== undefined) {
         if (/^\d+$/.test(serverWsAddress)) {
           var url = QmlWeb.$parseUrl(window.location.href);
-          wsUrl = "ws://"+url.host+":"+(serverWsAddress?serverWsAddress:url.port);
+          wsUrl = "ws://"+url.hostname+":"+(serverWsAddress?serverWsAddress:url.port);
         } else {
           if (/^ws:[/]/.test(serverWsAddress)) {
             wsUrl = serverWsAddress;

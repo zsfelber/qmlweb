@@ -232,41 +232,53 @@ function resolveClassImport(name) {
 
 // URL parser method
 function $parseUrl(uri, allowLocal) {
-  //                        scheme    pref  host     :port   path           file
-  const match = uri.match(/^([^/:]+:)?([/]*)([^/:]*)(:(\d*))?([/]|[/].+?[/])([^/]*)$/);
-  if (match && (match[1] || allowLocal)) {
-    if (match[1]===undefined) match[1]="";
-    if (match[2]===undefined) match[2]="";
-    if (match[4]===undefined) match[4]="";
-    const abs = match[2].length>=2;
-    const pref = abs?"//":match[2];                // leading slash (omit unnecessary ones)
-                                                   // htpp://a.com/a -> /     qrc:/a/b/c -> ''      qrc:///a/b/c -> /       qrc://localhost:8080/b/c -> /
-                                                   // a/b/c -> ''             /a/b/c -> ''          //a/b/c -> /
-    const au0 = match[3]+match[4];                 // host:port or path first
-    const au = abs ? au0 : "";                     // host:port
-    const scheme = match[1];                       // htpp:  qrc:
-    const path = abs ? match[6] : au0+match[6];    // htpp://a.com/a -> a     qrc:/a/b/c -> a/b/c   qrc:///a/b/c -> /a/b/c   qrc://localhost:8080/b/c -> /b/c
-                                                   // a/b/c -> a/b/c          /a/b/c -> /a/b/c      //a/b/c -> /a/b/c
-    const file = match[7];
-    const buri0 = scheme + pref + au;
-    const buri = buri0 + path;
-    uri = buri + file;
+  //                        scheme pref  host(name)  :port           flpath  search    hash
+  const match = uri.match(/^(\w+\:)([/]*)(([^:\/?#]*)(?:\:([0-9]+))?)([^?#]*)(\?[^#]*|)(#.*|)$/);
 
+  if (match && (match[1] || allowLocal)) {
     const url = {
-      uri: uri,
-      baseUri0: buri0,
-      baseUri: buri,
-      scheme: scheme,
-      prefix: pref,
+      scheme: match[1],
+      prefix: match[2],
       host: match[3],
-      authority: au,
+      hostname: match[4],
       port: match[5],
-      path: path,
-      file: file,
-      path2: path + file
+      fullpath: match[6],
+      search: match[7],
+      hash: match[8]
     };
-    if (url.port && !au) {
-      console.warn("Bad url, missing leading '/' after scheme (first tag with port number interpreted as file path item) : "+uri);
+
+    let preflen0 = url.prefix.length, preflen = preflen0;
+    const path = url.fullpath.split(/[\/]/);
+
+    if (!url.port) {
+      switch (preflen) {
+      case 0:
+      case 1:
+        if (url.host) {
+          path.unshift(url.host);
+          url.host = url.hostname = "";
+        }
+        break;
+      default:
+        break;
+      }
+    }
+
+    if (url.prefix && !url.host) {
+      preflen--;
+      path.unshift("");
+    }
+
+    if (path.length) {
+      url.file = path.pop();
+      path.push("");
+      url.path = path.join("/");
+    }
+
+    if (preflen >= 2) {
+      url.prefix = "//";
+    } else if (preflen !== preflen0) {
+      url.prefix = url.prefix.substring(preflen);
     }
 
     return url;
@@ -318,7 +330,7 @@ function $resolveImageURL(fileURL) {
   // used by the DOM. If not found, return the path itself without the
   // "qrc:/" scheme.
   if (url && (url.scheme === "qrc:")) {
-    return QmlWeb.qrc[url.path2] || url.path2;
+    return QmlWeb.qrc[url.fullpath] || url.fullpath;
   }
 
   // Something we can't parse, just pass it through

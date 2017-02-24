@@ -7,18 +7,28 @@ describe("QMLEngine.urls", function() {
     url = QmlWeb.$parseUrl("http://localhost:9876/samples/debug.html");
     expect(url.scheme).toBe("http:");
     expect(url.path).toBe("/samples/");
+    expect(url.host).toBe("localhost:9876");
     expect(url.port).toBe("9876");
     expect(url.prefix).toBe("//");
 
     url = QmlWeb.$parseUrl("qrc:/SomeDir/LoaderRelativeDots.qml");
     expect(url.scheme).toBe("qrc:");
     expect(url.prefix).toBe("");
+    expect(url.host).toBe("");
     expect(url.path).toBe("/SomeDir/");
 
     url = QmlWeb.$parseUrl("qrc://SomeDir/LoaderRelativeDots.qml");
     expect(url.scheme).toBe("qrc:");
     expect(url.prefix).toBe("//");
-    expect(url.path).toBe("/SomeDir/");
+    expect(url.host).toBe("SomeDir");
+    expect(url.path).toBe("/");
+
+    url = QmlWeb.$parseUrl("ftp:////localhost");
+    expect(url.host).toBe("localhost");
+    expect(url.port).toBe(undefined);
+    expect(url.prefix).toBe("//");
+    expect(url.path).toBe("");
+    expect(url.file).toBe("");
 
   });
 

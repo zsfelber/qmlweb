@@ -9,7 +9,7 @@ function loadClass(file) {
 
   let clazz;
   if (url.scheme === "qrc:") {
-    clazz = QmlWeb.qrc[url.path2];
+    clazz = QmlWeb.qrc[url.fullpath];
     if (!clazz) {
       QmlWeb.warn("qmlweb loadClass: Empty qrc entry :", url.path);
       return undefined;

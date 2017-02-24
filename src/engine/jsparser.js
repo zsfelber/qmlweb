@@ -21,7 +21,7 @@ function importJavascript(file, importAlias, contextMap) {
 
   let jsData;
   if (url.scheme === "qrc:") {
-    jsData = QmlWeb.qrc[url.path2];
+    jsData = QmlWeb.qrc[url.fullpath];
   } else {
     QmlWeb.loadParser();
     jsData = QmlWeb.jsparse(QmlWeb.getUrlContents(url.uri));

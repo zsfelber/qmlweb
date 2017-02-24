@@ -45,7 +45,7 @@ QmlWeb.addQrc = function(path, impl) {
     className = url.file;
   }
   m[className] = url.uri;
-  QmlWeb.qrc[url.path2] = impl;
+  QmlWeb.qrc[url.fullpath] = impl;
   impl.$class = "Component";
   impl.$name = className;
   impl.$file = url.uri;
