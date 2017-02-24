@@ -22,20 +22,6 @@ describe("QMLEngine.basic", function() {
     }
   );
 
-  it("Qt.resolvedUrl", function() {
-    var qml = load("ResolvedUrl", this.div);
-    /* Get the base address of the URL */
-    const x = QmlWeb.resolveBasePath("/");
-
-    expect(qml.outer).toBe(x.uri + "base/tests/");
-    expect(qml.current).toBe(qml.outer + "QMLEngine/qml/");
-    expect(qml.inner1).toBe(qml.current + "foo/bar");
-    expect(qml.inner2).toBe(qml.current + "foo/bar/");
-    expect(qml.inner3).toBe(qml.current + "foo/foo/lol/");
-    expect(qml.absolute).toBe(x.uri + "foo/bar");
-    expect(qml.full).toBe("http://example.com/bar");
-  });
-
   it("signal parameters", function() {
     var qml = load("SignalParameters", this.div);
     expect(qml.propA).toBe(42);
