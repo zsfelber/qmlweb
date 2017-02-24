@@ -232,8 +232,8 @@ function resolveClassImport(name) {
 
 // URL parser method
 function $parseUrl(uri, allowLocal) {
-  //                        scheme pref  host(name)  :port           flpath  search    hash
-  const match = uri.match(/^(\w+\:)([/]*)(([^:\/?#]*)(?:\:([0-9]+))?)([^?#]*)(\?[^#]*|)(#.*|)$/);
+  //                        scheme  pref  host(name)  :port           flpath  search    hash
+  const match = uri.match(/^(\w+\:)?([/]*)(([^:\/?#]*)(?:\:([0-9]+))?)([^?#]*)(\?[^#]*|)(#.*|)$/);
 
   if (match && (match[1] || allowLocal)) {
     const url = {
@@ -255,6 +255,9 @@ function $parseUrl(uri, allowLocal) {
       case 0:
       case 1:
         if (url.host) {
+          if (path.length && !path[0]) {
+            path.shift();
+          }
           path.unshift(url.host);
           url.host = url.hostname = "";
         }
@@ -278,8 +281,13 @@ function $parseUrl(uri, allowLocal) {
     if (preflen >= 2) {
       url.prefix = "//";
     } else if (preflen !== preflen0) {
-      url.prefix = url.prefix.substring(preflen);
+      url.prefix = url.prefix.substring(0, preflen);
     }
+
+    url.baseUri0 = url.scheme   + url.prefix + url.host;
+    url.baseUri =  url.baseUri0 + url.path;
+    url.uri =      url.baseUri  + url.file;
+    url.postfix =  url.search   + url.hash;
 
     return url;
   }

@@ -35,10 +35,13 @@ describe("QMLEngine.urls", function() {
   it("can parse local asbolute uri", function() {
     var url;
     url = QmlWeb.$parseUrl("/directory/samples/debug.html", true);
+    expect(url).not.toBe(undefined);
     expect(url.path).toBe("/directory/samples/");
 
     url = QmlWeb.$parseUrl("//directory/samples/debug.html", true);
-    expect(url.path).toBe("/directory/samples/");
+    expect(url.host).toBe("directory");
+    expect(url.hostname).toBe("directory");
+    expect(url.path).toBe("/samples/");
     expect(url.prefix).toBe("//");
   });
 
