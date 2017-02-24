@@ -284,6 +284,7 @@ function $parseUrl(uri, allowLocal) {
       url.prefix = url.prefix.substring(0, preflen);
     }
 
+    url.fullpath = url.path + url.file;
     url.baseUri0 = url.scheme   + url.prefix + url.host;
     url.baseUri =  url.baseUri0 + url.path;
     url.uri =      url.baseUri  + url.file;
