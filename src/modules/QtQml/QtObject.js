@@ -54,19 +54,19 @@ class QtObject extends QmlWeb.QObject {
     if (oldContainer) {
       oldContainer.elementRemove(this);
     }
-    this.purgeParentContext(oldContainer);
+    this.cleanupContext(oldContainer);
 
     if (newContainer) {
       newContainer.elementAdd(this);
     }
-    this.inheritParentContext(newContainer);
+    this.initializeContext(newContainer);
   }
 
   getAttributes() {
     return this.$attributes;
   }
 
-  inheritParentContext(parent) {
+  initializeContext(parent) {
     const engine = QmlWeb.engine;
 
     // NOTE making a new level of $context inheritance :
@@ -168,45 +168,13 @@ class QtObject extends QmlWeb.QObject {
       }
     }
 
-    this.$context.component = this;
-    this.$context.loaderContext = this.parent ? this.parent.context : engine._rootContext;
+    this.$context.component = this.$component;
+    this.$context.loaderContext = parent ? parent.$context : engine._rootContext;
     this.$context.parentContext = this.$parentCtxObject ? this.$parentCtxObject.$context : engine._rootContext;
 
-    // !!! see QMLBinding
-    this.$context = this.$context;
-    this.$component = this;
-
-    if (!this.$context) {
-      throw new Error("No component context");
-    }
-
-    if (this.$componentCreateFlags & QmlWeb.QMLComponentFlags.Nested) {
-
-      // Nested item top level uses loader Component imports:
-      this.redirectImports(this.parent);
-
-    } else {
-
-      if (this.moduleConstructors) {
-        throw new QmlWeb.AssertionError("Assertion failed. Super/Root Component : imports filled.  "+this+"  "+this.$context);
-      }
-
-      this.initImports();
-    }
-
-    if (this.$file) {
-      if (!this.$basePathUrl) {
-        throw new QmlWeb.AssertionError("Assertion failed. No component basePath present.  "+this+"  "+this.$context);
-      }
-    }
-    if (!this.moduleConstructors) {
-      throw new QmlWeb.AssertionError("Assertion failed. Component : no imports.  "+this+"  "+this.$context);
-    }
-
-    //QmlWeb.log(this.$context.toString());
   }
 
-  purgeParentContext(parent) {
+  cleanupContext(parent) {
     // TODO gz
     // purge obsolete QMLContext if needed
   }

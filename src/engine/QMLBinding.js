@@ -302,9 +302,9 @@ class QMLBinding {
 
       // removed: with(($$lf=($$o=$$c.$ownerObject).$leaf)!==$$o?$$lf(.$noalias):{}) with($$o(.$noalias))
       if (this.flags & QmlWeb.QMLBindingFlags.Alias) {
-        vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext?$$c.parentContext.$inheritedProperties:{}) with($$c.$pageContext) with($$o.$noalias) with($$c.self)";
+        vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext.$inheritedProperties) with($$c.$pageContext) with($$o.$noalias) with($$c.self)";
       } else {
-        vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext?$$c.parentContext.$inheritedProperties:{}) with($$c.$pageContext) with($$o) with($$c.self)";
+        vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext.$inheritedProperties) with($$c.$pageContext) with($$o) with($$c.self)";
       }
     }
     return vvith;

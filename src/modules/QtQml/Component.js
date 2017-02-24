@@ -14,6 +14,34 @@ class QMLComponent {
 
     // no component = is import root
     this.loaderComponent = QmlWeb.engine.$evaluatedObj.$component;
+
+    // !!! see QMLBinding
+    this.$component = this;
+
+    if (this.flags & QmlWeb.QMLComponentFlags.Nested) {
+
+      // Nested item top level uses loader Component imports:
+      this.redirectImports(this.loaderComponent);
+
+    } else {
+
+      if (this.moduleConstructors) {
+        throw new QmlWeb.AssertionError("Assertion failed. Super/Root Component : imports filled.  "+this);
+      }
+
+      this.initImports();
+    }
+
+    if (this.$file) {
+      if (!this.$basePathUrl) {
+        throw new QmlWeb.AssertionError("Assertion failed. No component basePath present.  "+this);
+      }
+    }
+    if (!this.moduleConstructors) {
+      throw new QmlWeb.AssertionError("Assertion failed. Component : no imports.  "+this);
+    }
+
+    //QmlWeb.log(this.$context.toString());
   }
 
   copyMeta(meta, flags) {
