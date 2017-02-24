@@ -89,11 +89,13 @@ function construct(meta, parent, flags) {
       //  }
       //}
 
+      item.initializeContext(parent);
+
+      const ctx = item.$context;
+
       if (!ctx) {
         throw new Error("No context : "+item);
       }
-
-      item.initializeContext(parent)
 
       QmlWeb.applyAllAttachedObjects(item);
 
@@ -128,7 +130,7 @@ function constructSuper(meta, parent) {
   let item;
 
   // NOTE resolve superclass info:
-  var clinfo = QmlWeb.resolveClassImport(meta.$class);
+  var clinfo = QmlWeb.resolveClassImport(meta.$class, meta.$component);
 
   if (clinfo.classConstructor) {
     // NOTE internal class, module/qmldir cache:

@@ -13,11 +13,12 @@ class QMLComponent {
     this.createFlags = this.flags & (QmlWeb.QMLComponentFlags.Root|QmlWeb.QMLComponentFlags.Nested|QmlWeb.QMLComponentFlags.Super);
 
     // no component = is import root
-    this.loaderComponent = QmlWeb.engine.$evaluatedObj.$component;
+    const evalObj = QmlWeb.engine.$evaluatedObj;
+    this.loaderComponent = evalObj ? evalObj.$component : null;
 
     // !!! see QMLBinding
     this.$component = this;
-    this.$meta.$component = this;
+    this.meta.$component = this;
     this.$root = this.loaderComponent ? this.loaderComponent.$root : this;
 
     if (this.flags & QmlWeb.QMLComponentFlags.Nested) {
@@ -248,14 +249,6 @@ class QMLComponent {
       // no parent -> this.context   see initMeta
       item = QmlWeb.construct(this.meta, parent, QmlWeb.QMLComponentFlags.Element|this.createFlags);
       QmlWeb.helpers.copy(item, properties);
-
-      // !!! see QMLBinding
-      // see QObject.constructor()
-      this.context.$ownerObject = item;
-      item.$pageElements = this.context.$pageElements;
-      item.$pageContext = this.context.$pageContext;
-      item.$info = this.context.$info;
-
 
       this.loadJsImports();
 

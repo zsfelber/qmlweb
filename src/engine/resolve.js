@@ -138,9 +138,12 @@ function resolveClass(file) {
 }
 
 
-function resolveImport(name) {
+function resolveImport(name, component) {
   const engine = QmlWeb.engine;
   const evalObj = engine.$evaluatedObj;
+  if (!component) {
+    component = evalObj.$component;
+  }
 
   let file = $resolvePath(name);
 
@@ -155,7 +158,7 @@ function resolveImport(name) {
   if (!clazz) {
     const nameIsUrl = /^(\w+):/.test(name)||name.startsWith("//");
     if (!nameIsUrl) {
-      const moreDirs = importSearchPaths(evalObj.$component);
+      const moreDirs = importSearchPaths(component);
       for (let i = 0; i < moreDirs.length; i++) {
         file = `${moreDirs[i]}${name}`;
         // TODO gz resolveClass  += engine.containers[...]
@@ -172,9 +175,13 @@ function resolveImport(name) {
   return {clazz, $file:file};
 }
 
-function resolveClassImport(name) {
-  const evalObj = QmlWeb.engine.$evaluatedObj;
+function resolveClassImport(name, component) {
   const engine = QmlWeb.engine;
+  const evalObj = QmlWeb.engine.$evaluatedObj;
+  if (!component) {
+    component = evalObj.$component;
+  }
+
   // Load component from file. Please look at import.js for main notes.
   // Actually, we have to use that order:
   // 1) try to load component from current basePath
@@ -186,7 +193,7 @@ function resolveClassImport(name) {
   //       That's not qml's original behaviour.
 
   // 3)regular (versioned) modules only: (from Component.constructor -> QmlWeb.loadImports)
-  let constructors = evalObj ? evalObj.$component.moduleConstructors : QmlWeb.constructors;
+  let constructors = component ? component.moduleConstructors : QmlWeb.constructors;
 
   const path = name.split(".");
   for (let ci = 0; ci < path.length; ++ci) {
@@ -199,10 +206,10 @@ function resolveClassImport(name) {
 
   if (constructors !== undefined) {
     return {classConstructor:constructors, path:path};
-  } else if (evalObj) {
+  } else if (component) {
 
     // 2) 3)preloaded qrc-s  4)
-    const qmldirs = evalObj.$component.ctxQmldirs;
+    const qmldirs = component.ctxQmldirs;
 
     const qdirInfo = qmldirs ? qmldirs[name] : null;
     // Are we have info on that component in some imported qmldir files?
@@ -212,7 +219,7 @@ function resolveClassImport(name) {
       filePath = qdirInfo.url;
     } else if (path.length === 2) {
       const qualified = qualifiedImportPath(
-        evalObj.$component, path[0]
+        component, path[0]
       );
       filePath = `${qualified}${path[1]}.qml`;
     } else {

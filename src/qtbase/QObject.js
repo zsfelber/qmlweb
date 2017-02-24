@@ -6,8 +6,7 @@ class QObject {
     this.$base = this;
     if (meta) {
       this.$meta = meta;
-      if (meta.$component||meta.$context) {
-        this.$isAttachedObj = true;
+      if (meta.$component) {
         // NOTE context bindings of object prototype chain :
         // QObject.context : UserAbstractItem.context
         // QtQml.QtObject.context : UserAbstractItem.context
@@ -18,29 +17,23 @@ class QObject {
         // UserLeafItem.context : $leaf.context
 
         this.$component = meta.$component;
-        this.$context = meta.$context;
+      }
 
-        // !!! see QMLBinding
-        this.$context.$ownerObject = this;
-
-        this.$pageElements = this.$context.$pageElements;
-        this.$pageContext = this.$context.$pageContext;
-        this.$info = this.$context.$info;
+      if (meta.attached) {
+        if (!parent) {
+          throw new Error("Object attached to null : "+this);
+        }
+        this.$isAttachedObj = true;
+        if (!this.$component) {
+          // context for attached properties like "anchors" and so
+          // see also $ownerObject
+          this.$component = parent.$component;
+          this.$context = parent.$context;
+        }
+        this.$attached_as = meta.$info;
       }
     }
 
-    if (meta && meta.attached) {
-      if (!parent) {
-        throw new Error("Object attached to null : "+this);
-      }
-      if (!this.$component && !this.$context) {
-        // context for attached properties like "anchors" and so
-        // see also $ownerObject
-        this.$component = parent.$component;
-        this.$context = parent.$context;
-      }
-      this.$attached_as = meta.$info;
-    }
 
     if (parent && parent.$tidyupList) {
       parent.$tidyupList.push(this);
