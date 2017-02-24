@@ -48,12 +48,14 @@ class QMLComponent {
 
         if (loaderComponent.flags & QmlWeb.QMLComponentFlags.Super) {
 
+          this.loaderComponent = loaderComponent.loaderComponent;
 
         } else if (loaderComponent.flags & QmlWeb.QMLComponentFlags.Root) {
 
           if (loaderComponent.loaderComponent) {
             throw new Error("Nested Component parent is Root but has loader : "+loaderComponent+"  its loader:"+loaderComponent.loaderComponent);
           }
+          this.loaderComponent = loaderComponent;
 
         } else if (loaderComponent.flags & QmlWeb.QMLComponentFlags.Nested) {
 
@@ -61,18 +63,18 @@ class QMLComponent {
             throw new Error("Loader Component $file mismatch : "+loaderComponent.$file+" vs "+this.$file);
           }
 
+          this.loaderComponent = loaderComponent;
           this.flags |= QmlWeb.QMLComponentFlags.FirstSuper;
 
         } else {
           throw new Error("Invalid loader Component flags of Super : "+this+"  loader:"+loaderComponent);
         }
 
-        this.loaderComponent = loaderComponent;
         this.parentComponent = loaderComponent.parentComponent;
 
-        if (this.loaderComponent) {
+        if (this.parentComponent) {
 
-          this.meta.$context = this.context = this.loaderComponent.context.createChild(
+          this.meta.$context = this.context = this.parentComponent.context.createChild(
                                         this.loaderComponent.toString(undefined, true) +" -> " +this.toString(undefined, true)), this.flags;
 
           if (this.loaderComponent.flags & QmlWeb.QMLComponentFlags.Super) {
