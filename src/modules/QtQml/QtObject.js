@@ -69,14 +69,14 @@ class QtObject extends QmlWeb.QObject {
 
   initializeContext(parent, flags) {
 
-    if (this.$context || this.$isAttachedObj) {
+    if (this.$isAttachedObj || this.hasOwnProperty("$context")) {
       return;
     }
 
     const engine = QmlWeb.engine;
     flags |= this.$componentCreateFlags;
 
-    if (!this.$component) {
+    if (!this.hasOwnProperty("$component")) {
       throw new QmlWeb.AssertionError("Assertion failed. No component : "+this);
     }
 
@@ -87,6 +87,21 @@ class QtObject extends QmlWeb.QObject {
     if (this.$component.status === QmlWeb.Component.Loading) {
       if (this.$leaf !== this) {
         throw new QmlWeb.AssertionError("this.$leaf !== this  : "+this+"  leaf:"+this.$leaf);
+      }
+    }
+
+    if (!this.$context) {
+      if (this.$component.status === QmlWeb.Component.Loading) {
+        // initialize the remaining bottom level context :
+        if (this.$base !== this.__proto__) {
+          throw new QmlWeb.AssertionError("this.$base !== this.__proto__  : "+this+"  leaf:"+this.$leaf+"  base:"+this.$base+"  proto:"+this.__proto__);
+        }
+        this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super);
+      } else {
+        // when component added dynamically, we initialize the whole prototype chain's contexts :
+        if (this.$base !== this) {
+          this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super);
+        }
       }
     }
 
@@ -211,11 +226,6 @@ class QtObject extends QmlWeb.QObject {
     this.$pageElements = this.$context.$pageElements;
     this.$pageContext = this.$context.$pageContext;
     this.$info = this.$context.$info;
-
-    // when component added dynamically, we initialize the whole prototype chain's contexts :
-    if (this.$component.status !== QmlWeb.Component.Loading && this.$base !== this) {
-      this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super);
-    }
   }
 
   cleanupContext(parent) {
@@ -223,8 +233,8 @@ class QtObject extends QmlWeb.QObject {
     // purge obsolete QMLContext if needed
 
     if (!this.$isAttachedObj) {
-      this.$parentCtxObject = null;
-      this.$context = null;
+      delete this.$parentCtxObject;
+      delete this.$context;
     }
   }
 
