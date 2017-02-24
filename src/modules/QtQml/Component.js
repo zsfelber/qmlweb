@@ -17,6 +17,7 @@ class QMLComponent {
 
     // !!! see QMLBinding
     this.$component = this;
+    this.$meta.$component = this;
     this.$root = this.loaderComponent ? this.loaderComponent.$root : this;
 
     if (this.flags & QmlWeb.QMLComponentFlags.Nested) {

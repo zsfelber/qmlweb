@@ -7,6 +7,7 @@ class QObject {
     if (meta) {
       this.$meta = meta;
       if (meta.$component||meta.$context) {
+        this.$isAttachedObj = true;
         // NOTE context bindings of object prototype chain :
         // QObject.context : UserAbstractItem.context
         // QtQml.QtObject.context : UserAbstractItem.context
@@ -56,6 +57,10 @@ class QObject {
     this.$leaf = this;
 
     this.$objectId = ++objectIds;
+  }
+
+  initializeContext(parent) {
+    // in QtQml.QtObject
   }
 
   createChild() {

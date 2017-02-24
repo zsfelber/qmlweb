@@ -51,15 +51,16 @@ class QtObject extends QmlWeb.QObject {
   }
 
   $onContainerChanged_(newContainer, oldContainer, propName) {
+
     if (oldContainer) {
       oldContainer.elementRemove(this);
     }
     this.cleanupContext(oldContainer);
 
+    this.initializeContext(newContainer);
     if (newContainer) {
       newContainer.elementAdd(this);
     }
-    this.initializeContext(newContainer);
   }
 
   getAttributes() {
@@ -67,7 +68,24 @@ class QtObject extends QmlWeb.QObject {
   }
 
   initializeContext(parent) {
+    if (this.$context || this.$isAttachedObj) {
+      return;
+    }
+
     const engine = QmlWeb.engine;
+
+    let nm = this.$component.$name;
+    if (/\.qml$/.test(nm)) {
+      nm = nm.substring(0, nm.length-4);
+    }
+
+    this.$superclass = this.$class;
+    this.$class = nm;
+    if (this.$componentCreateFlags & QmlWeb.QMLComponentFlags.Nested) {
+      this.$classname = "["+nm+"]";
+    } else {
+      this.$classname = nm;
+    }
 
     // NOTE making a new level of $context inheritance :
     // NOTE gz  context is prototyped from top to bottom, in terms of [containing QML]->[child element] relationship
@@ -135,7 +153,7 @@ class QtObject extends QmlWeb.QObject {
 
         }
 
-        if (!this.$file) {
+        if (!this.$component.$file) {
           throw new Error("No component file");
         }
 
@@ -171,11 +189,23 @@ class QtObject extends QmlWeb.QObject {
     this.$context.loaderContext = parent ? parent.$context : engine._rootContext;
     this.$context.parentContext = this.$parentCtxObject ? this.$parentCtxObject.$context : engine._rootContext;
 
+    // !!! see QMLBinding
+    this.$context.$ownerObject = this;
+
+    if (!this.$component.loaderComponent===!(flags & QmlWeb.QMLComponentFlags.Root)) {
+      throw new QmlWeb.AssertionError("Assertion failed. No Loader + Root or Root + Loader : "+component+"  ctx:"+this.$context);
+    }
+
   }
 
   cleanupContext(parent) {
     // TODO gz
     // purge obsolete QMLContext if needed
+
+    if (!this.$isAttachedObj) {
+      this.$parentCtxObject = null;
+      this.$context = null;
+    }
   }
 
 };

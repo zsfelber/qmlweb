@@ -81,28 +81,6 @@ function construct(meta, parent, flags) {
 
     try {
 
-      let nm = component.$name;
-      if (/\.qml$/.test(nm)) {
-        nm = nm.substring(0, nm.length-4);
-      }
-
-      item.$superclass = item.$class;
-      item.$class = nm;
-      if (flags & QmlWeb.QMLComponentFlags.Nested) {
-        item.$classname = "["+nm+"]";
-      } else {
-        item.$classname = nm;
-      }
-
-      var ctx = item.$context = component.context;
-      item.$component = component;
-      // !!! see QMLBinding
-      ctx.$ownerObject = item;
-
-      if (!component.loaderComponent===!(flags & QmlWeb.QMLComponentFlags.Root)) {
-        throw new QmlWeb.AssertionError("Assertion failed. No Loader + Root or Root + Loader : "+component+"  ctx:"+ctx);
-      }
-
       // Finalize instantiation over supertype item :
 
       //if (typeof item.dom !== "undefined") {
@@ -114,6 +92,8 @@ function construct(meta, parent, flags) {
       if (!ctx) {
         throw new Error("No context : "+item);
       }
+
+      item.initializeContext(parent)
 
       QmlWeb.applyAllAttachedObjects(item);
 
