@@ -56,7 +56,7 @@ QmlWeb.registerQmlType({
     var prevComponent = QmlWeb.engine.$evaluatedObj;
 
     try {
-      QmlWeb.engine.$evaluatedObj = this.$component;
+      QmlWeb.engine.$evaluatedObj = this;
       const url = QmlWeb.resolveBasePath(fileName);
       let $class = url.path + url.file;
       if (/\.qml$/.test($class)) {
