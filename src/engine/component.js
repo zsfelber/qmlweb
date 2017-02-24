@@ -13,7 +13,7 @@ class QMLContext {
     return undefined;
   }
 
-  createChild(info, nestedOrFirstSuper) {
+  createChild(info, componentFlags) {
     const childContext = Object.create(this);
     childContext.$info = info;
 
@@ -22,12 +22,21 @@ class QMLContext {
     // we use "this", $pageElements and loader context in evaluation, as all the variable names other than elements
     // are either in "this"(and supers) or in parent(ie loader) context,
 
-    if (QmlWeb.QMLComponentFlags.Nested & nestedOrFirstSuper) {
-      childContext.$inheritedProperties = Object.create(childContext.$inheritedProperties);
-    } else if (QmlWeb.QMLComponentFlags.FirstSuper & nestedOrFirstSuper) {
+    // #scope hierarchy:
+    // very precise code don't change this ::
+    // see also QMLComponent.init
+
+    if (QmlWeb.QMLComponentFlags.NestedOrFirst & componentFlags) {
       childContext.$inheritedProperties = Object.create(childContext.$inheritedProperties);
     } else {
       childContext.$inheritedProperties = {};
+    }
+
+    if (QmlWeb.QMLComponentFlags.Nested & componentFlags) {
+      // inherit page top $pageElements and $pageContext (Object.create(this) already do this) :
+      // childContext.$pageElements = this.$pageElements;
+      // childContext.$pageContext = this.$pageContext;
+    } else {
       childContext.$pageElements = {};
       childContext.$pageContext = Object.create(childContext.$pageElements);
       childContext.$pageContext.$top = childContext;

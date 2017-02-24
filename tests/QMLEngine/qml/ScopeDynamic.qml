@@ -6,5 +6,7 @@ Item {
 
   ScopeDynamicWithFoo {
     id: child
+
+    property int foo: 666//bad if it is found in super !
   }
 }

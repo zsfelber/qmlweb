@@ -391,21 +391,25 @@ function $instanceOf(o, typestring, component) {
 
   if (o && o.$base) {
 
-    o = o.$leaf;
-
     var clinfo = QmlWeb.resolveClassImport(typestring, component);
     let f;
     if (clinfo.constructor) {
-      return o instanceof clinfo.constructor;
+      return o.$leaf instanceof clinfo.constructor;
     } else if (f=clinfo.$file) {
+
+      o = o.$base;
+
       for (let c = o.$component; c; c=c.loaderComponent) {
         if (c.$file===f) {
           return true;
         }
+        if (!(c.flags & QmlWeb.QMLComponentFlags.Super)) {
+          break;
+        }
       }
       return false;
     } else {
-      throw new Error("QmlWeb.$instanceOf : Class not found : "+typestring+" in context of "+component.context);
+      throw new Error("QmlWeb.$instanceOf : Class not found : "+typestring+" in context of "+component.$context);
     }
   } else {
 

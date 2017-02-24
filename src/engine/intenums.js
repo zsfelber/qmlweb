@@ -46,6 +46,7 @@ const QMLComponentFlags = {
   LoadImports : 16,
   Flat : 32,
   FirstSuper : 64,
+  NestedOrFirst : 66,
 
   Super_mnem : "S",
   Nested_mnem : "N",

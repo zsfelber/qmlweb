@@ -27,6 +27,10 @@ class QMLComponent {
     // NOTE gz  object is prototyped from bottom to top, in terms of [type]->[supertype] relationship
     // see also QObject.createChild()->Object.create() in classes.construct
     // see also Object.create in QMLContext.createChild
+
+    // #scope hierarchy:
+    // see also component.js/QMLContext.createChild
+
     if (loaderComponent) {
       if ((this.flags&QmlWeb.QMLComponentFlags.Super?1:0)+(this.flags&QmlWeb.QMLComponentFlags.Nested?1:0) > 1) {
         throw new QmlWeb.AssertionError("Assertion failed : component either factory nested or super  It is "+QmlWeb.QMLComponentFlags.toString(this.flags));
@@ -44,36 +48,39 @@ class QMLComponent {
 
         if (loaderComponent.flags & QmlWeb.QMLComponentFlags.Super) {
 
-          this.loaderComponent = loaderComponent.loaderComponent;
-          this.parentComponent = null;
 
-        } else if (loaderComponent.flags & (QmlWeb.QMLComponentFlags.Root|QmlWeb.QMLComponentFlags.Nested)) {
+        } else if (loaderComponent.flags & QmlWeb.QMLComponentFlags.Root) {
+
+          if (loaderComponent.loaderComponent) {
+            throw new Error("Nested Component parent is Root but has loader : "+loaderComponent+"  its loader:"+loaderComponent.loaderComponent);
+          }
+
+        } else if (loaderComponent.flags & QmlWeb.QMLComponentFlags.Nested) {
+
+          if (loaderComponent.$file && loaderComponent.$file !== this.$file) {
+            throw new Error("Loader Component $file mismatch : "+loaderComponent.$file+" vs "+this.$file);
+          }
 
           this.flags |= QmlWeb.QMLComponentFlags.FirstSuper;
-          this.loaderComponent = loaderComponent;
-          this.parentComponent = loaderComponent;
 
         } else {
           throw new Error("Invalid loader Component flags of Super : "+this+"  loader:"+loaderComponent);
         }
 
+        this.loaderComponent = loaderComponent;
+        this.parentComponent = loaderComponent.parentComponent;
 
         if (this.loaderComponent) {
 
-          if (loaderComponent.flags & QmlWeb.QMLComponentFlags.Nested) {
-            if (loaderComponent.$file && loaderComponent.$file !== this.$file) {
-              throw new Error("Loader Component $file mismatch : "+loaderComponent.$file+" vs "+this.$file);
-            }
-          }
           this.meta.$context = this.context = this.loaderComponent.context.createChild(
-                                        this.loaderComponent.toString(undefined, true) +" -> " +this.toString(undefined, true)), QmlWeb.QMLComponentFlags.FirstSuper&this.flags;
+                                        this.loaderComponent.toString(undefined, true) +" -> " +this.toString(undefined, true)), this.flags;
 
           if (this.loaderComponent.flags & QmlWeb.QMLComponentFlags.Super) {
             throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.context)
           }
         } else {
 
-          this.meta.$context = this.context = engine.rootContext.createChild(loaderComponent.toString(undefined, true) + " .. " +this.toString(undefined, true), QmlWeb.QMLComponentFlags.FirstSuper&this.flags);
+          this.meta.$context = this.context = engine.rootContext.createChild(loaderComponent.toString(undefined, true) + " .. " +this.toString(undefined, true), this.flags);
 
         }
 
@@ -85,15 +92,13 @@ class QMLComponent {
         // Nested or Factory
 
         this.loaderComponent = loaderComponent;
+        this.parentComponent = loaderComponent;
         this.$base = this;
         this.$leaf = this;
         this.$root = loaderComponent.$root;
 
-        this.meta.$context = this.context = loaderComponent.context.createChild(loaderComponent.toString(undefined, true)+" -> "+this.toString(undefined, true), QmlWeb.QMLComponentFlags.Nested);
+        this.meta.$context = this.context = loaderComponent.context.createChild(loaderComponent.toString(undefined, true)+" -> "+this.toString(undefined, true), this.flags);
         this.context.nestedLevel = this.nestedLevel = (loaderComponent.nestedLevel||0)+1;
-        // inherit page top $pageElements and $pageContext :
-        this.context.$pageElements = loaderComponent.context.$pageElements;
-        this.context.$pageContext = loaderComponent.context.$pageContext;
       }
 
       //QmlWeb.warn("Component  "+this.context);
