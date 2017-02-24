@@ -67,13 +67,29 @@ class QtObject extends QmlWeb.QObject {
     return this.$attributes;
   }
 
-  initializeContext(parent) {
+  initializeContext(parent, flags) {
+
     if (this.$context || this.$isAttachedObj) {
       return;
     }
 
     const engine = QmlWeb.engine;
-    let flags = this.$componentCreateFlags;
+    flags |= this.$componentCreateFlags;
+
+    if (!this.$component) {
+      throw new QmlWeb.AssertionError("Assertion failed. No component : "+this);
+    }
+
+    if (!this.$component.loaderComponent===!(flags & QmlWeb.QMLComponentFlags.Root)) {
+      throw new QmlWeb.AssertionError("Assertion failed.   Loader:"+this.$component.loaderComponent+"  invalid flags : "+QmlWeb.QMLComponentFlags.toString(flags));
+    }
+
+    if (this.$component.status === QmlWeb.Component.Loading) {
+      if (this.$leaf !== this) {
+        throw new QmlWeb.AssertionError("this.$leaf !== this  : "+this+"  leaf:"+this.$leaf);
+      }
+    }
+
 
     let nm = this.$component.$name;
     if (/\.qml$/.test(nm)) {
@@ -196,10 +212,10 @@ class QtObject extends QmlWeb.QObject {
     this.$pageContext = this.$context.$pageContext;
     this.$info = this.$context.$info;
 
-    if (!this.$component.loaderComponent===!(flags & QmlWeb.QMLComponentFlags.Root)) {
-      throw new QmlWeb.AssertionError("Assertion failed. No Loader + Root or Root + Loader : "+component+"  ctx:"+this.$context);
+    // when component added dynamically, we initialize the whole prototype chain's contexts :
+    if (this.$component.status !== QmlWeb.Component.Loading && this.$base !== this) {
+      this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super);
     }
-
   }
 
   cleanupContext(parent) {

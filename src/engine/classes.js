@@ -217,7 +217,7 @@ function addElementToPageContexts(item, id, ctx) {
   // see also QMLBindingFlags.bindXXX methods how a name is eventually resolved at runtime
 
   if (id in ctx.self) {
-    throw new AssertionError("Assertion failed. Context self entry already defined : "+id+" object:"+item);
+    throw new QmlWeb.AssertionError("Assertion failed. Context self entry already defined : "+id+" object:"+item);
   }
 
   // nothing but self :
