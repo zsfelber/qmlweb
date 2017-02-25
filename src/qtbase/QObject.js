@@ -134,14 +134,10 @@ class QObject {
 
   toString(detail) {
     var tos =
-      ((detail&&this.$info)?this.$info:
-                  (this.$classname?this.$classname:
-                          (this.$meta?this.$meta.info?this.$meta.info:
-                                  (this.$meta.$name?this.$meta.$name:"???:"+this.constructor.name):
-                                          ("???:"+this.constructor.name))))+
-      (this.$leaf?this.$leaf.id?":"+this.$leaf.id:"":
-                  (this.id?":"+this.id:""))+
-      (detail?":"+this.$objectId:"");
+      (typeof this.$info==="string"? this.$info : this.constructor.name) +
+        (this.$leaf?this.$leaf.id?":"+this.$leaf.id:"":
+                    (this.id?":"+this.id:""))+
+        (detail?":"+this.$objectId:"");
     return tos;
   }
 }

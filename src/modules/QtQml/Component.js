@@ -15,14 +15,13 @@ class QMLComponent {
     // no component = is import root
     const evalObj = QmlWeb.engine.$evaluatedObj;
     this.loaderComponent = evalObj ? evalObj.$component : null;
+    // !!! see QMLBinding
+    this.$component = this;
+    this.$root = this.loaderComponent ? this.loaderComponent.$root : this;
 
     if (!this.loaderComponent===!(flags & QmlWeb.QMLComponentFlags.Root)) {
       throw new QmlWeb.AssertionError("Assertion failed.   Loader:"+this.loaderComponent+"  invalid flags : "+QmlWeb.QMLComponentFlags.toString(flags));
     }
-
-    // !!! see QMLBinding
-    this.$component = this;
-    this.$root = this.loaderComponent ? this.loaderComponent.$root : this;
 
     if (this.flags & QmlWeb.QMLComponentFlags.Nested) {
 
@@ -257,14 +256,14 @@ class QMLComponent {
 
       this.loadJsImports();
 
-      if (item.isComponentAttached) {
+      if (item.$isComponentAttached) {
         // NOTE one level of supertype hierarchy, QObject's component first (recursively) :
         // NOTE not possible even trying to emit 'completed' right now, because we are before "applyProperties"
         // and so unable to determine whether a called property exists and not yet initialiazed or it doesn't exist at all.
         const itm = {
           fun:QMLComponent.complete,
           thisObj:this,
-          info:"Pending component.complete (waiting to initialization) : "+(this.context?this.context:this),
+          info:"Pending component.complete (waiting to initialization) : "+item.$context,
           opId:"C:"+this.$componentId
         };
         QmlWeb.engine.pendingOperations.stack.push(itm);
@@ -300,7 +299,7 @@ class QMLComponent {
     return item;
   }
 
-  toString(name, short) {
+  toString(name, long) {
     if (this.$name && this.$id && this.$name.toUpperCase()===this.$id.toUpperCase()+".QML") {
       name = this.$id;
     } else if (this.$class && this.$id && this.$class.toUpperCase()===this.$id.toUpperCase()) {
@@ -309,11 +308,17 @@ class QMLComponent {
       if (!name) name = this.$name;
       if (!name) name = this.$file;
       if (!name) name = "cl:"+this.$class;
+      if (name && !long) {
+        const l = name.lastIndexOf("/");
+        if (l>0) {
+          name = "~"+name.substring(l);
+        }
+      }
       if (this.$id) name += ":"+this.$id;
     }
     var c = QmlWeb.QMLComponentFlags.toString(this.flags);
 
-    return c+"["+name+(this.nestedLevel?" l"+this.nestedLevel:"")+(short?"":" "+QmlWeb.Component.toString(this.status))+"]";
+    return c+"["+name+(this.nestedLevel?" l"+this.nestedLevel:"")+(long?" "+QmlWeb.Component.toString(this.status):"")+"]";
   }
 
   static complete() {
@@ -340,8 +345,8 @@ class QMLComponent {
   }
 
   static getAttachedObject() {
-    if (!this.isComponentAttached) {
-      this.isComponentAttached = true;
+    if (!this.$isComponentAttached) {
+      this.$isComponentAttached = true;
     }
     return this.$component;
   }

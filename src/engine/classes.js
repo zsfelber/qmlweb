@@ -90,6 +90,9 @@ function construct(meta, parent, flags) {
 
       item.$component = meta.$component;
       item.$componentCreateFlags = flags;
+      if (meta.$component) {
+        item.$info = meta.$component.toString();
+      }
 
       item.initializeContext(parent);
 

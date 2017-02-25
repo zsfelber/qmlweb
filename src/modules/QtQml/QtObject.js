@@ -77,16 +77,16 @@ class QtObject extends QmlWeb.QObject {
     flags |= this.$componentCreateFlags;
 
     if (!this.hasOwnProperty("$component") || !this.$component) {
-      throw new QmlWeb.AssertionError("Assertion failed. No component : "+this);
+      throw new QmlWeb.AssertionError("Assertion failed. No component : "+this.toString.apply(this));
     }
 
-    if (!this.$component.loaderComponent===!(flags & QmlWeb.QMLComponentFlags.Root)) {
+    if (!this.$component.loaderComponent===!(this.$component.flags & QmlWeb.QMLComponentFlags.Root)) {
       throw new QmlWeb.AssertionError("Assertion failed.   Loader:"+this.$component.loaderComponent+"  invalid flags : "+QmlWeb.QMLComponentFlags.toString(flags));
     }
 
     if (this.$component.status === QmlWeb.Component.Loading) {
       if (this.$leaf !== this) {
-        throw new QmlWeb.AssertionError("this.$leaf !== this  : "+this+"  leaf:"+this.$leaf);
+        throw new QmlWeb.AssertionError("this.$leaf !== this  : "+this.toString.apply(this)+"  leaf:"+this.toString.apply(this.$leaf));
       }
     }
 
@@ -94,7 +94,7 @@ class QtObject extends QmlWeb.QObject {
       if (this.$component.status === QmlWeb.Component.Loading) {
         // initialize the remaining bottom level context :
         if (this.$base !== this.__proto__) {
-          throw new QmlWeb.AssertionError("this.$base !== this.__proto__  : "+this+"  leaf:"+this.$leaf+"  base:"+this.$base+"  proto:"+this.__proto__);
+          throw new QmlWeb.AssertionError("this.$base !== this.__proto__  : "+this.toString.apply(this)+"  leaf:"+this.toString.apply(this.$leaf)+"  base:"+this.toString.apply(this.$base)+"  proto:"+this.toString.apply(this.__proto__));
         }
         this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super);
       } else {
@@ -134,7 +134,7 @@ class QtObject extends QmlWeb.QObject {
       }
 
       if (flags&QmlWeb.QMLComponentFlags.Root) {
-        throw new Error("Invalid root Component construction (a loader Component is found) : "+this);
+        throw new Error("Invalid root Component construction (a loader Component is found) : "+this.toString.apply(this));
       }
 
       if (flags&QmlWeb.QMLComponentFlags.Super) {
@@ -165,14 +165,14 @@ class QtObject extends QmlWeb.QObject {
           this.$componentCreateFlags = flags |= QmlWeb.QMLComponentFlags.FirstSuper;
 
         } else {
-          throw new Error("Invalid loader Component flags of Super : "+this+"  loader:"+parent);
+          throw new Error("Invalid loader Component flags of Super : "+this.toString.apply(this)+"  loader:"+parent);
         }
 
 
         if (this.$parentCtxObject) {
 
           this.$context = this.$parentCtxObject.$context.createChild(
-              parent.$component.toString(undefined, true) +" -> " +this.$component.toString(undefined, true), flags);
+              parent.$component.toString() +" -> " +this.$component.toString(), flags);
 
           if (this.$parentCtxObject.$componentCreateFlags & QmlWeb.QMLComponentFlags.Super) {
             throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.$context)
@@ -181,7 +181,7 @@ class QtObject extends QmlWeb.QObject {
         } else {
 
           this.$context = engine._rootContext.createChild(
-              parent.$component.toString(undefined, true) + " .. " +this.$component.toString(undefined, true), flags);
+              parent.$component.toString() + " .. " +this.$component.toString(), flags);
 
         }
 
@@ -196,24 +196,24 @@ class QtObject extends QmlWeb.QObject {
         this.$context.nestedLevel = this.nestedLevel = (parent.nestedLevel||0)+1;
 
         this.$context = this.$parentCtxObject.context.createChild(
-              parent.$component.toString(undefined, true)+" -> "+this.$component.toString(undefined, true), flags);
+              parent.$component.toString()+" -> "+this.$component.toString(), flags);
       }
 
       //QmlWeb.warn("Component  "+this.$context);
     } else {
       this.$parentCtxObject = null;
 
-      this.$context = engine._rootContext.createChild(this.$component.toString(undefined, true));
+      this.$context = engine._rootContext.createChild(this.$component.toString());
 
       //QmlWeb.warn("Component  "+this);
       if (flags&QmlWeb.QMLComponentFlags.Nested) {
         throw new Error("Component is nested but no loader Component.");
       }
       if (flags&QmlWeb.QMLComponentFlags.Super) {
-        QmlWeb.warn("Component is super but no loader Component : "+this);
+        QmlWeb.warn("Component is super but no loader Component : "+this.toString.apply(this));
       }
       if (!(flags&QmlWeb.QMLComponentFlags.Root)) {
-        throw new Error("Component has no loader but Root flag is not set : "+this);
+        throw new Error("Component has no loader but Root flag is not set : "+this.toString.apply(this));
       }
     }
 
