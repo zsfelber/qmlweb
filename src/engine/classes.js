@@ -74,7 +74,6 @@ function construct(meta, parent, flags) {
   // see also Object.create in QMLContext.createChild
   if (superitem instanceof QmlWeb.QObject) {
     item = superitem.createChild();
-    item.$componentCreateFlags = flags;
 
     const prevEvalObj = QmlWeb.engine.$evaluatedObj;
     QmlWeb.engine.$evaluatedObj = item;
@@ -88,6 +87,9 @@ function construct(meta, parent, flags) {
       //    item.dom.className += `  ${meta.id}`;
       //  }
       //}
+
+      item.$component = meta.$component;
+      item.$componentCreateFlags = flags;
 
       item.initializeContext(parent);
 

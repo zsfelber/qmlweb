@@ -76,7 +76,7 @@ class QtObject extends QmlWeb.QObject {
     const engine = QmlWeb.engine;
     flags |= this.$componentCreateFlags;
 
-    if (!this.hasOwnProperty("$component")) {
+    if (!this.hasOwnProperty("$component") || !this.$component) {
       throw new QmlWeb.AssertionError("Assertion failed. No component : "+this);
     }
 

@@ -16,9 +16,12 @@ class QMLComponent {
     const evalObj = QmlWeb.engine.$evaluatedObj;
     this.loaderComponent = evalObj ? evalObj.$component : null;
 
+    if (!this.loaderComponent===!(flags & QmlWeb.QMLComponentFlags.Root)) {
+      throw new QmlWeb.AssertionError("Assertion failed.   Loader:"+this.loaderComponent+"  invalid flags : "+QmlWeb.QMLComponentFlags.toString(flags));
+    }
+
     // !!! see QMLBinding
     this.$component = this;
-    this.meta.$component = this;
     this.$root = this.loaderComponent ? this.loaderComponent.$root : this;
 
     if (this.flags & QmlWeb.QMLComponentFlags.Nested) {
@@ -49,7 +52,7 @@ class QMLComponent {
 
   copyMeta(meta, flags) {
     var cons;
-    this.meta = {$component:this};
+    this.meta = {};
     if (meta.clazz) {
       if (meta.$file === undefined) {
         meta.$file = meta.clazz.$file;
@@ -99,6 +102,8 @@ class QMLComponent {
 
       QmlWeb.helpers.copy(this.meta, metachild);
     }
+
+    this.meta.$component = this;
 
     this.$id = this.meta.id;
     this.$name = this.meta.$name;
