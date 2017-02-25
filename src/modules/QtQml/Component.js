@@ -307,7 +307,7 @@ class QMLComponent {
     } else {
       if (!name) name = this.$name;
       if (!name) name = this.$file;
-      if (!name) name = "cl:"+this.$class;
+      if (!name&&this.$class) name = "cl:"+this.$class;
       if (name && !long) {
         const l = name.lastIndexOf("/");
         if (l>0) {
@@ -317,6 +317,7 @@ class QMLComponent {
       if (this.$id) name += ":"+this.$id;
     }
     var c = QmlWeb.QMLComponentFlags.toString(this.flags);
+    if (!name) name = "";
 
     return c+"["+name+(this.nestedLevel?" l"+this.nestedLevel:"")+(long?" "+QmlWeb.Component.toString(this.status):"")+"]";
   }
