@@ -67,7 +67,7 @@ class QtObject extends QmlWeb.QObject {
     return this.$attributes;
   }
 
-  initializeContext(parent, flags) {
+  initializeContext(parent, flags, recursive) {
 
     if (this.$isAttachedObj || this.hasOwnProperty("$context")) {
       return;
@@ -84,24 +84,20 @@ class QtObject extends QmlWeb.QObject {
       throw new QmlWeb.AssertionError("Assertion failed.   Loader:"+this.$component.loaderComponent+"  invalid flags : "+QmlWeb.QMLComponentFlags.toString(flags));
     }
 
-    if (this.$component.status === QmlWeb.Component.Loading) {
-      if (this.$leaf !== this) {
-        throw new QmlWeb.AssertionError("this.$leaf !== this  : "+this.toString.apply(this)+"  leaf:"+this.toString.apply(this.$leaf));
+    if (this.$context) {
+      if (recursive) {
+        throw new QmlWeb.AssertionError("Invalid call. recursive+context : "+this.toString.apply(this)+"  context:"+this.$context);
       }
-    }
-
-    if (!this.$context) {
-      if (this.$component.status === QmlWeb.Component.Loading) {
-        // initialize the remaining bottom level context :
-        if (this.$base !== this.__proto__) {
-          throw new QmlWeb.AssertionError("this.$base !== this.__proto__  : "+this.toString.apply(this)+"  leaf:"+this.toString.apply(this.$leaf)+"  base:"+this.toString.apply(this.$base)+"  proto:"+this.toString.apply(this.__proto__));
-        }
-        this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super);
-      } else {
-        // when component added dynamically, we initialize the whole prototype chain's contexts :
-        if (this.$base !== this) {
-          this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super);
-        }
+    } else if (!recursive && this.$component.status === QmlWeb.Component.Loading) {
+      // initialize the remaining bottom level context :
+      if (this.$base !== this.__proto__) {
+        throw new QmlWeb.AssertionError("this.$base !== this.__proto__  : "+this.toString.apply(this)+"  leaf:"+this.toString.apply(this.$leaf)+"  base:"+this.toString.apply(this.$base)+"  proto:"+this.toString.apply(this.__proto__));
+      }
+      this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super, true);
+    } else {
+      // when component added dynamically, we initialize the whole prototype chain's contexts :
+      if (this.$base !== this) {
+        this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super, true);
       }
     }
 
@@ -208,12 +204,6 @@ class QtObject extends QmlWeb.QObject {
       //QmlWeb.warn("Component  "+this);
       if (flags&QmlWeb.QMLComponentFlags.Nested) {
         throw new Error("Component is nested but no loader Component.");
-      }
-      if (flags&QmlWeb.QMLComponentFlags.Super) {
-        QmlWeb.warn("Component is super but no loader Component : "+this.toString.apply(this));
-      }
-      if (!(flags&QmlWeb.QMLComponentFlags.Root)) {
-        throw new Error("Component has no loader but Root flag is not set : "+this.toString.apply(this));
       }
     }
 
