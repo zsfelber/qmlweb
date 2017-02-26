@@ -69,7 +69,7 @@ const QMLBindingFlags = {
   _Alias : 8,
   Alias : 12, // always bidirectional
   User : 16,
-  OmitContext : 32,
+  ContextNullable : 32,
   ListTemplate : 64,
 
   toString: function(flags) {

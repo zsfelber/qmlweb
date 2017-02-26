@@ -1,4 +1,3 @@
-let signalIds = 0;
 
 class Connection {
   constructor($signal, slotObj, slot, type, thisObj) {
@@ -24,7 +23,7 @@ class Connection {
 
 class Signal {
   constructor(name, params = [], options = {}) {
-    this.$objectId = this.$signalId = ++signalIds;
+    this.$objectId = this.$signalId = ++objectIds;
     this.$name = name;
     this.connectedSlots = [];
     this.obj = options.obj;

@@ -21,7 +21,7 @@ function initMeta(self, meta, constructor) {
           desc = { type: desc };
         }
         try {
-          QmlWeb.createProperty(desc.type, self, name, desc);
+          QmlWeb.createProperty(desc.type, self, name, desc, QMLBindingFlags.ContextNullable);
         } catch (err) {
           if (err instanceof QmlWeb.FatalError) throw err;
           if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)

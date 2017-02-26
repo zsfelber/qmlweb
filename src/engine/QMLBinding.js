@@ -1,4 +1,3 @@
-let bindingIds = 0;
 
 function _ubertrim(str) {
   if (!str) {
@@ -80,7 +79,7 @@ class QMLBinding {
     // it may also fine tune other aspects, like bidirectionality of binding or
     // whether it is an alias
 
-    this.$objectId = this.$bindingId = ++bindingIds;
+    this.$objectId = this.$bindingId = ++objectIds;
 
     // If flags is not passed, we decide it here.
     // If it is a block, we require a return statement. If it is a
@@ -287,20 +286,23 @@ class QMLBinding {
     }
   }
 
+  static fakectx(obj) {
+    return {$ownerObject:obj, parentContext:{$inheritedProperties:{}}, $pageContext:{}, self:{}};
+  }
+
   namespace() {
     var vvith;
-    if (this.flags & QmlWeb.QMLBindingFlags.OmitContext) {
+    if (this.flags & QmlWeb.QMLBindingFlags.ContextNullable) {
       if (this.flags & QmlWeb.QMLBindingFlags.Alias) {
-        vvith = "with(QmlWeb) with(this.$leaf!==this?this.$leaf.$noalias:{}) with(this.$noalias)";
+        vvith = "var $$c=this.$context?this.$context:QMLBinding.fakectx(this),$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext.$inheritedProperties) with($$c.$pageContext) with($$o.$noalias) with($$c.self)";
       } else {
-        vvith = "with(QmlWeb) with(this.$leaf!==this?this.$leaf:{})          with(this)";
+        vvith = "var $$c=this.$context?this.$context:QMLBinding.fakectx(this),$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext.$inheritedProperties) with($$c.$pageContext) with($$o) with($$c.self)";
       }
     } else {
 
       // NOTE necessary to use $context.$ownerObject instead of 'this' directly because of attached objects
       // see QObject() QMLComponent.getAttachedObject()
 
-      // removed: with(($$lf=($$o=$$c.$ownerObject).$leaf)!==$$o?$$lf(.$noalias):{}) with($$o(.$noalias))
       if (this.flags & QmlWeb.QMLBindingFlags.Alias) {
         vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext.$inheritedProperties) with($$c.$pageContext) with($$o.$noalias) with($$c.self)";
       } else {

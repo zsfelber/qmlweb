@@ -37,7 +37,7 @@ function formatPath(path, path0, first) {
  * @param {String} propName Property name
  * @param {Object} [options] Options that allow finetuning of the property
  */
-function createProperty(type, obj, propName, options) {
+function createProperty(type, obj, propName, options, bindingFlags=0) {
   if (!options) options = {};
 
   const QMLProperty = QmlWeb.QMLProperty;
@@ -101,7 +101,7 @@ function createProperty(type, obj, propName, options) {
 
     var p = formatPath(path0);
     const QMLBinding = QmlWeb.QMLBinding;
-    var binding = new QMLBinding(p, proplast, QMLBindingFlags.ImplExpression|QMLBindingFlags.Alias);
+    var binding = new QMLBinding(p, proplast, QMLBindingFlags.ImplExpression|QMLBindingFlags.Alias|bindingFlags);
 
     // NOTE alias + initialValue works too
     _set_prop(propName, prop, QMLPropertyFlags.ReasonInit, binding);
@@ -127,7 +127,7 @@ function createProperty(type, obj, propName, options) {
   var ctx = obj.$context;
 
   // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
-  // (It's true. We may use QMLBindingFlags.OmitContext flag to omit context lookup in compilation in the related cases.
+  // (It's true. We may use QMLBindingFlags.ContextNullable flag to omit context lookup in compilation in the related cases.
   //  Usually we call javascript functions from custom module js classes -> connect(...) codes directly, so this
   //  flag was not used so far. )
 

@@ -1,4 +1,3 @@
-let propertyIds = 0;
 
 function objToStringSafe(obj, detail) {
   var os = (typeof obj.$info==="string"?obj.$info:(obj.$base?obj.$base.toString():(obj.$classname||obj.constructor?(obj.$classname||obj.constructor.name)+":":""))+(detail&&obj.$objectId?obj.$objectId+":":""));
@@ -49,7 +48,7 @@ class QMLProperty {
     // object.
     this.$tidyupList = [];
 
-    this.$objectId = this.$propertyId = ++propertyIds;
+    this.$objectId = this.$propertyId = ++objectIds;
     this.evalTreeConnections = {};
     this.childEvalTreeConnections = 0;
   }
