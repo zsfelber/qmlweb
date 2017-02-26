@@ -262,9 +262,9 @@ class QMLComponent {
         // and so unable to determine whether a called property exists and not yet initialiazed or it doesn't exist at all.
         const itm = {
           fun:QMLComponent.complete,
-          thisObj:this,
+          thisObj:item,
           info:"Pending component.complete (waiting to initialization) : "+item.$context,
-          opId:"C:"+this.$componentId
+          opId:"C:"+item.$objectId
         };
         QmlWeb.engine.pendingOperations.stack.push(itm);
         QmlWeb.engine.pendingOperations.map["C:"+this.$componentId] = itm;
@@ -324,7 +324,9 @@ class QMLComponent {
 
   static complete() {
 
-    if (this.status === QmlWeb.Component.Ready) {
+    if (!this.$component) {
+      throw new QmlWeb.AssertionError("No Component in complete() : "+this);
+    } else if (this.$component.status === QmlWeb.Component.Ready) {
       throw new QmlWeb.AssertionError("Component status already Ready in complete() : "+this);
     } else if (!this.$attachedComponent) {
       throw new QmlWeb.AssertionError("Component complete() invoked but no $attachedComponent :  "+this);
@@ -332,7 +334,7 @@ class QMLComponent {
       // This is the standard status exposed to QML, and its
       // Ready state should not depend on signal/slots (we use
       // engine.operationState/QMLOperationState internally):
-      this.status = QmlWeb.Component.Ready;
+      this.$component.status = QmlWeb.Component.Ready;
 
       try {
         this.$attachedComponent.completed();
