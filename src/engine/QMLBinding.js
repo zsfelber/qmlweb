@@ -229,7 +229,7 @@ class QMLBinding {
   // this == connection : var connection = Signal.connect(...); binding.run.call(connection, ...);
   run() {
     var prevEvalObj = QmlWeb.engine.$evaluatedObj;
-    QmlWeb.engine.$evaluatedObj = this.bindingObj.$component;
+    QmlWeb.engine.$evaluatedObj = this.bindingObj;
 
     try {
       if (!this.binding.implRun) {
@@ -244,7 +244,7 @@ class QMLBinding {
         var os = QmlWeb.objToStringSafe(this.bindingObj);
         QmlWeb.dumpEvalError("Binding#"+this.binding.$bindingId+"/run error : "+err.message+" this:" + os + (err.srcdumpok?" srcdump:ok":" "+this.binding), err);
       } else {
-        err.message += "  Binding#"+this.$bindingId;
+        err.message += "  Binding#"+this.binding.$bindingId;
       }
       err.srcdumpok = 1;
       throw err;

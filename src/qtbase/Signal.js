@@ -1,25 +1,62 @@
 let signalIds = 0;
 
+class Connection {
+  constructor($signal, slotObj, slot, type, thisObj) {
+    this.index = $signal.connectedSlots.length;
+    this.$signal = $signal;
+    this.slotObj = slotObj;
+    this.id = slotObj.$objectId;
+    this.slot = slot;
+    this.type = type;
+    this.thisObj = thisObj?thisObj:slotObj;
+  }
+
+  disconnect(all) {
+    this.$signal.disconnectConnection(this, all);
+  };
+
+  toString() {
+    return "Conn:"+this.$signal.obj+".signal:"+this.$signal.$name+" -> "+
+          (this.binding ? this.binding.toString():
+          (this.slot ? this.slot.toString() : ""));
+  };
+}
+
 class Signal {
   constructor(name, params = [], options = {}) {
     this.$objectId = this.$signalId = ++signalIds;
     this.$name = name;
     this.connectedSlots = [];
     this.obj = options.obj;
+    this.params = params;
     this.options = options;
 
-    this.signal = (...args) => this.execute(...args);
+    this.signal = this.execute.bind(this);
+    // avoid unnecassary funcion.bind (creating closures):
     this.signal.$signal = this;
-    this.signal.parameters = params;
-    this.signal.connect = this.connect.bind(this);
-    this.signal.disconnect = this.disconnect.bind(this);
-    this.signal.isConnected = this.isConnected.bind(this);
+    this.signal.connect = Signal.connectSignal;
+    this.signal.disconnect = Signal.disconnectSignal;
+    this.signal.isConnected = Signal.isSignalConnected;
 
     // TODO Fix Keys that don't have an obj for the signal
     if (this.obj && this.obj.$signals !== undefined) {
       this.obj.$signals[this.$signalId] = this.signal;
     }
   }
+
+  // where this = "this".signal
+  static connectSignal() {
+    this.$signal.connect(...args);
+  }
+  // where this = "this".signal
+  static disconnectSignal() {
+    this.$signal.disconnect(...args);
+  }
+  // where this = "this".signal
+  static isSignalConnected() {
+    return this.$signal.isConnected(...args);
+  }
+
   execute(...args) {
     const pushed = QmlWeb.QMLProperty.pushEvalStack();
     try {
@@ -51,35 +88,24 @@ class Signal {
     }
     var connection;
     if (args.length === 1) {
-      connection = { thisObj: global, slotObj: global, slot: args[0], type };
+      connection = new Connection(this, global, args[0], type);
     } else if (typeof args[1] === "string" || args[1] instanceof String) {
       if (args[0].$tidyupList && args[0] !== this.obj) {
         args[0].$tidyupList.push(this.signal);
       }
       const slot = args[0][args[1]];
-      connection = { thisObj: args[0], slotObj: args[0], id:args[0].$objectId, slot, type };
+      connection = new Connection(this, args[0], slot, type);
     } else {
       if (args[0].$tidyupList &&
         (!this.obj || args[0] !== this.obj && args[0] !== this.obj.$parent)
       ) {
         args[0].$tidyupList.push(this.signal);
       }
-      connection = { thisObj: args[0], slotObj: args[0], id:args[0].$objectId, slot: args[1], type };
+      connection = new Connection(this, args[0], args[1], type);
     }
     if (!connection.slot) {
       throw new Error("Missing slot for signal:"+this.$name+"  connection   slotObj:"+connection.slotObj);
     }
-
-    connection.disconnect = function(all) {
-      connection.signal.disconnectConnection(connection, all);
-    };
-    connection.index = this.connectedSlots.length;
-    connection.signal = this;
-    connection.toString = function() {this
-      return "Conn:"+connection.signal.obj+".signal:"+connection.signal.$name+" -> "+
-            (connection.binding ? connection.binding.toString():
-            (connection.slot ? connection.slot.toString() : ""));
-    };
 
     this.connectedSlots.push(connection);
 
@@ -181,9 +207,9 @@ class Signal {
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
            || ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
         if (desc.binding) {
-          QmlWeb.warn("Signal : "+QmlWeb.objToStringSafe(desc.thisObj)+" . "+ desc.signal.$name + (desc.slotObj!==desc.thisObj?" slotObj:" + QmlWeb.objToStringSafe(desc.slotObj):"") +" slot(autobound) error:", err);
+          QmlWeb.warn("Signal : "+QmlWeb.objToStringSafe(desc.thisObj)+" . "+ desc.$signal.$name + (desc.slotObj!==desc.thisObj?" slotObj:" + QmlWeb.objToStringSafe(desc.slotObj):"") +" slot(autobound) error:", err);
         } else {
-          QmlWeb.warn("Signal : "+QmlWeb.objToStringSafe(desc.thisObj)+" . "+ desc.signal.$name + (desc.slotObj!==desc.thisObj?" slotObj:" + QmlWeb.objToStringSafe(desc.slotObj):"") +" slot(user function) error:", err);
+          QmlWeb.warn("Signal : "+QmlWeb.objToStringSafe(desc.thisObj)+" . "+ desc.$signal.$name + (desc.slotObj!==desc.thisObj?" slotObj:" + QmlWeb.objToStringSafe(desc.slotObj):"") +" slot(user function) error:", err);
         }
       } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
         if (err.ctType === "UninitializedEvaluation")

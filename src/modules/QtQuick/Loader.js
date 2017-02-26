@@ -53,7 +53,7 @@ QmlWeb.registerQmlType({
       return;
     }
 
-    var prevComponent = QmlWeb.engine.$evaluatedObj;
+    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
 
     try {
       QmlWeb.engine.$evaluatedObj = this;
@@ -76,7 +76,7 @@ QmlWeb.registerQmlType({
         throw new QmlWeb.AssertionError("Assertion failed Loader: !qmlComponent || this.sourceComponent!==qmlComponent : "+this.toString(true));
       }
     } finally {
-      QmlWeb.engine.$evaluatedObj = prevComponent;
+      QmlWeb.engine.$evaluatedObj = prevEvalObj;
     }
   }
 

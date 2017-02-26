@@ -246,7 +246,7 @@ function applyProperty(item, i, value) {
 
   if (value instanceof Object) {
     if (value instanceof QmlWeb.QMLSignalDefinition) {
-      var met = QmlWeb.Signal.signal(i, value.parameters);0
+      var met = QmlWeb.Signal.signal(i, value.parameters);
       item.$context[i] = met;
       item[i] = met;
       met.owner = item;
@@ -256,6 +256,7 @@ function applyProperty(item, i, value) {
         throw new Error("Qml method binding should be a function : " + value);
       }
       value.compile();
+      // TODO remove unnecessary 'bind's (use classes):
       var met = value.run.bind({binding:value, bindingObj:item});
       item.$context[i] = met;
       item[i] = met;
