@@ -45,15 +45,15 @@ class Signal {
   }
 
   // where this = "this".signal
-  static connectSignal() {
+  static connectSignal(...args) {
     this.$signal.connect(...args);
   }
   // where this = "this".signal
-  static disconnectSignal() {
+  static disconnectSignal(...args) {
     this.$signal.disconnect(...args);
   }
   // where this = "this".signal
-  static isSignalConnected() {
+  static isSignalConnected(...args) {
     return this.$signal.isConnected(...args);
   }
 
