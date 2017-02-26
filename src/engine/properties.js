@@ -310,8 +310,8 @@ function connectSignal(item, signalName, value) {
   }
 
   const params = [];
-  for (const j in _signal.parameters) {
-    params.push(_signal.parameters[j].name);
+  for (const j in _signal.$signal.params) {
+    params.push(_signal.$signal.params[j].name);
   }
 
   var ps = params.join(",");
