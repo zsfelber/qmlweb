@@ -46,11 +46,11 @@ class Signal {
 
   // where this = "this".signal
   static connectSignal(...args) {
-    this.$signal.connect(...args);
+    return this.$signal.connect(...args);
   }
   // where this = "this".signal
   static disconnectSignal(...args) {
-    this.$signal.disconnect(...args);
+    return this.$signal.disconnect(...args);
   }
   // where this = "this".signal
   static isSignalConnected(...args) {

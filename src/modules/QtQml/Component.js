@@ -358,9 +358,13 @@ class QMLComponent {
 
 class AttachedComponent {
   constructor(parent) {
+    this.parent = parent;
     this.$properties = {};
     QmlWeb.initMeta(this, {}, AttachedComponent);
     QObject.attach(parent, this);
+  }
+  toString() {
+    return "AtCmp:"+this.parent;
   }
 }
 
