@@ -6,7 +6,10 @@ class QObject {
     this.$base = this;
     if (meta) {
       this.$meta = meta;
-      if (meta.$component) {
+
+      if (meta.attached) {
+        QObject.attach(parent, this, meta.$info);
+      } else if (meta.$component) {
         // NOTE context bindings of object prototype chain :
         // QObject.context : UserAbstractItem.context
         // QtQml.QtObject.context : UserAbstractItem.context
@@ -17,20 +20,6 @@ class QObject {
         // UserLeafItem.context : $leaf.context
 
         this.$component = meta.$component;
-      }
-
-      if (meta.attached) {
-        if (!parent) {
-          throw new Error("Object attached to null : "+this);
-        }
-        this.$isAttachedObj = true;
-        if (!this.$component) {
-          // context for attached properties like "anchors" and so
-          // see also $ownerObject
-          this.$component = parent.$component;
-          this.$context = parent.$context;
-        }
-        this.$attached_as = meta.$info;
       }
     }
 
@@ -50,6 +39,20 @@ class QObject {
     this.$leaf = this;
 
     this.$objectId = ++objectIds;
+  }
+
+  static attach(parent, child, info) {
+    if (!parent) {
+      throw new Error("Object attached to null : "+child);
+    }
+    child.$isAttachedObj = true;
+    child.$attached_as = info;
+
+    // context for attached properties like "anchors" and so
+    // see also $ownerObject
+    QmlWeb.setupGetter(child, "$component", ()=>parent.$component, child);
+    QmlWeb.setupGetter(child, "$context", ()=>parent.$context, child);
+
   }
 
   initializeContext(parent) {
@@ -87,8 +90,8 @@ class QObject {
   }
 
   $delete() {
-    if (this.isComponentAttached) {
-      this.$component.destruction();
+    if (this.$attachedComponent) {
+      this.$attachedComponent.destruction();
     }
 
     while (this.$tidyupList.length > 0) {

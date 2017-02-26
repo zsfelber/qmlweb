@@ -256,7 +256,7 @@ class QMLComponent {
 
       this.loadJsImports();
 
-      if (item.$isComponentAttached) {
+      if (item.$attachedComponent) {
         // NOTE one level of supertype hierarchy, QObject's component first (recursively) :
         // NOTE not possible even trying to emit 'completed' right now, because we are before "applyProperties"
         // and so unable to determine whether a called property exists and not yet initialiazed or it doesn't exist at all.
@@ -325,7 +325,9 @@ class QMLComponent {
   static complete() {
 
     if (this.status === QmlWeb.Component.Ready) {
-      throw new Error("Component status already Ready in complete()  "+this);
+      throw new QmlWeb.AssertionError("Component status already Ready in complete() : "+this);
+    } else if (!this.$attachedComponent) {
+      throw new QmlWeb.AssertionError("Component complete() invoked but no $attachedComponent :  "+this);
     } else {
       // This is the standard status exposed to QML, and its
       // Ready state should not depend on signal/slots (we use
@@ -333,7 +335,7 @@ class QMLComponent {
       this.status = QmlWeb.Component.Ready;
 
       try {
-        this.completed();
+        this.$attachedComponent.completed();
         //QmlWeb.log("Completed : "+this+" : "+item);
       } catch (err) {
         if (err.ctType) {
@@ -346,12 +348,18 @@ class QMLComponent {
   }
 
   static getAttachedObject() {
-    if (!this.$isComponentAttached) {
-      this.$isComponentAttached = true;
+    if (!this.$attachedComponent) {
+      this.$attachedComponent = new AttachedComponent(this);
     }
-    return this.$component;
+    return this.$attachedComponent;
   }
 
+}
+
+class AttachedComponent {
+  constructor(parent) {
+    QObject.attach(parent, this);
+  }
 }
 
 QmlWeb.registerQmlType({
@@ -359,11 +367,19 @@ QmlWeb.registerQmlType({
   module: "QtQml",
   name: "Component",
   versions: /.*/,
+  constructor: QMLComponent
+});
+
+QmlWeb.registerQmlType({
+  global: true,
+  module: "QtQml",
+  name: "AttachedComponent",
+  versions: /.*/,
   signals: {
     completed: [],
     destruction: []
   },
-  constructor: QMLComponent
+  constructor: AttachedComponent
 });
 
 QmlWeb.QMLComponent = QMLComponent;

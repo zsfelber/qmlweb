@@ -1,37 +1,32 @@
 /* eslint accessor-pairs: 0 */
 
-function setupGetter(obj, propName, func, owner, enumerable=false) {
+function setupGetter(obj, propName, get, owner, enumerable=false) {
   Object.defineProperty(obj, propName, {
-    get: func,
-    owner: owner,
+    get, owner,
     configurable: true,
     enumerable
   });
 }
 
-function setupValue(obj, propName, func, owner, enumerable=false) {
+function setupSetter(obj, propName, set, owner, enumerable=false) {
   Object.defineProperty(obj, propName, {
-    value: func,
-    owner: owner,
+    set, owner,
     configurable: true,
     enumerable
   });
 }
 
-function setupSetter(obj, propName, func, owner, enumerable=false) {
+function setupValue(obj, propName, value, owner, enumerable=false, writable=false) {
   Object.defineProperty(obj, propName, {
-    set: func,
-    owner: owner,
+    value, owner,
+    writable, enumerable,
     configurable: true,
-    enumerable
   });
 }
 
-function setupGetterSetter(obj, propName, getter, setter, owner, enumerable=false) {
+function setupGetterSetter(obj, propName, get, set, owner, enumerable=false) {
   Object.defineProperty(obj, propName, {
-    get: getter,
-    set: setter,
-    owner: owner,
+    get, set, owner,
     configurable: true,
     enumerable
   });
