@@ -55,9 +55,12 @@ class QtObject extends QmlWeb.QObject {
     if (oldContainer) {
       oldContainer.elementRemove(this);
     }
-    this.cleanupContext(oldContainer);
 
-    this.initializeContext(newContainer);
+    if (oldContainer !== newContainer) {
+      this.$leaf.cleanupContext(oldContainer);
+      this.$leaf.initializeContext(newContainer);
+    }
+
     if (newContainer) {
       newContainer.elementAdd(this);
     }
