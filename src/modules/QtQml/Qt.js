@@ -22,14 +22,12 @@ const Qt = {
     return QmlWeb.createComponent(imp, QmlWeb.QMLComponentFlags.LoadImports);
   },
 
-  createQmlObject: (src, parent, file) => {
-    return QmlWeb.createQmlObject(src, parent, file);
-  },
+  createQmlObject: QmlWeb.createQmlObject,
 
   // Returns url resolved relative to the URL of the caller.
   // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
   // in QMLUrl.js
-  resolvedUrl: url => QmlWeb.qmlUrl(url),
+  resolvedUrl: QmlWeb.qmlUrl,
 
   size: function size(width, height) {
     return new QmlWeb.QSizeF(width, height);

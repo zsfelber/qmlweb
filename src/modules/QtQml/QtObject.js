@@ -181,17 +181,13 @@ class QtObject extends QmlWeb.QObject {
 
         }
 
-        if (!this.$component.$file) {
-          throw new Error("No component file");
-        }
-
       } else {
         // Nested or Factory
 
         this.$parentCtxObject = parent;
         this.$context.nestedLevel = this.nestedLevel = (parent.nestedLevel||0)+1;
 
-        this.$context = this.$parentCtxObject.context.createChild(
+        this.$context = this.$parentCtxObject.$context.createChild(
               parent.$component.toString()+" -> "+this.$component.toString(), flags);
       }
 
