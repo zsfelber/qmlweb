@@ -72,7 +72,7 @@ class QMLProperty {
 
 
       } else {
-        if (prevEvalObj && prevEvalObj.$context.$ownerObject.$objectId === this.propDeclObj.$objectId) {
+        if (prevEvalObj && prevEvalObj.$context && prevEvalObj.$context.$ownerObject.$objectId === this.propDeclObj.$objectId) {
 
           // entry condition means : if   we are accessing this prop from a binding  in (some subtype of) current object:
           // then, using current binding context (and set current parent obj)
@@ -368,13 +368,13 @@ class QMLProperty {
           const queueItems = engine.pendingOperations.map[this.$propertyId];
           if (queueItems) {
             try {
+              delete engine.pendingOperations.map[this.$propertyId];
               toUpdate = 0;
               queueItems.forEach(engine.processOp, engine);
             } catch (err) {
               if (err instanceof QmlWeb.FatalError) throw err;
               error = err;
             } finally {
-              delete this.pendingOperations.map[this.$propertyId];
               queueItems.splice(0, queueItems.length);
               queueItems.$cleared = true;
             }

@@ -89,8 +89,16 @@ class QObject {
   }
 
   $delete() {
-    if (this.$attachedComponent) {
-      this.$attachedComponent.destruction();
+    if (this.$leaf.$attachedComponent) {
+      if (!(this instanceof QObject)) {
+        throw new AssertionError("$delete non-QObject : " + this);
+      }
+
+      for (var obj = this.$leaf; obj !== obj.constructor.prototype; obj=obj.__proto__) {
+        if (obj.hasOwnProperty("$attachedComponent")) {
+          obj.$attachedComponent.destruction();
+        }
+      }
     }
 
     while (this.$tidyupList.length > 0) {

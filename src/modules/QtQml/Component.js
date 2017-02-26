@@ -259,14 +259,20 @@ class QMLComponent {
         // NOTE one level of supertype hierarchy, QObject's component first (recursively) :
         // NOTE not possible even trying to emit 'completed' right now, because we are before "applyProperties"
         // and so unable to determine whether a called property exists and not yet initialiazed or it doesn't exist at all.
+        let opId = "C:"+this.$componentId;
+        let itms = QmlWeb.engine.pendingOperations.map[opId];
+        if (!itms) {
+          QmlWeb.engine.pendingOperations.map[opId] = itms = [];
+          QmlWeb.engine.pendingOperations.stack.push(itms);
+        }
+
         const itm = {
           fun:QMLComponent.complete,
           thisObj:item,
           info:"Pending component.complete (waiting to initialization) : "+item.$context,
-          opId:"C:"+item.$objectId
+          opId
         };
-        QmlWeb.engine.pendingOperations.stack.push(itm);
-        QmlWeb.engine.pendingOperations.map["C:"+this.$componentId] = itm;
+        itms.push(itm);
       } else {
         this.status = QmlWeb.Component.Ready;
       }
@@ -349,7 +355,7 @@ class QMLComponent {
   }
 
   static getAttachedObject() {
-    if (!this.$attachedComponent) {
+    if (!this.hasOwnProperty("$attachedComponent")) {
       this.$attachedComponent = new AttachedComponent(this);
     }
     return this.$attachedComponent;

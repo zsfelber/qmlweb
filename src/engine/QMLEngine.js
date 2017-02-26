@@ -457,15 +457,16 @@ class QMLEngine {
     while (this.pendingOperations.stack.length > 0) {
       let op = this.pendingOperations.stack.shift(), opId;
       if (op instanceof Array) {
-        op.forEach(this.processOp, this);
         opId = op[0].opId;
+        delete this.pendingOperations.map[opId];
+        op.forEach(this.processOp, this);
         op.splice(0, op.length);
         op.$cleared = true;
       } else {
-        this.processOp(op);
         opId = op.opId;
+        delete this.pendingOperations.map[opId];
+        this.processOp(op);
       }
-      delete this.pendingOperations.map[opId];
     }
 
     QmlWeb.log("processPendingOperations : done  total:"+this.i+" properties:"+this.a+"("+(this.a1+","+this.ae)+") functions:"+this.b+"  Info:",this.info, "   Warning("+this.w+"):",this.warning, "   Error("+this.e+"):",this.error);

@@ -146,8 +146,8 @@ class QtObject extends QmlWeb.QObject {
 
         } else if (loaderFlags & QmlWeb.QMLComponentFlags.Root) {
 
-          if (parent.parent) {
-            throw new Error("Nested Component parent is Root but has loader : "+parent+"  its loader:"+parent.parent);
+          if (parent.container) {
+            throw new Error("Nested Component parent is Root but has loader : "+parent+"  its loader:"+parent.container);
           }
           this.$parentCtxObject = parent;
 
