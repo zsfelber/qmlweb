@@ -62,7 +62,6 @@ class QObject {
   createChild() {
 
     const childObj = Object.create(this);
-    childObj.$base = this.$base;
     childObj.$properties = Object.create(this.$properties);
     childObj.$properties_noalias = Object.create(this.$properties_noalias);
     // see properties.createProperty /
