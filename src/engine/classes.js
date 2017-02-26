@@ -2,7 +2,7 @@
 function initMeta(self, meta, constructor) {
   const info = constructor.$qmlTypeInfo;
   if (info) {
-    self.$info = info;
+    self.$modinf = info;
     self.$classname = info.$name;
     if (info.enums) {
       // TODO: not exported to the whole file scope yet
@@ -138,9 +138,19 @@ function constructSuper(meta, parent) {
   var clinfo = QmlWeb.resolveClassImport(meta.$class, meta.$component);
 
   if (clinfo.classConstructor) {
+
     // NOTE internal class, module/qmldir cache:
     meta.parent = parent;
     item = new clinfo.classConstructor(meta);
+
+    this.$info = this.$classname = item.constructor.name;
+
+    if (item.$attachedComponent) {
+      // for basic classes like Item, QtObject (in its __proto__) :
+      // It needs this additional activization here (there is another one in QMLComponent.$createObject)
+      QObject.pendingComplete(item);
+    }
+
   } else {
     if (meta.id) {
       clinfo.id = meta.id;

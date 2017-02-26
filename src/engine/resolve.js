@@ -309,7 +309,13 @@ function $resolvePath(file, basePathUrl) {
   }
 
   if (!basePathUrl) {
-    basePathUrl = QmlWeb.engine.$evaluatedObj.$basePathUrl;
+    const $e = QmlWeb.engine.$evaluatedObj;
+    if ($e.$component) {
+      basePathUrl = $e.$component.$basePathUrl;
+    } else {
+      basePathUrl = QmlWeb.engine.$basePathUrl;
+      console.warn("$resolvePath  no current component, using default path:"+basePathUrl);
+    }
   }
 
   if (!basePathUrl) {

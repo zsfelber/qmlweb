@@ -79,12 +79,34 @@ class QtObject extends QmlWeb.QObject {
     const engine = QmlWeb.engine;
     flags |= this.$componentCreateFlags;
 
-    if (!this.hasOwnProperty("$component") || !this.$component) {
-      throw new QmlWeb.AssertionError("Assertion failed. No component : "+this.toString.apply(this));
+    if (!recursive) {
+      if (!this.hasOwnProperty("$component") || !this.$component) {
+        throw new QmlWeb.AssertionError("Assertion failed. No component : "+this.toString.apply(this));
+      }
+
+      if (!this.$component.loaderComponent===!(this.$component.flags & QmlWeb.QMLComponentFlags.Root)) {
+        throw new QmlWeb.AssertionError("Assertion failed.   Loader:"+this.$component.loaderComponent+"  invalid flags : "+QmlWeb.QMLComponentFlags.toString(flags));
+      }
     }
 
-    if (!this.$component.loaderComponent===!(this.$component.flags & QmlWeb.QMLComponentFlags.Root)) {
-      throw new QmlWeb.AssertionError("Assertion failed.   Loader:"+this.$component.loaderComponent+"  invalid flags : "+QmlWeb.QMLComponentFlags.toString(flags));
+    // Not basic class __proto__ :
+    let $cinfo;
+    if (this.$component) {
+      let nm = this.$component.$name;
+      if (/\.qml$/.test(nm)) {
+        nm = nm.substring(0, nm.length-4);
+      }
+
+      this.$superclass = this.$class;
+      this.$class = nm;
+      if (flags & QmlWeb.QMLComponentFlags.Nested) {
+        this.$classname = "["+nm+"]";
+      } else {
+        this.$classname = nm;
+      }
+      $cinfo = this.$component.toString();
+    } else {
+      $cinfo = this.constructor.name;
     }
 
     if (this.$context) {
@@ -97,25 +119,9 @@ class QtObject extends QmlWeb.QObject {
         throw new QmlWeb.AssertionError("this.$base !== this.__proto__  : "+this.toString.apply(this)+"  leaf:"+this.toString.apply(this.$leaf)+"  base:"+this.toString.apply(this.$base)+"  proto:"+this.toString.apply(this.__proto__));
       }
       this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super, true);
-    } else {
+    } else if (this.$base !== this) {
       // when component added dynamically, we initialize the whole prototype chain's contexts :
-      if (this.$base !== this) {
-        this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super, true);
-      }
-    }
-
-
-    let nm = this.$component.$name;
-    if (/\.qml$/.test(nm)) {
-      nm = nm.substring(0, nm.length-4);
-    }
-
-    this.$superclass = this.$class;
-    this.$class = nm;
-    if (flags & QmlWeb.QMLComponentFlags.Nested) {
-      this.$classname = "["+nm+"]";
-    } else {
-      this.$classname = nm;
+      this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super, true);
     }
 
     // NOTE making a new level of $context inheritance :
@@ -155,7 +161,7 @@ class QtObject extends QmlWeb.QObject {
 
         } else if (loaderFlags & QmlWeb.QMLComponentFlags.Nested) {
 
-          if (this.$component.loaderComponent.$file && this.$component.loaderComponent.$file !== this.$component.$file) {
+          if (this.$component && this.$component.loaderComponent.$file && this.$component.loaderComponent.$file !== this.$component.$file) {
             throw new Error("Loader Component $file mismatch : "+this.$component.loaderComponent.$file+" vs "+this.$component.$file);
           }
 
@@ -171,7 +177,7 @@ class QtObject extends QmlWeb.QObject {
         if (this.$parentCtxObject) {
 
           this.$context = this.$parentCtxObject.$context.createChild(
-              parent.$component.toString() +" -> " +this.$component.toString(), flags);
+              parent.$component.toString() +" -> " +$cinfo, flags);
 
           if (this.$parentCtxObject.$componentCreateFlags & QmlWeb.QMLComponentFlags.Super) {
             throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.$context)
@@ -180,7 +186,7 @@ class QtObject extends QmlWeb.QObject {
         } else {
 
           this.$context = engine._rootContext.createChild(
-              parent.$component.toString() + " .. " +this.$component.toString(), flags);
+              parent.$component.toString() + " .. " +$cinfo, flags);
 
         }
 
@@ -191,14 +197,14 @@ class QtObject extends QmlWeb.QObject {
         this.$context.nestedLevel = this.nestedLevel = (parent.nestedLevel||0)+1;
 
         this.$context = this.$parentCtxObject.$context.createChild(
-              parent.$component.toString()+" -> "+this.$component.toString(), flags);
+              parent.$component.toString()+" -> "+$cinfo, flags);
       }
 
       //QmlWeb.warn("Component  "+this.$context);
     } else {
       this.$parentCtxObject = null;
 
-      this.$context = engine._rootContext.createChild(this.$component.toString());
+      this.$context = engine._rootContext.createChild($cinfo);
 
       //QmlWeb.warn("Component  "+this);
       if (flags&QmlWeb.QMLComponentFlags.Nested) {
@@ -215,6 +221,7 @@ class QtObject extends QmlWeb.QObject {
     this.$pageElements = this.$context.$pageElements;
     this.$pageContext = this.$context.$pageContext;
     this.$info = this.$context.$info;
+
   }
 
   cleanupContext(parent) {

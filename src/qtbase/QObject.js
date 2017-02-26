@@ -4,25 +4,6 @@ class QObject {
   constructor(parent, meta) {
     this.$parent = parent;
     this.$base = this;
-    if (meta) {
-      this.$meta = meta;
-
-      if (meta.attached) {
-        QObject.attach(parent, this, meta.$info);
-      } else if (meta.$component) {
-        // NOTE context bindings of object prototype chain :
-        // QObject.context : UserAbstractItem.context
-        // QtQml.QtObject.context : UserAbstractItem.context
-        // QtQuick.Item.context : UserAbstractItem.context
-        // UserAbstractItem.context : UserAbstractItem.context
-        // UserItem.context : UserItem.context
-        // ...
-        // UserLeafItem.context : $leaf.context
-
-        this.$component = meta.$component;
-      }
-    }
-
 
     if (parent && parent.$tidyupList) {
       parent.$tidyupList.push(this);
@@ -39,6 +20,14 @@ class QObject {
     this.$leaf = this;
 
     this.$objectId = ++objectIds;
+
+    if (meta) {
+      this.$meta = meta;
+
+      if (meta.attached) {
+        QObject.attach(parent, this, meta.$info);
+      }
+    }
   }
 
   static attach(parent, child, info) {
@@ -52,7 +41,27 @@ class QObject {
     // see also $ownerObject
     QmlWeb.setupGetter(child, "$component", ()=>parent.$component, child);
     QmlWeb.setupGetter(child, "$context", ()=>parent.$context, child);
+  }
 
+  static pendingComplete(item) {
+    const pendingOperations = QmlWeb.engine.pendingOperations;
+    // NOTE one level of supertype hierarchy, QObject's component first (recursively) :
+    // NOTE not possible even trying to emit 'completed' right now, because we are before "applyProperties"
+    // and so unable to determine whether a called property exists and not yet initialiazed or it doesn't exist at all.
+    const opId = "C:"+item.$objectId;
+    let itms = pendingOperations.map[opId];
+    if (!itms) {
+      pendingOperations.map[opId] = itms = [];
+      pendingOperations.stack.push(itms);
+    }
+
+    const itm = {
+      fun:QMLComponent.complete,
+      thisObj:item,
+      info:"Pending component.complete (waiting to initialization) : "+item.$context,
+      opId
+    };
+    itms.push(itm);
   }
 
   initializeContext(parent) {

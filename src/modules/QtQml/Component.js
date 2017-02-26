@@ -255,24 +255,9 @@ class QMLComponent {
 
       this.loadJsImports();
 
+      // invoked either this or one from >@see also< classes.constructSuper
       if (item.$attachedComponent) {
-        // NOTE one level of supertype hierarchy, QObject's component first (recursively) :
-        // NOTE not possible even trying to emit 'completed' right now, because we are before "applyProperties"
-        // and so unable to determine whether a called property exists and not yet initialiazed or it doesn't exist at all.
-        let opId = "C:"+this.$componentId;
-        let itms = QmlWeb.engine.pendingOperations.map[opId];
-        if (!itms) {
-          QmlWeb.engine.pendingOperations.map[opId] = itms = [];
-          QmlWeb.engine.pendingOperations.stack.push(itms);
-        }
-
-        const itm = {
-          fun:QMLComponent.complete,
-          thisObj:item,
-          info:"Pending component.complete (waiting to initialization) : "+item.$context,
-          opId
-        };
-        itms.push(itm);
+        QObject.pendingComplete(item);
       } else {
         this.status = QmlWeb.Component.Ready;
       }
@@ -329,17 +314,18 @@ class QMLComponent {
 
   static complete() {
 
-    if (!this.$component) {
-      throw new QmlWeb.AssertionError("No Component in complete() : "+this);
-    } else if (this.$component.status === QmlWeb.Component.Ready) {
-      throw new QmlWeb.AssertionError("Component status already Ready in complete() : "+this);
-    } else if (!this.$attachedComponent) {
+    if (!this.$attachedComponent) {
       throw new QmlWeb.AssertionError("Component complete() invoked but no $attachedComponent :  "+this);
     } else {
-      // This is the standard status exposed to QML, and its
-      // Ready state should not depend on signal/slots (we use
-      // engine.operationState/QMLOperationState internally):
-      this.$component.status = QmlWeb.Component.Ready;
+      if (this.$component) {
+        if (this.$component.status === QmlWeb.Component.Ready) {
+          throw new QmlWeb.AssertionError("Component status already Ready in complete() : "+this);
+        }
+        // This is the standard status exposed to QML, and its
+        // Ready state should not depend on signal/slots (we use
+        // engine.operationState/QMLOperationState internally):
+        this.$component.status = QmlWeb.Component.Ready;
+      }
 
       try {
         this.$attachedComponent.completed();
