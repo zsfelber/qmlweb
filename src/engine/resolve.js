@@ -145,7 +145,7 @@ function resolveImport(name, component) {
     component = evalObj.$component;
   }
 
-  let file = $resolvePath(name);
+  let file = $resolvePath(name, undefined, component);
 
   let clazz;
   // If "name" was a full URL, "file" will be equivalent to name and this
@@ -176,9 +176,8 @@ function resolveImport(name, component) {
 }
 
 function resolveClassImport(name, component) {
-  const engine = QmlWeb.engine;
-  const evalObj = QmlWeb.engine.$evaluatedObj;
   if (!component) {
+    const evalObj = QmlWeb.engine.$evaluatedObj;
     component = evalObj.$component;
   }
 
@@ -303,15 +302,19 @@ function $parseUrl(uri, allowLocal) {
 }
 
 // Return a path to load the file
-function $resolvePath(file, basePathUrl) {
+function $resolvePath(file, basePathUrl, component) {
   if (file && (/^(\w+):/.test(file)||file.startsWith("//"))) {
     return file;
   }
 
   if (!basePathUrl) {
-    const $e = QmlWeb.engine.$evaluatedObj;
-    if ($e && $e.$component) {
-      basePathUrl = $e.$component.$basePathUrl;
+    if (!component) {
+      const evalObj = QmlWeb.engine.$evaluatedObj;
+      component = evalObj.$component;
+    }
+
+    if (component) {
+      basePathUrl = component.$basePathUrl;
     } else {
       basePathUrl = QmlWeb.engine.$basePathUrl;
       console.warn("$resolvePath  no current component, using default path:"+basePathUrl.baseUri+"  (from main file:"+basePathUrl.file+")");
