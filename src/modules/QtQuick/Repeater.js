@@ -27,7 +27,7 @@ class Repeater extends Item {
     //TODO gz  this.delegate.init();
     this.$applyModel();
   }
-  $onParentChanged() {
+  $onContainerChanged() {
     this.$applyModel();
   }
   $getModel() {
