@@ -253,8 +253,6 @@ class QMLComponent {
       item = QmlWeb.construct(this.meta, parent, QmlWeb.QMLComponentFlags.Element|this.createFlags);
       QmlWeb.helpers.copy(item, properties);
 
-      this.loadJsImports();
-
       // invoked either this or one from >@see also< classes.constructSuper
       if (item.$attachedComponent) {
         QObject.pendingComplete(item);

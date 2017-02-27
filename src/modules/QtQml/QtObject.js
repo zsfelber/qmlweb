@@ -222,6 +222,9 @@ class QtObject extends QmlWeb.QObject {
     this.$pageContext = this.$context.$pageContext;
     this.$info = this.$context.$info;
 
+    if (this.$component) {
+      this.$component.loadJsImports();
+    }
   }
 
   cleanupContext(parent) {

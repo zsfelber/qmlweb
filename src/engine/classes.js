@@ -143,10 +143,10 @@ function constructSuper(meta, parent) {
     meta.parent = parent;
     item = new clinfo.classConstructor(meta);
 
-    this.$info = this.$classname = item.constructor.name;
+    item.$info = item.$classname = item.constructor.name;
 
     if (item.$attachedComponent) {
-      // for basic classes like Item, QtObject (in its __proto__) :
+      // for basic classes like Item, QtObject (and in complex classes' lowest non-prototype __proto__) :
       // It needs this additional activization here (there is another one in QMLComponent.$createObject)
       QObject.pendingComplete(item);
     }

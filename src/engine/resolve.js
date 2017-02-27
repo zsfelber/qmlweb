@@ -227,7 +227,7 @@ function resolveClassImport(name, component) {
     }
 
     // 1) through $resolvePath(name);
-    let imp = resolveImport(filePath);
+    let imp = resolveImport(filePath, component);
 
     imp.$path=path;
 
@@ -310,11 +310,11 @@ function $resolvePath(file, basePathUrl) {
 
   if (!basePathUrl) {
     const $e = QmlWeb.engine.$evaluatedObj;
-    if ($e.$component) {
+    if ($e && $e.$component) {
       basePathUrl = $e.$component.$basePathUrl;
     } else {
       basePathUrl = QmlWeb.engine.$basePathUrl;
-      console.warn("$resolvePath  no current component, using default path:"+basePathUrl);
+      console.warn("$resolvePath  no current component, using default path:"+basePathUrl.baseUri+"  (from main file:"+basePathUrl.file+")");
     }
   }
 

@@ -59,8 +59,10 @@ class Signal {
   execute(...args) {
     const pushed = QmlWeb.QMLProperty.pushEvalStack();
     try {
-      for (const i in this.connectedSlots) {
-        const desc = this.connectedSlots[i];
+      // it may remove another item meanwhile, required to dup:
+      const dupcs = this.connectedSlots.slice(0);
+      for (const i in dupcs) {
+        const desc = dupcs[i];
         var args2 = args.slice(0);
         if (desc.type & Signal.QueuedConnection) {
           Signal.$addQueued(desc, args2);
