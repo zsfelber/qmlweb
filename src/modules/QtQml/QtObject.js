@@ -56,8 +56,8 @@ class QtObject extends QmlWeb.QObject {
       oldContainer.elementRemove(this);
     }
 
-    if (oldContainer !== newContainer) {
-      this.$leaf.cleanupContext(oldContainer);
+    if (this.$loaderContext !== newContainer) {
+      this.$leaf.cleanupContext(this.$loaderContext);
       this.$leaf.initializeContext(newContainer);
     }
 
@@ -76,21 +76,13 @@ class QtObject extends QmlWeb.QObject {
       return;
     }
 
+    this.$loaderContext = parent;
+
     const engine = QmlWeb.engine;
     flags |= this.$componentCreateFlags;
 
-    if (!recursiveLoader) {
-      if (!this.hasOwnProperty("$component") || !this.$component) {
-        throw new QmlWeb.AssertionError("Assertion failed. No component : "+this.toString.apply(this));
-      }
-
-      if (!this.$component.loaderComponent===!(this.$component.flags & QmlWeb.QMLComponentFlags.Root)) {
-        throw new QmlWeb.AssertionError("Assertion failed.   Loader:"+this.$component.loaderComponent+"  invalid flags : "+QmlWeb.QMLComponentFlags.toString(flags));
-      }
-    }
-
     // Not basic class __proto__ :
-    let $pcinfo, $cinfo;
+    let $pcinfo, $cinfo, loaderComponent;
     if (parent) {
       if (parent.$component) {
         $pcinfo = parent.$component.toString();
@@ -113,20 +105,28 @@ class QtObject extends QmlWeb.QObject {
         this.$classname = nm;
       }
       $cinfo = this.$component.toString();
+      loaderComponent = this.$component.loaderComponent;
     } else {
       $cinfo = this.constructor.name;
     }
+
+    if (!recursiveLoader) {
+      if (this.$base !== this) {
+        if (!this.$component) {
+          throw new QmlWeb.AssertionError("Assertion failed. No component : "+this.toString.apply(this));
+        }
+      }
+
+      if (!loaderComponent===!(this.$component.flags & QmlWeb.QMLComponentFlags.Root)) {
+        throw new QmlWeb.AssertionError("Assertion failed.   Loader:"+loaderComponent+"  invalid flags : "+QmlWeb.QMLComponentFlags.toString(flags));
+      }
+    }
+
 
     if (this.$context) {
       if (recursiveLoader) {
         throw new QmlWeb.AssertionError("Invalid call. recursive+context : "+this.toString.apply(this)+"  context:"+this.$context);
       }
-    } else if (!recursiveLoader && this.$component.status === QmlWeb.Component.Loading) {
-      // initialize the remaining bottom level context :
-      if (this.$base !== this.__proto__) {
-        throw new QmlWeb.AssertionError("this.$base !== this.__proto__  : "+this.toString.apply(this)+"  leaf:"+this.toString.apply(this.$leaf)+"  base:"+this.toString.apply(this.$base)+"  proto:"+this.toString.apply(this.__proto__));
-      }
-      this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super, this);
     } else if (this.$base !== this) {
       // when component added dynamically, we initialize the whole prototype chain's contexts :
       this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super, this);
@@ -174,8 +174,8 @@ class QtObject extends QmlWeb.QObject {
 
         } else if (loaderFlags & QmlWeb.QMLComponentFlags.Nested) {
 
-          if (this.$component && this.$component.loaderComponent.$file && this.$component.loaderComponent.$file !== this.$component.$file) {
-            throw new Error("Loader Component $file mismatch : "+this.$component.loaderComponent.$file+" vs "+this.$component.$file);
+          if (this.$component && loaderComponent && loaderComponent.$file && loaderComponent.$file !== this.$component.$file) {
+            throw new Error("Loader Component $file mismatch : "+loaderComponent.$file+" vs "+this.$component.$file);
           }
 
           this.$parentCtxObject = parent;

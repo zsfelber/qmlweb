@@ -3,6 +3,7 @@ class QMLContext {
   constructor(inheritedProperties) {
     this.$inheritedProperties = inheritedProperties;
     this.self = {};
+    this.$contextProtoId = this.$objectId = ++objectIds;
   }
 
   nameForObject(obj) {
@@ -16,6 +17,7 @@ class QMLContext {
 
   createChild(info, componentFlags) {
     const childContext = Object.create(this);
+    childContext.$contextProtoId = this.$objectId = ++objectIds;
     childContext.$info = info;
     childContext.self = {};
 
