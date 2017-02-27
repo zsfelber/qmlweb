@@ -87,24 +87,36 @@ QmlWeb.registerQmlType({
   }
 
   $onSourceComponentChanged(newItem) {
-    if (!this.active) return;
-    this.$unload();
+    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
 
-    if (!newItem) {
-      this.item = null;
-      return;
-    }
+    try {
+      // in case it is the same object, keeping the context set with QMLProperty.setEvaluatedObj because
+      // it points to the corrent __proto__ of "this" :
+      if (!prevEvalObj || prevEvalObj.$objectId !== this.$objectId) {
+        QmlWeb.engine.$evaluatedObj = this;
+      }
 
-    this.item = newItem.$createObject(this/*parent*/);
-    this.$updateGeometry();
+      if (!this.active) return;
+      this.$unload();
 
-    if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
-      // We don't call those on first creation, as they will be called
-      // by the regular creation-procedures at the right time.
-      QmlWeb.engine.processPendingOperations();
-    }
-    if (this.item) {
-      this.loaded();
+      if (!newItem) {
+        this.item = null;
+        return;
+      }
+
+      this.item = newItem.$createObject(QmlWeb.engine.$evaluatedObj/*this or some proto  parent*/);
+      this.$updateGeometry();
+
+      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+        // We don't call those on first creation, as they will be called
+        // by the regular creation-procedures at the right time.
+        QmlWeb.engine.processPendingOperations();
+      }
+      if (this.item) {
+        this.loaded();
+      }
+    } finally {
+      QmlWeb.engine.$evaluatedObj = prevEvalObj;
     }
   }
   setSource(url, options) {
