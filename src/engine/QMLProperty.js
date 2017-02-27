@@ -9,6 +9,8 @@ function e(msg) {
   throw new Error(msg);
 }
 
+var setEvaluatedObjAlreadyDone = {setE:"valuatedObjAlreadyDone"};
+
 class QMLProperty {
   constructor(type, obj, name, options) {
     if (!obj) {
@@ -61,40 +63,7 @@ class QMLProperty {
     try {
       const isch = flags & QmlWeb.QMLPropertyFlags.SetChildren;
 
-      // NOTE valParentObj(/bindingCtxObj) is passed through property.set,$set or $setVal, its in the descendant level in object type hierarchy (proto chain),
-      // eg. passed along with SetChildren
-
-      if (valParentObj) {
-        // main entry 2/2 of this.valParentObj! nowhere else passed
-        this.valParentObj = valParentObj;
-
-        // childObj.loaderComponent should be valParentObj.$component
-
-
-      } else {
-        if (prevEvalObj && prevEvalObj.$context && prevEvalObj.$context.$ownerObject.$objectId === this.propDeclObj.$objectId) {
-
-          // entry condition means : if   we are accessing this prop from a binding  in (some subtype of) current object:
-          // then, using current binding context (and set current parent obj)
-
-          // see tests/PropertiesUrl.qml and look at 'properties_url_import.remoteSet = "remoteSet.png"' :
-
-          this.valParentObj = prevEvalObj.$context.$ownerObject;
-
-        } else {
-
-          // otherwise we add current bindingCtxObj's component to stack (if a binding exists, otherwise adding its variable's content
-          // which points to this.propDeclObj )
-
-          this.valParentObj = this.bindingCtxObj;
-        }
-      }
-
-      // this.propDeclObj.$component : the QML supertype where the default property (eg"data") defined (eg"ItemBase")
-      // this.bindingCtxObj.$component : the QML supertype where the current binding is initialized
-      // these may be the supertype(s) of the actual parent (this.valParentObj) here:
-      QmlWeb.engine.$evaluatedObj = this.valParentObj;
-
+      if (valParentObj !== setEvaluatedObjAlreadyDone) this.setEvaluatedObj(valParentObj);
 
       const constructors = QmlWeb.constructors;
 
@@ -186,115 +155,126 @@ class QMLProperty {
   // 'update' reevaluates the get/set binding, stores or emits the value of the property, as determined from this.updateState
   update(flags, oldVal, valParentObj) {
 
+    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
+
     const origState = this.updateState;
     this.updateState |= QmlWeb.QMLPropertyState.Updating;
 
     let newVal;
 
     var pushed;
-    try {
-
-      if (this.binding) {
-
-        if (this.binding instanceof QmlWeb.QtBindingDefinition) {
-          this.binding = Qt.binding(this.binding.get, this.binding.set, this.binding.flags);
-        }
-
-        if (!this.binding.compiled) {
-          this.binding.compile();
-        }
-
-        if (origState & QmlWeb.QMLPropertyState.ValueSaved) {
-
-          // binding/set
-          newVal = this.value;
-          // NOTE valParentObj/bindingCtxObj is passed through property.set,$set or $setVal, its in the descendant level in object type hierarchy (proto chain),
-          // NOTE we don't pass this.valParentObj as valParentObj because it only belongs to this property and not to newVal or another property
-          this.binding.set(this.bindingCtxObj, newVal, flags);
-          this.updateState &= ~QmlWeb.QMLPropertyState.ValueSaved;
-
-        } else if (origState & QmlWeb.QMLPropertyState.LoadFromBinding)  {
-
-          this.obsoleteConnections = this.evalTreeConnections;
-          // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
-          this.evalTreeConnections = {};
-
-          // this.binding/get
-          pushed = QMLProperty.pushEvaluatingProperty(this);
-
-          if (oldVal === undefined) oldVal = this.value;
-          newVal = this.binding.get(this.bindingCtxObj);
-          newVal = this.$setVal(newVal, flags, valParentObj);
-          this.updateState &= ~QmlWeb.QMLPropertyState.LoadFromBinding;
-
-        } else {
-          throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid update state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  Binding:"+this.binding);
-        }
-
-      } else {
-
-        if (origState & QmlWeb.QMLPropertyState.ValueSaved)  {
-
-          this.obsoleteConnections = this.evalTreeConnections;
-          // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
-          this.evalTreeConnections = {};
-
-          newVal = this.value;
-          this.updateState &= ~QmlWeb.QMLPropertyState.ValueSaved;
-
-        } else {
-          throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid update state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  (case 'no binding')");
-        }
-      }
-
-    } catch (err) {
-      if (err instanceof QmlWeb.FatalError) throw err;
-
-      if (err.ctType) {
-        if (origState & QmlWeb.QMLPropertyState.ValueSaved) {
-          throw new QmlWeb.AssertionError("Assertion failed : "+err.ctType+" : "+QmlWeb.QMLPropertyState.toString(origState) +" -> "+ QmlWeb.QMLPropertyState.toString(this.updateState)+"  Invalid Error:", err);
-        //} else {
-          // when err.ctType==true: && LoadFromBinding
-          // PendingEval uses custom logic in get() implementation :
-        }
-      }
-
-      if (pushed) {
-        pushed = false;
-        QMLProperty.popEvaluatingProperty();
-      }
-
-      throw err;
-
-    } finally {
-
-      if (this.obsoleteConnections) {
-        for (var i in this.obsoleteConnections) {
-          con = this.obsoleteConnections[i];
-          con.disconnect();
-          con.signalOwner.childEvalTreeConnections--;
-        }
-        delete this.obsoleteConnections;
-      }
-
-      this.updateState &= ~QmlWeb.QMLPropertyState.Updating;
-    }
 
     try {
-      if (oldVal!==newVal && !(origState & QmlWeb.QMLPropertyState.Uninitialized)) {
-        if (this.updateState & QmlWeb.QMLPropertyState.Uninitialized) {
-          throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  Property became Uninitialized meanwhile but value seems changed!");
+
+      this.setEvaluatedObj(valParentObj);
+
+      try {
+
+        if (this.binding) {
+
+          if (this.binding instanceof QmlWeb.QtBindingDefinition) {
+            this.binding = Qt.binding(this.binding.get, this.binding.set, this.binding.flags);
+          }
+
+          if (!this.binding.compiled) {
+            this.binding.compile();
+          }
+
+          if (origState & QmlWeb.QMLPropertyState.ValueSaved) {
+
+            // binding/set
+            newVal = this.value;
+            // NOTE valParentObj/bindingCtxObj is passed through property.set,$set or $setVal, its in the descendant level in object type hierarchy (proto chain),
+            // NOTE we don't pass this.valParentObj as valParentObj because it only belongs to this property and not to newVal or another property
+            this.binding.set(this.bindingCtxObj, newVal, flags);
+            this.updateState &= ~QmlWeb.QMLPropertyState.ValueSaved;
+
+          } else if (origState & QmlWeb.QMLPropertyState.LoadFromBinding)  {
+
+            this.obsoleteConnections = this.evalTreeConnections;
+            // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
+            this.evalTreeConnections = {};
+
+            // this.binding/get
+            pushed = QMLProperty.pushEvaluatingProperty(this);
+
+            if (oldVal === undefined) oldVal = this.value;
+            newVal = this.binding.get(this.bindingCtxObj);
+            newVal = this.$setVal(newVal, flags, setEvaluatedObjAlreadyDone);
+            this.updateState &= ~QmlWeb.QMLPropertyState.LoadFromBinding;
+
+          } else {
+            throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid update state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  Binding:"+this.binding);
+          }
+
+        } else {
+
+          if (origState & QmlWeb.QMLPropertyState.ValueSaved)  {
+
+            this.obsoleteConnections = this.evalTreeConnections;
+            // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
+            this.evalTreeConnections = {};
+
+            newVal = this.value;
+            this.updateState &= ~QmlWeb.QMLPropertyState.ValueSaved;
+
+          } else {
+            throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid update state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  (case 'no binding')");
+          }
         }
-        this.sendChanged(oldVal, newVal);
+
+      } catch (err) {
+        if (err instanceof QmlWeb.FatalError) throw err;
+
+        if (err.ctType) {
+          if (origState & QmlWeb.QMLPropertyState.ValueSaved) {
+            throw new QmlWeb.AssertionError("Assertion failed : "+err.ctType+" : "+QmlWeb.QMLPropertyState.toString(origState) +" -> "+ QmlWeb.QMLPropertyState.toString(this.updateState)+"  Invalid Error:", err);
+          //} else {
+            // when err.ctType==true: && LoadFromBinding
+            // PendingEval uses custom logic in get() implementation :
+          }
+        }
+
+        if (pushed) {
+          pushed = false;
+          QMLProperty.popEvaluatingProperty();
+        }
+
+        throw err;
+
+      } finally {
+
+        if (this.obsoleteConnections) {
+          for (var i in this.obsoleteConnections) {
+            con = this.obsoleteConnections[i];
+            con.disconnect();
+            con.signalOwner.childEvalTreeConnections--;
+          }
+          delete this.obsoleteConnections;
+        }
+
+        this.updateState &= ~QmlWeb.QMLPropertyState.Updating;
       }
-    } catch (err2) {
-      if (err2 instanceof QmlWeb.FatalError) throw err2;
-      throw new QmlWeb.AssertionError("Assertion failed : update / "+this+" . changed threw error, ", err2);
-      throw err2;
+
+      try {
+        if (oldVal!==newVal && !(origState & QmlWeb.QMLPropertyState.Uninitialized)) {
+          if (this.updateState & QmlWeb.QMLPropertyState.Uninitialized) {
+            throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  Property became Uninitialized meanwhile but value seems changed!");
+          }
+          this.sendChanged(oldVal, newVal);
+        }
+      } catch (err2) {
+        if (err2 instanceof QmlWeb.FatalError) throw err2;
+        throw new QmlWeb.AssertionError("Assertion failed : update / "+this+" . changed threw error, ", err2);
+        throw err2;
+      } finally {
+        if (pushed) {
+          QMLProperty.popEvaluatingProperty();
+        }
+      }
+
     } finally {
-      if (pushed) {
-        QMLProperty.popEvaluatingProperty();
-      }
+      QmlWeb.engine.$evaluatedObj = prevEvalObj;
     }
   }
 
@@ -631,6 +611,44 @@ class QMLProperty {
     result += "Current:\n";
     result += QMLProperty.stackToString.call(this, undefined, parent);
     return result;
+  }
+
+  setEvaluatedObj(valParentObj) {
+    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
+
+    // NOTE valParentObj(/bindingCtxObj) is passed through property.set,$set or $setVal, its in the descendant level in object type hierarchy (proto chain),
+    // eg. passed along with SetChildren
+
+    if (valParentObj) {
+      // main entry 2/2 of this.valParentObj! nowhere else passed
+      this.valParentObj = valParentObj;
+
+      // childObj.loaderComponent should be valParentObj.$component
+
+
+    } else {
+      if (prevEvalObj && prevEvalObj.$context && prevEvalObj.$context.$ownerObject.$objectId === this.propDeclObj.$objectId) {
+
+        // entry condition means : if   we are accessing this prop from a binding  in (some subtype of) current object:
+        // then, using current binding context (and set current parent obj)
+
+        // see tests/PropertiesUrl.qml and look at 'properties_url_import.remoteSet = "remoteSet.png"' :
+
+        this.valParentObj = prevEvalObj.$context.$ownerObject;
+
+      } else {
+
+        // otherwise we add current bindingCtxObj's component to stack (if a binding exists, otherwise adding its variable's content
+        // which points to this.propDeclObj )
+
+        this.valParentObj = this.bindingCtxObj;
+      }
+    }
+
+    // this.propDeclObj.$component : the QML supertype where the default property (eg"data") defined (eg"ItemBase")
+    // this.bindingCtxObj.$component : the QML supertype where the current binding is initialized
+    // these may be the supertype(s) of the actual parent (this.valParentObj) here:
+    QmlWeb.engine.$evaluatedObj = this.valParentObj;
   }
 
   static pushEvalStack() {

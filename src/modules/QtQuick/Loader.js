@@ -25,11 +25,12 @@ QmlWeb.registerQmlType({
     this.$sourceUrl = "";
 
     this.activeChanged.connect(this, this.$onActiveChanged);
-    this.sourceChanged.connect(this, this.$onSourceChanged);
+    this.$conSrcChanged = this.sourceChanged.connect(this, this.$onSourceChanged);
     this.sourceComponentChanged.connect(this, this.$onSourceComponentChanged);
     this.widthChanged.connect(this, this.$updateGeometry);
     this.heightChanged.connect(this, this.$updateGeometry);
   }
+
   $onActiveChanged() {
     if (!this.active) {
       this.$unload();
@@ -56,7 +57,12 @@ QmlWeb.registerQmlType({
     var prevEvalObj = QmlWeb.engine.$evaluatedObj;
 
     try {
-      QmlWeb.engine.$evaluatedObj = this;
+      // in case it is the same object, keeping the context set with QMLProperty.setEvaluatedObj because
+      // it points to the corrent __proto__ of "this" :
+      if (!prevEvalObj || prevEvalObj.$objectId !== this.$objectId) {
+        QmlWeb.engine.$evaluatedObj = this;
+      }
+
       const url = QmlWeb.resolveBasePath(fileName);
       let $class = url.path + url.file;
       if (/\.qml$/.test($class)) {
