@@ -354,7 +354,7 @@ class QMLBinding {
         ${vvith} {
           return (function() {
             ${ (this.flags&QmlWeb.QMLBindingFlags.ImplFunction) ? "return function"+src+";" : (this.flags&QmlWeb.QMLBindingFlags.ImplBlock) ? src : "return "+src+";"}
-          }).apply(this);
+          }).apply($$o);
         }
       })`);
     } else if (this.src instanceof Object) {
@@ -433,7 +433,7 @@ class QMLBinding {
                     throw new Error("Writable/Bidirectional binding#"+this.$bindingId+" write error : target property '${this.src} ${fp}' not found, cannot write to null.");
                   }
                 }
-              }).apply(this);
+              }).apply($$o);
             }
           })`);
         } else {
@@ -457,7 +457,7 @@ class QMLBinding {
                     throw new Error("Writable/Bidirectional binding#"+this.$bindingId+" write error : target property '${fp}' not found, cannot write to null.");
                   }
                 }
-              }).apply(this);
+              }).apply($$o);
             }
           })`);
         }
@@ -503,7 +503,7 @@ class QMLBinding {
       var $$__arguments = arguments;
       ${vvith} return (function(${this.args}) {
         ${this.src}
-      }).apply(this, $$__arguments);
+      }).apply($$o, $$__arguments);
     })`);
   }
 
