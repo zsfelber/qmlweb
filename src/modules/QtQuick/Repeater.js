@@ -12,10 +12,10 @@ class Repeater extends Item {
 
     this.modelChanged.connect(this, this.$onModelChanged);
     this.delegateChanged.connect(this, this.$onDelegateChanged);
-    this.parentChanged.connect(this, this.$onParentChanged);
+    this.containerChanged.connect(this, this.$onContainerChanged);
   }
   repeaterContainer() {
-    return this.parent;
+    return this.container;
   }
   itemAt(index) {
     return this.$items[index];
@@ -37,7 +37,7 @@ class Repeater extends Item {
             this.model;
   }
   $applyModel() {
-    if (!this.delegate || !this.parent) {
+    if (!this.delegate || !this.container) {
       return;
     }
 
@@ -142,67 +142,75 @@ class Repeater extends Item {
     const createProperty = QmlWeb.createProperty;
     const model = this.$getModel();
     let index;
+    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
+    try {
+      QmlWeb.engine.$evaluatedObj = this.container;
 
-    for (index = startIndex; index < endIndex; index++) {
-      const newItem = this.delegate.$createObject(this.parent);
-      createProperty("int", newItem, "index", { initialValue: index });
-      // // TODO gz obsolete : scope
-      // const scope = {
-      //   $object: newItem,
-      //   $context: ...
-      // };
+      for (index = startIndex; index < endIndex; index++) {
 
-      if (typeof model === "number" || model instanceof Array) {
-        if (typeof newItem.$properties.modelData === "undefined") {
-          createProperty("variant", newItem, "modelData");
-        }
-        const value = model instanceof Array ?
-                      model[index] :
-                      typeof model === "number" ? index : "undefined";
-        newItem.$properties.modelData.set(value, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
-                                          newItem);
-      } else {
-        // QML exposes a "model" property in the scope that contains all role
-        // data.
-        const modelData = {};
-        for (let i = 0; i < model.roleNames.length; i++) {
-          const roleName = model.roleNames[i];
-          if (typeof newItem.$properties[roleName] === "undefined") {
-            createProperty("variant", newItem, roleName);
+        const newItem = this.delegate.$createObject(this.container);
+        createProperty("int", newItem, "index", { initialValue: index });
+        // // TODO gz obsolete : scope
+        // const scope = {
+        //   $object: newItem,
+        //   $context: ...
+        // };
+
+        if (typeof model === "number" || model instanceof Array) {
+          if (typeof newItem.$properties.modelData === "undefined") {
+            createProperty("variant", newItem, "modelData");
           }
-          const roleData = model.data(index, roleName);
-          modelData[roleName] = roleData;
-          newItem.$properties[roleName].set(
-            roleData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
+          const value = model instanceof Array ?
+                        model[index] :
+                        typeof model === "number" ? index : "undefined";
+          newItem.$properties.modelData.set(value, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
+                                            newItem);
+        } else {
+          // QML exposes a "model" property in the scope that contains all role
+          // data.
+          const modelData = {};
+          for (let i = 0; i < model.roleNames.length; i++) {
+            const roleName = model.roleNames[i];
+            if (typeof newItem.$properties[roleName] === "undefined") {
+              createProperty("variant", newItem, roleName);
+            }
+            const roleData = model.data(index, roleName);
+            modelData[roleName] = roleData;
+            newItem.$properties[roleName].set(
+              roleData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
+              newItem
+            );
+          }
+          if (typeof newItem.$properties.model === "undefined") {
+            createProperty("variant", newItem, "model");
+          }
+          newItem.$properties.model.set(
+            modelData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
             newItem
           );
         }
-        if (typeof newItem.$properties.model === "undefined") {
-          createProperty("variant", newItem, "model");
+
+        this.$items.splice(index, 0, newItem);
+
+        // parent must be set after the roles have been added to newItem scope in
+        // case we are outside of QMLOperationState.System and parentChanged has
+        // any side effects that result in those roleNames being referenced.
+        // ($createObject does this)
+        //newItem.parent = this.parent;
+
+        // TODO debug this. Without check to System, Completed sometimes called
+        // twice.. But is this check correct?
+        // TODO gz
+        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.System)) {
+          // We don't call those on first creation, as they will be called
+          // by the regular creation-procedures at the right time.
+          this.$callOnCompleted(newItem);
         }
-        newItem.$properties.model.set(
-          modelData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
-          newItem
-        );
       }
-
-      this.$items.splice(index, 0, newItem);
-
-      // parent must be set after the roles have been added to newItem scope in
-      // case we are outside of QMLOperationState.System and parentChanged has
-      // any side effects that result in those roleNames being referenced.
-      // ($createObject does this)
-      //newItem.parent = this.parent;
-
-      // TODO debug this. Without check to System, Completed sometimes called
-      // twice.. But is this check correct?
-      // TODO gz
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.System)) {
-        // We don't call those on first creation, as they will be called
-        // by the regular creation-procedures at the right time.
-        this.$callOnCompleted(newItem);
-      }
+    } finally {
+      QmlWeb.engine.$evaluatedObj = prevEvalObj;
     }
+
     if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
       // We don't call those on first creation, as they will be called
       // by the regular creation-procedures at the right time.

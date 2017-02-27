@@ -157,7 +157,7 @@ function constructSuper(meta, parent) {
     }
 
     // always super here:
-    item = createComponentAndElement(clinfo, parent, QMLComponentFlags.Super);
+    item = createComponentAndElement(clinfo, parent, QMLComponentFlags.Super, meta.$component);
 
     //if (typeof item.dom !== "undefined") {
     //  item.dom.className += ` ${clinfo.$path[clinfo.$path.length - 1]}`;
@@ -167,12 +167,12 @@ function constructSuper(meta, parent) {
   return item;
 }
 
-function createComponentAndElement(meta, parent, flags) {
+function createComponentAndElement(meta, parent, flags, loaderComponent) {
 
   // NOTE 1 : class component from meta. meta may be resolved superclass info (Super: from resolveClassImport)
   // or QMLElement directly (Nested : in form {clazz:element_meta}):
   // NOTE 2 : LoadImports is only interpreted with Super and not with Nested (so ignored in latter case)
-  const component = QmlWeb.createComponent(meta, flags |= QmlWeb.QMLComponentFlags.LoadImports);
+  const component = QmlWeb.createComponent(meta, flags |= QmlWeb.QMLComponentFlags.LoadImports, loaderComponent);
 
   if (!component) {
     throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);

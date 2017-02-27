@@ -1,6 +1,6 @@
 
 class QMLComponent {
-  constructor(meta, flags) {
+  constructor(meta, flags, loaderComponent) {
 
     this.$objectId = this.$componentId = ++objectIds;
     this.$properties = {};
@@ -13,7 +13,9 @@ class QMLComponent {
 
     // no component = is import root
     const evalObj = QmlWeb.engine.$evaluatedObj;
-    this.loaderComponent = evalObj ? evalObj.$component : null;
+    if (!loaderComponent && evalObj) loaderComponent = evalObj.$component;
+    this.loaderComponent = loaderComponent;
+
     // !!! see QMLBinding
     this.$component = this;
     this.$root = this.loaderComponent ? this.loaderComponent.$root : this;

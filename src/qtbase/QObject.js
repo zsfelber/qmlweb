@@ -136,7 +136,7 @@ class QObject {
     // must do this:
     // 1) parent will be notified and erase object from it's children.
     // 2) DOM node will be removed.
-    this.parent = undefined;
+    this.container = undefined;
 
     // Disconnect any slots connected to any of our signals. Do this after
     // clearing the parent, as that relies on parentChanged being handled.

@@ -53,9 +53,9 @@ class QMLContext {
 }
 
 
-function createComponent(meta, flags) {
+function createComponent(meta, flags, loaderComponent) {
   const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-  return new QMLComponent(meta, flags);
+  return new QMLComponent(meta, flags, loaderComponent);
 }
 
 
