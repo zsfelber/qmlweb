@@ -90,7 +90,15 @@ class QtObject extends QmlWeb.QObject {
     }
 
     // Not basic class __proto__ :
-    let $cinfo;
+    let $pcinfo, $cinfo;
+    if (parent) {
+      if (parent.$component) {
+        $pcinfo = parent.$component.toString();
+      }
+    } else {
+      $pcinfo = "";
+    }
+
     if (this.$component) {
       let nm = this.$component.$name;
       if (/\.qml$/.test(nm)) {
@@ -177,7 +185,7 @@ class QtObject extends QmlWeb.QObject {
         if (this.$parentCtxObject) {
 
           this.$context = this.$parentCtxObject.$context.createChild(
-              parent.$component.toString() +" -> " +$cinfo, flags);
+              $pcinfo +" -> " +$cinfo, flags);
 
           if (this.$parentCtxObject.$componentCreateFlags & QmlWeb.QMLComponentFlags.Super) {
             throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.$context)
@@ -186,7 +194,7 @@ class QtObject extends QmlWeb.QObject {
         } else {
 
           this.$context = engine._rootContext.createChild(
-              parent.$component.toString() + " .. " +$cinfo, flags);
+              $pcinfo + " .. " +$cinfo, flags);
 
         }
 
@@ -197,7 +205,7 @@ class QtObject extends QmlWeb.QObject {
         this.$context.nestedLevel = this.nestedLevel = (parent.nestedLevel||0)+1;
 
         this.$context = this.$parentCtxObject.$context.createChild(
-              parent.$component.toString()+" -> "+$cinfo, flags);
+              $pcinfo+" -> "+$cinfo, flags);
       }
 
       //QmlWeb.warn("Component  "+this.$context);

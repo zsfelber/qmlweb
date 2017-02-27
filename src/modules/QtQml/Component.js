@@ -20,11 +20,7 @@ class QMLComponent {
     this.$component = this;
     this.$root = this.loaderComponent ? this.loaderComponent.$root : this;
 
-    if (!this.loaderComponent===!(flags & QmlWeb.QMLComponentFlags.Root)) {
-      throw new QmlWeb.AssertionError("Assertion failed.   Loader:"+this.loaderComponent+"  invalid flags : "+QmlWeb.QMLComponentFlags.toString(flags));
-    }
-
-    if (this.flags & QmlWeb.QMLComponentFlags.Nested) {
+    if (this.flags & QmlWeb.QMLComponentFlags.Nested && this.loaderComponent) {
 
       // Nested item top level uses loader Component imports:
       this.redirectImports(this.loaderComponent);
