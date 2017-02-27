@@ -70,7 +70,7 @@ class QtObject extends QmlWeb.QObject {
     return this.$attributes;
   }
 
-  initializeContext(parent, flags, recursive) {
+  initializeContext(parent, flags, recursiveLoader) {
 
     if (this.$isAttachedObj || this.hasOwnProperty("$context")) {
       return;
@@ -79,7 +79,7 @@ class QtObject extends QmlWeb.QObject {
     const engine = QmlWeb.engine;
     flags |= this.$componentCreateFlags;
 
-    if (!recursive) {
+    if (!recursiveLoader) {
       if (!this.hasOwnProperty("$component") || !this.$component) {
         throw new QmlWeb.AssertionError("Assertion failed. No component : "+this.toString.apply(this));
       }
@@ -118,18 +118,18 @@ class QtObject extends QmlWeb.QObject {
     }
 
     if (this.$context) {
-      if (recursive) {
+      if (recursiveLoader) {
         throw new QmlWeb.AssertionError("Invalid call. recursive+context : "+this.toString.apply(this)+"  context:"+this.$context);
       }
-    } else if (!recursive && this.$component.status === QmlWeb.Component.Loading) {
+    } else if (!recursiveLoader && this.$component.status === QmlWeb.Component.Loading) {
       // initialize the remaining bottom level context :
       if (this.$base !== this.__proto__) {
         throw new QmlWeb.AssertionError("this.$base !== this.__proto__  : "+this.toString.apply(this)+"  leaf:"+this.toString.apply(this.$leaf)+"  base:"+this.toString.apply(this.$base)+"  proto:"+this.toString.apply(this.__proto__));
       }
-      this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super, true);
+      this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super, this);
     } else if (this.$base !== this) {
       // when component added dynamically, we initialize the whole prototype chain's contexts :
-      this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super, true);
+      this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super, this);
     }
 
     // NOTE making a new level of $context inheritance :
@@ -152,7 +152,12 @@ class QtObject extends QmlWeb.QObject {
 
       if (flags&QmlWeb.QMLComponentFlags.Super) {
 
-        const loaderFlags = parent.$componentCreateFlags;
+        let loaderFlags;
+        if (recursiveLoader) {
+          loaderFlags = recursiveLoader.$componentCreateFlags;
+        } else {
+          loaderFlags = parent.$componentCreateFlags;
+        }
 
         if (loaderFlags & QmlWeb.QMLComponentFlags.Super) {
 

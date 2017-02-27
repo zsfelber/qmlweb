@@ -10,6 +10,7 @@ class QMLComponent {
 
     this.flags = flags;
     this.createFlags = this.flags & (QmlWeb.QMLComponentFlags.Root|QmlWeb.QMLComponentFlags.Nested|QmlWeb.QMLComponentFlags.Super);
+    this.cntPendingCompletions = 0;
 
     // no component = is import root
     const evalObj = QmlWeb.engine.$evaluatedObj;
@@ -254,6 +255,7 @@ class QMLComponent {
       // invoked either this or one from >@see also< classes.constructSuper
       if (item.$attachedComponent) {
         QObject.pendingComplete(item);
+        this.cntPendingCompletions++;
       } else {
         this.status = QmlWeb.Component.Ready;
       }
@@ -313,14 +315,17 @@ class QMLComponent {
     if (!this.$attachedComponent) {
       throw new QmlWeb.AssertionError("Component complete() invoked but no $attachedComponent :  "+this);
     } else {
+
       if (this.$component) {
         if (this.$component.status === QmlWeb.Component.Ready) {
           throw new QmlWeb.AssertionError("Component status already Ready in complete() : "+this);
         }
-        // This is the standard status exposed to QML, and its
-        // Ready state should not depend on signal/slots (we use
-        // engine.operationState/QMLOperationState internally):
-        this.$component.status = QmlWeb.Component.Ready;
+        if (!--this.$component.cntPendingCompletions) {
+          // This is the standard status exposed to QML, and its
+          // Ready state should not depend on signal/slots (we use
+          // engine.operationState/QMLOperationState internally):
+          this.$component.status = QmlWeb.Component.Ready;
+        }
       }
 
       try {
@@ -362,7 +367,10 @@ QmlWeb.registerQmlType({
   module: "QtQml",
   name: "Component",
   versions: /.*/,
-  constructor: QMLComponent
+  constructor: QMLComponent,
+  properties: {
+    status : "int"
+  }
 });
 
 QmlWeb.registerQmlType({
