@@ -294,9 +294,9 @@ class QMLBinding {
     var vvith;
     if (this.flags & QmlWeb.QMLBindingFlags.ContextNullable) {
       if (this.flags & QmlWeb.QMLBindingFlags.Alias) {
-        vvith = "var $$c=this.$context?this.$context:QMLBinding.fakectx(this),$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext.$externalContext) with($$c.$pageContext) with($$o.$noalias) with($$c.self)";
+        vvith = "var $$c=this.$context?this.$context:QMLBinding.fakectx(this),$$o=$$c.$ownerObject; with(QmlWeb) with($$c.$parentContext.$externalContext) with($$c.$pageContext) with($$o.$noalias) with($$c.self)";
       } else {
-        vvith = "var $$c=this.$context?this.$context:QMLBinding.fakectx(this),$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext.$externalContext) with($$c.$pageContext) with($$o) with($$c.self)";
+        vvith = "var $$c=this.$context?this.$context:QMLBinding.fakectx(this),$$o=$$c.$ownerObject; with(QmlWeb) with($$c.$parentContext.$externalContext) with($$c.$pageContext) with($$o) with($$c.self)";
       }
     } else {
 
@@ -304,9 +304,9 @@ class QMLBinding {
       // see QObject() QMLComponent.getAttachedObject()
 
       if (this.flags & QmlWeb.QMLBindingFlags.Alias) {
-        vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext.$externalContext) with($$c.$pageContext) with($$o.$noalias) with($$c.self)";
+        vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.$parentContext.$externalContext) with($$c.$pageContext) with($$o.$noalias) with($$c.self)";
       } else {
-        vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.parentContext.$externalContext) with($$c.$pageContext) with($$o) with($$c.self)";
+        vvith = "var $$c=this.$context,$$o=$$c.$ownerObject; with(QmlWeb) with($$c.$parentContext.$externalContext) with($$c.$pageContext) with($$o) with($$c.self)";
       }
     }
     return vvith;

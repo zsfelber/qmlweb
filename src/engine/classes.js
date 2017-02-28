@@ -94,6 +94,11 @@ function construct(meta, parent, flags) {
         item.$info = meta.$component.toString();
       }
 
+      // We don't initialize Super item directly
+      // Waiting to the current construct/constructSuper/component.createObject recursion
+      // until its calling thread returns to the the first non-super component, then initialize each
+      // __proto__ at once (invoked recursively from initializeContext) : so we know which is the
+      // first Super from the top, as required to construct context inheritance properly
       if (!(flags & QmlWeb.QMLComponentFlags.Super)) {
         item.initializeContext(parent);
       }

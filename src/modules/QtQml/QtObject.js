@@ -86,6 +86,8 @@ class QtObject extends QmlWeb.QObject {
     if (parent) {
       if (parent.$component) {
         $pcinfo = parent.$component.toString();
+      } else {
+        $pcinfo = parent.constructor.name;
       }
     } else {
       $pcinfo = "";
@@ -152,70 +154,30 @@ class QtObject extends QmlWeb.QObject {
 
       if (flags&QmlWeb.QMLComponentFlags.Super) {
 
-        let loaderFlags;
-        if (recursiveLoader) {
-          loaderFlags = recursiveLoader.$componentCreateFlags;
-        } else {
-          loaderFlags = parent.$componentCreateFlags;
+        if (!recursiveLoader) {
+          this.$componentCreateFlags = flags |= QmlWeb.QMLComponentFlags.FirstSuper;
         }
 
-        if (loaderFlags & QmlWeb.QMLComponentFlags.Super) {
+        if (parent) {
 
-          this.$parentCtxObject = parent;
-
-        } else if (loaderFlags & QmlWeb.QMLComponentFlags.Root) {
-
-          if (parent.container) {
-            throw new Error("Nested Component parent is Root but has loader : "+parent+"  its loader:"+parent.container);
-          }
-          this.$parentCtxObject = parent;
-
-          this.$componentCreateFlags = flags |= QmlWeb.QMLComponentFlags.FirstSuper;
-
-        } else if (loaderFlags & QmlWeb.QMLComponentFlags.Nested) {
-
-          if (this.$component && loaderComponent && loaderComponent.$file && loaderComponent.$file !== this.$component.$file) {
-            throw new Error("Loader Component $file mismatch : "+loaderComponent.$file+" vs "+this.$component.$file);
-          }
-
-          this.$parentCtxObject = parent;
-
-          this.$componentCreateFlags = flags |= QmlWeb.QMLComponentFlags.FirstSuper;
-
-        } else {
-          throw new Error("Invalid loader Component flags of Super : "+this.toString.apply(this)+"  loader:"+parent);
-        }
-
-
-        if (this.$parentCtxObject) {
-
-          this.$context = this.$parentCtxObject.$context.createChild(
-              $pcinfo +" -> " +$cinfo, flags);
-
-          if (this.$parentCtxObject.$componentCreateFlags & QmlWeb.QMLComponentFlags.Super) {
-            throw new Error("Asserion failed. Top Component should be Nested or Root. "+this.$context)
-          }
+          this.$context = parent.$context.createChild($pcinfo +" ~> " +$cinfo, flags);
 
         } else {
 
-          this.$context = engine._rootContext.createChild(
-              $pcinfo + " .. " +$cinfo, flags);
+          this.$context = engine._rootContext.createChild($pcinfo + " .. " +$cinfo, flags);
 
         }
 
       } else {
         // Nested or Factory
 
-        this.$parentCtxObject = parent;
         this.$context.nestedLevel = this.nestedLevel = (parent.nestedLevel||0)+1;
 
-        this.$context = this.$parentCtxObject.$context.createChild(
-              $pcinfo+" -> "+$cinfo, flags);
+        this.$context = parent.$context.createChild($pcinfo+" -> "+$cinfo, flags);
       }
 
       //QmlWeb.warn("Component  "+this.$context);
     } else {
-      this.$parentCtxObject = null;
 
       this.$context = engine._rootContext.createChild($cinfo);
 
@@ -225,9 +187,8 @@ class QtObject extends QmlWeb.QObject {
       }
     }
 
-    this.$context.component = this.$component;
-    this.$context.loaderContext = parent ? parent.$context : engine._rootContext;
-    this.$context.parentContext = this.$parentCtxObject ? this.$parentCtxObject.$context : engine._rootContext;
+    this.$context.$component = this.$component;
+    this.$context.$parentContext = parent ? parent.$context : engine._rootContext;
 
     // !!! see QMLBinding
     this.$context.$ownerObject = this;
@@ -242,11 +203,13 @@ class QtObject extends QmlWeb.QObject {
 
   cleanupContext(parent) {
     // TODO gz
-    // purge obsolete QMLContext if needed
+    // mabe additional cleanup tasks for each QMLContext object
 
     if (!this.$isAttachedObj) {
-      delete this.$parentCtxObject;
       delete this.$context;
+      if (this.$base !== this) {
+        this.__proto__.cleanupContext(parent);
+      }
     }
   }
 
