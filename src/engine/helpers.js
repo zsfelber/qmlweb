@@ -52,6 +52,29 @@ class QmlWebHelpers {
     return merged;
   }
 
+  static mergeProtoInPlace() {
+    const args = QmlWebHelpers.slice(arguments);
+    const merged = args.shift();
+    for (const i in args) {
+      const arg = args[i];
+      if (!arg) {
+        continue;
+      }
+      Object.keys(arg).forEach(function(key) {
+        merged[key] = arg[key];
+      });
+      if (merged instanceof Array) {
+        if (!(arg instanceof Array)) {
+          throw new Error("Copy from Object to Array");
+        }
+        if (arg.length > merged.length) {
+          merged.length = arg.length;
+        }
+      }
+    }
+    return merged;
+  }
+
 
 }
 

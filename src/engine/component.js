@@ -31,14 +31,14 @@ class QMLContext {
       childContext.$pageContext.$top = childContext;
     }
 
-    childContext.$externalContext = {};
+    childContext.$externalContext = Object.create(childContext.$externalContext);
 
     return childContext;
   }
 
   // initializing $externalContext with lazy strategy, at the time we know, whether this context
   // is the first Super in chain of Nested components or something else
-  joinExternalContext() {
+  splitExternalContext() {
 
     // see properties.createProperty /
     // namespace setting in QMLBinding with(...) -s / QObject.$noalias.createChild / components.js.createChild :
@@ -51,9 +51,9 @@ class QMLContext {
 
     const old = this.$externalContext;
 
-    this.$externalContext = Object.create(this.__proto__.$externalContext);
+    this.$externalContext = {};
 
-    QmlWeb.helpers.mergeInPlace(this.$externalContext, old);
+    QmlWeb.helpers.mergeProtoInPlace(this.$externalContext, old);
   }
 
   toString() {
