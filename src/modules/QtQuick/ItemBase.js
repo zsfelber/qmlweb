@@ -8,31 +8,34 @@ class ItemBase extends QtObject {
     this.hoveredChanged.connect(this, this.$onHoveredChanged);
   }
 
-  $onElementAdd(element) {
+  $onElementAdd(element, flags) {
     var leafElement = element.$leaf;
+    const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
 
-    if (this.$defaultProperty) {
-      var prop = this.$properties[this.$defaultProperty];
-      if (prop.type === "list") {
-        var parr = prop.value;
-        element.$properties.$index.set(parr.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-        parr.push(leafElement);
+    if (elemFlag) {
+      if (this.$defaultProperty) {
+        var prop = this.$properties[this.$defaultProperty];
+        if (prop.type === "list") {
+          var parr = prop.value;
+          element.$properties.$index.set(parr.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+          parr.push(leafElement);
+        } else {
+          element.$properties.$index.set(0, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+          prop.set(leafElement);
+        }
       } else {
-        element.$properties.$index.set(0, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-        prop.set(leafElement);
+        throw new Error("ItemBase.$onElementAdd : No default property : "+this+"/"+this.$leaf);
       }
-    } else {
-      throw new Error("ItemBase.$onElementAdd : No default property : "+this+"/"+this.$leaf);
-    }
 
-    if (leafElement instanceof ItemBase) {
-      element.$properties.$childIndex.set(this.$properties.children.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-      this.children.push(leafElement);
-      this.childrenChanged();
-    } else {
-      element.$properties.$resourceIndex.set(this.$properties.resources.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-      this.resources.push(leafElement);
-      this.resourcesChanged();
+      if (leafElement instanceof ItemBase) {
+        element.$properties.$childIndex.set(this.$properties.children.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+        this.children.push(leafElement);
+        this.childrenChanged();
+      } else {
+        element.$properties.$resourceIndex.set(this.$properties.resources.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+        this.resources.push(leafElement);
+        this.resourcesChanged();
+      }
     }
     if (this.dom) {
       if (element.dom) {
@@ -43,36 +46,39 @@ class ItemBase extends QtObject {
     }
   }
 
-  $onElementRemove(element) {
+  $onElementRemove(element, flags) {
     var leafElement = element.$leaf;
+    const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
 
-    if (this.$defaultProperty) {
-      var prop = this.$properties[this.$defaultProperty];
-      if (prop.type === "list") {
-        var parr = prop.get();
-        parr.splice(element.$index, 1);
-        for (var i = element.$index; i < parr.length; ++i) {
-          parr[i].$properties.$index.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+    if (elemFlag) {
+      if (this.$defaultProperty) {
+        var prop = this.$properties[this.$defaultProperty];
+        if (prop.type === "list") {
+          var parr = prop.get();
+          parr.splice(element.$index, 1);
+          for (var i = element.$index; i < parr.length; ++i) {
+            parr[i].$properties.$index.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+          }
+        } else {
+          prop.set(null);
         }
       } else {
-        prop.set(null);
+        throw new Error("ItemBase.$onElementRemove : No default property : "+this+"/"+this.$leaf);
       }
-    } else {
-      throw new Error("ItemBase.$onElementRemove : No default property : "+this+"/"+this.$leaf);
-    }
 
-    if (leafElement instanceof ItemBase) {
-      this.children.splice(element.$childIndex, 1);
-      for (var i = element.$childIndex; i < this.children.length; ++i) {
-        this.children[i].$properties.$childIndex.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+      if (leafElement instanceof ItemBase) {
+        this.children.splice(element.$childIndex, 1);
+        for (var i = element.$childIndex; i < this.children.length; ++i) {
+          this.children[i].$properties.$childIndex.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+        }
+        this.childrenChanged();
+      } else {
+        this.resources.splice(element.$resourceIndex, 1);
+        for (var i = element.$resourceIndex; i < this.resources.length; ++i) {
+          this.resources[i].$properties.$resourceIndex.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+        }
+        this.resourcesChanged();
       }
-      this.childrenChanged();
-    } else {
-      this.resources.splice(element.$resourceIndex, 1);
-      for (var i = element.$resourceIndex; i < this.resources.length; ++i) {
-        this.resources[i].$properties.$resourceIndex.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-      }
-      this.resourcesChanged();
     }
     if (this.dom) {
       if (element.dom) {

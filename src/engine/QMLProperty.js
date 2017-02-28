@@ -62,6 +62,7 @@ class QMLProperty {
 
     try {
       const isch = flags & QmlWeb.QMLPropertyFlags.SetChildren;
+      const elemflag = (isch?QmlWeb.QMLComponentFlags.Element:0);
 
       if (valParentObj !== setEvaluatedObjAlreadyDone) this.setEvaluatedObj(valParentObj);
 
@@ -84,7 +85,7 @@ class QMLProperty {
         }
 
         // NOTE gz : key entry point 1 of QmlWeb.construct  -> see key entry point 2
-        var tmp = QmlWeb.qmlList(newVal, this.valParentObj, QmlWeb.QMLComponentFlags.Nested);
+        var tmp = QmlWeb.qmlList(newVal, this.valParentObj, QmlWeb.QMLComponentFlags.Nested|elemflag);
 
         // Otherwise, we trust containerChanged/onAddElement
         if (!isch) {
@@ -110,7 +111,7 @@ class QMLProperty {
           // all the other ones just forward these
           // Call to here comes from
           // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
-          this.value = QmlWeb.createComponentAndElement({clazz:newVal}, this.valParentObj, QmlWeb.QMLComponentFlags.Nested);
+          this.value = QmlWeb.createComponentAndElement({clazz:newVal}, this.valParentObj, QmlWeb.QMLComponentFlags.Nested|elemflag);
         }
       } else if (newVal instanceof Object || newVal === undefined || newVal === null) {
         this.value = newVal;

@@ -52,8 +52,9 @@ class QtObject extends QmlWeb.QObject {
 
   $onContainerChanged_(newContainer, oldContainer, propName) {
 
+    const elemFlag = this.$componentCreateFlags & QmlWeb.QMLComponentFlags.Element;
     if (oldContainer) {
-      oldContainer.elementRemove(this);
+      oldContainer.elementRemove(this, elemFlag);
     }
 
     if (this.$loaderContext !== newContainer) {
@@ -64,7 +65,7 @@ class QtObject extends QmlWeb.QObject {
     }
 
     if (newContainer) {
-      newContainer.elementAdd(this);
+      newContainer.elementAdd(this, elemFlag);
     }
   }
 
@@ -225,10 +226,12 @@ QmlWeb.registerQmlType({
   },
   signals: {
      elementAdd: [
-       { type: "QtObject", name: "element" }
+       { type: "QtObject", name: "element" },
+       { type: "int", name: "flags" }
      ],
      elementRemove: [
-       { type: "QtObject", name: "element" }
+       { type: "QtObject", name: "element" },
+       { type: "int", name: "flags" }
      ]
   },
   constructor: QtObject

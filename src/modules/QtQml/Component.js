@@ -10,6 +10,7 @@ class QMLComponent {
 
     this.flags = flags;
     this.createFlags = this.flags & (QmlWeb.QMLComponentFlags.Root|QmlWeb.QMLComponentFlags.Nested|QmlWeb.QMLComponentFlags.Super);
+    this.elementFlag = this.flags & QmlWeb.QMLComponentFlags.Element;
     this.cntPendingCompletions = 0;
 
     // no component = is import root
@@ -249,7 +250,7 @@ class QMLComponent {
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
-      item = QmlWeb.construct(this.meta, parent, QmlWeb.QMLComponentFlags.Element|this.createFlags);
+      item = QmlWeb.construct(this.meta, parent, this.createFlags|this.elementFlag);
       QmlWeb.helpers.mergeInPlace(item, properties);
 
       // invoked either this or one from >@see also< classes.constructSuper
