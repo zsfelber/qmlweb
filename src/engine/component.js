@@ -38,7 +38,7 @@ class QMLContext {
 
   // initializing $externalContext with lazy strategy, at the time we know, whether this context
   // is the first Super in chain of Nested components or something else
-  splitExternalContext() {
+  joinExternalContext() {
 
     // see properties.createProperty /
     // namespace setting in QMLBinding with(...) -s / QObject.$noalias.createChild / components.js.createChild :

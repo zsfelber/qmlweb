@@ -103,11 +103,12 @@ function construct(meta, parent, flags) {
       }
 
       // We can't finish context initialization
-      // until the current construct/constructSuper/component.createObject recursion
-      // calling thread returns to the the first non-super component see also components.js/splitExternalContext
+      // until the current construct/constructSuper/component.createObject recursion calling thread
+      // returns to the the first non-super component see also components.js/joinExternalContext
       if (!(flags & QmlWeb.QMLComponentFlags.Super)) {
-        item.$componentCreateFlags = flags |= QmlWeb.QMLComponentFlags.FirstSuper;
-        ctx.splitExternalContext();
+        ctx.joinExternalContext();
+        superitem.$componentCreateFlags |= QmlWeb.QMLComponentFlags.FirstSuper;
+        superitem.$context.joinExternalContext();
       }
 
       QmlWeb.applyAllAttachedObjects(item);
