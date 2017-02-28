@@ -138,6 +138,7 @@ class QObject {
       this.$parent.$tidyupList.splice(index, 1);
     }
 
+    this.$base.$isDeleted = true;
     // must do this:
     // 1) parent will be notified and erase object from it's children.
     // 2) DOM node will be removed.

@@ -58,7 +58,9 @@ class QtObject extends QmlWeb.QObject {
 
     if (this.$loaderContext !== newContainer) {
       this.$leaf.cleanupContext(this.$loaderContext);
-      this.$leaf.initializeContext(newContainer);
+      if (!this.$isDeleted) {
+        this.$leaf.initializeContext(newContainer);
+      }
     }
 
     if (newContainer) {
