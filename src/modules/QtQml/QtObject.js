@@ -145,7 +145,7 @@ class QtObject extends QmlWeb.QObject {
 
     if (parent) {
       if ((flags&QmlWeb.QMLComponentFlags.Super?1:0)+(flags&QmlWeb.QMLComponentFlags.Nested?1:0) > 1) {
-        throw new QmlWeb.AssertionError("Assertion failed : component either factory nested or super  It is "+QmlWeb.QMLComponentFlags.toString(flags));
+        throw new QmlWeb.AssertionError("Assertion failed : component either factory, nested or super  It is "+QmlWeb.QMLComponentFlags.toString(flags));
       }
 
       if (flags&QmlWeb.QMLComponentFlags.Root) {
@@ -184,7 +184,6 @@ class QtObject extends QmlWeb.QObject {
     }
 
     this.$context.$component = this.$component;
-    this.$context.$parentContext = parent ? parent.$context : engine._rootContext;
 
     // !!! see QMLBinding
     this.$context.$ownerObject = this;
