@@ -94,19 +94,20 @@ function construct(meta, parent, flags) {
         item.$info = meta.$component.toString();
       }
 
-      // We don't initialize Super item directly
-      // Waiting to the current construct/constructSuper/component.createObject recursion
-      // until its calling thread returns to the the first non-super component, then initialize each
-      // __proto__ at once (invoked recursively from initializeContext) : so we know which is the
-      // first Super from the top, as required to construct context inheritance properly
-      if (!(flags & QmlWeb.QMLComponentFlags.Super)) {
-        item.initializeContext(parent);
-      }
+      item.initializeContext(parent);
 
       const ctx = item.$context;
 
       if (!ctx) {
         throw new Error("No context : "+item);
+      }
+
+      // We can't finish context initialization
+      // until the current construct/constructSuper/component.createObject recursion
+      // calling thread returns to the the first non-super component see also components.js/splitExternalContext
+      if (!(flags & QmlWeb.QMLComponentFlags.Super)) {
+        item.$componentCreateFlags = flags |= QmlWeb.QMLComponentFlags.FirstSuper;
+        ctx.splitExternalContext();
       }
 
       QmlWeb.applyAllAttachedObjects(item);
@@ -238,12 +239,12 @@ function addElementToPageContexts(item, id, ctx) {
   // see also QMLProperty.createProperty how element access can be hidden by same name property or alias
   // see also QMLBindingFlags.bindXXX methods how a name is eventually resolved at runtime
 
-  if (id in ctx.self) {
+  if (id in ctx.$self) {
     throw new QmlWeb.AssertionError("Assertion failed. Context self entry already defined : "+id+" object:"+item);
   }
 
   // nothing but self :
-  ctx.self[id] = item;
+  ctx.$self[id] = item;
 
   // current page top context $pageElements is inherited :
   if (id in ctx.$pageElements) {

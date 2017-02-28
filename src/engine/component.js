@@ -2,7 +2,7 @@
 class QMLContext {
   constructor(inheritedProperties) {
     this.$externalContext = inheritedProperties;
-    this.self = {};
+    this.$self = {};
     this.$contextProtoId = this.$objectId = ++objectIds;
   }
 
@@ -19,22 +19,7 @@ class QMLContext {
     const childContext = Object.create(this);
     childContext.$contextProtoId = this.$objectId = ++objectIds;
     childContext.$info = info;
-    childContext.self = {};
-
-    // see properties.createProperty /
-    // namespace setting in QMLBinding with(...) -s / QObject.$noalias.createChild / components.js.createChild :
-    // we use "this", $pageElements and loader context in evaluation, as all the variable names other than elements
-    // are either in "this"(and supers) or in parent(ie loader) context,
-
-    // #scope hierarchy:
-    // very precise code don't change this ::
-    // see also QMLComponent.init
-
-    if (QmlWeb.QMLComponentFlags.NestedOrFirst & componentFlags) {
-      childContext.$externalContext = Object.create(childContext.$externalContext);
-    } else {
-      childContext.$externalContext = {};
-    }
+    childContext.$self = {};
 
     if (QmlWeb.QMLComponentFlags.Nested & componentFlags) {
       // inherit page top $pageElements and $pageContext (Object.create(this) already do this) :
@@ -46,7 +31,29 @@ class QMLContext {
       childContext.$pageContext.$top = childContext;
     }
 
+    childContext.$externalContext = {};
+
     return childContext;
+  }
+
+  // initializing $externalContext with lazy strategy, at the time we know, whether this context
+  // is the first Super in chain of Nested components or something else
+  splitExternalContext() {
+
+    // see properties.createProperty /
+    // namespace setting in QMLBinding with(...) -s / QObject.$noalias.createChild / components.js.createChild :
+    // we use "this", $pageElements and loader context in evaluation, as all the variable names other than elements
+    // are either in "this"(and supers) or in parent(ie loader) context,
+
+    // #scope hierarchy:
+    // very precise code don't change this ::
+    // see also QMLComponent.init
+
+    const old = this.$externalContext;
+
+    this.$externalContext = Object.create(this.__proto__.$externalContext);
+
+    QmlWeb.helpers.mergeInPlace(this.$externalContext, old);
   }
 
   toString() {

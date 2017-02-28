@@ -67,14 +67,14 @@ class QMLComponent {
         }
       }
 
-      QmlWeb.helpers.copy(this.meta, meta.clazz);
+      QmlWeb.helpers.mergeInPlace(this.meta, meta.clazz);
       cons = QmlWeb.constructors[this.meta.$class];
     } else {
       if (meta.$file) {
         throw new Error("QML class or constructor not found : "+meta.$file);
       }
 
-      QmlWeb.helpers.copy(this.meta, meta);
+      QmlWeb.helpers.mergeInPlace(this.meta, meta);
       if (this.meta.$class !== "Component" || this.meta._constructor !== QMLComponent) {
         throw new QmlWeb.AssertionError("Assertion failed. Component element $class:"+meta.$class+" !== 'Component' || QMLComponent !== "+(this.meta._constructor?this.meta._constructor.name:"<null>"));
       }
@@ -97,7 +97,7 @@ class QMLComponent {
         throw new Errror("Component's 'children' should be a sole QMLMetaElement : "+this);
       }
 
-      QmlWeb.helpers.copy(this.meta, metachild);
+      QmlWeb.helpers.mergeInPlace(this.meta, metachild);
     }
 
     this.meta.$component = this;
@@ -250,7 +250,7 @@ class QMLComponent {
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
       item = QmlWeb.construct(this.meta, parent, QmlWeb.QMLComponentFlags.Element|this.createFlags);
-      QmlWeb.helpers.copy(item, properties);
+      QmlWeb.helpers.mergeInPlace(item, properties);
 
       // invoked either this or one from >@see also< classes.constructSuper
       if (item.$attachedComponent) {

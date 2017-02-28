@@ -154,10 +154,6 @@ class QtObject extends QmlWeb.QObject {
 
       if (flags&QmlWeb.QMLComponentFlags.Super) {
 
-        if (!recursiveLoader) {
-          this.$componentCreateFlags = flags |= QmlWeb.QMLComponentFlags.FirstSuper;
-        }
-
         if (parent) {
 
           this.$context = parent.$context.createChild($pcinfo +" ~> " +$cinfo, flags);

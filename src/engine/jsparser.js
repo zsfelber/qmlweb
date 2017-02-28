@@ -56,13 +56,13 @@ function importJavascript(file, importAlias, contextMap) {
     if ($a) {
       if ($a !== contextMap) {
         console.warn("Merging same-named import aliases : "+importAlias+"  in context: "+$c.$info);
-        QmlWeb.helpers.copy($a, contextMap);
+        QmlWeb.helpers.mergeInPlace($a, contextMap);
       }
     } else {
       $p[importAlias] = contextMap;
     }
   } else {
-    QmlWeb.helpers.copy($p, contextMap);
+    QmlWeb.helpers.mergeInPlace($p, contextMap);
   }
   delete $p.$$_contextMap;
   delete $p.$$_importAlias;

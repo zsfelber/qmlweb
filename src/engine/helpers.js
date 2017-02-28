@@ -25,26 +25,31 @@ class QmlWebHelpers {
     return merged;
   }
 
-  static copy() {
-    var args = slice(arguments);
-    var result = args[0];
-    args.shift();
-    args.forEach(function(arg){
-      if (arg) {
-        for (var prop in arg) {
-          result[prop] = arg[prop];
+  static slice(a, start) {
+    return Array.prototype.slice.call(a, start || 0);
+  }
+
+  static mergeInPlace() {
+    const args = QmlWebHelpers.slice(arguments);
+    const merged = args.shift();
+    for (const i in args) {
+      const arg = args[i];
+      if (!arg) {
+        continue;
+      }
+      for (const key in arg) {
+        merged[key] = arg[key];
+      }
+      if (merged instanceof Array) {
+        if (!(arg instanceof Array)) {
+          throw new Error("Copy from Object to Array");
         }
-        if (result instanceof Array) {
-          if (!(arg instanceof Array)) {
-            throw new Error("Copy from Object to Array");
-          }
-          if (arg.length > result.length) {
-            result.length = arg.length;
-          }
+        if (arg.length > merged.length) {
+          merged.length = arg.length;
         }
       }
-    });
-    return result;
+    }
+    return merged;
   }
 
 

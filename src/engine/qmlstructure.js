@@ -136,10 +136,6 @@ class QMLMetaElement {
   }
 }
 
-function slice(a, start) {
-  return Array.prototype.slice.call(a, start || 0);
-}
-
 var s_objectIds = 0;
 var undefinedMarker = {};
 
@@ -417,8 +413,8 @@ convertToEngine.walkers = {
                   true, listTemplate? tree : undefined
                   );
   },
-  qmlaliasdef: function() { return new QMLAliasDefinition(slice(arguments, 1)); },
-  qmlaliasdefro:function() { return new QMLAliasDefinition(slice(arguments, 1), true); },
+  qmlaliasdef: function() { return new QMLAliasDefinition(QmlWeb.helpers.slice(arguments, 1)); },
+  qmlaliasdefro:function() { return new QMLAliasDefinition(QmlWeb.helpers.slice(arguments, 1), true); },
   qmlsignaldef: (name, params) =>
                 new QMLSignalDefinition(params),
   qmldefaultprop: tree => convertToEngine.walk(tree),
