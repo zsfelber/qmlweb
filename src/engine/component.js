@@ -1,7 +1,7 @@
 
 class QMLContext {
   constructor(inheritedProperties) {
-    this.$inheritedProperties = inheritedProperties;
+    this.$externalContext = inheritedProperties;
     this.self = {};
     this.$contextProtoId = this.$objectId = ++objectIds;
   }
@@ -31,9 +31,9 @@ class QMLContext {
     // see also QMLComponent.init
 
     if (QmlWeb.QMLComponentFlags.NestedOrFirst & componentFlags) {
-      childContext.$inheritedProperties = Object.create(childContext.$inheritedProperties);
+      childContext.$externalContext = Object.create(childContext.$externalContext);
     } else {
-      childContext.$inheritedProperties = {};
+      childContext.$externalContext = {};
     }
 
     if (QmlWeb.QMLComponentFlags.Nested & componentFlags) {

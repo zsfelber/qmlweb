@@ -161,7 +161,7 @@ class QtObject extends QmlWeb.QObject {
 
         if (loaderFlags & QmlWeb.QMLComponentFlags.Super) {
 
-          this.$parentCtxObject = parent.$parentCtxObject;
+          this.$parentCtxObject = parent;
 
         } else if (loaderFlags & QmlWeb.QMLComponentFlags.Root) {
 

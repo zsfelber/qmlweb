@@ -7,17 +7,17 @@ describe("QMLEngine.scope", function() {
   var load = prefixedQmlLoader("QMLEngine/qml/Scope");
   it("can reference parent items id", function() {
     var qml = load("Root", this.div);
-    var parentItem = contextVariable(qml, "parentItem");
-    expect(parentItem).not.toBe(undefined);
-    parentItem = parentItem.__proto__;
-    expect(parentItem.$context).not.toBe(undefined);
-    var childA = contextVariable(parentItem, "childA");
+    var midItem = contextVariable(qml, "midItem");
+    expect(midItem).not.toBe(undefined);
+    midItem = midItem.__proto__;
+    expect(midItem.$context).not.toBe(undefined);
+    var childA = contextVariable(midItem, "childA");
     expect(childA).not.toBe(undefined);
-    var childB = contextVariable(parentItem, "childB");
+    var childB = contextVariable(midItem, "childB");
     expect(childB).not.toBe(undefined);
     expect(childA.parentValue).toBe(100);
     expect(childA.rootValue).toBe(1000);
-    expect(parentItem.sum).toBe(6600);
+    expect(midItem.sum).toBe(6600);
   });
 
   it("can reference inherited properties from parent (upflow)", function() {

@@ -94,7 +94,9 @@ function construct(meta, parent, flags) {
         item.$info = meta.$component.toString();
       }
 
-      item.initializeContext(parent);
+      if (!(flags & QmlWeb.QMLComponentFlags.Super)) {
+        item.initializeContext(parent);
+      }
 
       const ctx = item.$context;
 
@@ -244,6 +246,9 @@ function addElementToPageContexts(item, id, ctx) {
   }
   ctx.$pageElements[id] = item;
 
+  if (!ctx.$externalContext.hasOwnProperty(id)) {
+    ctx.$externalContext[id] = item;
+  }
 }
 
 
