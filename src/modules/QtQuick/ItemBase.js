@@ -3,28 +3,14 @@ class ItemBase extends QtObject {
     super(meta);
     QmlWeb.initMeta(this, meta, ItemBase);
 
-    this.elementAdd.connect(this, this.$onElementAdd);
-    this.elementRemove.connect(this, this.$onElementRemove);
     this.hoveredChanged.connect(this, this.$onHoveredChanged);
   }
 
-  $onElementAdd(element, flags) {
+  $elementAdd(element, flags) {
     const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
 
     if (elemFlag) {
-      if (this.$defaultProperty) {
-        var prop = this.$properties[this.$defaultProperty];
-        if (prop.type === "list") {
-          var parr = prop.value;
-          element.$properties.$index.set(parr.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-          parr.push(element);
-        } else {
-          element.$properties.$index.set(0, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-          prop.set(element);
-        }
-      } else {
-        throw new Error("ItemBase.$onElementAdd : No default property : "+this+"/"+this.$leaf);
-      }
+      super.$elementAdd(element, flags);
 
       if (element instanceof ItemBase) {
         element.$properties.$childIndex.set(this.$properties.children.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
@@ -45,24 +31,11 @@ class ItemBase extends QtObject {
     }
   }
 
-  $onElementRemove(element, flags) {
+  $elementRemove(element, flags) {
     const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
 
     if (elemFlag) {
-      if (this.$defaultProperty) {
-        var prop = this.$properties[this.$defaultProperty];
-        if (prop.type === "list") {
-          var parr = prop.get();
-          parr.splice(element.$index, 1);
-          for (var i = element.$index; i < parr.length; ++i) {
-            parr[i].$properties.$index.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-          }
-        } else {
-          prop.set(null);
-        }
-      } else {
-        throw new Error("ItemBase.$onElementRemove : No default property : "+this+"/"+this.$leaf);
-      }
+      super.$elementRemove(element, flags);
 
       if (element instanceof ItemBase) {
         this.children.splice(element.$childIndex, 1);

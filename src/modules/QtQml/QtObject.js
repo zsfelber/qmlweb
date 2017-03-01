@@ -56,7 +56,7 @@ class QtObject extends QmlWeb.QObject {
     const elemFlag = leaf.$componentCreateFlags & QmlWeb.QMLComponentFlags.Element;
 
     if (oldContainer) {
-      oldContainer.elementRemove(leaf, elemFlag);
+      oldContainer.$elementRemove(leaf, elemFlag);
     }
 
     if (leaf.$loaderContext !== newContainer) {
@@ -67,7 +67,48 @@ class QtObject extends QmlWeb.QObject {
     }
 
     if (newContainer) {
-      newContainer.elementAdd(leaf, elemFlag);
+      newContainer.$elementAdd(leaf, elemFlag);
+    }
+  }
+
+  $elementAdd(element, flags) {
+    const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
+
+    if (elemFlag) {
+      if (this.$defaultProperty) {
+        var prop = this.$properties[this.$defaultProperty];
+        if (prop.type === "list") {
+          var parr = prop.value;
+          element.$properties.$index.set(parr.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+          parr.push(element);
+        } else {
+          element.$properties.$index.set(0, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+          prop.set(element);
+        }
+      } else {
+        throw new Error("QtObject.$elementAdd : No default property : "+this+"/"+this.$leaf);
+      }
+    }
+  }
+
+  $elementRemove(element, flags) {
+    const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
+
+    if (elemFlag) {
+      if (this.$defaultProperty) {
+        var prop = this.$properties[this.$defaultProperty];
+        if (prop.type === "list") {
+          var parr = prop.get();
+          parr.splice(element.$index, 1);
+          for (var i = element.$index; i < parr.length; ++i) {
+            parr[i].$properties.$index.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+          }
+        } else {
+          prop.set(null);
+        }
+      } else {
+        throw new Error("QtObject.$elementRemove : No default property : "+this+"/"+this.$leaf);
+      }
     }
   }
 
@@ -225,16 +266,6 @@ QmlWeb.registerQmlType({
      $index: { type: "int", pendingInit:true, readOnly:true },
      $resourceIndex: { type: "int", pendingInit:true, readOnly:true },
      objectName: "string"
-  },
-  signals: {
-     elementAdd: [
-       { type: "QtObject", name: "element" },
-       { type: "int", name: "flags" }
-     ],
-     elementRemove: [
-       { type: "QtObject", name: "element" },
-       { type: "int", name: "flags" }
-     ]
   },
   constructor: QtObject
 });
