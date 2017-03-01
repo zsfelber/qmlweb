@@ -31,14 +31,16 @@ QmlWeb.registerQmlType({
       if (!prop) return;
 
       const key = this.$getKey(attrName);
-      prop.set(localStorage.getItem(key));
+      const storedval = localStorage.getItem(key);
+      if (storedval !== undefined && storedval !== null) {
+        prop.set(storedval);
+      }
     }, this);
   }
   $initializeProperties() {
     this.$attributes.forEach(attrName => {
 
       let emitter = this;
-      let signalName = `${attrName}Changed`;
 
       // NOTE aliases are now regular properties (so Changed works)
       const prop = this.$leaf.$properties[attrName];
@@ -49,8 +51,7 @@ QmlWeb.registerQmlType({
         return;
       }
 
-
-      emitter[signalName].connect(this, () => {
+      prop.changed.connect(this, () => {
         localStorage.setItem(this.$getKey(attrName), prop.value);
       });
     }, this);
