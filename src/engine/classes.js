@@ -144,15 +144,20 @@ function constructSuper(meta, parent) {
   let item;
 
   // NOTE resolve superclass info:
-  var clinfo = QmlWeb.resolveClassImport(meta.$class, meta.$component);
+  var supermeta = QmlWeb.resolveClassImport(meta.$class, meta.$component);
 
-  if (clinfo.classConstructor) {
+  if (supermeta.classConstructor) {
+    // NOTE 1  internal class, module/qmldir cache:
 
-    // NOTE internal class, module/qmldir cache:
-    meta.parent = parent;
-    item = new clinfo.classConstructor(meta);
+    supermeta.parent = parent;
+    supermeta.$class = meta.$class;
+    // TODO hack
+    supermeta.tagName = meta.tagName;
+    supermeta.$on = meta.$on;
 
-    item.$info = item.$classname = item.constructor.name;
+    item = new supermeta.classConstructor(supermeta);
+
+    item.$info = item.$classname = supermeta.classConstructor.name;
 
     if (item.$attachedComponent) {
       // for basic classes like Item, QtObject (and in complex classes' lowest non-prototype __proto__) :
@@ -161,15 +166,17 @@ function constructSuper(meta, parent) {
     }
 
   } else {
+    // NOTE 2  qml class:
+
     if (meta.id) {
-      clinfo.id = meta.id;
+      supermeta.id = meta.id;
     }
 
     // always super here:
-    item = createComponentAndElement(clinfo, parent, QMLComponentFlags.Super, meta.$component);
+    item = createComponentAndElement(supermeta, parent, QMLComponentFlags.Super, meta.$component);
 
     //if (typeof item.dom !== "undefined") {
-    //  item.dom.className += ` ${clinfo.$path[clinfo.$path.length - 1]}`;
+    //  item.dom.className += ` ${supermeta.$path[supermeta.$path.length - 1]}`;
     //}
   }
 
@@ -214,7 +221,7 @@ function createQmlObject(src, parent, file) {
   const clazz = QmlWeb.parseQML(src, file);
   file = file || "createQmlObject_function";
 
-  var component = QmlWeb.createComponent({clazz, parent, $file:file}, QmlWeb.QMLComponentFlags.LoadImports);
+  var component = QmlWeb.createComponent({clazz, $file:file}, QmlWeb.QMLComponentFlags.LoadImports);
 
   const obj = component.createObject(parent);
 

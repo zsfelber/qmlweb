@@ -52,20 +52,22 @@ class QtObject extends QmlWeb.QObject {
 
   $onContainerChanged_(newContainer, oldContainer, propName) {
 
-    const elemFlag = this.$componentCreateFlags & QmlWeb.QMLComponentFlags.Element;
+    const leaf = this.$leaf;
+    const elemFlag = leaf.$componentCreateFlags & QmlWeb.QMLComponentFlags.Element;
+
     if (oldContainer) {
-      oldContainer.elementRemove(this, elemFlag);
+      oldContainer.elementRemove(leaf, elemFlag);
     }
 
-    if (this.$loaderContext !== newContainer) {
-      this.$leaf.cleanupContext(this.$loaderContext);
-      if (!this.$isDeleted) {
-        this.$leaf.initializeContext(newContainer);
+    if (leaf.$loaderContext !== newContainer) {
+      leaf.cleanupContext(leaf.$loaderContext);
+      if (!leaf.$isDeleted) {
+        leaf.initializeContext(newContainer);
       }
     }
 
     if (newContainer) {
-      newContainer.elementAdd(this, elemFlag);
+      newContainer.elementAdd(leaf, elemFlag);
     }
   }
 

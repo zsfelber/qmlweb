@@ -9,7 +9,6 @@ class ItemBase extends QtObject {
   }
 
   $onElementAdd(element, flags) {
-    var leafElement = element.$leaf;
     const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
 
     if (elemFlag) {
@@ -18,22 +17,22 @@ class ItemBase extends QtObject {
         if (prop.type === "list") {
           var parr = prop.value;
           element.$properties.$index.set(parr.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-          parr.push(leafElement);
+          parr.push(element);
         } else {
           element.$properties.$index.set(0, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-          prop.set(leafElement);
+          prop.set(element);
         }
       } else {
         throw new Error("ItemBase.$onElementAdd : No default property : "+this+"/"+this.$leaf);
       }
 
-      if (leafElement instanceof ItemBase) {
+      if (element instanceof ItemBase) {
         element.$properties.$childIndex.set(this.$properties.children.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-        this.children.push(leafElement);
+        this.children.push(element);
         this.childrenChanged();
       } else {
         element.$properties.$resourceIndex.set(this.$properties.resources.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-        this.resources.push(leafElement);
+        this.resources.push(element);
         this.resourcesChanged();
       }
     }
@@ -47,7 +46,6 @@ class ItemBase extends QtObject {
   }
 
   $onElementRemove(element, flags) {
-    var leafElement = element.$leaf;
     const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
 
     if (elemFlag) {
@@ -66,7 +64,7 @@ class ItemBase extends QtObject {
         throw new Error("ItemBase.$onElementRemove : No default property : "+this+"/"+this.$leaf);
       }
 
-      if (leafElement instanceof ItemBase) {
+      if (element instanceof ItemBase) {
         this.children.splice(element.$childIndex, 1);
         for (var i = element.$childIndex; i < this.children.length; ++i) {
           this.children[i].$properties.$childIndex.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);

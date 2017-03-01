@@ -201,6 +201,7 @@ class QMLComponent {
   $createObject(parent, properties = {}) {
     const engine = QmlWeb.engine;
     const oldFlags = this.flags;
+    const oldElementFlag = this.elementFlag;
     const oldCreateFlags = this.createFlags;
     // change base path to current component base path
     const oldState = engine.operationState;
@@ -215,6 +216,7 @@ class QMLComponent {
       if (!this.createFlags) {
         if (parent) {
           this.createFlags = QmlWeb.QMLComponentFlags.Nested;
+          this.elementFlag = QmlWeb.QMLComponentFlags.Element;
 
           // (1) Nested item top level uses loader Component imports  see(2) :
           this.redirectImports(this.loaderComponent);
@@ -270,6 +272,7 @@ class QMLComponent {
       engine.operationState = oldState;
       this.flags = oldFlags;
       this.createFlags = oldCreateFlags;
+      this.elementFlag = oldElementFlag;
     }
     return item;
   }
@@ -277,9 +280,7 @@ class QMLComponent {
   createObject(parent, properties = {}) {
     const item = this.$createObject(parent, properties);
 
-    if (item instanceof QmlWeb.ItemBase) {
-      item.$properties.parent.set(parent, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, item);
-    } else if (item instanceof QmlWeb.QtObject) {
+    if (item instanceof QmlWeb.QtObject) {
       item.$properties.container.set(parent, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, item);
     } else if (item instanceof QMLComponent) {
       item.$component = this;

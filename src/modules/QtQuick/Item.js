@@ -20,7 +20,7 @@ class Item extends ItemBase {
     this.css = QmlWeb.createStyle(this.dom.style);
     // In case the class is qualified, only use the last part for the css class
     // name.
-    const classComponent = meta.$class.split(".").pop();
+    // const classComponent = meta.$class.split(".").pop();
     //this.dom.className = `${classComponent}${this.id ? ` ${this.id}` : ""}`;
     //this.dom.className = "qmlitem";
     this.impl = null; // Store the actually drawn element
