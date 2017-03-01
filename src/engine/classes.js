@@ -151,6 +151,7 @@ function constructSuper(meta, parent) {
 
     supermeta.parent = parent;
     supermeta.$class = meta.$class;
+    supermeta.parentmeta = meta;
     // TODO hack
     supermeta.tagName = meta.tagName;
     supermeta.$on = meta.$on;

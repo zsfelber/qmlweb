@@ -7,13 +7,15 @@ class QtObject extends QmlWeb.QObject {
 
     // Component get own properties
     this.$attributes = [];
-    for (const key in meta) {
-      if (!meta.hasOwnProperty(key) || !meta[key]) {
-        continue;
-      }
-      const name = meta[key].__proto__.constructor.name;
-      if (name === "QMLPropertyDefinition" || name === "QMLAliasDefinition") {
-        this.$attributes.push(key);
+    if (meta.parentmeta) {
+      for (const key in meta.parentmeta) {
+        if (!meta.parentmeta.hasOwnProperty(key) || !meta.parentmeta[key]) {
+          continue;
+        }
+        const name = meta.parentmeta[key].__proto__.constructor.name;
+        if (name === "QMLPropertyDefinition" || name === "QMLAliasDefinition") {
+          this.$attributes.push(key);
+        }
       }
     }
 

@@ -12,6 +12,7 @@ QmlWeb.registerQmlType({
     QmlWeb.initMeta(this, meta, Settings);
 
     if (typeof window.localStorage === "undefined") {
+      console.warn("Settings.  window.localStorage is undefined.");
       return;
     }
 
@@ -26,11 +27,12 @@ QmlWeb.registerQmlType({
   }
   $loadProperties() {
     this.$attributes.forEach(attrName => {
-      if (!this.$properties[attrName]) return;
+      const prop = this.$leaf.$properties[attrName];
+      if (!prop) return;
 
       const key = this.$getKey(attrName);
-      this[attrName] = localStorage.getItem(key);
-    });
+      prop.set(localStorage.getItem(key));
+    }, this);
   }
   $initializeProperties() {
     this.$attributes.forEach(attrName => {
@@ -39,7 +41,7 @@ QmlWeb.registerQmlType({
       let signalName = `${attrName}Changed`;
 
       // NOTE aliases are now regular properties (so Changed works)
-      const prop = this.$properties[attrName];
+      const prop = this.$leaf.$properties[attrName];
       /*if (prop && prop.type==="alias") {
         emitter = this.$context[prop.value.objectName];
         signalName = `${prop.value.propertyName}Changed`;
@@ -49,8 +51,8 @@ QmlWeb.registerQmlType({
 
 
       emitter[signalName].connect(this, () => {
-        localStorage.setItem(this.$getKey(attrName), this[attrName]);
+        localStorage.setItem(this.$getKey(attrName), prop.value);
       });
-    });
+    }, this);
   }
 });

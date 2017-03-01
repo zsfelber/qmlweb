@@ -97,7 +97,7 @@ function registerElement(name, file) {
           }
         );
         qml.$properties[pname].changed.connect(this, () => this.applyAttribute(attr));
-      });
+      }, this);
 
       // Set and update wrapper width/height
       QmlWeb.setStyle(this.css, "width", `${qml.width}px`, {});

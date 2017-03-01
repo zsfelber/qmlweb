@@ -5,12 +5,14 @@ class ListElement extends QtObject {
     QmlWeb.initMeta(this, meta, ListElement);
 
     const createProperty = QmlWeb.createProperty;
-    for (const i in meta) {
-      if (i[0] !== "$") {
-        createProperty("variant", this, i);
+    if (meta.parentmeta) {
+      for (const i in meta.parentmeta) {
+        if (i[0] !== "$") {
+          createProperty("variant", this, i);
+        }
       }
     }
-    QmlWeb.applyProperties(meta, this);
+    QmlWeb.applyProperties(meta.parentmeta, this);
   }
 }
 
