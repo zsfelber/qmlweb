@@ -12,7 +12,7 @@ describe("QtQuick.Timer", function() {
     qml.yield = function(arg) {
       var t = new Date() - now;
       expect(t).toBeRoughly(50, 1);
-      done();
+      if (done) done();
     };
     qml.start();
   });
@@ -24,7 +24,7 @@ describe("QtQuick.Timer", function() {
     qml.yield = function(arg) {
       var t = new Date() - now;
       expect(t).toBeRoughly(500, 0.1);
-      done();
+      if (done) done();
     };
     qml.start();
   });
@@ -33,7 +33,7 @@ describe("QtQuick.Timer", function() {
     var qml = load("Running", this.div);
     qml.yield = function(succeed) {
       expect(succeed).toBe(true);
-      done();
+      if (done) done();
     };
     qml.start();
   });

@@ -9,7 +9,7 @@ describe("QtQuick.Behavior", function() {
     setTimeout(function() {
       expect(qml.gotX).toBe(true);
       expect(qml.gotY).toBe(false);
-      done();
+      if (done) done();
     }, 200);
   });
 });

@@ -674,7 +674,7 @@ QmlWeb.registerQmlType({
   baseClass: "ItemBase",
   properties: {
     $opacity: { type: "real", initialValue: 1 },
-    state: "string",
+    state: { type: "string", initialValue: null },
     states: "list",
     transitions: "list",
     transform: "list",

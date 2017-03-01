@@ -74,7 +74,7 @@ describe("QtBase.Signal", function() {
     expect(result).toBe(0);
     setTimeout(function() {
       expect(result).toBe(23);
-      done();
+      if (done) done();
     }, 10);
   });
 });

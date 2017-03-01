@@ -14,7 +14,7 @@ describe("QtQuick.Loader", function() {
     const qml = load("SourceDelayed", this.div);
     qml.yield = function() {
       expect(qml.item.value).toBe(42);
-      done();
+      if (done) done();
     };
     qml.start();
   });
@@ -22,7 +22,7 @@ describe("QtQuick.Loader", function() {
     const qml = load("SourceComponentDelayed", this.div);
     qml.yield = function() {
       expect(qml.item.value).toBe(42);
-      done();
+      if (done) done();
     };
     qml.start();
   });

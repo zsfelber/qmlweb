@@ -92,7 +92,7 @@
           var process = function() {
             if (++loaded !== 2) return;
             expect(imagesEqual(result, expected)).toBe(true);
-            done();
+            if (done) done();
           };
 
           expected = document.createElement("img");
