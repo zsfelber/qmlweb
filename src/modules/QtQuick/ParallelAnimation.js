@@ -19,12 +19,12 @@ QmlWeb.registerQmlType({
 
     this.animationsChanged.connect(this, this.$onAnimationsChanged);
 
-    QmlWeb.engine.$registerStart(() => {
+    QmlWeb.engine.$registerStart(this, () => {
       if (!this.running) return;
       self.running = false; // toggled back by start();
       self.start();
     });
-    QmlWeb.engine.$registerStop(() => this.stop());
+    QmlWeb.engine.$registerStop(this, () => this.stop());
   }
   $onAnimationsChanged() {
     const flags = QmlWeb.Signal.UniqueConnection;

@@ -14,13 +14,14 @@ QmlWeb.registerQmlType({
 
     this.animationsChanged.connect(this, this.$onAnimatonsChanged);
 
-    QmlWeb.engine.$registerStart(() => {
+    QmlWeb.engine.$registerStart(this, () => {
       if (!this.running) return;
       this.running = false; // toggled back by start();
       this.start();
     });
-    QmlWeb.engine.$registerStop(() => self.stop());
+    QmlWeb.engine.$registerStop(this, () => self.stop());
   }
+
   $onAnimatonsChanged() {
     const flags = QmlWeb.Signal.UniqueConnection;
     for (let i = 0; i < this.animations.length; i++) {

@@ -149,6 +149,11 @@ class QObject {
     for (const i in this.$signals) {
       this.$signals[i].disconnect();
     }
+
+    // Remove start/stop/ticker entry from engine
+    QmlWeb.engine.$removeStart(this);
+    QmlWeb.engine.$removeStop(this);
+    QmlWeb.engine.$removeTicker(this);
   }
 
   // must have a `destroy` method

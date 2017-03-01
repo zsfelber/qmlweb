@@ -4,6 +4,7 @@ QmlWeb.useShadowDom = false;
 QmlWeb.isTesting = true;
 
 var engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
+var cleanupList = [];
 
 function loadQmlFile(file, div, opts) {
   //var engine = new QmlWeb.QMLEngine(div, opts || {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
@@ -12,6 +13,7 @@ function loadQmlFile(file, div, opts) {
   engine.start();
   engine.stop();
   document.body.appendChild(div);
+  cleanupList.push(engine.rootObject);
   return engine.rootObject;
 }
 
@@ -98,6 +100,20 @@ var customMatchers = {
                   " is known to be failing. Skipping...");
       return;
     }
-    itOrig.apply(this, arguments);
+
+    args = QmlWeb.helpers.slice(arguments, 0);
+    const origFun = args[1];
+    args[1] = function _fwd() {
+      try {
+        origFun.apply(this, arguments);
+      } finally {
+        while (cleanupList.length) {
+          const itm = cleanupList.pop();
+          console.log("Cleanup : "+itm);
+          itm.destroy();
+        }
+      }
+    };
+    itOrig.apply(this, args);
   };
 }());

@@ -25,13 +25,13 @@ QmlWeb.registerQmlType({
      * the timer will trigger. */
     this.runningChanged.connect(this, this.$onRunningChanged);
 
-    QmlWeb.engine.$registerStart(() => {
+    QmlWeb.engine.$registerStart(this, () => {
       if (this.running) {
         this.restart();
       }
     });
 
-    QmlWeb.engine.$registerStop(() => this.stop());
+    QmlWeb.engine.$registerStop(this, () => this.stop());
   }
   start() {
     this.running = true;
@@ -70,12 +70,14 @@ QmlWeb.registerQmlType({
       this.$properties.running.value = false;
     }
 
-    // Trigger this.
-    this.triggered();
-
-    if (!this.repeat) {
-      // Emit changed signal manually after setting the value manually above.
-      this.runningChanged();
+    try {
+      // Trigger this.
+      this.triggered();
+    } finally {
+      if (!this.repeat) {
+        // Emit changed signal manually after setting the value manually above.
+        this.runningChanged();
+      }
     }
   }
 });

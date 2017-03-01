@@ -47,12 +47,12 @@ class QMLEngine {
     //----------Private Members---------
 
     // Ticker resource id and ticker callbacks
-    this._tickers = [];
+    this._tickers = {};
     //this._lastTick = Date.now();
 
     // Callbacks for stopping or starting the engine
-    this._whenStop = [];
-    this._whenStart = [];
+    this._whenStop = {};
+    this._whenStart = {};
 
     // Keyboard management
     this.$initKeyboard();
@@ -125,7 +125,8 @@ class QMLEngine {
       this.operationState |= QMLOperationState.Running;
       //this._tickerId = setInterval(this._tick.bind(this), this.$interval);
       //this._tickers.forEach(ticker => ticker(now, elapsed));
-      this._whenStart.forEach(function(val) {
+      for (const i in this._whenStart) {
+        const val = this._whenStart[i];
         try {
           val();
         } catch (err) {
@@ -136,8 +137,9 @@ class QMLEngine {
             QmlWeb.warn(err.ctType+" error in startup script.");
           }
         }
-      });
-      this._tickers.forEach(function(val) {
+      }
+      for (const i in this._tickers) {
+        const val = this._tickers[i];
         try {
           this.$startTicker(val);
         } catch (err) {
@@ -148,7 +150,7 @@ class QMLEngine {
             QmlWeb.warn(err.ctType+" : Startup error in ticker.");
           }
         }
-      });
+      }
     }
   }
 
@@ -157,9 +159,15 @@ class QMLEngine {
     const QMLOperationState = QmlWeb.QMLOperationState;
     if (this.operationState & QMLOperationState.Running) {
       //clearInterval(this._tickerId);
-      this._tickers.forEach(ticker => $stopTicker(ticker));
+      for (const i in this._tickers) {
+        const val = this._tickers[i];
+        $stopTicker(val);
+      }
       this.operationState &= ~QMLOperationState.Running;
-      this._whenStop.forEach(callback => callback());
+      for (const i in this._whenStop) {
+        const val = this._whenStop[i];
+        val();
+      }
     }
   }
 
@@ -330,27 +338,33 @@ class QMLEngine {
   }*/
 
 
-  $registerStart(f) {
-    this._whenStart.push(f);
+  $registerStart(owner, f) {
+    this._whenStart[owner.$objectId] = f;
   }
 
-  $registerStop(f) {
-    this._whenStop.push(f);
+  $registerStop(owner, f) {
+    this._whenStop[owner.$objectId] = f;
+  }
+
+  $removeStart(owner) {
+    delete this._whenStart[owner.$objectId];
+  }
+
+  $removeStop(owner) {
+    delete this._whenStop[owner.$objectId];
   }
 
   $addTicker(t) {
-    this._tickers.push(t);
+    this._tickers[t.$objectId] = t;
 
     if (this.operationState & QMLOperationState.Running) {
       $startTicker(t);
     }
   }
 
-  $removeTicker(t) {
-    const index = this._tickers.indexOf(t);
-    if (index !== -1) {
-      this._tickers.splice(index, 1);
-    }
+  $removeTicker(owner) {
+    delete this._tickers[owner.$objectId];
+
     if (this.operationState & QMLOperationState.Running) {
       $stopTicker(t);
     }
