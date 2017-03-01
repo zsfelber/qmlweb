@@ -2,5 +2,5 @@
 //  return QmlWeb.$resolvePath(`${val}`);
 //}
 //QMLUrl.plainType = true;
-QmlWeb.qmlUrl = QmlWeb.$resolvePath;
-QmlWeb.qmlUrl.plainType = true;
+//QmlWeb.qmlUrl = QMLUrl;
+QmlWeb.$resolvePath.plainType = true;

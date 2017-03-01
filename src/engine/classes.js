@@ -216,7 +216,7 @@ function createQmlObject(src, parent, file) {
   // Returns url resolved relative to the URL of the caller.
   // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
   // in QMLUrl.js
-  //var resolvedUrl = url => QmlWeb.qmlUrl(url),
+  //var resolvedUrl = url => QmlWeb.$resolvePath(url),
 
   const clazz = QmlWeb.parseQML(src, file);
   file = file || "createQmlObject_function";
