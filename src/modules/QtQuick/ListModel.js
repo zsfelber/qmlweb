@@ -95,3 +95,4 @@ QmlWeb.registerQmlType({
   constructor:ListModel
 });
 
+QmlWeb.ListModel = ListModel;

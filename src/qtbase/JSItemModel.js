@@ -1,6 +1,7 @@
 class JSItemModel {
   constructor() {
     this.roleNames = [];
+    this.$modelId = this.$objectId = ++objectIds;
 
     const Signal = QmlWeb.Signal;
     this.dataChanged = Signal.signal("dataChanged", [
