@@ -36,7 +36,7 @@ QmlWeb.registerQmlType({
   }
 
   $onValueChanged(value) {
-    if (value !== undefined && this.$property) {
+    if (this.$property) {
       this.$property.set(value);
     }
   }
