@@ -32,7 +32,17 @@ class QColor {
       // Copy constructor
       this.$value = val.$value;
     } else if (typeof val === "string") {
-      this.$value = val.toLowerCase();
+      let cap;
+      if (cap=/^\#([0-9a-fA-F]+)$/.exec(val)) {
+        val = parseInt("0x"+cap[1]);
+        if (val < 0x1000000) {// alpha not defined  -> 255
+          val += 0xff000000;
+        }
+        const argb = val.toString(16).substr(-8);
+        this.$value = `#${argb}`;
+      } else {
+        this.$value = val.toLowerCase();
+      }
     } else if (typeof val === "number") {
       // we assume it is int value and must be converted to css hex with padding
       val = Math.round(val);
@@ -118,4 +128,5 @@ class QColor {
 QColor.$colors = {};
 QColor.$colorsCount = 0;
 QColor.comparableColorsLimit = 10000;
+QColor.valueType = true;
 QmlWeb.QColor = QColor;

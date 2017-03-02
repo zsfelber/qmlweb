@@ -7,11 +7,11 @@ Item {
   property var trueTests: [
     foo === bar,
     foo == bar,
-    foo == "#abcdef"
+    foo == "#ffabcdef"
   ]
   property var falseTests: [
-    foo === "#abcDEF",
-    foo == "#abcDEF",
-    foo === "#abcdef"
+    foo === "#ffabcDEF",
+    foo == "#ffabcDEF",
+    foo === "#ffabcdef"
   ]
 }

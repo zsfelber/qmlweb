@@ -76,7 +76,8 @@ class QMLProperty {
         this.updateState &= ~QmlWeb.QMLPropertyState.Uninitialized;
       }
 
-      if (constructors[this.type] === QmlWeb.qmlList) {
+      const cons = constructors[this.type];
+      if (cons === QmlWeb.qmlList) {
         // SetChildren (used in init mode only) : we merge the subclasses items and don't clear it every time
         // otherwise : clear it, most important when this is the default property, otherwise it just appends new entries
         if (!isch) {
@@ -99,7 +100,7 @@ class QMLProperty {
             clazz: newVal,
             $file: newVal.$file
           });
-        } else if (constructors[this.type] === QMLComponent) {
+        } else if (cons === QMLComponent) {
           // User declared Component type but assigned Element directly (eg initialized a delegate)
 
           this.value = QmlWeb.createComponent({
@@ -113,12 +114,14 @@ class QMLProperty {
           // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
           this.value = QmlWeb.createComponentAndElement({clazz:newVal}, this.valParentObj, QmlWeb.QMLComponentFlags.Nested|elemflag);
         }
-      } else if (newVal instanceof Object || newVal === undefined || newVal === null) {
+      } else if (newVal === undefined || newVal === null || !cons) {
         this.value = newVal;
-      } else if (constructors[this.type].plainType) {
-        this.value = constructors[this.type](newVal);
+      } else if (cons.plainType) {
+        this.value = cons(newVal);
+      } else if (cons.valueType || !(newVal instanceof Object)) {
+        this.value = new cons(newVal);
       } else {
-        this.value = new constructors[this.type](newVal);
+        this.value = newVal;
       }
 
       return this.value;

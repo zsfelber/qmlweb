@@ -98,7 +98,8 @@ describe("QMLEngine.properties", function() {
 
   it("ChangedSignal", function() {
     var qml = load("ChangedSignal", this.div);
-    expect(qml.result).toBe(69);
+    //QmlWeb/zsfelber 69->81 indended (+12 = width + height changed initially)
+    expect(qml.result).toBe(81);
   });
 
   it("ChangedExpressionSignal", function() {
