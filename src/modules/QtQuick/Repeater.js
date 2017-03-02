@@ -236,7 +236,7 @@ class Repeater extends Item {
     const pendingOps = QmlWeb.engine.pendingOperations;
     const op = pendingOps.map["C:"+child.Component.$componentId];
     // TODO store index
-    pendingOps.stack.splice(pendingOps.indexOf(op), 1);
+    pendingOps.stack.splice(pendingOps.stack.indexOf(op), 1);
     for (let i = 0; i < child.children.length; i++) {
       this.$removeChildProperties(child.children[i]);
     }

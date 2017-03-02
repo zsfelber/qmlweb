@@ -103,7 +103,12 @@ class QtObject extends QmlWeb.QObject {
           var parr = prop.get();
           parr.splice(element.$index, 1);
           for (var i = element.$index; i < parr.length; ++i) {
-            parr[i].$properties.$index.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+            const p = parr[i].$properties;
+            if (p) {
+              p.$index.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+            } else {
+              console.warn(this+" . $elementRemove : default property : "+this.$defaultProperty+", no array["+i+"].$properties : "+parr);
+            }
           }
         } else {
           prop.set(null);

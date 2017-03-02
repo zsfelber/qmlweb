@@ -9,24 +9,26 @@ class ItemBase extends QtObject {
   $elementAdd(element, flags) {
     const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
 
-    if (elemFlag) {
-      super.$elementAdd(element, flags);
+    if (element) {
+      if (elemFlag) {
+        super.$elementAdd(element, flags);
 
-      if (element instanceof ItemBase) {
-        element.$properties.$childIndex.set(this.$properties.children.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-        this.children.push(element);
-        this.childrenChanged();
-      } else {
-        element.$properties.$resourceIndex.set(this.$properties.resources.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-        this.resources.push(element);
-        this.resourcesChanged();
+        if (element instanceof ItemBase) {
+          element.$properties.$childIndex.set(this.$properties.children.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+          this.children.push(element);
+          this.childrenChanged();
+        } else {
+          element.$properties.$resourceIndex.set(this.$properties.resources.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+          this.resources.push(element);
+          this.resourcesChanged();
+        }
       }
-    }
-    if (this.dom) {
-      if (element.dom) {
-        this.dom.appendChild(element.dom);
-      //} else {
-      //  QmlWeb.warn("Child has no 'dom':"+element);
+      if (this.dom) {
+        if (element.dom) {
+          this.dom.appendChild(element.dom);
+        //} else {
+        //  QmlWeb.warn("Child has no 'dom':"+element);
+        }
       }
     }
   }

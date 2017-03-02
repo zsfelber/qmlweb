@@ -18,8 +18,10 @@ QmlWeb.registerQmlType({
     this.enabledChanged.connect(this, this.$onEnabledChanged);
   }
   $onAnimationChanged(newVal) {
-    newVal.target = this.$parent;
-    newVal.property = this.$on;
+    if (newVal) {
+      newVal.target = this.$parent;
+      newVal.property = this.$on;
+    }
     this.$parent.$properties[this.$on].animation = newVal;
   }
   $onEnabledChanged(newVal) {
