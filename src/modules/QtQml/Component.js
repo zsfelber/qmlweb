@@ -256,7 +256,7 @@ class QMLComponent {
       QmlWeb.helpers.mergeInPlace(item, properties);
 
       // invoked either this or one from >@see also< classes.constructSuper
-      if (item.$attachedComponent) {
+      if (item.hasOwnProperty("$attachedComponent")) {
         QObject.pendingComplete(item);
         this.cntPendingCompletions++;
       } else {

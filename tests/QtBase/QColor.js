@@ -11,7 +11,7 @@ describe("QtBase.QColor", function() {
     ];
     colors.forEach(function(input) {
       var color = new QmlWeb.QColor(input);
-      expect(color.toString()).toBe("#abcdef");
+      expect(color.toString()).toBe("#ffabcdef");
     });
   });
 

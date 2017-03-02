@@ -154,12 +154,15 @@ class QMLProperty {
 
 
   // 'update' reevaluates the get/set binding, stores or emits the value of the property, as determined from this.updateState
-  update(flags, oldVal, valParentObj) {
+  update(flags, oldVal, valParentObj, dirtyNow) {
 
     var prevEvalObj = QmlWeb.engine.$evaluatedObj;
 
     const origState = this.updateState;
     this.updateState |= QmlWeb.QMLPropertyState.Updating;
+    if (!dirtyNow) {
+      dirtyNow = origState;
+    }
 
     let newVal;
 
@@ -181,7 +184,7 @@ class QMLProperty {
             this.binding.compile();
           }
 
-          if (origState & QmlWeb.QMLPropertyState.ValueSaved) {
+          if (dirtyNow & QmlWeb.QMLPropertyState.ValueSaved) {
 
             // binding/set
             newVal = this.value;
@@ -190,7 +193,7 @@ class QMLProperty {
             this.binding.set(this.bindingCtxObj, newVal, flags);
             this.updateState &= ~QmlWeb.QMLPropertyState.ValueSaved;
 
-          } else if (origState & QmlWeb.QMLPropertyState.LoadFromBinding)  {
+          } else if (dirtyNow & QmlWeb.QMLPropertyState.LoadFromBinding)  {
 
             this.obsoleteConnections = this.evalTreeConnections;
             // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
@@ -210,7 +213,7 @@ class QMLProperty {
 
         } else {
 
-          if (origState & QmlWeb.QMLPropertyState.ValueSaved)  {
+          if (dirtyNow & QmlWeb.QMLPropertyState.ValueSaved)  {
 
             this.obsoleteConnections = this.evalTreeConnections;
             // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
@@ -228,8 +231,8 @@ class QMLProperty {
         if (err instanceof QmlWeb.FatalError) throw err;
 
         if (err.ctType) {
-          if (origState & QmlWeb.QMLPropertyState.ValueSaved) {
-            throw new QmlWeb.AssertionError("Assertion failed : "+err.ctType+" : "+QmlWeb.QMLPropertyState.toString(origState) +" -> "+ QmlWeb.QMLPropertyState.toString(this.updateState)+"  Invalid Error:", err);
+          if (dirtyNow & QmlWeb.QMLPropertyState.ValueSaved) {
+            throw new QmlWeb.AssertionError("Assertion failed : "+err.ctType+" : "+QmlWeb.QMLPropertyState.toString(dirtyNow) +" -> "+ QmlWeb.QMLPropertyState.toString(this.updateState)+"  Invalid Error:", err);
           //} else {
             // when err.ctType==true: && LoadFromBinding
             // PendingEval uses custom logic in get() implementation :
@@ -551,14 +554,15 @@ class QMLProperty {
         this.bindingCtxObj = this.propDeclObj;
       }
 
+      let dirtyNow;
       if (queueItem) {
-        const stst = queueItem.queueItems.dirty_seq.shift();
-        if (!(this.updateState&stst)) {
-          throw new QmlWeb.AssertionError("Assertion failed : "+this+" . Queued update state not matching : "+QmlWeb.QMLPropertyState.toString(stst));
+        dirtyNow = queueItem.queueItems.dirty_seq.shift();
+        if (!(this.updateState&dirtyNow)) {
+          throw new QmlWeb.AssertionError("Assertion failed : "+this+" . Queued update state not matching : "+QmlWeb.QMLPropertyState.toString(dirtyNow));
         }
       }
 
-      this.update(flags, oldVal, valParentObj);
+      this.update(flags, oldVal, valParentObj, dirtyNow);
 
       if (queueItem && queueItem.queueItems.length) {
         this.updateState |= queueItem.queueItems.dirty_seq[0];
