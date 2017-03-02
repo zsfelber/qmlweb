@@ -40,7 +40,7 @@ QmlWeb.registerQmlType({
     this.pointSizeChanged.connect(this, this.$onPointSizeChanged);
     this.strikeoutChanged.connect(this, this.$onStrikeoutChanged);
     this.underlineChanged.connect(this, this.$onUnderlineChanged);
-    this.weightChanged.connect(this, this.$onWidthChanged);
+    this.weightChanged.connect(this, this.$onWeightChanged);
     this.wordSpacingChanged.connect(this, this.$onWordSpacingChanged);
   }
 
@@ -100,7 +100,7 @@ QmlWeb.registerQmlType({
         ? "underline"
         : "none");
   }
-  $onWidthChanged(newVal) {
+  $onWeightChanged(newVal) {
     const css = this.getTargetImplStyle();
     QmlWeb.setStyle(css, "fontWeight", this.$weightToCss(newVal));
   }
