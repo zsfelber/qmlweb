@@ -277,13 +277,20 @@ class QMLComponent {
     return item;
   }
 
-  createObject(parent, properties = {}) {
+  createObject(parent, properties = {}, outallchanges, outallchanges_old) {
     const item = this.$createObject(parent, properties);
 
-    if (item instanceof QmlWeb.QtObject) {
-      item.$properties.container.set(parent, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, item);
-    } else if (item instanceof QMLComponent) {
-      item.$component = this;
+    this.outallchanges = outallchanges;
+    this.outallchanges_old = outallchanges_old;
+    try {
+      if (item instanceof QmlWeb.QtObject) {
+        item.$properties.container.set(parent, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, item);
+      } else if (item instanceof QMLComponent) {
+        item.$component = this;
+      }
+    } finally {
+      this.outallchanges = undefined;
+      this.outallchanges_old = undefined;
     }
 
     return item;

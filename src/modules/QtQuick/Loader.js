@@ -104,7 +104,7 @@ QmlWeb.registerQmlType({
         return;
       }
 
-      this.item = newItem.$createObject(QmlWeb.engine.$evaluatedObj/*this or some proto  parent*/);
+      this.item = newItem.createObject(QmlWeb.engine.$evaluatedObj/*this or some proto  parent*/);
       this.$updateGeometry();
 
       if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {

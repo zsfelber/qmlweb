@@ -389,6 +389,16 @@ class QMLEngine {
     }
   }
 
+  addPendingOp(itm) {
+    let itms = this.pendingOperations.map[itm.opId];
+    if (!itms) {
+      this.pendingOperations.map[itm.opId] = itms = [];
+      this.pendingOperations.stack.push(itms);
+    }
+    itms.push(itm);
+    return itms;
+  }
+
   processOp(op) {
     const oldP = this.currentPendingOp;
     this.currentPendingOp = op;
@@ -456,6 +466,16 @@ class QMLEngine {
     this.i++;
   }
 
+  processSinglePendingOperation(op) {
+    if (op.length)  {
+      opId = op[0].opId;
+      delete this.pendingOperations.map[opId];
+      op.forEach(this.processOp, this);
+      op.splice(0, op.length);
+      op.$cleared = true;
+    }
+  }
+
   processPendingOperations() {
     // Initialize property bindings
     //
@@ -469,20 +489,8 @@ class QMLEngine {
     this.i=0; this.a=0; this.ae=0; this.a1=0; this.b=0; this.e=0; this.w=0;
     this.info = {}; this.warning = {}; this.error = {};
     while (this.pendingOperations.stack.length > 0) {
-      let op = this.pendingOperations.stack.shift(), opId;
-      if (op instanceof Array) {
-        if (op.length)  {
-          opId = op[0].opId;
-          delete this.pendingOperations.map[opId];
-          op.forEach(this.processOp, this);
-          op.splice(0, op.length);
-          op.$cleared = true;
-        }
-      } else {
-        opId = op.opId;
-        delete this.pendingOperations.map[opId];
-        this.processOp(op);
-      }
+      let op = this.pendingOperations.stack.shift();
+      this.processSinglePendingOperation(op);
     }
 
     QmlWeb.log("processPendingOperations : done  total:"+this.i+" properties:"+this.a+"("+(this.a1+","+this.ae)+") functions:"+this.b+"  Info:",this.info, "   Warning("+this.w+"):",this.warning, "   Error("+this.e+"):",this.error);

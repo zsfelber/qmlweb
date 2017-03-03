@@ -37,7 +37,8 @@ class Repeater extends Item {
             this.model;
   }
   $applyModel() {
-    if (!this.delegate || !this.container) {
+    const container = this.repeaterContainer();
+    if (!this.delegate || !container) {
       return;
     }
 
@@ -141,14 +142,17 @@ class Repeater extends Item {
     const QMLOperationState = QmlWeb.QMLOperationState;
     const createProperty = QmlWeb.createProperty;
     const model = this.$getModel();
+    const container = this.repeaterContainer();
     let index;
     var prevEvalObj = QmlWeb.engine.$evaluatedObj;
     try {
-      QmlWeb.engine.$evaluatedObj = this.container;
+      QmlWeb.engine.$evaluatedObj = container;
 
+      var outallchanges = {};
       for (index = startIndex; index < endIndex; index++) {
 
-        const newItem = this.delegate.$createObject(this.container);
+        const newItem = this.delegate.createObject(container, {}, outallchanges);
+        const np = newItem.$properties;
         createProperty("int", newItem, "index", { initialValue: index });
         // // TODO gz obsolete : scope
         // const scope = {
@@ -157,13 +161,13 @@ class Repeater extends Item {
         // };
 
         if (typeof model === "number" || model instanceof Array) {
-          if (typeof newItem.$properties.modelData === "undefined") {
+          if (typeof np.modelData === "undefined") {
             createProperty("variant", newItem, "modelData");
           }
           const value = model instanceof Array ?
                         model[index] :
                         typeof model === "number" ? index : "undefined";
-          newItem.$properties.modelData.set(value, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
+          np.modelData.set(value, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
                                             newItem);
         } else {
           // QML exposes a "model" property in the scope that contains all role
@@ -171,20 +175,20 @@ class Repeater extends Item {
           const modelData = {};
           for (let i = 0; i < model.roleNames.length; i++) {
             const roleName = model.roleNames[i];
-            if (typeof newItem.$properties[roleName] === "undefined") {
+            if (typeof np[roleName] === "undefined") {
               createProperty("variant", newItem, roleName);
             }
             const roleData = model.data(index, roleName);
             modelData[roleName] = roleData;
-            newItem.$properties[roleName].set(
+            np[roleName].set(
               roleData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
               newItem
             );
           }
-          if (typeof newItem.$properties.model === "undefined") {
+          if (typeof np.model === "undefined") {
             createProperty("variant", newItem, "model");
           }
-          newItem.$properties.model.set(
+          np.model.set(
             modelData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
             newItem
           );
@@ -217,8 +221,14 @@ class Repeater extends Item {
       QmlWeb.engine.processPendingOperations();
     }
 
-    if (index > 0) {
-      this.repeaterContainer().childrenChanged();
+    if (outallchanges.children) {
+      container.childrenChanged();
+    }
+    if (outallchanges.resources) {
+      container.resourcesChanged();
+    }
+    if (outallchanges[container.$defaultProperty]) {
+      container.$properties[container.$defaultProperty].changed();
     }
 
     for (let i = endIndex; i < this.$items.length; i++) {

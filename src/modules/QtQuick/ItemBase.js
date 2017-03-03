@@ -6,21 +6,27 @@ class ItemBase extends QtObject {
     this.hoveredChanged.connect(this, this.$onHoveredChanged);
   }
 
-  $elementAdd(element, flags) {
+  $elementAdd(element, flags, outallchanges) {
     const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
 
     if (element) {
       if (elemFlag) {
-        super.$elementAdd(element, flags);
+        super.$elementAdd(element, flags, outallchanges);
 
         if (element instanceof ItemBase) {
           element.$properties.$childIndex.set(this.$properties.children.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
           this.children.push(element);
-          this.childrenChanged();
+          if (outallchanges)
+            outallchanges.children = (outallchanges.children || 0) + 1;
+          else
+            this.childrenChanged();
         } else {
           element.$properties.$resourceIndex.set(this.$properties.resources.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
           this.resources.push(element);
-          this.resourcesChanged();
+          if (outallchanges)
+            outallchanges.resources = (outallchanges.resources || 0) + 1;
+          else
+            this.resourcesChanged();
         }
       }
       if (this.dom) {
@@ -33,24 +39,30 @@ class ItemBase extends QtObject {
     }
   }
 
-  $elementRemove(element, flags) {
+  $elementRemove(element, flags, outallchanges) {
     const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
 
     if (elemFlag) {
-      super.$elementRemove(element, flags);
+      super.$elementRemove(element, flags, outallchanges);
 
       if (element instanceof ItemBase) {
         this.children.splice(element.$childIndex, 1);
         for (var i = element.$childIndex; i < this.children.length; ++i) {
           this.children[i].$properties.$childIndex.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
         }
-        this.childrenChanged();
+        if (outallchanges)
+          outallchanges.children = (outallchanges.children || 0) + 1;
+        else
+          this.childrenChanged();
       } else {
         this.resources.splice(element.$resourceIndex, 1);
         for (var i = element.$resourceIndex; i < this.resources.length; ++i) {
           this.resources[i].$properties.$resourceIndex.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
         }
-        this.resourcesChanged();
+        if (outallchanges)
+          outallchanges.resources = (outallchanges.resources || 0) + 1;
+        else
+          this.resourcesChanged();
       }
     }
     if (this.dom) {

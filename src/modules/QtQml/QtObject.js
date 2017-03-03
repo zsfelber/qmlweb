@@ -58,7 +58,7 @@ class QtObject extends QmlWeb.QObject {
     const elemFlag = leaf.$componentCreateFlags & QmlWeb.QMLComponentFlags.Element;
 
     if (oldContainer) {
-      oldContainer.$elementRemove(leaf, elemFlag);
+      oldContainer.$elementRemove(leaf, elemFlag, leaf.$component?leaf.$component.outallchanges_old:undefined);
     }
 
     if (leaf.$loaderContext !== newContainer) {
@@ -69,11 +69,11 @@ class QtObject extends QmlWeb.QObject {
     }
 
     if (newContainer) {
-      newContainer.$elementAdd(leaf, elemFlag);
+      newContainer.$elementAdd(leaf, elemFlag, leaf.$component?leaf.$component.outallchanges:undefined);
     }
   }
 
-  $elementAdd(element, flags) {
+  $elementAdd(element, flags, outallchanges) {
     const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
 
     if (elemFlag) {
@@ -83,6 +83,10 @@ class QtObject extends QmlWeb.QObject {
           var parr = prop.value;
           element.$properties.$index.set(parr.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
           parr.push(element);
+          if (outallchanges)
+            outallchanges[this.$defaultProperty] = (outallchanges[this.$defaultProperty] || 0) + 1;
+          //else
+            //prop.changed();
         } else {
           element.$properties.$index.set(0, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
           prop.set(element);
@@ -93,7 +97,7 @@ class QtObject extends QmlWeb.QObject {
     }
   }
 
-  $elementRemove(element, flags) {
+  $elementRemove(element, flags, outallchanges) {
     const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
 
     if (elemFlag) {
@@ -106,6 +110,10 @@ class QtObject extends QmlWeb.QObject {
             const p = parr[i].$properties;
             if (p) {
               p.$index.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
+              if (outallchanges)
+                outallchanges[this.$defaultProperty] = (outallchanges[this.$defaultProperty] || 0) + 1;
+              //else
+              //  prop.changed();
             } else {
               console.warn(this+" . $elementRemove : default property : "+this.$defaultProperty+", no array["+i+"].$properties : "+parr);
             }

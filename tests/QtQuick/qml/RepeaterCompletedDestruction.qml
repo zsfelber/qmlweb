@@ -8,17 +8,13 @@ Item {
 
     Repeater {
         id: repeater
-        Item {
-            Repeater {
-                model: 1
-                Rectangle {
-                    Component.onCompleted: {
-                        root.internal_created++
-                    }
-                    Component.onDestruction: {
-                        root.internal_destroyed++
-                    }
-                }
+        model: 1
+        Rectangle {
+            Component.onCompleted: {
+                root.internal_created++
+            }
+            Component.onDestruction: {
+                root.internal_destroyed++
             }
         }
     }

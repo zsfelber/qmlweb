@@ -44,7 +44,6 @@ class QObject {
   }
 
   static pendingComplete(item) {
-    const pendingOperations = QmlWeb.engine.pendingOperations;
     // NOTE one level of supertype hierarchy, QObject's component first (recursively) :
     // NOTE not possible even trying to emit 'completed' right now, because we are before "applyProperties"
     // and so unable to determine whether a called property exists and not yet initialiazed or it doesn't exist at all.
@@ -54,11 +53,6 @@ class QObject {
     } else {
       opId = "C0:"+item.$objectId;
     }
-    let itms = pendingOperations.map[opId];
-    if (!itms) {
-      pendingOperations.map[opId] = itms = [];
-      pendingOperations.stack.push(itms);
-    }
 
     const itm = {
       fun:QMLComponent.complete,
@@ -66,7 +60,8 @@ class QObject {
       info:"Pending component.complete (waiting to initialization) : "+item.$context,
       opId
     };
-    itms.push(itm);
+
+    QmlWeb.engine.addPendingOp(itm);
   }
 
   initializeContext(parent) {

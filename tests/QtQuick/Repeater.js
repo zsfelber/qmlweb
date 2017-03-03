@@ -73,6 +73,12 @@ describe("QtQuick.Repeater", function() {
     expect(qml.internal_destroyed).toBe(3);
   });
 
+  it("nested Repeater delegate onCompleted and onDestruction called", function() {
+    var qml = load("NestedCompletedDestruction", this.div);
+    expect(qml.internal_created).toBe(3);
+    expect(qml.internal_destroyed).toBe(3);
+  });
+
   it("model role", function() {
     var qml = load("ModelRole", this.div);
     var r = qml.repeater;

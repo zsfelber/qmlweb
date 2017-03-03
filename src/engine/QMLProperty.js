@@ -36,6 +36,7 @@ class QMLProperty {
     this.options = options;
     this.readOnly = options.readOnly;
     this.pendingInit = options.pendingInit;
+    this.autoPendingOpsBeforeGetDisabled = options.autoPendingOpsBeforeGetDisabled;
     this.updateState = QmlWeb.QMLPropertyState.Uninitialized;
     this.changed = QmlWeb.Signal.signal("changed", [{name:"val"}, {name:"oldVal"}, {name:"name"}], { obj });
     this.binding = null;
@@ -348,26 +349,23 @@ class QMLProperty {
         if (!engine.currentPendingOp) {
           throw new QmlWeb.AssertionError("Assertion failed : no engine.currentPendingOp  "+this);
         }
+        // if it has been found and is not being already processed,
         // we take this property from queue and update it immediately,
-        // if it has been found and not being already processed.
+        // if it is being processed, then we omit update
         // otherwise just don't do anything here:
-        if (engine.currentPendingOp.property !== this) {
+        if (engine.currentPendingOp.property === this) {
+          toUpdate = 0;
+        } else if (!this.autoPendingOpsBeforeGetDisabled) {
           const queueItems = engine.pendingOperations.map[this.$propertyId];
           if (queueItems) {
             try {
-              delete engine.pendingOperations.map[this.$propertyId];
               toUpdate = 0;
-              queueItems.forEach(engine.processOp, engine);
+              engine.processSinglePendingOperation(queueItems);
             } catch (err) {
               if (err instanceof QmlWeb.FatalError) throw err;
               error = err;
-            } finally {
-              queueItems.splice(0, queueItems.length);
-              queueItems.$cleared = true;
             }
           }
-        } else {
-          toUpdate = 0;
         }
       } else if (engine.pendingOperations.map.hasOwnProperty(this.$propertyId)) {
         throw new QmlWeb.AssertionError(`Assertion failed. pendingOperation/property filled at runtime : `, this);
@@ -499,22 +497,22 @@ class QMLProperty {
             (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
 
           // triggers update at Starting stage:
-          let queueItems = QmlWeb.engine.pendingOperations.map[this.$propertyId];
-          if (!queueItems) {
-            QmlWeb.engine.pendingOperations.map[this.$propertyId] = queueItems = [];
-            QmlWeb.engine.pendingOperations.stack.push(queueItems);
-            // need to keep state flags consistency after 'update' called
-            // 'update' always resets the current updated flag to null except the
-            // remaining update tasks' dirty bits
-            queueItems.dirty_seq = [];
-          }
 
           const queueItem = {
-            property:this, opId:this.$propertyId, oldVal, newVal, flags, valParentObj, queueItems
+            property:this, opId:this.$propertyId, oldVal, newVal, flags, valParentObj
           };
-          queueItems.dirty_seq.push(dirty);
 
-          queueItems.push(queueItem);
+          const queueItems = QmlWeb.engine.addPendingOp(queueItem);
+          queueItem.queueItems = queueItems;
+
+          // need to keep state flags consistency after 'update' called
+          // 'update' always resets the current updated flag to 0 except the
+          // remaining update tasks' dirty bits
+          if (!queueItems.dirty_seq) {
+            queueItems.dirty_seq = [dirty];
+          } else {
+            queueItems.dirty_seq.push(dirty);
+          }
 
         }
 
