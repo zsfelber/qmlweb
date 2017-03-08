@@ -12,7 +12,7 @@ Item {
         text: weights[index]
         font.weight: eval("Font." + text)
         Component.onCompleted : {
-          console.log(++i+": Font." + text+" : "+eval("Font." + text)+" > "+font.weight);
+          console.log(++i+": Font." + text+" : "+font.weight+" > "+dom.children[0].style.fontWeight);
         }
       }
     }

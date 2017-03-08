@@ -394,6 +394,7 @@ class QMLEngine {
     if (!itms) {
       this.pendingOperations.map[itm.opId] = itms = [];
       this.pendingOperations.stack.push(itms);
+      itms.opId = itm.opId;
     }
     itms.push(itm);
     return itms;
