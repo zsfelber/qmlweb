@@ -85,8 +85,8 @@ class QtObject extends QmlWeb.QObject {
           parr.push(element);
           if (outallchanges)
             outallchanges[this.$defaultProperty] = (outallchanges[this.$defaultProperty] || 0) + 1;
-          //else
-            //prop.changed();
+          else
+            prop.changed(parr, parr, this.$defaultProperty);
         } else {
           element.$properties.$index.set(0, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
           prop.set(element);
@@ -112,8 +112,8 @@ class QtObject extends QmlWeb.QObject {
               p.$index.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
               if (outallchanges)
                 outallchanges[this.$defaultProperty] = (outallchanges[this.$defaultProperty] || 0) + 1;
-              //else
-              //  prop.changed();
+              else
+                prop.changed(parr, parr, this.$defaultProperty);
             } else {
               console.warn(this+" . $elementRemove : default property : "+this.$defaultProperty+", no array["+i+"].$properties : "+parr);
             }

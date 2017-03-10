@@ -211,7 +211,8 @@ class Repeater extends Item {
       container.resourcesChanged();
     }
     if (outallchanges[container.$defaultProperty]) {
-      container.$properties[container.$defaultProperty].changed();
+      const prop = container.$properties[container.$defaultProperty];
+      prop.changed(prop.value, prop.value, container.$defaultProperty);
     }
 
     for (let i = endIndex; i < this.$items.length; i++) {
@@ -222,7 +223,6 @@ class Repeater extends Item {
     const removed = this.$items.splice(startIndex, endIndex - startIndex);
     for (const index in removed) {
       removed[index].destroy();
-      this.$removeChildProperties(removed[index]);
     }
   }
 }
