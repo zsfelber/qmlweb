@@ -16,17 +16,19 @@ class ItemBase extends QtObject {
         if (element instanceof ItemBase) {
           element.$properties.$childIndex.set(this.$properties.children.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
           this.children.push(element);
-          if (outallchanges)
+          if (outallchanges) {
             outallchanges.children = (outallchanges.children || 0) + 1;
-          else
+          } else {
             this.childrenChanged();
+          }
         } else {
           element.$properties.$resourceIndex.set(this.$properties.resources.value.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
           this.resources.push(element);
-          if (outallchanges)
+          if (outallchanges) {
             outallchanges.resources = (outallchanges.resources || 0) + 1;
-          else
+          } else {
             this.resourcesChanged();
+          }
         }
       }
       if (this.dom) {
@@ -50,19 +52,21 @@ class ItemBase extends QtObject {
         for (var i = element.$childIndex; i < this.children.length; ++i) {
           this.children[i].$properties.$childIndex.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
         }
-        if (outallchanges)
+        if (outallchanges) {
           outallchanges.children = (outallchanges.children || 0) + 1;
-        else
+        } else {
           this.childrenChanged();
+        }
       } else {
         this.resources.splice(element.$resourceIndex, 1);
         for (var i = element.$resourceIndex; i < this.resources.length; ++i) {
           this.resources[i].$properties.$resourceIndex.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
         }
-        if (outallchanges)
+        if (outallchanges) {
           outallchanges.resources = (outallchanges.resources || 0) + 1;
-        else
+        } else {
           this.resourcesChanged();
+        }
       }
     }
     if (this.dom) {

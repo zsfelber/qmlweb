@@ -83,13 +83,19 @@ class QtObject extends QmlWeb.QObject {
           var parr = prop.value;
           element.$properties.$index.set(parr.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
           parr.push(element);
-          if (outallchanges)
+          if (outallchanges) {
             outallchanges[this.$defaultProperty] = (outallchanges[this.$defaultProperty] || 0) + 1;
-          else
+          } else {
             prop.changed(parr, parr, this.$defaultProperty);
+          }
         } else {
           element.$properties.$index.set(0, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-          prop.set(element);
+          if (element === prop.value) {
+            // notifying always :
+            prop.changed(element, element, this.$defaultProperty);
+          } else {
+            prop.set(element);
+          }
         }
       } else {
         throw new Error("QtObject.$elementAdd : No default property : "+this+"/"+this.$leaf);
@@ -110,10 +116,11 @@ class QtObject extends QmlWeb.QObject {
             const p = parr[i].$properties;
             if (p) {
               p.$index.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
-              if (outallchanges)
+              if (outallchanges) {
                 outallchanges[this.$defaultProperty] = (outallchanges[this.$defaultProperty] || 0) + 1;
-              else
+              } else {
                 prop.changed(parr, parr, this.$defaultProperty);
+              }
             } else {
               console.warn(this+" . $elementRemove : default property : "+this.$defaultProperty+", no array["+i+"].$properties : "+parr);
             }

@@ -51,6 +51,7 @@ class QMLComponent {
   copyMeta(meta, flags) {
     var cons;
     this.meta = {};
+    this.$on = meta.$on;
     if (meta.clazz) {
       if (meta.$file === undefined) {
         meta.$file = meta.clazz.$file;
@@ -102,6 +103,17 @@ class QMLComponent {
     }
 
     this.meta.$component = this;
+    if (this.meta.$on!==this.$on) {
+      if (this.$on) {
+        if (this.meta.$on) {
+          throw new AssertionError("Component #"+this.$componentId+" meta.$on conflict : "+this.$on+" vs "+this.meta.$on);
+        } else {
+          this.meta.$on = this.$on;
+        }
+      } else {
+        this.$on = this.meta.$on;
+      }
+    }
 
     this.$id = this.meta.id;
     this.$name = this.meta.$name;

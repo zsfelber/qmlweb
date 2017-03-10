@@ -94,7 +94,7 @@ var customMatchers = {
     describeOrig.apply(this, arguments);
   };
 
-  window.it = function(name) {
+  window.it = function(name, fun, deferredCleanup) {
     if (isFailing(name)) {
       console.log("Test " + current + "." + name +
                   " is known to be failing. Skipping...");
@@ -107,13 +107,23 @@ var customMatchers = {
       try {
         origFun.apply(this, arguments);
       } finally {
-        while (cleanupList.length) {
-          const itm = cleanupList.pop();
-          console.log("Cleanup : "+itm);
-          itm.destroy();
+        if (deferredCleanup) {
+          deferredCleanup.list = cleanupList;
+          cleanupList = [];
+        } else {
+          cleanup();
         }
       }
     };
     itOrig.apply(this, args);
   };
+
+  window.cleanup = function(list) {
+    if (!list) list = cleanupList;
+    while (list.length) {
+      const itm = list.pop();
+      console.log("Cleanup : "+itm);
+      itm.destroy();
+    }
+  }
 }());
