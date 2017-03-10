@@ -55,7 +55,7 @@ class QObject {
     }
 
     const itm = {
-      fun:(destruction ? QMLComponent.complete : QObject.$delete),
+      fun:(destruction ? QObject.$delete : QMLComponent.complete),
       thisObj:item,
       info: (destruction?"Pending component.destruction (waiting to destroy) : ":
                          "Pending component.complete (waiting to initialization) : ")+item.$context,
@@ -113,7 +113,7 @@ class QObject {
 
     while (this.$tidyupList.length > 0) {
       const item = this.$tidyupList[0];
-      if (item.$delete) {
+      if (item.destroy) {
         // It's a QObject
         QObject.$delete.call(item);
       } else {
@@ -156,6 +156,11 @@ class QObject {
   // http://doc.qt.io/qt-5/qtqml-javascript-dynamicobjectcreation.html
   destroy() {
     QObject.pendingComplete(this, true);
+    if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+      // We don't call those on first creation, as they will be called
+      // by the regular creation-procedures at the right time.
+      QmlWeb.engine.processPendingOperations();
+    }
   }
 
   toString(detail) {
