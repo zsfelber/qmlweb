@@ -132,21 +132,21 @@ class QMLProperty {
     }
   }
 
-  // TODO move to Animation (binding it to a 'changed' slot)
-  resetAnimation(oldVal) {
+  // TODO ? move to Animation (binding it to a 'changed' slot)
+  resetAnimation(oldVal, newVal) {
     this.animation.running = false;
     this.animation.$actions = [{
-      target: this.animation.target || this.propDeclObj,
-      property: this.animation.property || this.name,
-      from: this.animation.from || oldVal,
-      to: this.animation.to || this.value
+      target: this.valParentObj,
+      property: this,
+      from: oldVal,
+      to: newVal
     }];
     this.animation.running = true;
   }
 
   sendChanged(oldVal, newVal) {
     if (this.animation) {
-      this.resetAnimation(oldVal);
+      this.resetAnimation(oldVal, newVal);
     }
     this.changed(newVal, oldVal, this.name);
 

@@ -44,8 +44,7 @@ class NumberAnimation extends PropertyAnimation {
                       this.easing.$add( action.from ,
                                         this.easing.$multiply(  this.easing.$subtract(action.to, action.from),
                                                                 this.easing.$valueForProgress(this.$at)   )   )  );
-      const property = action.target.$properties[action.property];
-      property.set(value, QmlWeb.QMLPropertyFlags.ReasonAnimation);
+      action.property.set(value, QmlWeb.QMLPropertyFlags.ReasonAnimation);
     }
   }
   $onRunningChanged(newVal) {
@@ -64,8 +63,7 @@ class NumberAnimation extends PropertyAnimation {
   complete() {
     for (const i in this.$actions) {
       const action = this.$actions[i];
-      const property = action.target.$properties[action.property];
-      property.set(action.to, QmlWeb.QMLPropertyFlags.ReasonAnimation);
+      action.property.set(action.to, QmlWeb.QMLPropertyFlags.ReasonAnimation);
     }
     this.$loop++;
     if (this.$loop === this.loops) {

@@ -25,7 +25,7 @@ QmlWeb.registerQmlType({
       for (const j in actions) {
         const action = actions[j];
         if (($targets.length === 0 || $targets.indexOf(action.target) !== -1) &&
-            ($props.length === 0 || $props.indexOf(action.property) !== -1)) {
+            ($props.length === 0 || $props.indexOf(action.property.name) !== -1)) {
           $actions.push(action);
         }
       }

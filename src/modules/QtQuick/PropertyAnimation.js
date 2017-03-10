@@ -48,8 +48,8 @@ class PropertyAnimation extends Animation {
     for (let i = 0; i < this.$targets.length; i++) {
       for (const j in this.$props) {
         this.$actions.push({
+          property: this.$targets[i].$properties[this.$props[j]],
           target: this.$targets[i],
-          property: this.$props[j],
           from: this.from,
           to: this.to
         });
