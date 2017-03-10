@@ -43,7 +43,7 @@ class QObject {
     QmlWeb.setupGetter(child, "$context", ()=>parent.$context, child);
   }
 
-  static pendingComplete(item) {
+  static pendingComplete(item, destruction) {
     // NOTE one level of supertype hierarchy, QObject's component first (recursively) :
     // NOTE not possible even trying to emit 'completed' right now, because we are before "applyProperties"
     // and so unable to determine whether a called property exists and not yet initialiazed or it doesn't exist at all.
@@ -55,9 +55,10 @@ class QObject {
     }
 
     const itm = {
-      fun:QMLComponent.complete,
+      fun:(destruction ? QMLComponent.complete : QObject.$delete),
       thisObj:item,
-      info:"Pending component.complete (waiting to initialization) : "+item.$context,
+      info: (destruction?"Pending component.destruction (waiting to destroy) : ":
+                         "Pending component.complete (waiting to initialization) : ")+item.$context,
       opId
     };
 
@@ -97,7 +98,7 @@ class QObject {
     return result;
   }
 
-  $delete() {
+  static $delete() {
     if (this.$leaf.$attachedComponent) {
       if (!(this instanceof QObject)) {
         throw new AssertionError("$delete non-QObject : " + this);
@@ -114,7 +115,7 @@ class QObject {
       const item = this.$tidyupList[0];
       if (item.$delete) {
         // It's a QObject
-        item.$delete();
+        QObject.$delete.call(item);
       } else {
         // It must be a signal
         item.disconnect(this);
@@ -154,7 +155,7 @@ class QObject {
   // must have a `destroy` method
   // http://doc.qt.io/qt-5/qtqml-javascript-dynamicobjectcreation.html
   destroy() {
-    this.$delete();
+    QObject.pendingComplete(this, true);
   }
 
   toString(detail) {

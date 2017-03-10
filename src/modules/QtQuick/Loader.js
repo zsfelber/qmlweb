@@ -126,18 +126,8 @@ QmlWeb.registerQmlType({
   }
   $unload() {
     if (!this.item) return;
-    this.item.$delete();
-    this.item.parent = undefined;
+    this.item.destroy();
     this.item = undefined;
-  }
-  $callOnCompleted(child) {
-    child.Component.completed();
-    const QtObject = QmlWeb.QtObject;
-    for (let i = 0; i < child.$tidyupList.length; i++) {
-      if (child.$tidyupList[i] instanceof QtObject) {
-        this.$callOnCompleted(child.$tidyupList[i]);
-      }
-    }
   }
   $updateGeometry() {
     // Loader size doesn't exist

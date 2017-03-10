@@ -67,15 +67,6 @@ class Repeater extends Item {
     }
     this.count = this.$items.length;
   }
-  $callOnCompleted(child) {
-    child.Component.completed();
-    const QtObject = QmlWeb.QtObject;
-    for (let i = 0; i < child.$tidyupList.length; i++) {
-      if (child.$tidyupList[i] instanceof QtObject) {
-        this.$callOnCompleted(child.$tidyupList[i]);
-      }
-    }
-  }
   $_onModelDataChanged(startIndex, endIndex, roles) {
     const model = this.$getModel();
     const roleNames = roles || model.roleNames;
@@ -202,14 +193,6 @@ class Repeater extends Item {
         // ($createObject does this)
         //newItem.parent = this.parent;
 
-        // TODO debug this. Without check to System, Completed sometimes called
-        // twice.. But is this check correct?
-        // TODO gz
-        if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.System)) {
-          // We don't call those on first creation, as they will be called
-          // by the regular creation-procedures at the right time.
-          this.$callOnCompleted(newItem);
-        }
       }
     } finally {
       QmlWeb.engine.$evaluatedObj = prevEvalObj;
@@ -238,17 +221,8 @@ class Repeater extends Item {
   $removeChildren(startIndex, endIndex) {
     const removed = this.$items.splice(startIndex, endIndex - startIndex);
     for (const index in removed) {
-      removed[index].$delete();
+      removed[index].destroy();
       this.$removeChildProperties(removed[index]);
-    }
-  }
-  $removeChildProperties(child) {
-    const pendingOps = QmlWeb.engine.pendingOperations;
-    const op = pendingOps.map["C:"+child.Component.$componentId];
-    // TODO store index
-    pendingOps.stack.splice(pendingOps.stack.indexOf(op), 1);
-    for (let i = 0; i < child.children.length; i++) {
-      this.$removeChildProperties(child.children[i]);
     }
   }
 }
