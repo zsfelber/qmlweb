@@ -45,11 +45,13 @@ class PropertyAnimation extends Animation {
   }
   $redoActions() {
     this.$actions = [];
-    for (let i = 0; i < this.$targets.length; i++) {
+    for (const tid in this.$targets) {
+      const t = this.$targets[tid];
       for (const j in this.$props) {
+        const p = this.$props[j];
         this.$actions.push({
-          property: this.$targets[i].$properties[this.$props[j]],
-          target: this.$targets[i],
+          property: t.$properties[p],
+          target: t,
           from: this.from,
           to: this.to
         });
@@ -57,28 +59,43 @@ class PropertyAnimation extends Animation {
     }
   }
   $redoProperties() {
-    this.$props = this.properties.split(",");
+    var props = this.properties.split(",");
+    this.$props = {};
+
+    // Merge properties and property
+    if (this.property) {
+      props.push(this.property);
+    }
 
     // Remove whitespaces
-    for (let i = 0; i < this.$props.length; i++) {
-      const matches = this.$props[i].match(/\w+/);
+    for (const i in props) {
+      const matches = props[i].match(/\w+/);
       if (matches) {
-        this.$props[i] = matches[0];
+        this.$props[matches[0]] = 1;
       } else {
-        this.$props.splice(i, 1);
         i--;
       }
     }
-    // Merge properties and property
-    if (this.property && this.$props.indexOf(this.property) === -1) {
-      this.$props.push(this.property);
-    }
   }
+
   $redoTargets() {
-    this.$targets = this.targets.slice();
-    if (this.target && this.$targets.indexOf(this.target) === -1) {
-      this.$targets.push(this.target);
+    var targets = this.targets.slice();
+    this.$targets = {};
+
+    if (this.target) {
+      targets.push(this.target);
     }
+
+    for (const tid in targets) {
+      const t = targets[tid];
+      if (!t.$objectId) {
+        console.error("Bad PropertyAnimation target("+tid+") : "+t+"  Not a qml object.");
+        continue;
+      }
+
+      this.$targets[t.$objectId] = t;
+    }
+
   }
 }
 

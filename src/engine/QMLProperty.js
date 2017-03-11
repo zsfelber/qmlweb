@@ -144,10 +144,11 @@ class QMLProperty {
     this.animation.running = true;
   }
 
-  sendChanged(oldVal, newVal) {
+  sendChanged(oldVal, newVal, flags) {
     if (this.animation) {
       this.resetAnimation(oldVal, newVal);
     }
+
     this.changed(newVal, oldVal, this.name);
 
     // TODO gz   $syncPropertyToRemote !!!!!!!!!!!!
@@ -269,7 +270,7 @@ class QMLProperty {
           if (this.updateState & QmlWeb.QMLPropertyState.Uninitialized) {
             throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  Property became Uninitialized meanwhile but value seems changed!");
           }
-          this.sendChanged(oldVal, newVal);
+          this.sendChanged(oldVal, newVal, flags);
         }
       } catch (err2) {
         if (err2 instanceof QmlWeb.FatalError) throw err2;
