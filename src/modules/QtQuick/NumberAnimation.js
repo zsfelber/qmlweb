@@ -17,7 +17,7 @@ class NumberAnimation extends PropertyAnimation {
       const action = this.$actions[i];
       action.from = action.from !== undefined ?
                       action.from :
-                      action.target[action.property];
+                      action.property.get();
     }
     this.$elapsed = 0;
     this.$startTime = Date.now();

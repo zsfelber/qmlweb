@@ -124,7 +124,7 @@ class Item extends ItemBase {
     // Get current values for revert actions
     for (const i in actions) {
       const action = actions[i];
-      action.from = action.target[action.property];
+      action.from = action.property.get();
     }
     if (newState) {
       const changes = newState.$getAllChanges();
@@ -146,17 +146,17 @@ class Item extends ItemBase {
       //   $object: action.target,
       //   $context: (newState ? newState.$context : action.target.$context)
       // };
-      action.target.$properties[action.property].set(
+      action.property.set(
         action.value, QmlWeb.QMLPropertyFlags.ReasonUser, action.target
       );
     }
     for (const i in actions) {
       const action = actions[i];
-      action.to = action.target[action.property];
+      action.to = action.property.get();
       if (action.explicit) {
         // Remove binding
-        action.target[action.property] = action.target[action.property];
-        action.value = action.target[action.property];
+        action.property.set(action.property.value, QMLPropertyFlags.ResetBinding);
+        action.value = action.property.get();
       }
     }
 
@@ -199,19 +199,16 @@ class Item extends ItemBase {
     for (let j = 0; j < change.$actions.length; j++) {
       const item = change.$actions[j];
 
+      const property = change.property;
       const action = {
         target: change.target,
-        property: item.property,
-        origValue: change.target.$properties[item.property].binding ||
-                    change.target.$properties[item.property].value,
-        value: item.value,
-        from: change.target[item.property],
+        property: property,
+        from: property.get(),
         to: undefined,
         explicit: change.explicit
       };
 
       const actionIndex = arrayFindIndex(actions, element =>
-        element.target === action.target &&
         element.property === action.property
       );
       if (actionIndex !== -1) {
@@ -222,8 +219,7 @@ class Item extends ItemBase {
 
       // Look for existing revert action, else create it
       const revertIndex = arrayFindIndex(this.$revertActions, element =>
-        element.target === change.target &&
-        element.property === item.property
+        element.property === property
       );
       if (revertIndex !== -1 && !change.restoreEntryValues) {
         // We don't want to revert, so remove it
@@ -231,11 +227,9 @@ class Item extends ItemBase {
       } else if (revertIndex === -1 && change.restoreEntryValues) {
         this.$revertActions.push({
           target: change.target,
-          property: item.property,
-          value: change.target.$properties[item.property].binding ||
-                  change.target.$properties[item.property].value,
+          property: property,
           from: undefined,
-          to: change.target[item.property]
+          to: property.get()
         });
       }
     }
