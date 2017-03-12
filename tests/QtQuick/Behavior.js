@@ -2,7 +2,7 @@ describe("QtQuick.Behavior", function() {
   setupDivElement();
   var load = prefixedQmlLoader("QtQuick/qml/Behavior");
 
-  var defcleanup = {};
+  var defcleanup1 = {};
   it("Basic", function(done) {
     var qml = load("Basic", this.div);
     expect(qml.gotX).toBe(false);
@@ -12,8 +12,9 @@ describe("QtQuick.Behavior", function() {
       expect(qml.gotY).toBe(false);
       if (done) done();
       console.log("Finished : BehaviorBasic");
-      cleanup(defcleanup.list);
+      cleanup(defcleanup1.list);
+      defcleanup1.engine.stop();
     }, 200);
 
-  }, defcleanup);
+  }, defcleanup1);
 });

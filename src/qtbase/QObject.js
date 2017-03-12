@@ -55,7 +55,7 @@ class QObject {
     }
 
     const itm = {
-      fun:(destruction ? QObject.$delete : QMLComponent.complete),
+      fun:(destruction ? this.$delete : QMLComponent.complete),
       thisObj:item,
       info: (destruction?"Pending component.destruction (waiting to destroy) : ":
                          "Pending component.complete (waiting to initialization) : ")+item.$context,
@@ -98,7 +98,7 @@ class QObject {
     return result;
   }
 
-  static $delete() {
+  $delete() {
     if (this.$leaf.$attachedComponent) {
       if (!(this instanceof QObject)) {
         throw new AssertionError("$delete non-QObject : " + this);
@@ -115,7 +115,7 @@ class QObject {
       const item = this.$tidyupList[0];
       if (item.destroy) {
         // It's a QObject
-        QObject.$delete.call(item);
+        item.$delete();
       } else {
         // It must be a signal
         item.disconnect(this);

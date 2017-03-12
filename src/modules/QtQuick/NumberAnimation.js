@@ -9,7 +9,7 @@ class NumberAnimation extends PropertyAnimation {
     this.$at = 0;
     this.$loop = 0;
 
-    this.tick = this.$ticker;
+    this.tick = this.$ticker.bind(this);
     this.runningChanged.connect(this, this.$onRunningChanged);
   }
   $startLoop() {

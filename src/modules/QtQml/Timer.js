@@ -32,6 +32,7 @@ QmlWeb.registerQmlType({
     });
 
     QmlWeb.engine.$registerStop(this, () => this.stop());
+    this.tick = this.$ticker.bind(this);
   }
   start() {
     this.running = true;
@@ -53,13 +54,12 @@ QmlWeb.registerQmlType({
         this.$trigger();
       }
       if (this.repeat)
-        this.$intervalId = setInterval(this.$trigger.bind(this), this.interval);
+        engine.$addTicker(this);
       else
-        setTimeout(this.$trigger.bind(this), this.interval);
+        setTimeout(this.tick, this.interval);
     } else {
       if (this.$intervalId) {
-        clearInterval(this.$intervalId);
-        delete this.$intervalId;
+        engine.$removeTicker(this);
       }
     }
   }

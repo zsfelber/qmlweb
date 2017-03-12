@@ -3,15 +3,16 @@
 QmlWeb.useShadowDom = false;
 QmlWeb.isTesting = true;
 
-var engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
+var engine;
 var cleanupList = [];
+var thereisDeferredCleanup;
 
 function loadQmlFile(file, div, opts) {
-  //var engine = new QmlWeb.QMLEngine(div, opts || {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
+  if (!engine) engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
   engine.setDom(div);
   engine.loadFile(file);
   engine.start();
-  engine.stop();
+  if (!thereisDeferredCleanup) engine.stop();
   document.body.appendChild(div);
   cleanupList.push(engine.rootObject);
   return engine.rootObject;
@@ -101,15 +102,17 @@ var customMatchers = {
       return;
     }
 
+    thereisDeferredCleanup = deferredCleanup;
     args = QmlWeb.helpers.slice(arguments, 0);
-    const origFun = args[1];
     args[1] = function _fwd() {
       try {
-        origFun.apply(this, arguments);
+        fun.apply(this, arguments);
       } finally {
         if (deferredCleanup) {
           deferredCleanup.list = cleanupList;
+          deferredCleanup.engine = engine;
           cleanupList = [];
+          engine = null;
         } else {
           cleanup();
         }

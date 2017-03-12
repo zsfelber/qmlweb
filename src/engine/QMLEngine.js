@@ -161,7 +161,7 @@ class QMLEngine {
       //clearInterval(this._tickerId);
       for (const i in this._tickers) {
         const val = this._tickers[i];
-        $stopTicker(val);
+        this.$stopTicker(val);
       }
       this.operationState &= ~QMLOperationState.Running;
       for (const i in this._whenStop) {
@@ -366,7 +366,7 @@ class QMLEngine {
     delete this._tickers[owner.$objectId];
 
     if (this.operationState & QMLOperationState.Running) {
-      $stopTicker(t);
+      this.$stopTicker(t);
     }
   }
 
