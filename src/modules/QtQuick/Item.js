@@ -137,7 +137,10 @@ class Item extends ItemBase {
       //   $context: (newState ? newState.$context : action.target.$context)
       // };
       if (newAction.explicit) {
-        // Remove R binding (but not RW like alias)
+        // Replace R binding (but not RW like alias)
+        if (newAction.binding) {
+          newAction.property.set(newAction.binding, QMLPropertyFlags.ReasonUser, newAction.target);
+        }
         newAction.property.set(newAction.value, QMLPropertyFlags.ReasonUser, newAction.target);
       } else {
         newAction.property.set(newAction.value, QMLPropertyFlags.ReasonTemporally, newAction.target);
@@ -217,6 +220,8 @@ class Item extends ItemBase {
             property: changeAction.property,
             from: undefined,
             to: changeAction.property.value,
+            value: changeAction.property.value,
+            binding: changeAction.property.binding,
             explicit: change.explicit
           });
         }

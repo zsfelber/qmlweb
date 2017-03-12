@@ -6,6 +6,7 @@ describe("QMLEngine.states", function() {
     var qml = load("Simple", this.div);
     var count = 0;
     qml.yield = function() {
+      console.log(qml.value);
       if (count === 0) {
         expect(qml.value).toBe(10);
       } else if (count === 1) {
@@ -23,6 +24,7 @@ describe("QMLEngine.states", function() {
     var qml = load("When", this.div);
     var count = 0;
     qml.yield = function() {
+      console.log(qml.value);
       if (count === 0) {
         expect(qml.value).toBe(10);
       } else if (count === 1) {
