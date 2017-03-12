@@ -38,11 +38,12 @@ class PropertyAnimation extends Animation {
     this.propertyChanged.connect(this, this.$redoProperties);
     this.propertiesChanged.connect(this, this.$redoProperties);
 
-    if (meta.$on !== undefined) {
+    if (this.$on) {
       this.property = meta.$on;
       this.target = this.$parent;
     }
   }
+
   $redoActions() {
     this.$actions = [];
     for (const tid in this.$targets) {
