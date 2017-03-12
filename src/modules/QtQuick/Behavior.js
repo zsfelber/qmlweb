@@ -4,7 +4,7 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
-    animation: "Animation",
+    animation: { type: "Animation", initialValue: null },
     enabled: { type: "bool", initialValue: true }
   },
   defaultProperty: "animation"

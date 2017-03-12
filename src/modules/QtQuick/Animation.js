@@ -38,8 +38,8 @@ QmlWeb.registerQmlType({
   properties: {
     alwaysRunToEnd: "bool",
     loops: { type: "int", initialValue: 1 },
-    paused: "bool",
-    running: "bool"
+    paused: { type: "bool", initialValue: false},
+    running: { type: "bool", initialValue: false}
   },
   constructor:Animation
 });
