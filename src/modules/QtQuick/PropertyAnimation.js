@@ -59,7 +59,7 @@ class PropertyAnimation extends Animation {
     }
   }
   $redoProperties() {
-    var props = this.properties.split(",");
+    var props = this.properties?this.properties.split(","):[];
     this.$props = {};
 
     // Merge properties and property
@@ -105,10 +105,10 @@ QmlWeb.registerQmlType({
     duration: { type: "int", initialValue: 250 },
     from: "real",
     to: "real",
-    properties: "string",
-    property: "string",
-    target: "QtObject",
-    targets: "list"
+    properties: { type: "string", initialValue: null},
+    property: { type: "string", initialValue: null},
+    target: { type: "QtObject", initialValue: null},
+    targets: { type: "list", initialValue: null},
   },
   constructor:PropertyAnimation
 });
