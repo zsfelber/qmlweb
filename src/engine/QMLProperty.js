@@ -132,8 +132,7 @@ class QMLProperty {
     }
   }
 
-  // TODO ? move to Animation (binding it to a 'changed' slot)
-  resetAnimation(oldVal, newVal) {
+  resetAnimation(oldVal, newVal, flags) {
     this.animation.running = false;
     this.animation.$actions = [{
       target: this.valParentObj,
@@ -146,7 +145,7 @@ class QMLProperty {
 
   sendChanged(oldVal, newVal, flags) {
     if (this.animation) {
-      this.resetAnimation(oldVal, newVal);
+      this.resetAnimation(oldVal, newVal, flags);
     }
 
     this.changed(newVal, oldVal, this.name);

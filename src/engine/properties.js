@@ -282,7 +282,7 @@ function applyProperty(item, i, value) {
     item.$properties[i].set(value, QMLPropertyFlags.Privileged, item);
     return true;
   } else if (i in item) {
-    // TODO protect attached or special properties not overwritten here (Component, anochors)
+    // TODO protect attached or special properties not overwritten here (Component, anchors)
     item[i] = value;
     return true;
   } else if (item.$setCustomData) {

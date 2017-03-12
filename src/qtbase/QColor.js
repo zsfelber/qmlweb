@@ -59,6 +59,7 @@ class QColor {
       throw new Error("Unsupported color value : "+val);
     }
   }
+
   toString() {
     return this.$value;
   }
@@ -100,6 +101,9 @@ class QColor {
     this.$value = ((Math.max(0,a[0])&0xff000000)<<6) + ((Math.max(0,a[1])&0x00ff0000)<<4) + ((Math.max(0,a[2])&0x0000ff00)<<2) + (Math.max(0,a[3])&0x000000ff);
   }
 
+  static $construct(val) {
+    return new QColor(val);
+  }
   static $add(a,b) {
     a = a.$to4 ? a.$to4() : a;
     b = b.$to4 ? b.$to4() : b;

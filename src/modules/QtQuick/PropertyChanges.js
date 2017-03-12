@@ -15,7 +15,11 @@ QmlWeb.registerQmlType({
 
     this.$actions = [];
   }
-  $setCustomData(property, value) {
-    this.$actions.push({ property, value });
+
+  $setCustomData(propname, value) {
+    const propertyChange = { value };
+    setupGetter(propertyChange, "target", ()=>this.target);
+    setupGetter(propertyChange, "property", ()=>this.target.$properties[propname]);
+    this.$actions.push(propertyChange);
   }
 });

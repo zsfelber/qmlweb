@@ -72,8 +72,6 @@ class PropertyAnimation extends Animation {
       const matches = props[i].match(/\w+/);
       if (matches) {
         this.$props[matches[0]] = 1;
-      } else {
-        i--;
       }
     }
   }
@@ -95,7 +93,6 @@ class PropertyAnimation extends Animation {
 
       this.$targets[t.$objectId] = t;
     }
-
   }
 }
 

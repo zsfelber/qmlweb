@@ -107,57 +107,45 @@ class Item extends ItemBase {
   }
   $onStateChanged(newVal, oldVal) {
     // let oldState; // TODO: do we need oldState?
-    let newState;
-    for (let i = 0; i < this.states.length; i++) {
-      if (this.states[i].name === newVal) {
-        newState = this.states[i];
-      }
-      /*
-      else if (this.states[i].name === oldVal) {
-        oldState = this.states[i];
-      }
-      */
-    }
+    const newState = this.states.filter(state => state.name === newVal)[0];
 
-    const actions = this.$revertActions.slice();
+    const newActions = this.$revertActions.slice();
 
     // Get current values for revert actions
-    for (const i in actions) {
-      const action = actions[i];
-      action.from = action.property.get();
+    for (const i in newActions) {
+      const newAction = newActions[i];
+      newAction.from = newAction.property.get();
     }
     if (newState) {
       const changes = newState.$getAllChanges();
 
       // Get all actions we need to do and create actions to revert them
       for (let i = 0; i < changes.length; i++) {
-        this.$applyChange(actions, changes[i]);
+        this.$applyChange(newActions, changes[i]);
       }
     }
 
     // Set all property changes and fetch the actual values afterwards
     // The latter is needed for transitions. We need to set all properties
     // before we fetch the values because properties can be interdependent.
-    for (const i in actions) {
-      const action = actions[i];
+    for (const i in newActions) {
+      const newAction = newActions[i];
       // // TODO gz obsolete : scope
       // const scope = {
       //   action: action,
       //   $object: action.target,
       //   $context: (newState ? newState.$context : action.target.$context)
       // };
-      action.property.set(
-        action.value, QmlWeb.QMLPropertyFlags.ReasonUser, action.target
-      );
-    }
-    for (const i in actions) {
-      const action = actions[i];
-      action.to = action.property.get();
-      if (action.explicit) {
-        // Remove binding
-        action.property.set(action.property.value, QMLPropertyFlags.ResetBinding);
-        action.value = action.property.get();
+      if (newAction.explicit) {
+        // Remove R binding (but not RW like alias)
+        newAction.property.set(newAction.value, QMLPropertyFlags.ReasonUser, newAction.target);
+      } else {
+        newAction.property.set(newAction.value, QMLPropertyFlags.ReasonAnimation, newAction.target);
       }
+    }
+    for (const i in newActions) {
+      const newAction = newActions[i];
+      newAction.to = newAction.property.get();
     }
 
     // Find the best transition to use
@@ -191,46 +179,49 @@ class Item extends ItemBase {
       }
     }
     if (transition) {
-      transition.$start(actions);
+      transition.$start(newActions);
     }
   }
-  $applyChange(actions, change) {
+
+  $applyChange(newActions, change) {
     const arrayFindIndex = QmlWeb.helpers.arrayFindIndex;
     for (let j = 0; j < change.$actions.length; j++) {
-      const item = change.$actions[j];
+      const changeAction = change.$actions[j];
 
-      const property = change.property;
       const action = {
-        target: change.target,
-        property: property,
-        from: property.get(),
+        target: changeAction.target,
+        property: changeAction.property,
+        from: changeAction.property.get(),
         to: undefined,
         explicit: change.explicit
       };
 
-      const actionIndex = arrayFindIndex(actions, element =>
-        element.property === action.property
+      const actionIndex = arrayFindIndex(newActions, element =>
+        element.property === changeAction.property
       );
       if (actionIndex !== -1) {
-        actions[actionIndex] = action;
+        newActions[actionIndex] = action;
       } else {
-        actions.push(action);
+        newActions.push(action);
       }
 
       // Look for existing revert action, else create it
       const revertIndex = arrayFindIndex(this.$revertActions, element =>
-        element.property === property
+        element.property === changeAction.property
       );
-      if (revertIndex !== -1 && !change.restoreEntryValues) {
+      if (change.restoreEntryValues) {
+        if (revertIndex === -1) {
+          this.$revertActions.push({
+            target: changeAction.target,
+            property: changeAction.property,
+            from: undefined,
+            to: changeAction.property.value,
+            explicit: change.explicit
+          });
+        }
+      } else if (revertIndex !== -1) {
         // We don't want to revert, so remove it
         this.$revertActions.splice(revertIndex, 1);
-      } else if (revertIndex === -1 && change.restoreEntryValues) {
-        this.$revertActions.push({
-          target: change.target,
-          property: property,
-          from: undefined,
-          to: property.get()
-        });
       }
     }
   }
