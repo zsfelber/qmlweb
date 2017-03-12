@@ -9,7 +9,7 @@ QmlWeb.registerQmlType({
 }, class PauseAnimation extends Animation {
    constructor(meta) {
      super(meta);
-    QmlWeb.initMeta(this, meta, PauseAnimation);
+     QmlWeb.initMeta(this, meta, PauseAnimation);
 
      this.runningChanged.connect(this, this.$onRunningChanged);
    }
@@ -18,23 +18,17 @@ QmlWeb.registerQmlType({
        // $loop === -1 is a marker to just finish this run
        return;
      }
-     if (this.parent instanceof A) {
-       this.parent.paused = false;
-     }
      this.complete();
    }
    $onRunningChanged(newVal) {
      if (newVal) {
        const A = QmlWeb.getConstructor("QtQuick", "2.0", "Animation");
        if (this.loops)
-         this.$intervalId = setInterval(this.$ticker.bind(this), this.duration);
+         this.$intervalId = setInterval(PauseAnimation.$ticker.bind(this), this.duration);
        else
-         setTimeout(this.$ticker.bind(this), this.duration);
-       if (this.parent instanceof A) {
-         this.parent.paused = true;
-       }
+         setTimeout(PauseAnimation.$ticker.bind(this), this.duration);
 
-       this.paused = false;
+       this.activate();
      } else {
        this.$loop = 0;
        if (this.$intervalId) {
@@ -43,10 +37,19 @@ QmlWeb.registerQmlType({
        }
      }
    }
+
+   activate() {
+     this.paused = false;
+     this.parent.paused = true;
+   }
+
    complete() {
      this.$loop++;
+     this.parent.paused = false;
      if (this.$loop === this.loops) {
        this.running = false;
+     } else {
+       setTimeout(this.activate.bind(this), 0);
      }
    }
 });

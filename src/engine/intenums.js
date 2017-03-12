@@ -80,7 +80,7 @@ const QMLBindingFlags = {
 const QMLPropertyFlags = {
   ReasonUser : 0,
   ReasonInit : 1,
-  ReasonAnimation : 2,
+  ReasonTemporally : 2,
   Privileged : 4,
   ReasonInitPrivileged : 1 | 4,
   ResetBinding : 8,

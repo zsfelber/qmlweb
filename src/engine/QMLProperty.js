@@ -549,7 +549,7 @@ class QMLProperty {
         }
 
         this.binding = newVal;
-      } else if (this.binding && !(this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional) && !(flags & QmlWeb.QMLPropertyFlags.ReasonAnimation)) {
+      } else if (this.binding && !(this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional) && !(flags & QmlWeb.QMLPropertyFlags.ReasonTemporally)) {
         this.binding = null;
         // reset this.bindingCtxObj
         this.bindingCtxObj = this.propDeclObj;

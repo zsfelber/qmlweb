@@ -24,7 +24,7 @@ QmlWeb.registerQmlType({
       const { $targets, $props, $actions } = animation;
       for (const j in actions) {
         const action = actions[j];
-        if (!$targets[action.target.$objectId] && !$props[action.property.name]) {
+        if (!$targets[action.target.$objectId] || !$props[action.property.name]) {
           $actions.push(action);
         }
       }

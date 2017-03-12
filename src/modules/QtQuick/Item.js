@@ -140,7 +140,7 @@ class Item extends ItemBase {
         // Remove R binding (but not RW like alias)
         newAction.property.set(newAction.value, QMLPropertyFlags.ReasonUser, newAction.target);
       } else {
-        newAction.property.set(newAction.value, QMLPropertyFlags.ReasonAnimation, newAction.target);
+        newAction.property.set(newAction.value, QMLPropertyFlags.ReasonTemporally, newAction.target);
       }
     }
     for (const i in newActions) {
@@ -193,7 +193,8 @@ class Item extends ItemBase {
         property: changeAction.property,
         from: changeAction.property.get(),
         to: undefined,
-        explicit: change.explicit
+        explicit: change.explicit,
+        value: changeAction.value
       };
 
       const actionIndex = arrayFindIndex(newActions, element =>
