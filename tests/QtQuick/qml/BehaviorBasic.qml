@@ -6,13 +6,13 @@ Item {
   
   Behavior on x {
     NumberAnimation {
-      duration: 200
+      duration: 400
     }
   }
   Behavior on y {
     enabled: false
     NumberAnimation {
-      duration: 200
+      duration: 400
     }
   }
   onXChanged: if (x > 0 && x < 1) gotX = true;

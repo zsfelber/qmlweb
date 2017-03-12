@@ -25,11 +25,11 @@ function prefixedQmlLoader(prefix) {
 }
 
 function loadQml(src, div, opts) {
-  //var engine = new QmlWeb.QMLEngine(div, opts || {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
+  if (!engine) engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
   engine.setDom(div);
   engine.loadQML(src);
   engine.start();
-  engine.stop();
+  if (!thereisDeferredCleanup) engine.stop();
   document.body.appendChild(div);
   return engine.rootObject;
 }
@@ -95,29 +95,31 @@ var customMatchers = {
     describeOrig.apply(this, arguments);
   };
 
-  window.it = function(name, fun, deferredCleanup) {
+  window.it = function(name) {
     if (isFailing(name)) {
       console.log("Test " + current + "." + name +
                   " is known to be failing. Skipping...");
       return;
     }
 
-    thereisDeferredCleanup = deferredCleanup;
-    args = QmlWeb.helpers.slice(arguments, 0);
-    args[1] = function _fwd() {
+    const F = arguments[1];
+    const D = arguments[2];
+    const args = QmlWeb.helpers.slice(arguments, 0);
+    args[1] = F ? function _fwd() {
       try {
-        fun.apply(this, arguments);
+        thereisDeferredCleanup = D;
+        F.apply(this, arguments);
       } finally {
-        if (deferredCleanup) {
-          deferredCleanup.list = cleanupList;
-          deferredCleanup.engine = engine;
+        if (D) {
+          D.list = cleanupList;
+          D.engine = engine;
           cleanupList = [];
           engine = null;
         } else {
           cleanup();
         }
       }
-    };
+    } : null;
     itOrig.apply(this, args);
   };
 

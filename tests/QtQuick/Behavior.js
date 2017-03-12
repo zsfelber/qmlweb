@@ -14,7 +14,7 @@ describe("QtQuick.Behavior", function() {
       console.log("Finished : BehaviorBasic");
       cleanup(defcleanup1.list);
       defcleanup1.engine.stop();
-    }, 200);
+    }, 400);
 
   }, defcleanup1);
 });

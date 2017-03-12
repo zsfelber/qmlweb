@@ -48,8 +48,7 @@ class PropertyAnimation extends Animation {
     this.$actions = [];
     for (const tid in this.$targets) {
       const t = this.$targets[tid];
-      for (const j in this.$props) {
-        const p = this.$props[j];
+      for (const p in this.$props) {
         this.$actions.push({
           property: t.$properties[p],
           target: t,

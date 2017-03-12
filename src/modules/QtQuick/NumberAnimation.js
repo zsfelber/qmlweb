@@ -19,8 +19,9 @@ class NumberAnimation extends PropertyAnimation {
         action.from = action.property.get();
       }
     }
-    this.$elapsed = 0;
+    this.$redoActions();
     this.$startTime = Date.now();
+    this.$elapsed = 0;
     this.$at = 0;
   }
   $ticker() {
@@ -28,12 +29,10 @@ class NumberAnimation extends PropertyAnimation {
       // $loop === -1 is a marker to just finish this run
       return;
     }
-    if (this.$at === 0 && this.$loop === 0 && !this.$actions.length) {
-      this.$redoActions();
-    }
 
     this.$elapsed = Date.now() - this.$startTime;
     this.$at = this.$elapsed / this.duration;
+    console.log("animation elapsed:"+this.$elapsed+" duration:"+this.duration+" at:"+this.$at);
     if (this.$at >= 1) {
       this.complete();
       return;
@@ -49,9 +48,11 @@ class NumberAnimation extends PropertyAnimation {
   }
   $onRunningChanged(newVal) {
     if (newVal) {
-      this.$startLoop();
       this.paused = false;
+      this.$startLoop();
       QmlWeb.engine.$addTicker(this);
+      this.$startTime = Date.now();
+      this.$ticker();
     } else if (this.alwaysRunToEnd && this.$at < 1) {
       this.$loop = -1; // -1 is used as a marker to stop
     } else {
@@ -70,10 +71,11 @@ class NumberAnimation extends PropertyAnimation {
       this.running = false;
     } else if (!this.running) {
       this.$actions = [];
+      this.$loop = 0;
     } else {
-      this.$startLoop(this);
+      this.$startLoop();
+      this.$ticker();
     }
-    QmlWeb.engine.$removeTicker(this);
   }
 }
 
