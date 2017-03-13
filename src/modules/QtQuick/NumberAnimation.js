@@ -12,7 +12,12 @@ class NumberAnimation extends PropertyAnimation {
     this.tick = this.$ticker.bind(this);
     this.runningChanged.connect(this, this.$onRunningChanged);
   }
-  $startLoop() {
+
+  $tickStarted() {
+    this.$startLoop();
+  }
+
+  $initLoop() {
     for (const i in this.$actions) {
       const action = this.$actions[i];
       if (action.from === undefined) {
@@ -20,10 +25,15 @@ class NumberAnimation extends PropertyAnimation {
       }
     }
     this.$redoActions();
+    this.paused = false;
+  }
+
+  $startLoop() {
     this.$startTime = Date.now();
     this.$elapsed = 0;
     this.$at = 0;
   }
+
   $ticker() {
     if (!this.running && this.$loop !== -1 || this.paused) {
       // $loop === -1 is a marker to just finish this run
@@ -48,8 +58,7 @@ class NumberAnimation extends PropertyAnimation {
   }
   $onRunningChanged(newVal) {
     if (newVal) {
-      this.paused = false;
-      this.$startLoop();
+      this.$initLoop();
       QmlWeb.engine.$addTicker(this);
     } else if (this.alwaysRunToEnd && this.$at < 1) {
       this.$loop = -1; // -1 is used as a marker to stop
@@ -71,6 +80,7 @@ class NumberAnimation extends PropertyAnimation {
       this.$actions = [];
       this.$loop = 0;
     } else {
+      this.$initLoop();
       this.$startLoop();
     }
   }

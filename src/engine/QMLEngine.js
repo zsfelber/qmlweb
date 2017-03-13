@@ -230,7 +230,7 @@ class QMLEngine {
   loadQMLTree(clazz, parent = null, file = undefined, operationFlags = 0, serverWsAddress, isClientSide, webSocket) {
     QmlWeb.engine = this;
     // default is 0 : Idle
-    var prevState = this.operationState;
+    var committedState = this.operationState;
 
     this.operationState |= operationFlags | QmlWeb.QMLOperationState.SystemInit;
 
@@ -264,14 +264,17 @@ class QMLEngine {
       this.operationState &= ~QmlWeb.QMLOperationState.Starting;
 
       this.start();
+      committedState = this.operationState;
 
       this.updateGeometry();
+      this.operationState &= ~QmlWeb.QMLOperationState.System;
+      committedState = this.operationState;
 
       return this.rootObject.$component;
 
     } finally {
       // reset to initial state : this intended to remove "System" flag (usually but stacking logic should work)
-      this.operationState = prevState;
+      this.operationState = committedState;
     }
   }
 
@@ -379,12 +382,18 @@ class QMLEngine {
       }
 
       t.tickerId = setInterval(t.tick, interval);
+      if (t.$tickStarted) {
+        t.$tickStarted();
+      }
     }
   }
 
   $stopTicker(t) {
     if (t.tickerId) {
       clearInterval(t.tickerId);
+      if (t.$tickStopped) {
+        t.$tickStopped();
+      }
       delete t.tickerId;
     }
   }
