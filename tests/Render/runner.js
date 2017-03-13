@@ -112,7 +112,6 @@
           } else {
             onTestLoad();
           }
-          failTimeout(2000, done);
         });
       });
     });

@@ -9,7 +9,7 @@ QmlWeb.useShadowDom = true;
 class QMLEngine {
   constructor(element, opts={}) {
     if (QmlWeb.engine) {
-      throw new Error("Instantiating multiple engines in same global/window object's environment is not supported. (Or call engine.destroy() first.)");
+      throw new AssertionError("Instantiating multiple engines in same global/window object's environment is not supported. (Or call engine.destroy() first.)");
     }
 
     QmlWeb.engine = this;
@@ -74,7 +74,7 @@ class QMLEngine {
     }
 
     var cleanup = QmlWeb.helpers.mergeObjects(this._whenStart, this._whenStop, this._tickers);
-    var cleaned = 0, invalid = 0;
+    var cleaned = 0, invalid = [];
 
     while (!cleanup.isEmpty()) {
       try {
@@ -82,10 +82,10 @@ class QMLEngine {
           try {
             const val = cleanup[i];
             if (val.destroy) {
-              val.$delete();
               ++cleaned;
+              val.$delete();
             } else {
-              ++invalid;
+              invalid.push(val.toString());
             }
           } finally {
             delete cleanup[i];
@@ -93,17 +93,22 @@ class QMLEngine {
           break;
         }
       } catch (err) {
-        console.error("engine destroy error : ", this, err);
+        console.error("engine destroy error : ", err.message);
       }
     }
     if (cleaned||invalid) {
-      console.warn("engine destroy : "+cleaned+" remaining objects destroyed. "+invalid+" items was invalid.", this, err);
+      console.warn("engine destroy : "+cleaned+" remaining objects destroyed. unhandled items : "+JSON.stringify(invalid)+".");
     }
+    this.operationState |= QMLOperationState.Destroyed;
 
     QmlWeb.engine = null;
   }
 
   setDom(element) {
+    if (QmlWeb.engine !== this) {
+      throw new QmlWeb.AssertionError("Engine is destroyed.");
+    }
+
     //this.fps = 60;
     // Math.floor, causes bugs to timing?
     //this.$interval = Math.floor(1000 / this.fps);
@@ -137,6 +142,10 @@ class QMLEngine {
   //---------- Public Methods ----------
 
   updateGeometry() {
+    if (QmlWeb.engine !== this) {
+      throw new QmlWeb.AssertionError("Engine is destroyed.");
+    }
+
     // we have to call `this.implicitHeight =` and `this.implicitWidth =`
     // each time the root element changes it's geometry
     // to reposition child elements of qml scene
@@ -160,6 +169,10 @@ class QMLEngine {
 
   // Start the engine
   start() {
+    if (QmlWeb.engine !== this) {
+      throw new QmlWeb.AssertionError("Engine is destroyed.");
+    }
+
     const QMLOperationState = QmlWeb.QMLOperationState;
     if (!(this.operationState & QMLOperationState.Running)) {
       this.operationState |= QMLOperationState.Running;
@@ -196,6 +209,10 @@ class QMLEngine {
 
   // Stop the engine
   stop() {
+    if (QmlWeb.engine !== this) {
+      throw new QmlWeb.AssertionError("Engine is destroyed.");
+    }
+
     const QMLOperationState = QmlWeb.QMLOperationState;
     if (this.operationState & QMLOperationState.Running) {
       //clearInterval(this._tickerId);
@@ -214,6 +231,10 @@ class QMLEngine {
 
   // Load file, parse and construct (.qml or .qml.js)
   loadFile(file, parent = null, operationFlags = 0, serverWsAddress, isClientSide) {
+    if (QmlWeb.engine !== this) {
+      throw new QmlWeb.AssertionError("Engine is destroyed.");
+    }
+
     var wsUrl, webSocket;
     if (operationFlags & QmlWeb.QMLOperationState.Remote) {
       if (serverWsAddress !== undefined) {
@@ -268,6 +289,10 @@ class QMLEngine {
   }
 
   loadQMLTree(clazz, parent = null, file = undefined, operationFlags = 0, serverWsAddress, isClientSide, webSocket) {
+    if (QmlWeb.engine !== this) {
+      throw new QmlWeb.AssertionError("Engine is destroyed.");
+    }
+
     // default is 0 : Idle
     var committedState = this.operationState;
 
@@ -327,12 +352,20 @@ class QMLEngine {
   }
 
   focusedElement() {
+    if (QmlWeb.engine !== this) {
+      throw new QmlWeb.AssertionError("Engine is destroyed.");
+    }
+
     return this.rootObject.$context.activeFocus;
   }
 
   //---------- Private Methods ----------
 
   $initKeyboard() {
+    if (QmlWeb.engine !== this) {
+      throw new QmlWeb.AssertionError("Engine is destroyed.");
+    }
+
     document.onkeypress = e => {
       let focusedElement = this.focusedElement();
       const event = QmlWeb.eventToKeyboard(e || window.event);
@@ -449,6 +482,10 @@ class QMLEngine {
   }
 
   processOp(op) {
+    if (QmlWeb.engine !== this) {
+      throw new QmlWeb.AssertionError("Engine is destroyed.");
+    }
+
     const oldP = this.currentPendingOp;
     this.currentPendingOp = op;
 
@@ -552,3 +589,8 @@ class QMLEngine {
 }
 
 QmlWeb.QMLEngine = QMLEngine;
+QmlWeb.getEngine = function() {
+  if (!QmlWeb.engine) throw new QmlWeb.AssertionError("No engine.");
+  else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Destroyed) throw new QmlWeb.AssertionError("Engine is destroyed.");
+  return QmlWeb.engine;
+};

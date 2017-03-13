@@ -263,6 +263,7 @@ class Item extends ItemBase {
       this.$context.activeFocus = this;
     } else if (document.qmlFocus === this) {
       document.getElementsByTagName("BODY")[0].focus();
+      const engine = QmlWeb.getEngine();
       document.qmlFocus = QmlWeb.engine.rootObject.$context.base;
       this.$context.activeFocus = null;
     }
@@ -418,6 +419,7 @@ class Item extends ItemBase {
     if (this.$updatingHGeometry) {
       return;
     }
+    const engine = QmlWeb.getEngine();
     if (!oncompl && !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Running)) {
       // resulting too expensive cyclic calls at init time:
       if (propName === "width") {
@@ -528,6 +530,7 @@ class Item extends ItemBase {
     if (this.$updatingVGeometry) {
       return;
     }
+    const engine = QmlWeb.getEngine();
     if (!oncompl && !(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Running)) {
       // resulting too expensive cyclic calls at init time:
       if (propName === "height") {

@@ -57,6 +57,7 @@ class NumberAnimation extends PropertyAnimation {
     }
   }
   $onRunningChanged(newVal) {
+    const engine = QmlWeb.getEngine();
     if (newVal) {
       this.$initLoop();
       QmlWeb.engine.$addTicker(this);

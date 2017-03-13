@@ -146,7 +146,8 @@ class QtObject extends QmlWeb.QObject {
 
     this.$loaderContext = parent;
 
-    const engine = QmlWeb.engine;
+    const engine = QmlWeb.getEngine();
+
     flags |= this.$componentCreateFlags;
 
     // Not basic class __proto__ :

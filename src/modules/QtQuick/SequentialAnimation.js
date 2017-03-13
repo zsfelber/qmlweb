@@ -14,6 +14,7 @@ QmlWeb.registerQmlType({
 
     this.animationsChanged.connect(this, this.$onAnimatonsChanged);
 
+    const engine = QmlWeb.getEngine();
     QmlWeb.engine.$registerStart(this, () => {
       if (!this.running) return;
       this.running = false; // toggled back by start();

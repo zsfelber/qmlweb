@@ -59,6 +59,7 @@ class QMLProperty {
   // Called by update and set to actually set this.value, performing any type
   // conversion required.
   $setVal(newVal, flags, valParentObj) {
+    const engine = QmlWeb.getEngine();
     var prevEvalObj = QmlWeb.engine.$evaluatedObj;
 
     try {
@@ -160,6 +161,7 @@ class QMLProperty {
   // 'update' reevaluates the get/set binding, stores or emits the value of the property, as determined from this.updateState
   update(flags, oldVal, valParentObj, dirtyNow) {
 
+    const engine = QmlWeb.getEngine();
     var prevEvalObj = QmlWeb.engine.$evaluatedObj;
 
     const origState = this.updateState;
@@ -332,7 +334,7 @@ class QMLProperty {
 
     // defer exceptions, because it is still correct to register current eval tree state :
     let error;
-    const engine = QmlWeb.engine;
+    const engine = QmlWeb.getEngine();
 
     if (engine.operationState & QmlWeb.QMLOperationState.Init) {
       if (this.updateState & QmlWeb.QMLPropertyState.LoadFromBinding) {
@@ -457,6 +459,7 @@ class QMLProperty {
   // Define setter
   set(newVal, flags, valParentObj) {
 
+    const engine = QmlWeb.getEngine();
     flags = flags || QmlWeb.QMLPropertyFlags.ReasonUser;
     if (this.readOnly && !(flags & QmlWeb.QMLPropertyFlags.Privileged)) {
       throw new Error(`property '${this.name}' has read only access`);
@@ -524,7 +527,7 @@ class QMLProperty {
 
   $set(newVal, oldVal, flags, valParentObj, queueItem) {
 
-    const engine = QmlWeb.engine;
+    const engine = QmlWeb.getEngine();
     flags = flags || QmlWeb.QMLPropertyFlags.ReasonUser;
     if (this.readOnly && !(flags & QmlWeb.QMLPropertyFlags.Privileged)) {
       throw new Error(`property '${this.name}' has read only access`);
@@ -621,6 +624,7 @@ class QMLProperty {
   }
 
   setEvaluatedObj(valParentObj) {
+    const engine = QmlWeb.getEngine();
     var prevEvalObj = QmlWeb.engine.$evaluatedObj;
 
     // NOTE valParentObj(/bindingCtxObj) is passed through property.set,$set or $setVal, its in the descendant level in object type hierarchy (proto chain),

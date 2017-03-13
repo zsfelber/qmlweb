@@ -167,6 +167,7 @@ class QMLBinding {
   }*/
 
   get(obj) {
+    const engine = QmlWeb.getEngine();
     var prevEvalObj = QmlWeb.engine.$evaluatedObj;
     QmlWeb.engine.$evaluatedObj = obj;
 
@@ -199,6 +200,7 @@ class QMLBinding {
   }
 
   set(obj, value, flags, valParentObj) {
+    const engine = QmlWeb.getEngine();
     var prevEvalObj = QmlWeb.engine.$evaluatedObj;
     QmlWeb.engine.$evaluatedObj = obj;
 
@@ -227,6 +229,7 @@ class QMLBinding {
 
   // this == connection : var connection = Signal.connect(...); binding.run.call(connection, ...);
   run() {
+    const engine = QmlWeb.getEngine();
     var prevEvalObj = QmlWeb.engine.$evaluatedObj;
     QmlWeb.engine.$evaluatedObj = this.bindingObj;
 

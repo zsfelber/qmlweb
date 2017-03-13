@@ -74,9 +74,16 @@ describe("QtBase.Signal", function() {
     expect(result).toBe(0);
     var called = false;
     setTimeout(function() {
-      called = true;
-      expect(result).toBe(23);
-      done();
+      const oe = QmlWeb.engine;
+      try {
+        QmlWeb.engine = done.engine;
+
+        called = true;
+        expect(result).toBe(23);
+        done();
+      } finally {
+        QmlWeb.engine = oe;
+      }
     }, 10);
     expect(called).toBe(false);
     failTimeout(2000, done);

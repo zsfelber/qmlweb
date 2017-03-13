@@ -36,6 +36,7 @@ const Qt = {
   include(path, importAlias) {
     let contextMap;
     if (!importAlias) {
+      const engine = QmlWeb.getEngine();
       const $c = QmlWeb.engine.$evaluatedObj.$context;
       const $p = $c.$pageContext;
       // recursive import alias ( see :

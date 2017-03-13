@@ -1,5 +1,6 @@
 
 function initMeta(self, meta, constructor) {
+  const engine = QmlWeb.getEngine();
   const info = constructor.$qmlTypeInfo;
   if (info) {
     self.$modinf = info;
@@ -61,6 +62,7 @@ function initMeta(self, meta, constructor) {
  */
 function construct(meta, parent, flags) {
 
+  const engine = QmlWeb.getEngine();
   // undefined -> 0
   flags |= 0;
 
@@ -212,7 +214,8 @@ function createComponentAndElement(meta, parent, flags, loaderComponent) {
 
 function createQmlObject(src, parent, file) {
 
-  const engine = QmlWeb.engine;
+  const engine = QmlWeb.getEngine();
+
 
   // Returns url resolved relative to the URL of the caller.
   // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method

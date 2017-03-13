@@ -163,6 +163,7 @@ function createProperty(type, obj, propName, options, bindingFlags=0) {
  */
 function applyProperties(metaObject, item) {
   const QMLProperty = QmlWeb.QMLProperty;
+  const engine = QmlWeb.getEngine();
   var prevEvalObj = QmlWeb.engine.$evaluatedObj;
   QmlWeb.engine.$evaluatedObj = item;
 
@@ -298,6 +299,7 @@ function applyProperty(item, i, value) {
 }
 
 function connectSignal(item, signalName, value) {
+  const engine = QmlWeb.getEngine();
   const QMLBinding = QmlWeb.QMLBinding;
   const _signal = item[signalName];
 

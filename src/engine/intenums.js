@@ -7,6 +7,7 @@ const QMLOperationState = {
   SystemInit: 2|8,
   BeforeStart: 4|8,
   Remote: 16,
+  Destroyed: 32,
 
   toString: function(flags) {
     return humanize.call(QMLOperationState, flags);

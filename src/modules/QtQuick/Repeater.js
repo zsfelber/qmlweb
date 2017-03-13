@@ -135,6 +135,7 @@ class Repeater extends Item {
     const model = this.$getModel();
     const container = this.repeaterContainer();
     let index;
+    const engine = QmlWeb.getEngine();
     var prevEvalObj = QmlWeb.engine.$evaluatedObj;
     try {
       QmlWeb.engine.$evaluatedObj = container;

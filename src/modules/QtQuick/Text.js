@@ -143,7 +143,8 @@ QmlWeb.registerQmlType({
     }
 
     const fc = this.impl;
-    const engine = QmlWeb.engine;
+    const engine = QmlWeb.getEngine();
+
     // Need to move the child out of it's parent so that it can properly
     // recalculate it's "natural" offsetWidth/offsetHeight
     if (engine.dom === document.body && engine.dom !== engine.domTarget) {

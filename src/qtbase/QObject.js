@@ -62,6 +62,7 @@ class QObject {
       opId
     };
 
+    const engine = QmlWeb.getEngine();
     QmlWeb.engine.addPendingOp(itm);
   }
 
@@ -171,6 +172,7 @@ class QObject {
 
     try {
 
+      const engine = QmlWeb.getEngine();
       // Remove start/stop/ticker entry from engine
       QmlWeb.engine.$removeStart(this);
       QmlWeb.engine.$removeStop(this);
@@ -184,6 +186,7 @@ class QObject {
   // http://doc.qt.io/qt-5/qtqml-javascript-dynamicobjectcreation.html
   destroy() {
     QObject.pendingComplete(this, true);
+    const engine = QmlWeb.getEngine();
     if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
       // We don't call those on first creation, as they will be called
       // by the regular creation-procedures at the right time.

@@ -54,6 +54,7 @@ QmlWeb.registerQmlType({
       return;
     }
 
+    const engine = QmlWeb.getEngine();
     var prevEvalObj = QmlWeb.engine.$evaluatedObj;
 
     try {
@@ -87,6 +88,7 @@ QmlWeb.registerQmlType({
   }
 
   $onSourceComponentChanged(newItem) {
+    const engine = QmlWeb.getEngine();
     var prevEvalObj = QmlWeb.engine.$evaluatedObj;
 
     try {

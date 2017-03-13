@@ -13,6 +13,7 @@ class QMLComponent {
     this.elementFlag = this.flags & QmlWeb.QMLComponentFlags.Element;
     this.cntPendingCompletions = 0;
 
+    const engine = QmlWeb.getEngine();
     // no component = is import root
     const evalObj = QmlWeb.engine.$evaluatedObj;
     if (!loaderComponent && evalObj) loaderComponent = evalObj.$component;
@@ -211,7 +212,8 @@ class QMLComponent {
 
 
   $createObject(parent, properties = {}) {
-    const engine = QmlWeb.engine;
+    const engine = QmlWeb.getEngine();
+
     const oldFlags = this.flags;
     const oldElementFlag = this.elementFlag;
     const oldCreateFlags = this.createFlags;

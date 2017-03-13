@@ -3,9 +3,12 @@ describe("QMLEngine.states", function() {
   var load = prefixedQmlLoader("QMLEngine/qml/State");
 
   it("changes property values state is changed", function(done) {
-    var qml = load("Simple", this.div);
+    var qml = load("Simple", this.div, null, done);
     var count = 0;
     qml.yield = function() {
+      const oe = QmlWeb.engine;
+      try {
+        QmlWeb.engine = done.engine;
       console.log(qml.value);
       if (count === 0) {
         expect(qml.value).toBe(10);
@@ -16,15 +19,21 @@ describe("QMLEngine.states", function() {
         done();
       }
       count += 1;
+      } finally {
+        QmlWeb.engine = oe;
+      }
     };
     qml.start();
     failTimeout(2000, done);
   });
 
   it("changes state when conditions are met", function(done) {
-    var qml = load("When", this.div);
+    var qml = load("When", this.div, null, done);
     var count = 0;
     qml.yield = function() {
+      const oe = QmlWeb.engine;
+      try {
+        QmlWeb.engine = done.engine;
       console.log(qml.value);
       if (count === 0) {
         expect(qml.value).toBe(10);
@@ -37,6 +46,9 @@ describe("QMLEngine.states", function() {
         done();
       }
       count += 1;
+      } finally {
+        QmlWeb.engine = oe;
+      }
     };
     qml.start();
     failTimeout(2000, done);

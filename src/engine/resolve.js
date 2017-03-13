@@ -80,12 +80,14 @@ function qualifiedImportPath(component, qualifier) {
 }
 
 function setImportPathList(arrayOfDirs) {
-  const engine = QmlWeb.engine;
+  const engine = QmlWeb.getEngine();
+
   engine.userAddedImportPaths = arrayOfDirs;
 }
 
 function importPathList() {
-  const engine = QmlWeb.engine;
+  const engine = QmlWeb.getEngine();
+
   return engine.userAddedImportPaths;
 }
 
@@ -95,7 +97,8 @@ function importPathList() {
 // `http://example.com/controls/qmldir`
 
 function addModulePath(moduleName, dirPath) {
-  const engine = QmlWeb.engine;
+  const engine = QmlWeb.getEngine();
+
   // Keep the mapping. It will be used in loadImports() function.
   // Remove trailing slash as it required for `readQmlDir`.
   engine.userAddedModulePaths[moduleName] = dirPath?dirPath.replace(/[/]$/, ""):null;
@@ -125,7 +128,8 @@ function addModulePath(moduleName, dirPath) {
 }*/
 
 function resolveClass(file) {
-  const engine = QmlWeb.engine;
+  const engine = QmlWeb.getEngine();
+
 
   let clazz = engine.classes[file];
 
@@ -139,7 +143,8 @@ function resolveClass(file) {
 
 
 function resolveImport(name, component) {
-  const engine = QmlWeb.engine;
+  const engine = QmlWeb.getEngine();
+
   const evalObj = engine.$evaluatedObj;
   if (!component) {
     component = evalObj.$component;
@@ -176,6 +181,7 @@ function resolveImport(name, component) {
 }
 
 function resolveClassImport(name, component) {
+  const engine = QmlWeb.getEngine();
   if (!component) {
     const evalObj = QmlWeb.engine.$evaluatedObj;
     component = evalObj.$component;
@@ -306,6 +312,7 @@ function $resolvePath(file, basePathUrl, component) {
   if (file && (/^(\w+):/.test(file)||file.startsWith("//"))) {
     return file;
   }
+  const engine = QmlWeb.getEngine();
 
   if (!basePathUrl) {
     if (!component) {

@@ -86,10 +86,16 @@ describe("QMLEngine.scope", function() {
 
   it("delegates in Repeaters have roles in scope",
     function(done) {
-      var qml = load("Repeater", this.div);
+      var qml = load("Repeater", this.div, null, done);
       qml.yield = function(width) {
+        const oe = QmlWeb.engine;
+        try {
+          QmlWeb.engine = done.engine;
         expect(width).toBe(200);
         done();
+        } finally {
+          QmlWeb.engine = oe;
+        }
       };
       failTimeout(2000, done);
     }

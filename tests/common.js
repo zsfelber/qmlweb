@@ -9,28 +9,57 @@ QmlWeb.isTesting = true;
 var $$engine;
 var cleanupList = [];
 
-function loadQmlFile(file, div, opts) {
-  if (!$$engine) $$engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
-  $$engine.setDom(div);
-  $$engine.loadFile(file);
+function loadQmlFile(file, div, opts, done) {
+  var engine;
+  if (done) {
+    if (done.engine) {
+      engine = done.engine;
+    } else {
+      engine = done.engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
+    }
+  } else {
+    if ($$engine) {
+      engine = $$engine;
+    } else {
+      engine = $$engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
+    }
+  }
+
+  engine.setDom(div);
+  engine.loadFile(file);
   document.body.appendChild(div);
-  cleanupList.push($$engine.rootObject);
-  return $$engine.rootObject;
+  cleanupList.push(engine.rootObject);
+  return engine.rootObject;
+}
+
+function loadQml(src, div, opts, done) {
+  var engine;
+  if (done) {
+    if (done.engine) {
+      engine = done.engine;
+    } else {
+      engine = done.engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
+    }
+  } else {
+    if ($$engine) {
+      engine = $$engine;
+    } else {
+      engine = $$engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
+    }
+  }
+
+  engine.setDom(div);
+  engine.loadQML(src);
+  document.body.appendChild(div);
+  return engine.rootObject;
 }
 
 function prefixedQmlLoader(prefix) {
-  return function(file, div, opts) {
-    return loadQmlFile("/base/tests/" + prefix + file + ".qml", div, opts);
+  return function(file, div, opts, done) {
+    return loadQmlFile("/base/tests/" + prefix + file + ".qml", div, opts, done);
   };
 }
 
-function loadQml(src, div, opts) {
-  if (!$$engine) $$engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
-  $$engine.setDom(div);
-  $$engine.loadQML(src);
-  document.body.appendChild(div);
-  return $$engine.rootObject;
-}
 
 function setupDivElement() {
   beforeEach(function() {
@@ -115,31 +144,34 @@ var customMatchers = {
         }
         console.log("Async : "+name+"  started.");
 
-        var defcleanup = {};
         const args2 = QmlWeb.helpers.slice(arguments, 0);
 
-        args2[0] = function() {
+        function _cleanup() {
           try {
             console.log("Async finished : "+name);
             args2[0].finished = true;
-            if (defcleanup.engine) defcleanup.engine.stop();
-            cleanup(defcleanup.list);
-            if (defcleanup.engine) defcleanup.engine.destroy();
+            if (args2[0].engine) args2[0].engine.stop();
+            cleanup(args2[0].list);
+            if (args2[0].engine) args2[0].engine.destroy();
           } catch (e) {
             console.error("Cleanup error : "+e.message);
           }
+        }
 
-          // !
+        args2[0] = function() {
+          _cleanup();
           done();
         };
 
         try {
           F.apply(this, args2);
+        } catch (e) {
+          args2[0].finished = true;
+          _cleanup();
+          throw e;
         } finally {
-          defcleanup.list = cleanupList;
-          defcleanup.engine = $$engine;
+          args2[0].list = cleanupList;
           cleanupList = [];
-          $$engine = null;
         }
       };
     } else {
