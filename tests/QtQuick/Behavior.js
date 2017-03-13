@@ -12,7 +12,6 @@ describe("QtQuick.Behavior", function() {
       called = true;
       expect(qml.gotX).toBe(true);
       expect(qml.gotY).toBe(false);
-      console.log("Finished : BehaviorBasic");
       done();
     }, 500);
     expect(called).toBe(false);

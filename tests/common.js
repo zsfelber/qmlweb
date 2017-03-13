@@ -6,16 +6,16 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 QmlWeb.useShadowDom = false;
 QmlWeb.isTesting = true;
 
-var engine;
+var $$engine;
 var cleanupList = [];
 
 function loadQmlFile(file, div, opts) {
-  if (!engine) engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
-  engine.setDom(div);
-  engine.loadFile(file);
+  if (!$$engine) $$engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
+  $$engine.setDom(div);
+  $$engine.loadFile(file);
   document.body.appendChild(div);
-  cleanupList.push(engine.rootObject);
-  return engine.rootObject;
+  cleanupList.push($$engine.rootObject);
+  return $$engine.rootObject;
 }
 
 function prefixedQmlLoader(prefix) {
@@ -25,11 +25,11 @@ function prefixedQmlLoader(prefix) {
 }
 
 function loadQml(src, div, opts) {
-  if (!engine) engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
-  engine.setDom(div);
-  engine.loadQML(src);
+  if (!$$engine) $$engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
+  $$engine.setDom(div);
+  $$engine.loadQML(src);
   document.body.appendChild(div);
-  return engine.rootObject;
+  return $$engine.rootObject;
 }
 
 function setupDivElement() {
@@ -120,6 +120,7 @@ var customMatchers = {
         args2[0] = function() {
           args2[0].finished = true;
           try {
+            console.log("Async finished : "+name);
             done();
           } finally {
             if (defcleanup.engine) defcleanup.engine.stop();
@@ -131,9 +132,9 @@ var customMatchers = {
           F.apply(this, args2);
         } finally {
           defcleanup.list = cleanupList;
-          defcleanup.engine = engine;
+          defcleanup.engine = $$engine;
           cleanupList = [];
-          engine = null;
+          $$engine = null;
         }
       };
     } else {
@@ -147,7 +148,7 @@ var customMatchers = {
         try {
           F.apply(this, arguments);
         } finally {
-          if (engine) engine.stop();
+          if ($$engine) $$engine.stop();
           cleanup();
         }
       };

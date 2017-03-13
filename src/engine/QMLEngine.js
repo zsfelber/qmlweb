@@ -361,12 +361,12 @@ class QMLEngine {
     this._tickers[t.$objectId] = t;
 
     if (this.operationState & QMLOperationState.Running) {
-      $startTicker(t);
+      this.$startTicker(t);
     }
   }
 
-  $removeTicker(owner) {
-    delete this._tickers[owner.$objectId];
+  $removeTicker(t) {
+    delete this._tickers[t.$objectId];
 
     if (this.operationState & QMLOperationState.Running) {
       this.$stopTicker(t);

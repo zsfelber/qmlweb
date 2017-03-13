@@ -524,6 +524,7 @@ class QMLProperty {
 
   $set(newVal, oldVal, flags, valParentObj, queueItem) {
 
+    const engine = QmlWeb.engine;
     flags = flags || QmlWeb.QMLPropertyFlags.ReasonUser;
     if (this.readOnly && !(flags & QmlWeb.QMLPropertyFlags.Privileged)) {
       throw new Error(`property '${this.name}' has read only access`);

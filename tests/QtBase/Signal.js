@@ -76,10 +76,9 @@ describe("QtBase.Signal", function() {
     setTimeout(function() {
       called = true;
       expect(result).toBe(23);
-      console.log("Finished : SignalQueuedConnection");
       done();
     }, 10);
     expect(called).toBe(false);
     failTimeout(2000, done);
-  }, defcleanup2);
+  });
 });
