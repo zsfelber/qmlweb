@@ -117,15 +117,19 @@ var customMatchers = {
 
         var defcleanup = {};
         const args2 = QmlWeb.helpers.slice(arguments, 0);
+
         args2[0] = function() {
-          args2[0].finished = true;
           try {
             console.log("Async finished : "+name);
-            done();
-          } finally {
+            args2[0].finished = true;
             if (defcleanup.engine) defcleanup.engine.stop();
             cleanup(defcleanup.list);
+          } catch (e) {
+            console.error("Cleanup error : "+e.message);
           }
+
+          // !
+          done();
         };
 
         try {
