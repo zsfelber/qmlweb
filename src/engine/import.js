@@ -239,8 +239,8 @@ function loadImport(entry, component) {
 
 
 
-QmlWeb.preloadImports = preloadImports;
-QmlWeb.addImportPath = addImportPath;
-QmlWeb.addComponentImportPath = addComponentImportPath;
-QmlWeb.loadImports = loadImports;
-QmlWeb.loadImport = loadImport;
+QMLEngine.prototype.preloadImports = preloadImports;
+QMLEngine.prototype.addImportPath = addImportPath;
+QMLEngine.prototype.addComponentImportPath = addComponentImportPath;
+QMLEngine.prototype.loadImports = loadImports;
+QMLEngine.prototype.loadImport = loadImport;

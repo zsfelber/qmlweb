@@ -441,31 +441,31 @@ function $instanceOf(o, typestring, component) {
 }
 
 
-QmlWeb.normalizePath = normalizePath;
+QMLEngine.prototype.normalizePath = normalizePath;
 
-QmlWeb.resolveBasePath = resolveBasePath;
+QMLEngine.prototype.resolveBasePath = resolveBasePath;
 
-QmlWeb.importSearchPaths = importSearchPaths;
+QMLEngine.prototype.importSearchPaths = importSearchPaths;
 
-QmlWeb.qualifiedImportPath = qualifiedImportPath;
+QMLEngine.prototype.qualifiedImportPath = qualifiedImportPath;
 
-QmlWeb.setImportPathList = setImportPathList;
+QMLEngine.prototype.setImportPathList = setImportPathList;
 
-QmlWeb.importPathList = importPathList;
-QmlWeb.addModulePath = addModulePath;
+QMLEngine.prototype.importPathList = importPathList;
+QMLEngine.prototype.addModulePath = addModulePath;
 
-QmlWeb.resolveClass = resolveClass;
+QMLEngine.prototype.resolveClass = resolveClass;
 
-QmlWeb.resolveImport = resolveImport;
+QMLEngine.prototype.resolveImport = resolveImport;
 
-QmlWeb.resolveClassImport = resolveClassImport;
+QMLEngine.prototype.resolveClassImport = resolveClassImport;
 
-QmlWeb.$parseUrl = $parseUrl;
+QMLEngine.prototype.$parseUrl = $parseUrl;
 
 // Return a path to load the file
-QmlWeb.$resolvePath = $resolvePath;
+QMLEngine.prototype.$resolvePath = $resolvePath;
 
 // Return a DOM-valid path to load the image (fileURL is an already-resolved
 // URL)
-QmlWeb.$resolveImageURL = $resolveImageURL;
-QmlWeb.$instanceOf = $instanceOf;
+QMLEngine.prototype.$resolveImageURL = $resolveImageURL;
+QMLEngine.prototype.$instanceOf = $instanceOf;

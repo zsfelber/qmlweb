@@ -382,8 +382,8 @@ function $propertyInfo(prop) {
 }
 
 
-QmlWeb.formatPath = formatPath;
-QmlWeb.createProperty = createProperty;
-QmlWeb.applyProperties = applyProperties;
-QmlWeb.connectSignal = connectSignal;
-QmlWeb.$propertyInfo = $propertyInfo;
+QMLEngine.prototype.formatPath = formatPath;
+QMLEngine.prototype.createProperty = createProperty;
+QMLEngine.prototype.applyProperties = applyProperties;
+QMLEngine.prototype.connectSignal = connectSignal;
+QMLEngine.prototype.$propertyInfo = $propertyInfo;

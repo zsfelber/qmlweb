@@ -70,4 +70,4 @@ function importJavascript(file, importAlias, contextMap) {
   return jsBinding;
 }
 
-QmlWeb.importJavascript = importJavascript;
+QMLEngine.prototype.importJavascript = importJavascript;

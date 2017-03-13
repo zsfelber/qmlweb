@@ -108,7 +108,7 @@ describe("QMLEngine.properties", function() {
   });
 
   it("Url", function() {
-    const engine = this.engine;
+    const engine = QmlWeb.engine;
     var qml = load("Url", this.div);
     expect(qml.localNonBoundSimple).toBe(
       engine.$basePathUrl.baseUri + "PropertiesUrlDir/localNonBoundSimple.png");

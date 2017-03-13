@@ -270,7 +270,7 @@ function addElementToPageContexts(item, id, ctx) {
 }
 
 
-QmlWeb.initMeta = initMeta;
-QmlWeb.construct = construct;
-QmlWeb.createComponentAndElement = createComponentAndElement;
-QmlWeb.createQmlObject = createQmlObject;
+QMLEngine.prototype.initMeta = initMeta;
+QMLEngine.prototype.construct = construct;
+QMLEngine.prototype.createComponentAndElement = createComponentAndElement;
+QMLEngine.prototype.createQmlObject = createQmlObject;
