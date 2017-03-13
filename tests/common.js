@@ -124,6 +124,7 @@ var customMatchers = {
             args2[0].finished = true;
             if (defcleanup.engine) defcleanup.engine.stop();
             cleanup(defcleanup.list);
+            if (defcleanup.engine) defcleanup.engine.destroy();
           } catch (e) {
             console.error("Cleanup error : "+e.message);
           }

@@ -99,57 +99,85 @@ class QObject {
   }
 
   static $delete() {
-    if (this.$leaf.$attachedComponent) {
-      if (!(this instanceof QObject)) {
-        throw new AssertionError("$delete non-QObject : " + this);
-      }
+    try {
+      if (this.$leaf.$attachedComponent) {
+        if (!(this instanceof QObject)) {
+          throw new AssertionError("$delete non-QObject : " + this);
+        }
 
-      for (var obj = this.$leaf; obj !== obj.constructor.prototype; obj=obj.__proto__) {
-        if (obj.hasOwnProperty("$attachedComponent")) {
-          obj.$attachedComponent.destruction();
+        for (var obj = this.$leaf; obj !== obj.constructor.prototype; obj=obj.__proto__) {
+          if (obj.hasOwnProperty("$attachedComponent")) {
+            obj.$attachedComponent.destruction();
+          }
         }
       }
+    } catch (err) {
+      console.error("$delete error : ", this, err);
     }
 
-    while (this.$tidyupList.length > 0) {
-      const item = this.$tidyupList[0];
-      if (item.destroy) {
-        // It's a QObject
-        QObject.$delete.call(item);
-      } else {
-        // It must be a signal
-        item.disconnect(this);
+    try {
+      while (this.$tidyupList.length > 0) {
+        const item = this.$tidyupList[0];
+        if (item.destroy) {
+          // It's a QObject
+          QObject.$delete.call(item);
+        } else {
+          // It must be a signal
+          item.disconnect(this);
+        }
       }
+
+    } catch (err) {
+      console.error("$delete error : ", this, err);
     }
 
-    for (const i in this.$properties) {
-      const prop = this.$properties[i];
-      while (prop.$tidyupList.length > 0) {
-        prop.$tidyupList[0].disconnect(prop);
+    try {
+      for (const i in this.$properties) {
+        const prop = this.$properties[i];
+        while (prop.$tidyupList.length > 0) {
+          prop.$tidyupList[0].disconnect(prop);
+        }
       }
+    } catch (err) {
+      console.error("$delete error : ", this, err);
     }
 
-    if (this.$parent && this.$parent.$tidyupList) {
-      const index = this.$parent.$tidyupList.indexOf(this);
-      this.$parent.$tidyupList.splice(index, 1);
+    try {
+
+      if (this.$parent && this.$parent.$tidyupList) {
+        const index = this.$parent.$tidyupList.indexOf(this);
+        this.$parent.$tidyupList.splice(index, 1);
+      }
+    } catch (err) {
+      console.error("$delete error : ", this, err);
     }
 
-    this.$base.$isDeleted = true;
-    // must do this:
-    // 1) parent will be notified and erase object from it's children.
-    // 2) DOM node will be removed.
-    this.container = undefined;
+    try {
 
-    // Disconnect any slots connected to any of our signals. Do this after
-    // clearing the parent, as that relies on parentChanged being handled.
-    for (const i in this.$signals) {
-      this.$signals[i].disconnect();
+      this.$base.$isDeleted = true;
+      // must do this:
+      // 1) parent will be notified and erase object from it's children.
+      // 2) DOM node will be removed.
+      this.container = undefined;
+
+      // Disconnect any slots connected to any of our signals. Do this after
+      // clearing the parent, as that relies on parentChanged being handled.
+      for (const i in this.$signals) {
+        this.$signals[i].disconnect();
+      }
+    } catch (err) {
+      console.error("$delete error : ", this, err);
     }
 
-    // Remove start/stop/ticker entry from engine
-    QmlWeb.engine.$removeStart(this);
-    QmlWeb.engine.$removeStop(this);
-    QmlWeb.engine.$removeTicker(this);
+    try {
+
+      // Remove start/stop/ticker entry from engine
+      QmlWeb.engine.$removeStart(this);
+      QmlWeb.engine.$removeStop(this);
+      QmlWeb.engine.$removeTicker(this);
+    } catch (err) {
+      console.error("$delete error : ", this, err);
+    }
   }
 
   // must have a `destroy` method

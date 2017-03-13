@@ -8,6 +8,10 @@ QmlWeb.useShadowDom = true;
 // QML engine. EXPORTED.
 class QMLEngine {
   constructor(element, opts={}) {
+    if (QmlWeb.engine) {
+      throw new Error("Instantiating multiple engines in same global/window object's environment is not supported. (Or call engine.destroy() first.)");
+    }
+
     QmlWeb.engine = this;
     this.logging = opts.logging || QmlWeb.QMLEngineLogging.Full;
 
@@ -60,6 +64,36 @@ class QMLEngine {
     //----------Construct----------
 
     window.addEventListener("resize", () => this.updateGeometry());
+  }
+
+  destroy() {
+    try {
+      this.stop();
+    } catch (err) {
+      console.error("engine destroy errorr : ", this, err);
+    }
+
+    var cleanup = QmlWeb.helpers.mergeObjects(this._whenStart, this._whenStop, this._tickers);
+
+    while (!cleanup.isEmpty()) {
+      try {
+        for (const i in cleanup) {
+          try {
+            const val = cleanup[i];
+            if (val.destroy) {
+              val.$delete();
+            }
+          } finally {
+            delete cleanup[i];
+          }
+          break;
+        }
+      } catch (err) {
+        console.error("engine destroy errorr : ", this, err);
+      }
+    }
+
+    QmlWeb.engine = null;
   }
 
   setDom(element) {
@@ -119,7 +153,6 @@ class QMLEngine {
 
   // Start the engine
   start() {
-    QmlWeb.engine = this;
     const QMLOperationState = QmlWeb.QMLOperationState;
     if (!(this.operationState & QMLOperationState.Running)) {
       this.operationState |= QMLOperationState.Running;
@@ -228,7 +261,6 @@ class QMLEngine {
   }
 
   loadQMLTree(clazz, parent = null, file = undefined, operationFlags = 0, serverWsAddress, isClientSide, webSocket) {
-    QmlWeb.engine = this;
     // default is 0 : Idle
     var committedState = this.operationState;
 
