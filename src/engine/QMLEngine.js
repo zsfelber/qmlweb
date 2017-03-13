@@ -70,10 +70,11 @@ class QMLEngine {
     try {
       this.stop();
     } catch (err) {
-      console.error("engine destroy errorr : ", this, err);
+      console.error("engine destroy error : ", this, err);
     }
 
     var cleanup = QmlWeb.helpers.mergeObjects(this._whenStart, this._whenStop, this._tickers);
+    var cleaned = 0, invalid = 0;
 
     while (!cleanup.isEmpty()) {
       try {
@@ -82,6 +83,9 @@ class QMLEngine {
             const val = cleanup[i];
             if (val.destroy) {
               val.$delete();
+              ++cleaned;
+            } else {
+              ++invalid;
             }
           } finally {
             delete cleanup[i];
@@ -89,8 +93,11 @@ class QMLEngine {
           break;
         }
       } catch (err) {
-        console.error("engine destroy errorr : ", this, err);
+        console.error("engine destroy error : ", this, err);
       }
+    }
+    if (cleaned||invalid) {
+      console.warn("engine destroy : "+cleaned+" remaining objects destroyed. "+invalid+" items was invalid.", this, err);
     }
 
     QmlWeb.engine = null;
