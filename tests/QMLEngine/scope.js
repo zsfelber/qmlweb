@@ -91,6 +91,7 @@ describe("QMLEngine.scope", function() {
         expect(width).toBe(200);
         done();
       };
+      failTimeout(2000, done);
     }
   );
 });

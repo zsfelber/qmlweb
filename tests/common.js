@@ -1,18 +1,18 @@
 // We need to disable Shadow DOM isolation for tests, as we inspect
 // the DOM contents of QML elements through .children
+
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+
 QmlWeb.useShadowDom = false;
 QmlWeb.isTesting = true;
 
 var engine;
 var cleanupList = [];
-var thereisDeferredCleanup;
 
 function loadQmlFile(file, div, opts) {
   if (!engine) engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
   engine.setDom(div);
   engine.loadFile(file);
-  engine.start();
-  if (!thereisDeferredCleanup) engine.stop();
   document.body.appendChild(div);
   cleanupList.push(engine.rootObject);
   return engine.rootObject;
@@ -28,8 +28,6 @@ function loadQml(src, div, opts) {
   if (!engine) engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr});
   engine.setDom(div);
   engine.loadQML(src);
-  engine.start();
-  if (!thereisDeferredCleanup) engine.stop();
   document.body.appendChild(div);
   return engine.rootObject;
 }
@@ -103,34 +101,43 @@ var customMatchers = {
     }
 
     const F = arguments[1];
-    const D = arguments[2];
     const args = QmlWeb.helpers.slice(arguments, 0);
     if (!F) {
       throw new Error("it : Callback function is missing.");
     }
+
     if (/^function\s*\w*\s*\(\s*done\b/.test(F.toString())) {
-      console.warn("Async mode : it(done) is used.");
+      console.log("Async mode : "+name+" : it(done) is used.");
       args[1] = function _fwd(_done) {
         const done = arguments[0];
         if (!done) {
           throw new Error("done() is not defined.");
         }
+        console.log("Async : "+name+"  started.");
+
+        var defcleanup = {};
+        const args2 = QmlWeb.helpers.slice(arguments, 0);
+        args2[0] = function() {
+          args2[0].finished = true;
+          try {
+            done();
+          } finally {
+            if (defcleanup.engine) defcleanup.engine.stop();
+            cleanup(defcleanup.list);
+          }
+        };
 
         try {
-          thereisDeferredCleanup = D;
-          F.apply(this, arguments);
+          F.apply(this, args2);
         } finally {
-          if (D) {
-            D.list = cleanupList;
-            D.engine = engine;
-            cleanupList = [];
-            engine = null;
-          } else {
-            cleanup();
-          }
+          defcleanup.list = cleanupList;
+          defcleanup.engine = engine;
+          cleanupList = [];
+          engine = null;
         }
       };
     } else {
+      console.log(name+" : it() is used. (Sync)");
       args[1] = function _fwd() {
         const done = arguments[0];
         if (done) {
@@ -138,17 +145,10 @@ var customMatchers = {
         }
 
         try {
-          thereisDeferredCleanup = D;
           F.apply(this, arguments);
         } finally {
-          if (D) {
-            D.list = cleanupList;
-            D.engine = engine;
-            cleanupList = [];
-            engine = null;
-          } else {
-            cleanup();
-          }
+          if (engine) engine.stop();
+          cleanup();
         }
       };
     }
@@ -164,4 +164,18 @@ var customMatchers = {
       itm.destroy();
     }
   }
+
+  window.failTimeout = function(millis, done) {
+    if (!done) {
+      throw new Error("done() is missing.");
+    }
+
+    setTimeout(function(){
+      if (!done.finished) {
+        expect("Async test : Timeout reached : "+millis).toBe(false);
+        done();
+      }
+    }, millis);
+  }
+
 }());

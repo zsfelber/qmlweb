@@ -4,7 +4,6 @@
     return;
   }
 
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 
   function screenshot(div, options) {
     if (!window.top.callPhantom) {
@@ -113,6 +112,7 @@
           } else {
             onTestLoad();
           }
+          failTimeout(2000, done);
         });
       });
     });

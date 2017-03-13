@@ -18,6 +18,7 @@ describe("QMLEngine.states", function() {
       count += 1;
     };
     qml.start();
+    failTimeout(2000, done);
   });
 
   it("changes state when conditions are met", function(done) {
@@ -38,5 +39,6 @@ describe("QMLEngine.states", function() {
       count += 1;
     };
     qml.start();
+    failTimeout(2000, done);
   });
 });

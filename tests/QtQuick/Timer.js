@@ -15,6 +15,7 @@ describe("QtQuick.Timer", function() {
       done();
     };
     qml.start();
+    failTimeout(2000, done);
   });
 
   it("can roughly set short intervals", function(done) {
@@ -27,6 +28,7 @@ describe("QtQuick.Timer", function() {
       done();
     };
     qml.start();
+    failTimeout(2000, done);
   });
 
   it("can set Timer.running = true to start", function(done) {
@@ -36,6 +38,7 @@ describe("QtQuick.Timer", function() {
       done();
     };
     qml.start();
+    failTimeout(2000, done);
   });
 
   it("Timer parent property", function() {

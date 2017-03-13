@@ -17,6 +17,7 @@ describe("QtQuick.Loader", function() {
       done();
     };
     qml.start();
+    failTimeout(2000, done);
   });
   it("SourceComponentDelayed", function(done) {
     const qml = load("SourceComponentDelayed", this.div);
@@ -25,6 +26,7 @@ describe("QtQuick.Loader", function() {
       done();
     };
     qml.start();
+    failTimeout(2000, done);
   });
   it("set source to an empty string", function() {
     const qml = load("EmptySource", this.div);
