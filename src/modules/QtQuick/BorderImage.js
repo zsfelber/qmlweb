@@ -58,7 +58,7 @@ QmlWeb.registerQmlType({
     this.progress = 0;
     this.status = this.BorderImage.Loading;
     //const style = this.impl.style;
-    const imageURL = QmlWeb.$resolveImageURL(source);
+    const imageURL = this.engine.$resolveImageURL(source);
     QmlWeb.setStyle(this.icss, "OBorderImageSource", `url("${imageURL}")`);
     QmlWeb.setStyle(this.icss, "borderImageSource", `url("${imageURL}")`);
     this.$img.src = imageURL;

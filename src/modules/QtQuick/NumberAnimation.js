@@ -57,7 +57,7 @@ class NumberAnimation extends PropertyAnimation {
     }
   }
   $onRunningChanged(newVal) {
-    const engine = this.engine;
+    const engine = this.$engine;
     if (newVal) {
       this.$initLoop();
       engine.$addTicker(this);

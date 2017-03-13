@@ -54,17 +54,17 @@ QmlWeb.registerQmlType({
       return;
     }
 
-    const engine = this.engine;
-    var prevEvalObj = engine.$evaluatedObj;
+    const engine = this.$engine;
+    var prevEvalObj = QmlWeb.$evaluatedObj;
 
     try {
       // in case it is the same object, keeping the context set with QMLProperty.setEvaluatedObj because
       // it points to the corrent __proto__ of "this" :
       if (!prevEvalObj || prevEvalObj.$objectId !== this.$objectId) {
-        engine.$evaluatedObj = this;
+        QmlWeb.$evaluatedObj = this;
       }
 
-      const url = QmlWeb.resolveBasePath(fileName);
+      const url = this.engine.resolveBasePath(fileName);
       let $class = url.path + url.file;
       if (/\.qml$/.test($class)) {
         $class = $class.substring(0, $class.length-4);
@@ -83,19 +83,19 @@ QmlWeb.registerQmlType({
         throw new QmlWeb.AssertionError("Assertion failed Loader: !qmlComponent || this.sourceComponent!==qmlComponent : "+this.toString(true));
       }
     } finally {
-      engine.$evaluatedObj = prevEvalObj;
+      QmlWeb.$evaluatedObj = prevEvalObj;
     }
   }
 
   $onSourceComponentChanged(newItem) {
-    const engine = this.engine;
-    var prevEvalObj = engine.$evaluatedObj;
+    const engine = this.$engine;
+    var prevEvalObj = QmlWeb.$evaluatedObj;
 
     try {
       // in case it is the same object, keeping the context set with QMLProperty.setEvaluatedObj because
       // it points to the corrent __proto__ of "this" :
       if (!prevEvalObj || prevEvalObj.$objectId !== this.$objectId) {
-        engine.$evaluatedObj = this;
+        QmlWeb.$evaluatedObj = this;
       }
 
       if (!this.active) return;
@@ -106,7 +106,7 @@ QmlWeb.registerQmlType({
         return;
       }
 
-      this.item = newItem.createObject(engine.$evaluatedObj/*this or some proto  parent*/);
+      this.item = newItem.createObject(QmlWeb.$evaluatedObj/*this or some proto  parent*/);
       this.$updateGeometry();
 
       if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
@@ -118,7 +118,7 @@ QmlWeb.registerQmlType({
         this.loaded();
       }
     } finally {
-      engine.$evaluatedObj = prevEvalObj;
+      QmlWeb.$evaluatedObj = prevEvalObj;
     }
   }
   setSource(url, options) {

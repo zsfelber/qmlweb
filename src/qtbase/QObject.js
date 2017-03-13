@@ -4,7 +4,7 @@ class QObject {
   constructor(parent, meta) {
     this.$parent = parent;
     this.$base = this;
-    this.engine = QmlWeb.getEngine();
+    this.$engine = QmlWeb.getEngine();
 
     if (parent && parent.$tidyupList) {
       parent.$tidyupList.push(this);
@@ -173,7 +173,7 @@ class QObject {
 
     try {
 
-      const engine = this.engine;
+      const engine = this.$engine;
       // Remove start/stop/ticker entry from engine
       engine.$removeStart(this);
       engine.$removeStop(this);
@@ -187,7 +187,7 @@ class QObject {
   // http://doc.qt.io/qt-5/qtqml-javascript-dynamicobjectcreation.html
   destroy() {
     QObject.pendingComplete(this, true);
-    const engine = this.engine;
+    const engine = this.$engine;
     if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
       // We don't call those on first creation, as they will be called
       // by the regular creation-procedures at the right time.

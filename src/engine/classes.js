@@ -1,6 +1,6 @@
 
 function initMeta(self, meta, constructor) {
-  const engine = this.engine;
+  const engine = this;
   const info = constructor.$qmlTypeInfo;
   if (info) {
     self.$modinf = info;
@@ -62,7 +62,7 @@ function initMeta(self, meta, constructor) {
  */
 function construct(meta, parent, flags) {
 
-  const engine = this.engine;
+  const engine = this;
   // undefined -> 0
   flags |= 0;
 
@@ -77,8 +77,8 @@ function construct(meta, parent, flags) {
   if (superitem instanceof QmlWeb.QObject) {
     item = superitem.createChild();
 
-    const prevEvalObj = engine.$evaluatedObj;
-    engine.$evaluatedObj = item;
+    const prevEvalObj = QmlWeb.$evaluatedObj;
+    QmlWeb.$evaluatedObj = item;
 
     try {
 
@@ -129,7 +129,7 @@ function construct(meta, parent, flags) {
       QmlWeb.applyProperties(meta, item);
 
     } finally {
-      engine.$evaluatedObj = prevEvalObj;
+      QmlWeb.$evaluatedObj = prevEvalObj;
     }
 
   } else if (superitem instanceof QmlWeb.QMLComponent){
@@ -146,7 +146,7 @@ function constructSuper(meta, parent) {
   let item;
 
   // NOTE resolve superclass info:
-  var supermeta = QmlWeb.resolveClassImport(meta.$class, meta.$component);
+  var supermeta = this.resolveClassImport(meta.$class, meta.$component);
 
   if (supermeta.classConstructor) {
     // NOTE 1  internal class, module/qmldir cache:
@@ -214,7 +214,7 @@ function createComponentAndElement(meta, parent, flags, loaderComponent) {
 
 function createQmlObject(src, parent, file) {
 
-  const engine = this.engine;
+  const engine = this;
 
 
   // Returns url resolved relative to the URL of the caller.

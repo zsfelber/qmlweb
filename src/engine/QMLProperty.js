@@ -16,7 +16,7 @@ class QMLProperty {
     if (!obj) {
       throw new Error("Invalid QMLProperty:"+name+" of null, type:"+type+" options:"+JSON.stringify(options));
     }
-    this.engine = QmlWeb.getEngine();
+    this.$engine = QmlWeb.getEngine();
 
     this.stacks = QMLProperty;
 
@@ -60,8 +60,8 @@ class QMLProperty {
   // Called by update and set to actually set this.value, performing any type
   // conversion required.
   $setVal(newVal, flags, valParentObj) {
-    const engine = this.engine;
-    var prevEvalObj = engine.$evaluatedObj;
+    const engine = this.$engine;
+    var prevEvalObj = QmlWeb.$evaluatedObj;
 
     try {
       const isch = flags & QmlWeb.QMLPropertyFlags.SetChildren;
@@ -130,7 +130,7 @@ class QMLProperty {
       return this.value;
 
     } finally {
-      engine.$evaluatedObj = prevEvalObj;
+      QmlWeb.$evaluatedObj = prevEvalObj;
     }
   }
 
@@ -162,8 +162,8 @@ class QMLProperty {
   // 'update' reevaluates the get/set binding, stores or emits the value of the property, as determined from this.updateState
   update(flags, oldVal, valParentObj, dirtyNow) {
 
-    const engine = this.engine;
-    var prevEvalObj = engine.$evaluatedObj;
+    const engine = this.$engine;
+    var prevEvalObj = QmlWeb.$evaluatedObj;
 
     const origState = this.updateState;
     this.updateState |= QmlWeb.QMLPropertyState.Updating;
@@ -285,7 +285,7 @@ class QMLProperty {
       }
 
     } finally {
-      engine.$evaluatedObj = prevEvalObj;
+      QmlWeb.$evaluatedObj = prevEvalObj;
     }
   }
 
@@ -335,7 +335,7 @@ class QMLProperty {
 
     // defer exceptions, because it is still correct to register current eval tree state :
     let error;
-    const engine = this.engine;
+    const engine = this.$engine;
 
     if (engine.operationState & QmlWeb.QMLOperationState.Init) {
       if (this.updateState & QmlWeb.QMLPropertyState.LoadFromBinding) {
@@ -460,7 +460,7 @@ class QMLProperty {
   // Define setter
   set(newVal, flags, valParentObj) {
 
-    const engine = this.engine;
+    const engine = this.$engine;
     flags = flags || QmlWeb.QMLPropertyFlags.ReasonUser;
     if (this.readOnly && !(flags & QmlWeb.QMLPropertyFlags.Privileged)) {
       throw new Error(`property '${this.name}' has read only access`);
@@ -528,7 +528,7 @@ class QMLProperty {
 
   $set(newVal, oldVal, flags, valParentObj, queueItem) {
 
-    const engine = this.engine;
+    const engine = this.$engine;
     flags = flags || QmlWeb.QMLPropertyFlags.ReasonUser;
     if (this.readOnly && !(flags & QmlWeb.QMLPropertyFlags.Privileged)) {
       throw new Error(`property '${this.name}' has read only access`);
@@ -625,8 +625,8 @@ class QMLProperty {
   }
 
   setEvaluatedObj(valParentObj) {
-    const engine = this.engine;
-    var prevEvalObj = engine.$evaluatedObj;
+    const engine = this.$engine;
+    var prevEvalObj = QmlWeb.$evaluatedObj;
 
     // NOTE valParentObj(/bindingCtxObj) is passed through property.set,$set or $setVal, its in the descendant level in object type hierarchy (proto chain),
     // eg. passed along with SetChildren
@@ -660,7 +660,7 @@ class QMLProperty {
     // this.propDeclObj.$component : the QML supertype where the default property (eg"data") defined (eg"ItemBase")
     // this.bindingCtxObj.$component : the QML supertype where the current binding is initialized
     // these may be the supertype(s) of the actual parent (this.valParentObj) here:
-    engine.$evaluatedObj = this.valParentObj;
+    QmlWeb.$evaluatedObj = this.valParentObj;
   }
 
   static pushEvalStack() {

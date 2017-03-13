@@ -1,7 +1,7 @@
 
 class QMLComponent {
   constructor(meta, flags, loaderComponent) {
-    this.engine = QmlWeb.getEngine();
+    this.$engine = QmlWeb.getEngine();
 
     this.$objectId = this.$componentId = ++objectIds;
     this.$properties = {};
@@ -14,9 +14,9 @@ class QMLComponent {
     this.elementFlag = this.flags & QmlWeb.QMLComponentFlags.Element;
     this.cntPendingCompletions = 0;
 
-    const engine = this.engine;
+    const engine = this.$engine;
     // no component = is import root
-    const evalObj = engine.$evaluatedObj;
+    const evalObj = QmlWeb.$evaluatedObj;
     if (!loaderComponent && evalObj) loaderComponent = evalObj.$component;
     this.loaderComponent = loaderComponent;
 
@@ -62,7 +62,7 @@ class QMLComponent {
         //  meta.clazz.$file = meta.clazz.$file.toString();
 
         if (meta.$file !== meta.clazz.$file) {
-          const uri1 = QmlWeb.$parseUrl(meta.$file, true), uri2 = QmlWeb.$parseUrl(meta.clazz.$file, true);
+          const uri1 = this.engine.$parseUrl(meta.$file, true), uri2 = this.engine.$parseUrl(meta.clazz.$file, true);
           if (!uri1 || !uri2 || uri1.path !== uri2.path) {
             if (!QmlWeb.isTesting || !uri1 || !uri2 || (uri1.path !== "/"+uri2.path && uri2.path !== "/"+uri1.path && uri1.path !== "/base"+uri2.path && uri2.path !== "/base"+uri1.path)) {
               console.warn((QmlWeb.isTesting?"testing  ":"")+"$file-s in Component and class differ :  meta.$file:'"+meta.$file+"' === meta.clazz.$file:'"+meta.clazz.$file+"'  paths:"+(uri1?uri1.path:"<null>")+" vs "+(uri2?uri2.path:"<null>"));
@@ -122,7 +122,7 @@ class QMLComponent {
     this.$file = this.meta.$file;
     this.$imports = this.meta.$imports;
     if (this.$file) {
-      this.$basePathUrl = QmlWeb.resolveBasePath(this.$file);
+      this.$basePathUrl = this.engine.resolveBasePath(this.$file);
     }
 
   }
@@ -202,7 +202,7 @@ class QMLComponent {
     for (let i = 0; i < this.$jsImports.length; ++i) {
       const importDesc = this.$jsImports[i];
 
-      const uri = QmlWeb.$resolvePath(importDesc[1], this.$basePathUrl);
+      const uri = this.engine.$resolvePath(importDesc[1], this.$basePathUrl);
       const jsBinding = QmlWeb.importJavascript(uri, importDesc[3]);
 
       if (!jsBinding) {
@@ -213,14 +213,14 @@ class QMLComponent {
 
 
   $createObject(parent, properties = {}) {
-    const engine = this.engine;
+    const engine = this.$engine;
 
     const oldFlags = this.flags;
     const oldElementFlag = this.elementFlag;
     const oldCreateFlags = this.createFlags;
     // change base path to current component base path
     const oldState = engine.operationState;
-    const prevEvalObj = engine.$evaluatedObj;
+    const prevEvalObj = QmlWeb.$evaluatedObj;
 
     let item;
     try {
@@ -283,7 +283,7 @@ class QMLComponent {
       this.status = QmlWeb.Component.Error;
       throw err;
     } finally {
-      engine.$evaluatedObj = prevEvalObj;
+      QmlWeb.$evaluatedObj = prevEvalObj;
       engine.operationState = oldState;
       this.flags = oldFlags;
       this.createFlags = oldCreateFlags;

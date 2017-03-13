@@ -28,17 +28,17 @@ describe("QMLEngine.importPath", function() {
     QmlWeb.addImportPath("http://example.org/path/to/qml");
     QmlWeb.addImportPath("http://example.org/second/path");
 
-    QmlWeb.setImportPathList([]);
+    $$engine.setImportPathList([]);
     expect(engine.userAddedImportPaths.length).toBe(0);
 
     QmlWeb.addImportPath("http://example.org/path/to/qml");
     expect(engine.userAddedImportPaths.length).toBe(1);
 
-    QmlWeb.setImportPathList(["http://example.org/path3"]);
+    $$engine.setImportPathList(["http://example.org/path3"]);
     expect(engine.userAddedImportPaths.length).toBe(1);
     expect(engine.userAddedImportPaths[0]).toBe("http://example.org/path3");
 
-    QmlWeb.setImportPathList(["http://example.org/4", "http://example.org/5"]);
+    $$engine.setImportPathList(["http://example.org/4", "http://example.org/5"]);
     expect(engine.userAddedImportPaths.length).toBe(2);
     expect(engine.userAddedImportPaths[0]).toBe("http://example.org/4");
     expect(engine.userAddedImportPaths[1]).toBe("http://example.org/5");

@@ -70,7 +70,7 @@ function registerElement(name, file) {
         QmlWeb.setStyle(this.css, "display", "inline-block", {});
       }
 
-      const engine = this.engine = new QmlWeb.QMLEngine(this);
+      const engine = this.$engine = new QmlWeb.QMLEngine(this);
       QmlWeb.loadFile(file);
       engine.start();
       const qml = this.qml = engine.rootObject;

@@ -23,7 +23,7 @@ class Connection {
 
 class Signal {
   constructor(name, params = [], options = {}) {
-    this.engine = QmlWeb.getEngine();
+    this.$engine = QmlWeb.getEngine();
 
     this.$objectId = this.$signalId = ++objectIds;
     this.$name = name;

@@ -135,10 +135,10 @@ class Repeater extends Item {
     const model = this.$getModel();
     const container = this.repeaterContainer();
     let index;
-    const engine = this.engine;
-    var prevEvalObj = engine.$evaluatedObj;
+    const engine = this.$engine;
+    var prevEvalObj = QmlWeb.$evaluatedObj;
     try {
-      engine.$evaluatedObj = container;
+      QmlWeb.$evaluatedObj = container;
 
       var outallchanges = {};
       for (index = startIndex; index < endIndex; index++) {
@@ -196,7 +196,7 @@ class Repeater extends Item {
 
       }
     } finally {
-      engine.$evaluatedObj = prevEvalObj;
+      QmlWeb.$evaluatedObj = prevEvalObj;
     }
 
     if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {

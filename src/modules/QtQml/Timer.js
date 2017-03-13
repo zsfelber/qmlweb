@@ -25,7 +25,7 @@ QmlWeb.registerQmlType({
      * the timer will trigger. */
     this.runningChanged.connect(this, this.$onRunningChanged);
 
-    const engine = this.engine;
+    const engine = this.$engine;
     engine.$registerStart(this, () => {
       if (this.running) {
         this.restart();

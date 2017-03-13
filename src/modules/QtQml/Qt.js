@@ -27,7 +27,7 @@ const Qt = {
   // Returns url resolved relative to the URL of the caller.
   // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
   // in QMLUrl.js
-  resolvedUrl: QmlWeb.$resolvePath,
+  resolvedUrl: QMLEngine.prototype.$resolvePath,
 
   size: function size(width, height) {
     return new QmlWeb.QSizeF(width, height);
@@ -35,9 +35,9 @@ const Qt = {
 
   include(path, importAlias) {
     let contextMap;
+    const engine = QmlWeb.$evaluatedObj.$engine;
     if (!importAlias) {
-      const engine = this.engine;
-      const $c = engine.$evaluatedObj.$context;
+      const $c = QmlWeb.$evaluatedObj.$context;
       const $p = $c.$pageContext;
       // recursive import alias ( see :
       //   tests/QMLEngine/qml/importTestInclude.js
@@ -47,7 +47,7 @@ const Qt = {
       contextMap = $p.$$_contextMap;
     }
 
-    const uri = QmlWeb.$resolvePath(path);
+    const uri = engine.$resolvePath(path);
     const jsBinding = QmlWeb.importJavascript(uri, importAlias, contextMap);
 
     if (!jsBinding) {

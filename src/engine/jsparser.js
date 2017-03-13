@@ -1,13 +1,13 @@
 // Load resolved file and parse as JavaScript
 function importJavascript(file, importAlias, contextMap) {
 
-  const url = QmlWeb.$parseUrl(file);
+  const url = this.$parseUrl(file);
   if (!url) {
     return undefined;
   }
 
-  const engine = this.engine;
-  const $c = engine.$evaluatedObj.$context;
+  const engine = this;
+  const $c = QmlWeb.$evaluatedObj.$context;
   const $p = $c.$pageContext;
   let jsBinding;
   /* it is cached to handle multiple includes of one */

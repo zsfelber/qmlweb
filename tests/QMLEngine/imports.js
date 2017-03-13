@@ -119,7 +119,7 @@ describe("QMLEngine.imports", function() {
     }
   });
   it("directory imports are local to file, should fail", function() {
-    const x = QmlWeb.resolveBasePath("/");
+    const x = $$engine.resolveBasePath("/");
     try {
       load("LocalToFile/DirectoryFail", this.div);
       expect("It Should throw exception! Its message : ").toBe("QML class or constructor not found : tests/QMLEngine/qml/ImportLocalToFile/ImportMe.qml");

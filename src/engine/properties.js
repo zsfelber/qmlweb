@@ -163,9 +163,9 @@ function createProperty(type, obj, propName, options, bindingFlags=0) {
  */
 function applyProperties(metaObject, item) {
   const QMLProperty = QmlWeb.QMLProperty;
-  const engine = this.engine;
-  var prevEvalObj = engine.$evaluatedObj;
-  engine.$evaluatedObj = item;
+  const engine = this;
+  var prevEvalObj = QmlWeb.$evaluatedObj;
+  QmlWeb.$evaluatedObj = item;
 
   function _hand_err(err, i) {
     if (err instanceof QmlWeb.FatalError) throw err;
@@ -226,7 +226,7 @@ function applyProperties(metaObject, item) {
       }
     }
   } finally {
-    engine.$evaluatedObj = prevEvalObj;
+    QmlWeb.$evaluatedObj = prevEvalObj;
   }
 }
 
@@ -299,7 +299,7 @@ function applyProperty(item, i, value) {
 }
 
 function connectSignal(item, signalName, value) {
-  const engine = this.engine;
+  const engine = this;
   const QMLBinding = QmlWeb.QMLBinding;
   const _signal = item[signalName];
 

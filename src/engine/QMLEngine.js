@@ -248,7 +248,7 @@ class QMLEngine {
     if (operationFlags & QmlWeb.QMLOperationState.Remote) {
       if (serverWsAddress !== undefined) {
         if (/^\d+$/.test(serverWsAddress)) {
-          var url = QmlWeb.$parseUrl(window.location.href);
+          var url = this.$parseUrl(window.location.href);
           wsUrl = "ws://"+url.hostname+":"+(serverWsAddress?serverWsAddress:url.port);
         } else {
           if (/^ws:[/]/.test(serverWsAddress)) {
@@ -278,11 +278,11 @@ class QMLEngine {
     }
 
     // used only in tests externally:
-    this.$basePathUrl = QmlWeb.resolveBasePath(file);
+    this.$basePathUrl = this.resolveBasePath(file);
 
     // TODO gz resolveClass  += engine.containers[...]
-    const respath = QmlWeb.$resolvePath(null, this.$basePathUrl);
-    const clazz = QmlWeb.resolveClass(respath);
+    const respath = this.$resolvePath(null, this.$basePathUrl);
+    const clazz = this.resolveClass(respath);
 
     const component = this.loadQMLTree(clazz, parent, file, operationFlags, serverWsAddress, isClientSide, webSocket);
     QmlWeb.log("loadFile success. LOADED : "+file);

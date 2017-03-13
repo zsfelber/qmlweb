@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // http://doc.qt.io/qt-5/qqmlengine.html#addImportPath
 
 function addImportPath(dirpath) {
-  const engine = this.engine;
+  const engine = this;
 
   engine.userAddedImportPaths.push(dirpath);
 }
@@ -44,7 +44,7 @@ function addImportPath(dirpath) {
  * The importContextId ensures it is only accessible from the file in which
  * it was imported. */
 function addComponentImportPath(component, dirpath, qualifier) {
-  const engine = this.engine;
+  const engine = this;
 
 
   const paths = component.componentImportPaths;
@@ -101,7 +101,7 @@ function loadImports(component, importsArray) {
     throw new Error("loadImports   No component:"+component);
   }
 
-  const engine = this.engine;
+  const engine = this;
 
   if (!engine.qmldirsContents) {
     engine.qmldirsContents = {}; // cache
@@ -126,7 +126,7 @@ function loadImports(component, importsArray) {
 }
 
 function loadImport(entry, component) {
-  const engine = this.engine;
+  const engine = this;
 
   var curBaseUrl = component.$basePathUrl;
   let name = entry[1];
@@ -141,7 +141,7 @@ function loadImport(entry, component) {
   const nameIsDir = !nameIsQualifiedModuleName && !nameIsUrl && !nameIsJs;
 
   if (nameIsDir) {
-    name = $resolvePath(name, curBaseUrl);
+    name = this.$resolvePath(name, curBaseUrl);
     if (name[name.length - 1] === "/") {
       // remove trailing slash as it required for `readQmlDir`
       name = name.substr(0, name.length - 1);
@@ -167,7 +167,7 @@ function loadImport(entry, component) {
       // 3. Js file, don't need qmldir
     } else {
       // 4. qt-style lookup for qualified module
-      const probableDirs = [curBaseUrl].concat(QmlWeb.importPathList());
+      const probableDirs = [curBaseUrl].concat(this.importPathList());
       var diredName = name.replace(/\./g, "/");
       qrcName = "qrc:/"+diredName;
 

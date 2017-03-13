@@ -30,8 +30,8 @@ More details here: http://doc.qt.io/qt-5/qml-url.html
 QmlWeb.qrcModules = {};
 QmlWeb.qrc = {};
 
-QmlWeb.addQrc = function(path, impl) {
-  const url = QmlWeb.$parseUrl(path, true);
+QMLEngine.prototype.addQrc = function(path, impl) {
+  const url = this.$parseUrl(path, true);
 
   var m = QmlWeb.qrcModules[url.baseUri];
   if (!m) {

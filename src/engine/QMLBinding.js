@@ -74,7 +74,7 @@ class QMLBinding {
  * @return {Object} Object representing the binding
  */
   constructor(src, property, flags, info) {
-    this.engine = QmlWeb.getEngine();
+    this.$engine = QmlWeb.getEngine();
     // this.flags states whether the binding is a simple js statement, a
     // function containing a return statement, or a block of statements.
     // it may also fine tune other aspects, like bidirectionality of binding or
@@ -168,9 +168,9 @@ class QMLBinding {
   }*/
 
   get(obj) {
-    const engine = this.engine;
-    var prevEvalObj = engine.$evaluatedObj;
-    engine.$evaluatedObj = obj;
+    const engine = this.$engine;
+    var prevEvalObj = QmlWeb.$evaluatedObj;
+    QmlWeb.$evaluatedObj = obj;
 
     // .call is needed for `this` support
     try {
@@ -196,14 +196,14 @@ class QMLBinding {
       err.srcdumpok = 1;
       throw err;
     } finally {
-      engine.$evaluatedObj = prevEvalObj;
+      QmlWeb.$evaluatedObj = prevEvalObj;
     }
   }
 
   set(obj, value, flags, valParentObj) {
-    const engine = this.engine;
-    var prevEvalObj = engine.$evaluatedObj;
-    engine.$evaluatedObj = obj;
+    const engine = this.$engine;
+    var prevEvalObj = QmlWeb.$evaluatedObj;
+    QmlWeb.$evaluatedObj = obj;
 
     // .call is needed for `this` support
     try {
@@ -224,15 +224,15 @@ class QMLBinding {
       err.srcdumpok = 1;
       throw err;
     } finally {
-      engine.$evaluatedObj = prevEvalObj;
+      QmlWeb.$evaluatedObj = prevEvalObj;
     }
   }
 
   // this == connection : var connection = Signal.connect(...); binding.run.call(connection, ...);
   run() {
-    const engine = this.engine;
-    var prevEvalObj = engine.$evaluatedObj;
-    engine.$evaluatedObj = this.bindingObj;
+    const engine = this.$engine;
+    var prevEvalObj = QmlWeb.$evaluatedObj;
+    QmlWeb.$evaluatedObj = this.bindingObj;
 
     try {
       if (!this.binding.implRun) {
@@ -252,7 +252,7 @@ class QMLBinding {
       err.srcdumpok = 1;
       throw err;
     } finally {
-      engine.$evaluatedObj = prevEvalObj;
+      QmlWeb.$evaluatedObj = prevEvalObj;
     }
   }
 

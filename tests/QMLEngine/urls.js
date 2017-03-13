@@ -4,26 +4,26 @@ describe("QMLEngine.urls", function() {
 
   it("can parse remote url", function() {
     var url;
-    url = QmlWeb.$parseUrl("http://localhost:9876/samples/debug.html");
+    url = $$engine.$parseUrl("http://localhost:9876/samples/debug.html");
     expect(url.scheme).toBe("http:");
     expect(url.path).toBe("/samples/");
     expect(url.host).toBe("localhost:9876");
     expect(url.port).toBe("9876");
     expect(url.prefix).toBe("//");
 
-    url = QmlWeb.$parseUrl("qrc:/SomeDir/LoaderRelativeDots.qml");
+    url = $$engine.$parseUrl("qrc:/SomeDir/LoaderRelativeDots.qml");
     expect(url.scheme).toBe("qrc:");
     expect(url.prefix).toBe("");
     expect(url.host).toBe("");
     expect(url.path).toBe("/SomeDir/");
 
-    url = QmlWeb.$parseUrl("qrc://SomeDir/LoaderRelativeDots.qml");
+    url = $$engine.$parseUrl("qrc://SomeDir/LoaderRelativeDots.qml");
     expect(url.scheme).toBe("qrc:");
     expect(url.prefix).toBe("//");
     expect(url.host).toBe("SomeDir");
     expect(url.path).toBe("/");
 
-    url = QmlWeb.$parseUrl("ftp:////localhost");
+    url = $$engine.$parseUrl("ftp:////localhost");
     expect(url.host).toBe("localhost");
     expect(url.port).toBe(undefined);
     expect(url.prefix).toBe("//");
@@ -34,11 +34,11 @@ describe("QMLEngine.urls", function() {
 
   it("can parse local asbolute uri", function() {
     var url;
-    url = QmlWeb.$parseUrl("/directory/samples/debug.html", true);
+    url = $$engine.$parseUrl("/directory/samples/debug.html", true);
     expect(url).not.toBe(undefined);
     expect(url.path).toBe("/directory/samples/");
 
-    url = QmlWeb.$parseUrl("//directory/samples/debug.html", true);
+    url = $$engine.$parseUrl("//directory/samples/debug.html", true);
     expect(url.host).toBe("directory");
     expect(url.hostname).toBe("directory");
     expect(url.path).toBe("/samples/");
@@ -48,7 +48,7 @@ describe("QMLEngine.urls", function() {
   it("Qt.resolvedUrl", function() {
     var qml = load("ResolvedUrl", this.div);
     /* Get the base address of the URL */
-    const x = QmlWeb.resolveBasePath("/");
+    const x = $$engine.resolveBasePath("/");
 
     expect(qml.outer).toBe(x.uri + "base/tests/");
     expect(qml.current).toBe(qml.outer + "QMLEngine/qml/");

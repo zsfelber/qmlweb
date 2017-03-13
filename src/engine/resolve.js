@@ -48,14 +48,14 @@ function normalizePath(path) {
 }
 
 function resolveBasePath(uri) {
-  let pu = $parseUrl(uri);
+  let pu = this.$parseUrl(uri);
   if (!pu) {
     if (!this.$basePathUrlA) {
       // Create an anchor element to get the absolute path from the DOM
       this.$basePathUrlA = document.createElement("a");
     }
     this.$basePathUrlA.href = uri;
-    pu = $parseUrl(this.$basePathUrlA.href);
+    pu = this.$parseUrl(this.$basePathUrlA.href);
     if (!pu) {
       throw new QmlWeb.AssertionError("Assertion failed : <A> element href should be absolute url, but it is : ("+uri+" ->) "+this.$basePathUrlA.href)
     }
@@ -80,13 +80,13 @@ function qualifiedImportPath(component, qualifier) {
 }
 
 function setImportPathList(arrayOfDirs) {
-  const engine = this.engine;
+  const engine = this;
 
   engine.userAddedImportPaths = arrayOfDirs;
 }
 
 function importPathList() {
-  const engine = this.engine;
+  const engine = this;
 
   return engine.userAddedImportPaths;
 }
@@ -97,7 +97,7 @@ function importPathList() {
 // `http://example.com/controls/qmldir`
 
 function addModulePath(moduleName, dirPath) {
-  const engine = this.engine;
+  const engine = this;
 
   // Keep the mapping. It will be used in loadImports() function.
   // Remove trailing slash as it required for `readQmlDir`.
@@ -128,7 +128,7 @@ function addModulePath(moduleName, dirPath) {
 }*/
 
 function resolveClass(file) {
-  const engine = this.engine;
+  const engine = this;
 
 
   let clazz = engine.classes[file];
@@ -143,9 +143,9 @@ function resolveClass(file) {
 
 
 function resolveImport(name, component) {
-  const engine = this.engine;
+  const engine = this;
 
-  const evalObj = engine.$evaluatedObj;
+  const evalObj = QmlWeb.$evaluatedObj;
   if (!component) {
     component = evalObj.$component;
   }
@@ -156,18 +156,18 @@ function resolveImport(name, component) {
   // If "name" was a full URL, "file" will be equivalent to name and this
   // will try and load the Component from the full URL, otherwise, this
   // doubles as checking for the file in the current directory.
-  clazz = resolveClass(file);
+  clazz = this.resolveClass(file);
 
   // If the Component is not found, and it is not a URL, look for "name" in
   // this context's importSearchPaths
   if (!clazz) {
     const nameIsUrl = /^(\w+):/.test(name)||name.startsWith("//");
     if (!nameIsUrl) {
-      const moreDirs = importSearchPaths(component);
+      const moreDirs = this.importSearchPaths(component);
       for (let i = 0; i < moreDirs.length; i++) {
         file = `${moreDirs[i]}${name}`;
         // TODO gz resolveClass  += engine.containers[...]
-        clazz = resolveClass(file);
+        clazz = this.resolveClass(file);
         if (clazz) break;
       }
     }
@@ -181,9 +181,9 @@ function resolveImport(name, component) {
 }
 
 function resolveClassImport(name, component) {
-  const engine = this.engine;
+  const engine = this;
   if (!component) {
-    const evalObj = engine.$evaluatedObj;
+    const evalObj = QmlWeb.$evaluatedObj;
     component = evalObj.$component;
   }
 
@@ -223,7 +223,7 @@ function resolveClassImport(name, component) {
     if (qdirInfo) {
       filePath = qdirInfo.url;
     } else if (path.length === 2) {
-      const qualified = qualifiedImportPath(
+      const qualified = this.qualifiedImportPath(
         component, path[0]
       );
       filePath = `${qualified}${path[1]}.qml`;
@@ -312,11 +312,11 @@ function $resolvePath(file, basePathUrl, component) {
   if (file && (/^(\w+):/.test(file)||file.startsWith("//"))) {
     return file;
   }
-  const engine = this.engine;
+  const engine = this;
 
   if (!basePathUrl) {
     if (!component) {
-      const evalObj = engine.$evaluatedObj;
+      const evalObj = QmlWeb.$evaluatedObj;
       component = evalObj.$component;
     }
 
@@ -348,7 +348,7 @@ function $resolvePath(file, basePathUrl, component) {
   }
   let url;
   // Remove duplicate slashes and dot segments in the path
-  path = normalizePath(path);
+  path = this.normalizePath(path);
   url = `${basePathUrl.baseUri0}${path}`;
 
   return url;
@@ -357,7 +357,7 @@ function $resolvePath(file, basePathUrl, component) {
 // Return a DOM-valid path to load the image (fileURL is an already-resolved
 // URL)
 function $resolveImageURL(fileURL) {
-  const url = $parseUrl(fileURL);
+  const url = this.$parseUrl(fileURL);
   // If we are within the resource system, look up a "real" path that can be
   // used by the DOM. If not found, return the path itself without the
   // "qrc:/" scheme.
@@ -402,7 +402,7 @@ function $instanceOf(o, typestring, component) {
   case "time":
     return typeof(o) === "date";
   case "url":
-    return typeof(o) === "string" ? $parseUrl(o) : false;
+    return typeof(o) === "string" ? this.$parseUrl(o) : false;
   case "RegExp":
     if (o instanceof RegExp) return true;
     else break;
@@ -414,7 +414,7 @@ function $instanceOf(o, typestring, component) {
 
   if (o && o.$base) {
 
-    var clinfo = QmlWeb.resolveClassImport(typestring, component);
+    var clinfo = this.resolveClassImport(typestring, component);
     let f;
     if (clinfo.constructor) {
       return o.$leaf instanceof clinfo.constructor;
@@ -468,4 +468,4 @@ QMLEngine.prototype.$resolvePath = $resolvePath;
 // Return a DOM-valid path to load the image (fileURL is an already-resolved
 // URL)
 QMLEngine.prototype.$resolveImageURL = $resolveImageURL;
-QMLEngine.prototype.$instanceOf = $instanceOf;
+QmlWeb.$instanceOf = QMLEngine.prototype.$instanceOf = $instanceOf;
