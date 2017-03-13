@@ -89,7 +89,7 @@ describe("QMLEngine.scope", function() {
       var qml = load("Repeater", this.div);
       qml.yield = function(width) {
         expect(width).toBe(200);
-        if (done) done();
+        done();
       };
     }
   );

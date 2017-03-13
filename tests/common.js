@@ -105,21 +105,54 @@ var customMatchers = {
     const F = arguments[1];
     const D = arguments[2];
     const args = QmlWeb.helpers.slice(arguments, 0);
-    args[1] = F ? function _fwd() {
-      try {
-        thereisDeferredCleanup = D;
-        F.apply(this, arguments);
-      } finally {
-        if (D) {
-          D.list = cleanupList;
-          D.engine = engine;
-          cleanupList = [];
-          engine = null;
-        } else {
-          cleanup();
+    if (!F) {
+      throw new Error("it : Callback function is missing.");
+    }
+    if (/^function\s*\w*\s*\(\s*done\b/.test(F.toString())) {
+      console.warn("Async mode : it(done) is used.");
+      args[1] = function _fwd(_done) {
+        const done = arguments[0];
+        if (!done) {
+          throw new Error("done() is not defined.");
         }
-      }
-    } : null;
+
+        try {
+          thereisDeferredCleanup = D;
+          F.apply(this, arguments);
+        } finally {
+          if (D) {
+            D.list = cleanupList;
+            D.engine = engine;
+            cleanupList = [];
+            engine = null;
+          } else {
+            cleanup();
+          }
+        }
+      };
+    } else {
+      args[1] = function _fwd() {
+        const done = arguments[0];
+        if (done) {
+          throw new Error("done() is defined.");
+        }
+
+        try {
+          thereisDeferredCleanup = D;
+          F.apply(this, arguments);
+        } finally {
+          if (D) {
+            D.list = cleanupList;
+            D.engine = engine;
+            cleanupList = [];
+            engine = null;
+          } else {
+            cleanup();
+          }
+        }
+      };
+    }
+
     itOrig.apply(this, args);
   };
 

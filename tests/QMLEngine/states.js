@@ -13,7 +13,7 @@ describe("QMLEngine.states", function() {
         expect(qml.value).toBe(20);
       } else {
         expect(qml.value).toBe(10);
-        if (done) done();
+        done();
       }
       count += 1;
     };
@@ -33,7 +33,7 @@ describe("QMLEngine.states", function() {
         expect(qml.value).toBe(30);
       } else {
         expect(qml.value).toBe(10);
-        if (done) done();
+        done();
       }
       count += 1;
     };

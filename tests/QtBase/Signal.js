@@ -54,6 +54,9 @@ describe("QtBase.Signal", function() {
     expect(result).toBe(24);
   });
 
+  beforeEach(function(done) {
+    done();
+  });
   var defcleanup2 = {};
   it("QueuedConnection", function(done) {
     var signal = new QmlWeb.Signal();
@@ -73,11 +76,15 @@ describe("QtBase.Signal", function() {
     expect(result).toBe(0);
     signal.execute();
     expect(result).toBe(0);
+    var called = false;
     setTimeout(function() {
+      called = true;
       expect(result).toBe(23);
-      if (done) done();
       console.log("Finished : SignalQueuedConnection");
       cleanup(defcleanup2.list);
+      done();
     }, 10);
+    expect(called).toBe(false);
+
   }, defcleanup2);
 });
