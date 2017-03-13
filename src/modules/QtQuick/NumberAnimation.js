@@ -51,8 +51,6 @@ class NumberAnimation extends PropertyAnimation {
       this.paused = false;
       this.$startLoop();
       QmlWeb.engine.$addTicker(this);
-      this.$startTime = Date.now();
-      this.$ticker();
     } else if (this.alwaysRunToEnd && this.$at < 1) {
       this.$loop = -1; // -1 is used as a marker to stop
     } else {
@@ -74,7 +72,6 @@ class NumberAnimation extends PropertyAnimation {
       this.$loop = 0;
     } else {
       this.$startLoop();
-      this.$ticker();
     }
   }
 }
