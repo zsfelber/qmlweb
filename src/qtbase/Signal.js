@@ -23,6 +23,8 @@ class Connection {
 
 class Signal {
   constructor(name, params = [], options = {}) {
+    this.engine = QmlWeb.getEngine();
+
     this.$objectId = this.$signalId = ++objectIds;
     this.$name = name;
     this.connectedSlots = [];
@@ -205,20 +207,20 @@ class Signal {
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
       if (err instanceof QmlWeb.FatalError) throw err;
-      const engine = QmlWeb.getEngine();
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
-           || ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
+      const engine = desc.$signal.engine;
+      if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
+           || ((engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
         if (desc.binding) {
           QmlWeb.warn("Signal : "+QmlWeb.objToStringSafe(desc.thisObj)+" . "+ desc.$signal.$name + (desc.slotObj!==desc.thisObj?" slotObj:" + QmlWeb.objToStringSafe(desc.slotObj):"") +" slot(autobound) error:", err);
         } else {
           QmlWeb.warn("Signal : "+QmlWeb.objToStringSafe(desc.thisObj)+" . "+ desc.$signal.$name + (desc.slotObj!==desc.thisObj?" slotObj:" + QmlWeb.objToStringSafe(desc.slotObj):"") +" slot(user function) error:", err);
         }
-      } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
+      } else if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
         if (err.ctType === "UninitializedEvaluation")
-          QmlWeb.engine.currentPendingOp.warnings.push({loc:"$execute", desc, args, err})
+          engine.currentPendingOp.warnings.push({loc:"$execute", desc, args, err})
           ;
         else
-          QmlWeb.engine.currentPendingOp.errors.push({loc:"$execute", desc, args, err});
+          engine.currentPendingOp.errors.push({loc:"$execute", desc, args, err});
       }
       err.srcdumpok = 1;
     }

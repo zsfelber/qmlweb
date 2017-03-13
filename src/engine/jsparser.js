@@ -6,8 +6,8 @@ function importJavascript(file, importAlias, contextMap) {
     return undefined;
   }
 
-  const engine = QmlWeb.getEngine();
-  const $c = QmlWeb.engine.$evaluatedObj.$context;
+  const engine = this.engine;
+  const $c = engine.$evaluatedObj.$context;
   const $p = $c.$pageContext;
   let jsBinding;
   /* it is cached to handle multiple includes of one */

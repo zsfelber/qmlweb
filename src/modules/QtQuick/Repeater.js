@@ -135,10 +135,10 @@ class Repeater extends Item {
     const model = this.$getModel();
     const container = this.repeaterContainer();
     let index;
-    const engine = QmlWeb.getEngine();
-    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
+    const engine = this.engine;
+    var prevEvalObj = engine.$evaluatedObj;
     try {
-      QmlWeb.engine.$evaluatedObj = container;
+      engine.$evaluatedObj = container;
 
       var outallchanges = {};
       for (index = startIndex; index < endIndex; index++) {
@@ -196,13 +196,13 @@ class Repeater extends Item {
 
       }
     } finally {
-      QmlWeb.engine.$evaluatedObj = prevEvalObj;
+      engine.$evaluatedObj = prevEvalObj;
     }
 
-    if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+    if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
       // We don't call those on first creation, as they will be called
       // by the regular creation-procedures at the right time.
-      QmlWeb.engine.processPendingOperations();
+      engine.processPendingOperations();
     }
 
     if (outallchanges.children) {

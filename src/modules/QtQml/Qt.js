@@ -36,8 +36,8 @@ const Qt = {
   include(path, importAlias) {
     let contextMap;
     if (!importAlias) {
-      const engine = QmlWeb.getEngine();
-      const $c = QmlWeb.engine.$evaluatedObj.$context;
+      const engine = this.engine;
+      const $c = engine.$evaluatedObj.$context;
       const $p = $c.$pageContext;
       // recursive import alias ( see :
       //   tests/QMLEngine/qml/importTestInclude.js

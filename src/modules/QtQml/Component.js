@@ -1,6 +1,7 @@
 
 class QMLComponent {
   constructor(meta, flags, loaderComponent) {
+    this.engine = QmlWeb.getEngine();
 
     this.$objectId = this.$componentId = ++objectIds;
     this.$properties = {};
@@ -13,9 +14,9 @@ class QMLComponent {
     this.elementFlag = this.flags & QmlWeb.QMLComponentFlags.Element;
     this.cntPendingCompletions = 0;
 
-    const engine = QmlWeb.getEngine();
+    const engine = this.engine;
     // no component = is import root
-    const evalObj = QmlWeb.engine.$evaluatedObj;
+    const evalObj = engine.$evaluatedObj;
     if (!loaderComponent && evalObj) loaderComponent = evalObj.$component;
     this.loaderComponent = loaderComponent;
 
@@ -212,7 +213,7 @@ class QMLComponent {
 
 
   $createObject(parent, properties = {}) {
-    const engine = QmlWeb.getEngine();
+    const engine = this.engine;
 
     const oldFlags = this.flags;
     const oldElementFlag = this.elementFlag;

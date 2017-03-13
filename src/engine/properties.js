@@ -163,21 +163,21 @@ function createProperty(type, obj, propName, options, bindingFlags=0) {
  */
 function applyProperties(metaObject, item) {
   const QMLProperty = QmlWeb.QMLProperty;
-  const engine = QmlWeb.getEngine();
-  var prevEvalObj = QmlWeb.engine.$evaluatedObj;
-  QmlWeb.engine.$evaluatedObj = item;
+  const engine = this.engine;
+  var prevEvalObj = engine.$evaluatedObj;
+  engine.$evaluatedObj = item;
 
   function _hand_err(err, i) {
     if (err instanceof QmlWeb.FatalError) throw err;
-    if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
-         || ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
-      QmlWeb.warn("Cannot apply property : "+item+" . "+i+"  opstate:"+QmlWeb.QMLOperationState.toString(QmlWeb.engine.operationState));
-    } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
+    if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
+         || ((engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
+      QmlWeb.warn("Cannot apply property : "+item+" . "+i+"  opstate:"+QmlWeb.QMLOperationState.toString(engine.operationState));
+    } else if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
       if (err.ctType === "UninitializedEvaluation")
-        QmlWeb.engine.currentPendingOp.warnings.push({loc:"applyProperties", err, item, i})
+        engine.currentPendingOp.warnings.push({loc:"applyProperties", err, item, i})
         ;
       else
-        QmlWeb.engine.currentPendingOp.errors.push({loc:"applyProperties", err, item, i});
+        engine.currentPendingOp.errors.push({loc:"applyProperties", err, item, i});
     }
   }
 
@@ -226,7 +226,7 @@ function applyProperties(metaObject, item) {
       }
     }
   } finally {
-    QmlWeb.engine.$evaluatedObj = prevEvalObj;
+    engine.$evaluatedObj = prevEvalObj;
   }
 }
 
@@ -299,7 +299,7 @@ function applyProperty(item, i, value) {
 }
 
 function connectSignal(item, signalName, value) {
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
   const QMLBinding = QmlWeb.QMLBinding;
   const _signal = item[signalName];
 
@@ -343,7 +343,7 @@ function connectSignal(item, signalName, value) {
       value.flags |= QMLBindingFlags.ImplFunction;
       value.compile();
     } catch (err) {
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+      if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
         QmlWeb.warn("connectSignal/slot compile error : "+
                      (err.srcdumpok?" . signal:"+signalName+" :":" :")+err.message+" "+
                      (err.srcdumpok?"srcdump:ok":""+connection));

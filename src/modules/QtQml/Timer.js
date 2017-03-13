@@ -25,14 +25,14 @@ QmlWeb.registerQmlType({
      * the timer will trigger. */
     this.runningChanged.connect(this, this.$onRunningChanged);
 
-    const engine = QmlWeb.getEngine();
-    QmlWeb.engine.$registerStart(this, () => {
+    const engine = this.engine;
+    engine.$registerStart(this, () => {
       if (this.running) {
         this.restart();
       }
     });
 
-    QmlWeb.engine.$registerStop(this, () => this.stop());
+    engine.$registerStop(this, () => this.stop());
     this.tick = this.$ticker.bind(this);
   }
   start() {

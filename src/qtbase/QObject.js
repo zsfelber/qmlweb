@@ -4,6 +4,7 @@ class QObject {
   constructor(parent, meta) {
     this.$parent = parent;
     this.$base = this;
+    this.engine = QmlWeb.getEngine();
 
     if (parent && parent.$tidyupList) {
       parent.$tidyupList.push(this);
@@ -62,8 +63,8 @@ class QObject {
       opId
     };
 
-    const engine = QmlWeb.getEngine();
-    QmlWeb.engine.addPendingOp(itm);
+    const engine = item.engine;
+    engine.addPendingOp(itm);
   }
 
   initializeContext(parent) {
@@ -172,11 +173,11 @@ class QObject {
 
     try {
 
-      const engine = QmlWeb.getEngine();
+      const engine = this.engine;
       // Remove start/stop/ticker entry from engine
-      QmlWeb.engine.$removeStart(this);
-      QmlWeb.engine.$removeStop(this);
-      QmlWeb.engine.$removeTicker(this);
+      engine.$removeStart(this);
+      engine.$removeStop(this);
+      engine.$removeTicker(this);
     } catch (err) {
       console.error("$delete error : ", this, err);
     }
@@ -186,11 +187,11 @@ class QObject {
   // http://doc.qt.io/qt-5/qtqml-javascript-dynamicobjectcreation.html
   destroy() {
     QObject.pendingComplete(this, true);
-    const engine = QmlWeb.getEngine();
-    if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+    const engine = this.engine;
+    if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
       // We don't call those on first creation, as they will be called
       // by the regular creation-procedures at the right time.
-      QmlWeb.engine.processPendingOperations();
+      engine.processPendingOperations();
     }
   }
 

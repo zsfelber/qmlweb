@@ -1,6 +1,6 @@
 
 function initMeta(self, meta, constructor) {
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
   const info = constructor.$qmlTypeInfo;
   if (info) {
     self.$modinf = info;
@@ -25,16 +25,16 @@ function initMeta(self, meta, constructor) {
           QmlWeb.createProperty(desc.type, self, name, desc, QMLBindingFlags.ContextNullable);
         } catch (err) {
           if (err instanceof QmlWeb.FatalError) throw err;
-          if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
-               || ((QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
+          if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
+               || ((engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
             QmlWeb.warn("Cannot create object property from module definition : "+self.$classname+"("+self.$objectId+") . "+name+"  opstate:"+
-                         QmlWeb.QMLOperationState.toString(QmlWeb.engine.operationState), err);
-          } else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Starting) {
+                         QmlWeb.QMLOperationState.toString(engine.operationState), err);
+          } else if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
             if (err.ctType === "UninitializedEvaluation")
-              QmlWeb.engine.currentPendingOp.warnings.push({loc:"initMeta", type:desc.type, self, name, err})
+              engine.currentPendingOp.warnings.push({loc:"initMeta", type:desc.type, self, name, err})
               ;
             else
-              QmlWeb.engine.currentPendingOp.errors.push({loc:"initMeta", type:desc.type, self, name, err});
+              engine.currentPendingOp.errors.push({loc:"initMeta", type:desc.type, self, name, err});
           }
         }
       }
@@ -62,7 +62,7 @@ function initMeta(self, meta, constructor) {
  */
 function construct(meta, parent, flags) {
 
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
   // undefined -> 0
   flags |= 0;
 
@@ -77,8 +77,8 @@ function construct(meta, parent, flags) {
   if (superitem instanceof QmlWeb.QObject) {
     item = superitem.createChild();
 
-    const prevEvalObj = QmlWeb.engine.$evaluatedObj;
-    QmlWeb.engine.$evaluatedObj = item;
+    const prevEvalObj = engine.$evaluatedObj;
+    engine.$evaluatedObj = item;
 
     try {
 
@@ -129,7 +129,7 @@ function construct(meta, parent, flags) {
       QmlWeb.applyProperties(meta, item);
 
     } finally {
-      QmlWeb.engine.$evaluatedObj = prevEvalObj;
+      engine.$evaluatedObj = prevEvalObj;
     }
 
   } else if (superitem instanceof QmlWeb.QMLComponent){
@@ -214,7 +214,7 @@ function createComponentAndElement(meta, parent, flags, loaderComponent) {
 
 function createQmlObject(src, parent, file) {
 
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
 
 
   // Returns url resolved relative to the URL of the caller.
@@ -230,7 +230,7 @@ function createQmlObject(src, parent, file) {
   const obj = component.createObject(parent);
 
   const QMLOperationState = QmlWeb.QMLOperationState;
-  if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+  if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
     // We don't call those on first creation, as they will be called
     // by the regular creation-procedures at the right time.
     engine.processPendingOperations();

@@ -80,13 +80,13 @@ function qualifiedImportPath(component, qualifier) {
 }
 
 function setImportPathList(arrayOfDirs) {
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
 
   engine.userAddedImportPaths = arrayOfDirs;
 }
 
 function importPathList() {
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
 
   return engine.userAddedImportPaths;
 }
@@ -97,7 +97,7 @@ function importPathList() {
 // `http://example.com/controls/qmldir`
 
 function addModulePath(moduleName, dirPath) {
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
 
   // Keep the mapping. It will be used in loadImports() function.
   // Remove trailing slash as it required for `readQmlDir`.
@@ -128,7 +128,7 @@ function addModulePath(moduleName, dirPath) {
 }*/
 
 function resolveClass(file) {
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
 
 
   let clazz = engine.classes[file];
@@ -143,7 +143,7 @@ function resolveClass(file) {
 
 
 function resolveImport(name, component) {
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
 
   const evalObj = engine.$evaluatedObj;
   if (!component) {
@@ -181,9 +181,9 @@ function resolveImport(name, component) {
 }
 
 function resolveClassImport(name, component) {
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
   if (!component) {
-    const evalObj = QmlWeb.engine.$evaluatedObj;
+    const evalObj = engine.$evaluatedObj;
     component = evalObj.$component;
   }
 
@@ -312,18 +312,18 @@ function $resolvePath(file, basePathUrl, component) {
   if (file && (/^(\w+):/.test(file)||file.startsWith("//"))) {
     return file;
   }
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
 
   if (!basePathUrl) {
     if (!component) {
-      const evalObj = QmlWeb.engine.$evaluatedObj;
+      const evalObj = engine.$evaluatedObj;
       component = evalObj.$component;
     }
 
     if (component) {
       basePathUrl = component.$basePathUrl;
     } else {
-      basePathUrl = QmlWeb.engine.$basePathUrl;
+      basePathUrl = engine.$basePathUrl;
       console.warn("$resolvePath  no current component, using default path:"+basePathUrl.baseUri+"  (from main file:"+basePathUrl.file+")");
     }
   }

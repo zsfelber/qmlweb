@@ -19,13 +19,13 @@ QmlWeb.registerQmlType({
 
     this.animationsChanged.connect(this, this.$onAnimationsChanged);
 
-    const engine = QmlWeb.getEngine();
-    QmlWeb.engine.$registerStart(this, () => {
+    const engine = this.engine;
+    engine.$registerStart(this, () => {
       if (!this.running) return;
       self.running = false; // toggled back by start();
       self.start();
     });
-    QmlWeb.engine.$registerStop(this, () => this.stop());
+    engine.$registerStop(this, () => this.stop());
   }
   $onAnimationsChanged() {
     const flags = QmlWeb.Signal.UniqueConnection;

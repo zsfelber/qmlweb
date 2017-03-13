@@ -31,7 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // http://doc.qt.io/qt-5/qqmlengine.html#addImportPath
 
 function addImportPath(dirpath) {
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
 
   engine.userAddedImportPaths.push(dirpath);
 }
@@ -44,7 +44,7 @@ function addImportPath(dirpath) {
  * The importContextId ensures it is only accessible from the file in which
  * it was imported. */
 function addComponentImportPath(component, dirpath, qualifier) {
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
 
 
   const paths = component.componentImportPaths;
@@ -101,7 +101,7 @@ function loadImports(component, importsArray) {
     throw new Error("loadImports   No component:"+component);
   }
 
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
 
   if (!engine.qmldirsContents) {
     engine.qmldirsContents = {}; // cache
@@ -126,7 +126,7 @@ function loadImports(component, importsArray) {
 }
 
 function loadImport(entry, component) {
-  const engine = QmlWeb.getEngine();
+  const engine = this.engine;
 
   var curBaseUrl = component.$basePathUrl;
   let name = entry[1];

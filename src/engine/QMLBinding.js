@@ -74,6 +74,7 @@ class QMLBinding {
  * @return {Object} Object representing the binding
  */
   constructor(src, property, flags, info) {
+    this.engine = QmlWeb.getEngine();
     // this.flags states whether the binding is a simple js statement, a
     // function containing a return statement, or a block of statements.
     // it may also fine tune other aspects, like bidirectionality of binding or
@@ -167,9 +168,9 @@ class QMLBinding {
   }*/
 
   get(obj) {
-    const engine = QmlWeb.getEngine();
-    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
-    QmlWeb.engine.$evaluatedObj = obj;
+    const engine = this.engine;
+    var prevEvalObj = engine.$evaluatedObj;
+    engine.$evaluatedObj = obj;
 
     // .call is needed for `this` support
     try {
@@ -185,7 +186,7 @@ class QMLBinding {
       }
     } catch (err) {
       if (err instanceof QmlWeb.FatalError) throw err;
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+      if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
         var os = QmlWeb.objToStringSafe(obj);
         QmlWeb.dumpEvalError("Binding#"+this.$bindingId+"/get error : "+err.message+" this:"+os+(err.srcdumpok?" srcdump:ok":" "+this), err);
       } else {
@@ -195,14 +196,14 @@ class QMLBinding {
       err.srcdumpok = 1;
       throw err;
     } finally {
-      QmlWeb.engine.$evaluatedObj = prevEvalObj;
+      engine.$evaluatedObj = prevEvalObj;
     }
   }
 
   set(obj, value, flags, valParentObj) {
-    const engine = QmlWeb.getEngine();
-    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
-    QmlWeb.engine.$evaluatedObj = obj;
+    const engine = this.engine;
+    var prevEvalObj = engine.$evaluatedObj;
+    engine.$evaluatedObj = obj;
 
     // .call is needed for `this` support
     try {
@@ -214,7 +215,7 @@ class QMLBinding {
       this.implSet.call(obj, value, flags, valParentObj);
     } catch (err) {
       if (err instanceof QmlWeb.FatalError) throw err;
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+      if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
         var os = QmlWeb.objToStringSafe(obj);
         QmlWeb.dumpEvalError("Binding#"+this.$bindingId+"/set error : "+err.message+" this:"+os+" value:"+value+" flags:"+flags+(err.srcdumpok?" srcdump:ok":" "+this), err);
       } else {
@@ -223,15 +224,15 @@ class QMLBinding {
       err.srcdumpok = 1;
       throw err;
     } finally {
-      QmlWeb.engine.$evaluatedObj = prevEvalObj;
+      engine.$evaluatedObj = prevEvalObj;
     }
   }
 
   // this == connection : var connection = Signal.connect(...); binding.run.call(connection, ...);
   run() {
-    const engine = QmlWeb.getEngine();
-    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
-    QmlWeb.engine.$evaluatedObj = this.bindingObj;
+    const engine = this.engine;
+    var prevEvalObj = engine.$evaluatedObj;
+    engine.$evaluatedObj = this.bindingObj;
 
     try {
       if (!this.binding.implRun) {
@@ -242,7 +243,7 @@ class QMLBinding {
       return this.binding.implRun.apply(this.bindingObj, arguments);
     } catch (err) {
       if (err instanceof QmlWeb.FatalError) throw err;
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+      if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
         var os = QmlWeb.objToStringSafe(this.bindingObj);
         QmlWeb.dumpEvalError("Binding#"+this.binding.$bindingId+"/run error : "+err.message+" this:" + os + (err.srcdumpok?" srcdump:ok":" "+this.binding), err);
       } else {
@@ -251,7 +252,7 @@ class QMLBinding {
       err.srcdumpok = 1;
       throw err;
     } finally {
-      QmlWeb.engine.$evaluatedObj = prevEvalObj;
+      engine.$evaluatedObj = prevEvalObj;
     }
   }
 

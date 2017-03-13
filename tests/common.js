@@ -28,7 +28,10 @@ function loadQmlFile(file, div, opts, done) {
   engine.setDom(div);
   engine.loadFile(file);
   document.body.appendChild(div);
-  cleanupList.push(engine.rootObject);
+  if (done)
+    done.list.push(engine.rootObject);
+  else
+    cleanupList.push(engine.rootObject);
   return engine.rootObject;
 }
 
@@ -51,6 +54,10 @@ function loadQml(src, div, opts, done) {
   engine.setDom(div);
   engine.loadQML(src);
   document.body.appendChild(div);
+  if (done)
+    done.list.push(engine.rootObject);
+  else
+    cleanupList.push(engine.rootObject);
   return engine.rootObject;
 }
 
@@ -136,7 +143,7 @@ var customMatchers = {
     }
 
     if (/^function\s*\w*\s*\(\s*done\b/.test(F.toString())) {
-      console.log("Async mode : "+name+" : it(done) is used.");
+      //console.log("Async mode : "+name+" : it(done) is used.");
       args[1] = function _fwd(_done) {
         const done = arguments[0];
         if (!done) {
@@ -162,6 +169,7 @@ var customMatchers = {
           _cleanup();
           done();
         };
+        args2[0].list = [];
 
         try {
           F.apply(this, args2);
@@ -169,13 +177,9 @@ var customMatchers = {
           args2[0].finished = true;
           _cleanup();
           throw e;
-        } finally {
-          args2[0].list = cleanupList;
-          cleanupList = [];
         }
       };
     } else {
-      console.log(name+" : it() is used. (Sync)");
       args[1] = function _fwd() {
         const done = arguments[0];
         if (done) {

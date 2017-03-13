@@ -54,14 +54,14 @@ QmlWeb.registerQmlType({
       return;
     }
 
-    const engine = QmlWeb.getEngine();
-    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
+    const engine = this.engine;
+    var prevEvalObj = engine.$evaluatedObj;
 
     try {
       // in case it is the same object, keeping the context set with QMLProperty.setEvaluatedObj because
       // it points to the corrent __proto__ of "this" :
       if (!prevEvalObj || prevEvalObj.$objectId !== this.$objectId) {
-        QmlWeb.engine.$evaluatedObj = this;
+        engine.$evaluatedObj = this;
       }
 
       const url = QmlWeb.resolveBasePath(fileName);
@@ -83,19 +83,19 @@ QmlWeb.registerQmlType({
         throw new QmlWeb.AssertionError("Assertion failed Loader: !qmlComponent || this.sourceComponent!==qmlComponent : "+this.toString(true));
       }
     } finally {
-      QmlWeb.engine.$evaluatedObj = prevEvalObj;
+      engine.$evaluatedObj = prevEvalObj;
     }
   }
 
   $onSourceComponentChanged(newItem) {
-    const engine = QmlWeb.getEngine();
-    var prevEvalObj = QmlWeb.engine.$evaluatedObj;
+    const engine = this.engine;
+    var prevEvalObj = engine.$evaluatedObj;
 
     try {
       // in case it is the same object, keeping the context set with QMLProperty.setEvaluatedObj because
       // it points to the corrent __proto__ of "this" :
       if (!prevEvalObj || prevEvalObj.$objectId !== this.$objectId) {
-        QmlWeb.engine.$evaluatedObj = this;
+        engine.$evaluatedObj = this;
       }
 
       if (!this.active) return;
@@ -106,19 +106,19 @@ QmlWeb.registerQmlType({
         return;
       }
 
-      this.item = newItem.createObject(QmlWeb.engine.$evaluatedObj/*this or some proto  parent*/);
+      this.item = newItem.createObject(engine.$evaluatedObj/*this or some proto  parent*/);
       this.$updateGeometry();
 
-      if (!(QmlWeb.engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+      if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
         // We don't call those on first creation, as they will be called
         // by the regular creation-procedures at the right time.
-        QmlWeb.engine.processPendingOperations();
+        engine.processPendingOperations();
       }
       if (this.item) {
         this.loaded();
       }
     } finally {
-      QmlWeb.engine.$evaluatedObj = prevEvalObj;
+      engine.$evaluatedObj = prevEvalObj;
     }
   }
   setSource(url, options) {

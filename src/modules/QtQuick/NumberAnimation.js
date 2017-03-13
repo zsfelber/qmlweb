@@ -57,16 +57,16 @@ class NumberAnimation extends PropertyAnimation {
     }
   }
   $onRunningChanged(newVal) {
-    const engine = QmlWeb.getEngine();
+    const engine = this.engine;
     if (newVal) {
       this.$initLoop();
-      QmlWeb.engine.$addTicker(this);
+      engine.$addTicker(this);
     } else if (this.alwaysRunToEnd && this.$at < 1) {
       this.$loop = -1; // -1 is used as a marker to stop
     } else {
       this.$loop = 0;
       this.$actions = [];
-      QmlWeb.engine.$removeTicker(this);
+      engine.$removeTicker(this);
     }
   }
   complete() {

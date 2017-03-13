@@ -146,7 +146,7 @@ class QtObject extends QmlWeb.QObject {
 
     this.$loaderContext = parent;
 
-    const engine = QmlWeb.getEngine();
+    const engine = this.engine;
 
     flags |= this.$componentCreateFlags;
 

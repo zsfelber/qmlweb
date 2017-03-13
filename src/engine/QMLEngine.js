@@ -8,65 +8,74 @@ QmlWeb.useShadowDom = true;
 // QML engine. EXPORTED.
 class QMLEngine {
   constructor(element, opts={}) {
-    if (QmlWeb.engine) {
-      throw new AssertionError("Instantiating multiple engines in same global/window object's environment is not supported. (Or call engine.destroy() first.)");
+    var committedEngine = QmlWeb.engine;
+    try {
+      if (!committedEngine) {
+        committedEngine = this;
+      }
+
+      QmlWeb.engine = this;
+      this.logging = opts.logging || QmlWeb.QMLEngineLogging.Full;
+
+      //----------Public Members----------
+
+      this.setDom(element);
+
+      // Cached component trees (post-QmlWeb.convertToEngine)
+      this.classes = {};
+
+      // Cached parsed JS files (post-QmlWeb.jsparse)
+      this.js = {};
+
+      // Current operation state of the engine (Idle, init, etc.)
+      this.operationState = QmlWeb.QMLOperationState.Idle;
+
+      // List of properties whose values are bindings. For internal use only.
+      // +
+      // List of operations to perform later after init. For internal use only.
+      this.pendingOperations = {stack:[], map:{}};
+
+      // Root object of the engine
+      this.rootObject = null;
+      this.rootContext = {};
+      this._rootContext = new QmlWeb.QMLContext(this.rootContext);
+
+      // Base path of qml engine (used for resource loading)
+      // used in tests only
+      this.$basePathUrl = "";
+
+      // Module import paths overrides
+      this.userAddedModulePaths = {};
+
+      // Stores data for setImportPathList(), importPathList(), and addImportPath
+      this.userAddedImportPaths = [];
+
+      //----------Private Members---------
+
+      // Ticker resource id and ticker callbacks
+      this._tickers = {};
+      //this._lastTick = Date.now();
+
+      // Callbacks for stopping or starting the engine
+      this._whenStop = {};
+      this._whenStart = {};
+
+      // Keyboard management
+      this.$initKeyboard();
+
+      //----------Construct----------
+
+      window.addEventListener("resize", () => this.updateGeometry());
+    } finally {
+      QmlWeb.engine = committedEngine;
     }
-
-    QmlWeb.engine = this;
-    this.logging = opts.logging || QmlWeb.QMLEngineLogging.Full;
-
-    //----------Public Members----------
-
-    this.setDom(element);
-
-    // Cached component trees (post-QmlWeb.convertToEngine)
-    this.classes = {};
-
-    // Cached parsed JS files (post-QmlWeb.jsparse)
-    this.js = {};
-
-    // Current operation state of the engine (Idle, init, etc.)
-    this.operationState = QmlWeb.QMLOperationState.Idle;
-
-    // List of properties whose values are bindings. For internal use only.
-    // +
-    // List of operations to perform later after init. For internal use only.
-    this.pendingOperations = {stack:[], map:{}};
-
-    // Root object of the engine
-    this.rootObject = null;
-    this.rootContext = {};
-    this._rootContext = new QmlWeb.QMLContext(this.rootContext);
-
-    // Base path of qml engine (used for resource loading)
-    // used in tests only
-    this.$basePathUrl = "";
-
-    // Module import paths overrides
-    this.userAddedModulePaths = {};
-
-    // Stores data for setImportPathList(), importPathList(), and addImportPath
-    this.userAddedImportPaths = [];
-
-    //----------Private Members---------
-
-    // Ticker resource id and ticker callbacks
-    this._tickers = {};
-    //this._lastTick = Date.now();
-
-    // Callbacks for stopping or starting the engine
-    this._whenStop = {};
-    this._whenStart = {};
-
-    // Keyboard management
-    this.$initKeyboard();
-
-    //----------Construct----------
-
-    window.addEventListener("resize", () => this.updateGeometry());
   }
 
   destroy() {
+    if (QmlWeb.engine !== this) {
+      throw new QmlWeb.AssertionError("Engine is already destroyed.");
+    }
+
     try {
       this.stop();
     } catch (err) {
