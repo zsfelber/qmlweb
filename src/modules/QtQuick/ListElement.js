@@ -4,7 +4,8 @@ class ListElement extends QtObject {
     super(meta);
     QmlWeb.initMeta(this, meta, ListElement);
 
-    const createProperty = QmlWeb.createProperty;
+    const engine = this.engine;
+    const createProperty = engine.createProperty;
     if (meta.parentmeta) {
       for (const i in meta.parentmeta) {
         if (i[0] !== "$") {

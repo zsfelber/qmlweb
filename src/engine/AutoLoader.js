@@ -6,7 +6,7 @@ window.addEventListener("load", () => {
     if (source) {
       QmlWeb.qmlEngine = new QmlWeb.QMLEngine();
       QmlWeb.qmlEngine.loadFile(source);
-      QmlWeb.qmlEngine.start();
+      //QmlWeb.qmlEngine.start();
       break;
     }
   }

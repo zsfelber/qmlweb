@@ -3,7 +3,8 @@ class PropertyAnimation extends Animation {
     super(meta);
     QmlWeb.initMeta(this, meta, PropertyAnimation);
 
-    const createProperty = QmlWeb.createProperty;
+    const engine = this.engine;
+    const createProperty = engine.createProperty;
     this.easing = new QmlWeb.QObject(this, {attached:true, info:"easing"});
     createProperty("enum", this.easing, "type",
       { initialValue: this.Easing.Linear });

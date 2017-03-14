@@ -131,11 +131,11 @@ class Repeater extends Item {
     }
 
     const QMLOperationState = QmlWeb.QMLOperationState;
-    const createProperty = QmlWeb.createProperty;
+    const engine = this.engine;
+    const createProperty = engine.createProperty;
     const model = this.$getModel();
     const container = this.repeaterContainer();
     let index;
-    const engine = this.$engine;
     var prevEvalObj = QmlWeb.$evaluatedObj;
     try {
       QmlWeb.$evaluatedObj = container;

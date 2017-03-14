@@ -4,7 +4,8 @@ class QImage extends Item {
     super(meta);
     QmlWeb.initMeta(this, meta, QImage);
 
-    const createProperty = QmlWeb.createProperty;
+    const engine = this.engine;
+    const createProperty = engine.createProperty;
 
     this.sourceSize = new QmlWeb.QObject(this, {attached:true, info:"sourceSize"});
     createProperty("int", this.sourceSize, "width");

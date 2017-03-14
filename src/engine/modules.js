@@ -1,34 +1,36 @@
-const notfound = {};
+QMLEngine.$onConstruct.push(function(){
+  this.notfound = {};
 
-const modules = {
-  Main: {
-    int: QmlWeb.qmlInteger,
-    real: QmlWeb.qmlNumber,
-    double: QmlWeb.qmlNumber,
-    string: QmlWeb.qmlString,
-    bool: QmlWeb.qmlBoolean,
-    list: QmlWeb.qmlList,
-    color: QmlWeb.QColor,
-    enum: QmlWeb.qmlNumber,
-    url: QMLEngine.prototype.$resolvePath,
-    variant: QmlWeb.qmlVariant,
-    "var": QmlWeb.qmlVariant
-  }
-};
+  this.modules = {
+    Main: {
+      int: QmlWeb.qmlInteger,
+      real: QmlWeb.qmlNumber,
+      double: QmlWeb.qmlNumber,
+      string: QmlWeb.qmlString,
+      bool: QmlWeb.qmlBoolean,
+      list: QmlWeb.qmlList,
+      color: QmlWeb.QColor,
+      enum: QmlWeb.qmlNumber,
+      url: QMLEngine.prototype.$resolvePath,
+      variant: QmlWeb.qmlVariant,
+      "var": QmlWeb.qmlVariant
+    }
+  };
 
-const objectAttachors = {
-};
+  this.objectAttachors = {
+  };
 
-// All object constructors
-QmlWeb.constructors = modules.Main;
+  // All object constructors
+  this.constructors = this.modules.Main;
+});
 
 // Helper. Adds a type to the constructor list
 function registerGlobalQmlType(name, type) {
-  const constructors = QmlWeb.constructors;
+  const constructors = this.constructors;
 
-  QmlWeb[type.name] = type;
+  this.rootContext[type.name] = type;
   constructors[name] = type;
-  modules.Main[name] = type;
+  this.modules.Main[name] = type;
 
   applyAttachedObjects(type, name, QmlWeb.QtObject.prototype);
 
@@ -172,9 +174,8 @@ function applyAllAttachedObjects(proto) {
 }
 
 
-QmlWeb.modules = modules;
-QmlWeb.registerGlobalQmlType = registerGlobalQmlType;
-QmlWeb.registerQmlType = registerQmlType;
-QmlWeb.getConstructor = getConstructor;
-QmlWeb.applyAttachedObjects = applyAttachedObjects;
-QmlWeb.applyAllAttachedObjects = applyAllAttachedObjects;
+QMLEngine.prototype.registerGlobalQmlType = registerGlobalQmlType;
+QMLEngine.prototype.registerQmlType = registerQmlType;
+QMLEngine.prototype.getConstructor = getConstructor;
+QMLEngine.prototype.applyAttachedObjects = applyAttachedObjects;
+QMLEngine.prototype.applyAllAttachedObjects = applyAllAttachedObjects;

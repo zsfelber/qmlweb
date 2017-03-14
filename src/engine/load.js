@@ -185,6 +185,6 @@ function readQmlDir(url) {
 }
 
 
-QmlWeb.loadClass = loadClass;
-QmlWeb.getUrlContents = getUrlContents;
-QmlWeb.readQmlDir = readQmlDir;
+QMLEngine.prototype.loadClass = loadClass;
+QMLEngine.prototype.getUrlContents = getUrlContents;
+QMLEngine.prototype.readQmlDir = readQmlDir;

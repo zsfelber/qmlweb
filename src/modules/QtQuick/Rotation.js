@@ -13,7 +13,8 @@ QmlWeb.registerQmlType({
     QmlWeb.initMeta(this, meta, Rotation);
     this.target = this.$parent;
 
-    const createProperty = QmlWeb.createProperty;
+    const engine = this.engine;
+    const createProperty = engine.createProperty;
 
     this.axis = new QmlWeb.QObject(this, {attached:true, info:"axis"});
     createProperty("real", this.axis, "x");

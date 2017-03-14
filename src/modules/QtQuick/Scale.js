@@ -14,7 +14,8 @@ QmlWeb.registerQmlType({
     QmlWeb.initMeta(this, meta, Scale);
     this.target = this.$parent;
 
-    const createProperty = QmlWeb.createProperty;
+    const engine = this.engine;
+    const createProperty = engine.createProperty;
     this.origin = new QmlWeb.QObject(this, {attached:true, info:"origin"});
     createProperty("real", this.origin, "x");
     createProperty("real", this.origin, "y");

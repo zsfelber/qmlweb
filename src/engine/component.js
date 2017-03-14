@@ -70,5 +70,5 @@ function createComponent(meta, flags, loaderComponent) {
 
 
 QmlWeb.QMLContext = QMLContext;
-QmlWeb.createComponent = createComponent;
+QMLEngine.prototype.createComponent = createComponent;
 

@@ -22,7 +22,7 @@ function initMeta(self, meta, constructor) {
           desc = { type: desc };
         }
         try {
-          QmlWeb.createProperty(desc.type, self, name, desc, QMLBindingFlags.ContextNullable);
+          engine.createProperty(desc.type, self, name, desc, QMLBindingFlags.ContextNullable);
         } catch (err) {
           if (err instanceof QmlWeb.FatalError) throw err;
           if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
@@ -176,7 +176,7 @@ function constructSuper(meta, parent) {
     }
 
     // always super here:
-    item = createComponentAndElement(supermeta, parent, QMLComponentFlags.Super, meta.$component);
+    item = this.createComponentAndElement(supermeta, parent, QMLComponentFlags.Super, meta.$component);
 
     //if (typeof item.dom !== "undefined") {
     //  item.dom.className += ` ${supermeta.$path[supermeta.$path.length - 1]}`;

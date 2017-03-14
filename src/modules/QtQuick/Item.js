@@ -25,7 +25,8 @@ class Item extends ItemBase {
     //this.dom.className = "qmlitem";
     this.impl = null; // Store the actually drawn element
 
-    const createProperty = QmlWeb.createProperty;
+    const engine = this.engine;
+    const createProperty = engine.createProperty;
 
     if (!this.$parent) {
       createProperty("var", this, "activeFocus");

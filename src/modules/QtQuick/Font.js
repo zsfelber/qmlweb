@@ -14,7 +14,8 @@ QmlWeb.registerQmlType({
     this.target = this.$parent;
 
     const Font = this.Font;
-    const createProperty = QmlWeb.createProperty;
+    const engine = this.engine;
+    const createProperty = engine.createProperty;
 
     createProperty("bool", this, "bold");
     createProperty("enum", this, "capitalization", { initialValue:

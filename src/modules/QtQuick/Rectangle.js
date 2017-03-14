@@ -18,7 +18,8 @@ class Rectangle extends Item {
     super(meta);
     QmlWeb.initMeta(this, meta, Rectangle);
 
-    const createProperty = QmlWeb.createProperty;
+    const engine = this.engine;
+    const createProperty = engine.createProperty;
     this.border = new QmlWeb.QObject(this, {attached:true, info:"border"});
     createProperty("color", this.border, "color", { initialValue: "black" });
     createProperty("int", this.border, "width", { initialValue: 1 });
