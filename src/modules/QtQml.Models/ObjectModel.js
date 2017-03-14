@@ -9,7 +9,7 @@ QmlWeb.registerQmlType({
 }, class ObjectModel extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, ObjectModel);
+    this.$engine.initMeta(this, meta, ObjectModel);
   }
   get(index) {
     return this.children[index];

@@ -9,7 +9,7 @@ QmlWeb.registerQmlType({
 }, class Settings extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Settings);
+    this.$engine.initMeta(this, meta, Settings);
 
     if (typeof window.localStorage === "undefined") {
       console.warn("Settings.  window.localStorage is undefined.");

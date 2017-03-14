@@ -17,7 +17,7 @@ QmlWeb.registerQmlType({
 }, class GeoLocation extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, GeoLocation);
+    this.$engine.initMeta(this, meta, GeoLocation);
 
     if (!navigator.geolocation) {
       return;

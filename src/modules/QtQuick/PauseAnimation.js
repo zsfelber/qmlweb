@@ -10,7 +10,7 @@ QmlWeb.registerQmlType({
 }, class PauseAnimation extends Animation {
    constructor(meta) {
      super(meta);
-     QmlWeb.initMeta(this, meta, PauseAnimation);
+     this.$engine.initMeta(this, meta, PauseAnimation);
 
      this.runningChanged.connect(this, this.$onRunningChanged);
      this.tick = this.$ticker.bind(this);

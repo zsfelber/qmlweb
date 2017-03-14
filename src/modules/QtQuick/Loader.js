@@ -20,7 +20,7 @@ QmlWeb.registerQmlType({
 }, class Loader extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Loader);
+    this.$engine.initMeta(this, meta, Loader);
 
     this.$sourceUrl = "";
 
@@ -64,13 +64,13 @@ QmlWeb.registerQmlType({
         QmlWeb.$evaluatedObj = this;
       }
 
-      const url = this.engine.resolveBasePath(fileName);
+      const url = this.$engine.resolveBasePath(fileName);
       let $class = url.path + url.file;
       if (/\.qml$/.test($class)) {
         $class = $class.substring(0, $class.length-4);
       }
 
-      const qmlComponent = QmlWeb.createComponent({
+      const qmlComponent = engine.createComponent({
         clazz: {$class, $file: fileName}
       }, QmlWeb.QMLComponentFlags.Nested);
 

@@ -11,10 +11,10 @@ QmlWeb.registerQmlType({
 }, class Scale extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Scale);
+    this.$engine.initMeta(this, meta, Scale);
     this.target = this.$parent;
 
-    const engine = this.engine;
+    const engine = this.$engine;
     const createProperty = engine.createProperty;
     this.origin = new QmlWeb.QObject(this, {attached:true, info:"origin"});
     createProperty("real", this.origin, "x");

@@ -1,7 +1,7 @@
 class ItemBase extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, ItemBase);
+    this.$engine.initMeta(this, meta, ItemBase);
 
     this.hoveredChanged.connect(this, this.$onHoveredChanged);
   }

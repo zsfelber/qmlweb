@@ -13,7 +13,7 @@ QmlWeb.registerQmlType({
 }, class Flow extends Positioner {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Flow);
+    this.$engine.initMeta(this, meta, Flow);
 
     this.flowChanged.connect(this, this.layoutChildren);
     this.layoutDirectionChanged.connect(this, this.layoutChildren);

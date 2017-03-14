@@ -2,7 +2,7 @@
 class Animation extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Animation);
+    this.$engine.initMeta(this, meta, Animation);
     this.$on = meta.$on;
     this.Component.completed.connect(this, this.Component$onCompleted);
   }

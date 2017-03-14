@@ -11,7 +11,7 @@ QmlWeb.registerQmlType({
 }, class ProgressBar extends Rectangle {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, ProgressBar);
+    this.$engine.initMeta(this, meta, ProgressBar);
 
   }
 

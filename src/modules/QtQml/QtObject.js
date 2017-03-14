@@ -3,7 +3,7 @@
 class QtObject extends QmlWeb.QObject {
   constructor(meta) {
     super(meta.parent, meta);
-    QmlWeb.initMeta(this, meta, QtObject);
+    this.$engine.initMeta(this, meta, QtObject);
 
     // Component get own properties
     this.$attributes = [];

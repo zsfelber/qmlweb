@@ -12,7 +12,7 @@ QmlWeb.registerQmlType({
 }, class WebEngineView extends WebView {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, WebEngineView);
+    this.$engine.initMeta(this, meta, WebEngineView);
 
     // TODO: implement more features on top of WebView
   }

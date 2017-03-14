@@ -16,9 +16,9 @@ var defaultRectStyle = QmlWeb.helpers.mergeObjects(QmlWeb.defaultItemStyle, {
 class Rectangle extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Rectangle);
+    this.$engine.initMeta(this, meta, Rectangle);
 
-    const engine = this.engine;
+    const engine = this.$engine;
     const createProperty = engine.createProperty;
     this.border = new QmlWeb.QObject(this, {attached:true, info:"border"});
     createProperty("color", this.border, "color", { initialValue: "black" });

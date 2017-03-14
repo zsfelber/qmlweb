@@ -232,7 +232,7 @@ function resolveClassImport(name, component) {
     }
 
     // 1) through $resolvePath(name);
-    let imp = resolveImport(filePath, component);
+    let imp = this.resolveImport(filePath, component);
 
     imp.$path=path;
 

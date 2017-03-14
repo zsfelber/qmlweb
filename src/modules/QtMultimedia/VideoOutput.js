@@ -18,7 +18,7 @@ QmlWeb.registerQmlType({
 }, class VideoOutput extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, VideoOutput);
+    this.$engine.initMeta(this, meta, VideoOutput);
 
     // TODO: impl
   }

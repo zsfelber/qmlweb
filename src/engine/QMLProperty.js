@@ -99,14 +99,14 @@ class QMLProperty {
         if (constructors[newVal.$class] === QMLComponent) {
           // Root element or nested Component element ?
 
-          this.value = QmlWeb.createComponent({
+          this.value = engine.createComponent({
             clazz: newVal,
             $file: newVal.$file
           });
         } else if (cons === QMLComponent) {
           // User declared Component type but assigned Element directly (eg initialized a delegate)
 
-          this.value = QmlWeb.createComponent({
+          this.value = engine.createComponent({
             clazz: newVal,
             $file: newVal.$file
           }, QmlWeb.QMLComponentFlags.Flat);
@@ -115,7 +115,7 @@ class QMLProperty {
           // all the other ones just forward these
           // Call to here comes from
           // [root QML top] classes.construct -> properties.applyProperties -> item.$properties[item.$defaultProperty].set
-          this.value = QmlWeb.createComponentAndElement({clazz:newVal}, this.valParentObj, QmlWeb.QMLComponentFlags.Nested|elemflag);
+          this.value = engine.createComponentAndElement({clazz:newVal}, this.valParentObj, QmlWeb.QMLComponentFlags.Nested|elemflag);
         }
       } else if (newVal === undefined || newVal === null || !cons) {
         this.value = newVal;

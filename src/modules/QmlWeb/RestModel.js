@@ -19,7 +19,7 @@ QmlWeb.registerQmlType({
 }, class RestModel extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, RestModel);
+    this.$engine.initMeta(this, meta, RestModel);
 
     this.attributes = this.getAttributes();
     this.runningRequests = 0;

@@ -11,7 +11,7 @@ const otherGeometryProperties = {
 class Item extends ItemBase {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Item);
+    this.$engine.initMeta(this, meta, Item);
 
     if (!this.dom) { // Create a dom element for this item.
       this.dom = document.createElement(meta.tagName || "div");
@@ -25,7 +25,7 @@ class Item extends ItemBase {
     //this.dom.className = "qmlitem";
     this.impl = null; // Store the actually drawn element
 
-    const engine = this.engine;
+    const engine = this.$engine;
     const createProperty = engine.createProperty;
 
     if (!this.$parent) {

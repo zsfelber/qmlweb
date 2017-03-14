@@ -2,7 +2,7 @@
 class Window extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Window);
+    this.$engine.initMeta(this, meta, Window);
 
     this.colorChanged.connect(this, this.$onColorChanged);
   }

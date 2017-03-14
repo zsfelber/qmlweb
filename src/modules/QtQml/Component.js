@@ -5,7 +5,7 @@ class QMLComponent {
 
     this.$objectId = this.$componentId = ++objectIds;
     this.$properties = {};
-    QmlWeb.initMeta(this, {}, QMLComponent);
+    this.$engine.initMeta(this, {}, QMLComponent);
 
     this.copyMeta(meta, flags);
 
@@ -62,7 +62,7 @@ class QMLComponent {
         //  meta.clazz.$file = meta.clazz.$file.toString();
 
         if (meta.$file !== meta.clazz.$file) {
-          const uri1 = this.engine.$parseUrl(meta.$file, true), uri2 = this.engine.$parseUrl(meta.clazz.$file, true);
+          const uri1 = this.$engine.$parseUrl(meta.$file, true), uri2 = this.$engine.$parseUrl(meta.clazz.$file, true);
           if (!uri1 || !uri2 || uri1.path !== uri2.path) {
             if (!QmlWeb.isTesting || !uri1 || !uri2 || (uri1.path !== "/"+uri2.path && uri2.path !== "/"+uri1.path && uri1.path !== "/base"+uri2.path && uri2.path !== "/base"+uri1.path)) {
               console.warn((QmlWeb.isTesting?"testing  ":"")+"$file-s in Component and class differ :  meta.$file:'"+meta.$file+"' === meta.clazz.$file:'"+meta.clazz.$file+"'  paths:"+(uri1?uri1.path:"<null>")+" vs "+(uri2?uri2.path:"<null>"));
@@ -122,7 +122,7 @@ class QMLComponent {
     this.$file = this.meta.$file;
     this.$imports = this.meta.$imports;
     if (this.$file) {
-      this.$basePathUrl = this.engine.resolveBasePath(this.$file);
+      this.$basePathUrl = this.$engine.resolveBasePath(this.$file);
     }
 
   }
@@ -202,7 +202,7 @@ class QMLComponent {
     for (let i = 0; i < this.$jsImports.length; ++i) {
       const importDesc = this.$jsImports[i];
 
-      const uri = this.engine.$resolvePath(importDesc[1], this.$basePathUrl);
+      const uri = this.$engine.$resolvePath(importDesc[1], this.$basePathUrl);
       const jsBinding = QmlWeb.importJavascript(uri, importDesc[3]);
 
       if (!jsBinding) {
@@ -267,7 +267,7 @@ class QMLComponent {
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
-      item = QmlWeb.construct(this.meta, parent, this.createFlags|this.elementFlag);
+      item = engine.construct(this.meta, parent, this.createFlags|this.elementFlag);
       QmlWeb.helpers.mergeInPlace(item, properties);
 
       // invoked either this or one from >@see also< classes.constructSuper
@@ -378,7 +378,7 @@ class AttachedComponent {
   constructor(parent) {
     this.parent = parent;
     this.$properties = {};
-    QmlWeb.initMeta(this, {}, AttachedComponent);
+    this.$engine.initMeta(this, {}, AttachedComponent);
     QObject.attach(parent, this);
   }
   toString() {

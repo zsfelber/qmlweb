@@ -11,7 +11,7 @@ QmlWeb.registerQmlType({
 }, class Behavior extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Behavior);
+    this.$engine.initMeta(this, meta, Behavior);
     this.$on = meta.$on;
 
     this.animationChanged.connect(this, this.$onAnimationChanged);

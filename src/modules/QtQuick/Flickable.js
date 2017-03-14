@@ -11,7 +11,7 @@ QmlWeb.registerQmlType({
 }, class Flickable extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Flickable);
+    this.$engine.initMeta(this, meta, Flickable);
 
   }
 

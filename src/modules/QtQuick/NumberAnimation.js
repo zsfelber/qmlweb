@@ -2,7 +2,7 @@
 class NumberAnimation extends PropertyAnimation {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, NumberAnimation);
+    this.$engine.initMeta(this, meta, NumberAnimation);
 
     this.$elapsed = 0;
     this.$startTime = 0;

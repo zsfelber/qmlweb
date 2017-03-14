@@ -22,7 +22,7 @@ QmlWeb.registerQmlType({
 }, class WebSocket extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, WebSocket);
+    this.$engine.initMeta(this, meta, WebSocket);
 
     this.$socket = undefined;
     this.$reconnect = false;

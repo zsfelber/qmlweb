@@ -1,7 +1,7 @@
 class Button extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Button);
+    this.$engine.initMeta(this, meta, Button);
 
     this.Component.completed.connect(this, this.Component$onCompleted);
     this.textChanged.connect(this, this.$onTextChanged);

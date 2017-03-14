@@ -1,7 +1,7 @@
 class WebView extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, WebView);
+    this.$engine.initMeta(this, meta, WebView);
 
     this.urlChanged.connect(this, this.$onUrlChanged);
 

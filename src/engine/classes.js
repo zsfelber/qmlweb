@@ -66,7 +66,7 @@ function construct(meta, parent, flags) {
   // undefined -> 0
   flags |= 0;
 
-  let superitem = constructSuper(meta, parent);
+  let superitem = this.constructSuper(meta, parent);
 
   let item;
   // NOTE making a new level of class inheritance :
@@ -119,7 +119,7 @@ function construct(meta, parent, flags) {
       // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
       // (see properties.createProperty. )
       if (meta.id) {
-        addElementToPageContexts(item, meta.id, ctx);
+        this.addElementToPageContexts(item, meta.id, ctx);
       //} else if (flags & QmlWeb.QMLComponentFlags.Nested) {
       //  QmlWeb.warn("No element id for item  : "+item+"  ctx:"+ctx);
       }
@@ -191,7 +191,7 @@ function createComponentAndElement(meta, parent, flags, loaderComponent) {
   // NOTE 1 : class component from meta. meta may be resolved superclass info (Super: from resolveClassImport)
   // or QMLElement directly (Nested : in form {clazz:element_meta}):
   // NOTE 2 : LoadImports is only interpreted with Super and not with Nested (so ignored in latter case)
-  const component = QmlWeb.createComponent(meta, flags |= QmlWeb.QMLComponentFlags.LoadImports, loaderComponent);
+  const component = this.createComponent(meta, flags |= QmlWeb.QMLComponentFlags.LoadImports, loaderComponent);
 
   if (!component) {
     throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);
@@ -225,7 +225,7 @@ function createQmlObject(src, parent, file) {
   const clazz = QmlWeb.parseQML(src, file);
   file = file || "createQmlObject_function";
 
-  var component = QmlWeb.createComponent({clazz, $file:file}, QmlWeb.QMLComponentFlags.LoadImports);
+  var component = this.createComponent({clazz, $file:file}, QmlWeb.QMLComponentFlags.LoadImports);
 
   const obj = component.createObject(parent);
 
@@ -274,3 +274,4 @@ QMLEngine.prototype.initMeta = initMeta;
 QMLEngine.prototype.construct = construct;
 QMLEngine.prototype.createComponentAndElement = createComponentAndElement;
 QMLEngine.prototype.createQmlObject = createQmlObject;
+QMLEngine.prototype.addElementToPageContexts = addElementToPageContexts;

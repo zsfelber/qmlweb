@@ -13,7 +13,7 @@ QmlWeb.registerQmlType({
 }, class ApplicationWindow extends Window {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, ApplicationWindow);
+    this.$engine.initMeta(this, meta, ApplicationWindow);
 
     // TODO
   }

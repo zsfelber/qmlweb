@@ -14,7 +14,7 @@ var defaultTextareaStyle = {
 class TextEdit extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, TextEdit);
+    this.$engine.initMeta(this, meta, TextEdit);
 
     const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
     this.font = new QMLFont(this);

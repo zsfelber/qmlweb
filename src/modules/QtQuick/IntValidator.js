@@ -10,7 +10,7 @@ QmlWeb.registerQmlType({
 }, class IntValidator extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, IntValidator);
+    this.$engine.initMeta(this, meta, IntValidator);
   }
   validate(string) {
     const regExp = /^(-|\+)?\s*[0-9]+$/;

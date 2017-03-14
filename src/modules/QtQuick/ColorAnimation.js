@@ -10,7 +10,7 @@ QmlWeb.registerQmlType({
 }, class ColorAnimation extends NumberAnimation {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, ColorAnimation);
+    this.$engine.initMeta(this, meta, ColorAnimation);
 
     this.easing.$add = QmlWeb.QColor.$add;
     this.easing.$subtract = QmlWeb.QColor.$subtract;

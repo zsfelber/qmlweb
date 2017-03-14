@@ -31,7 +31,7 @@ QmlWeb.registerQmlType({
 }, class TextField extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, TextField);
+    this.$engine.initMeta(this, meta, TextField);
 
     const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
     this.font = new QMLFont(this);

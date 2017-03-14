@@ -12,7 +12,7 @@ QmlWeb.registerQmlType({
 }, class DropShadow extends Filter {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, DropShadow);
+    this.$engine.initMeta(this, meta, DropShadow);
 
    this.radiusChanged.connect(this, this.$update);
    this.colorChanged.connect(this, this.$update);

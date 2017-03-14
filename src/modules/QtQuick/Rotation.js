@@ -10,10 +10,10 @@ QmlWeb.registerQmlType({
 }, class Rotation extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Rotation);
+    this.$engine.initMeta(this, meta, Rotation);
     this.target = this.$parent;
 
-    const engine = this.engine;
+    const engine = this.$engine;
     const createProperty = engine.createProperty;
 
     this.axis = new QmlWeb.QObject(this, {attached:true, info:"axis"});

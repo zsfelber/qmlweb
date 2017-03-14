@@ -11,7 +11,7 @@ QmlWeb.registerQmlType({
 }, class FileDialog extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, FileDialog);
+    this.$engine.initMeta(this, meta, FileDialog);
 
   }
 

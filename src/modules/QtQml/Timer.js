@@ -17,7 +17,7 @@ QmlWeb.registerQmlType({
 }, class Timer extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Timer);
+    this.$engine.initMeta(this, meta, Timer);
 
     this.$properties.container.set(this.$parent, QmlWeb.QMLPropertyFlags.ReasonInit, this);
 

@@ -1,7 +1,7 @@
 class Filter extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Filter);
+    this.$engine.initMeta(this, meta, Filter);
 
     this.$previousSource = null;
     this.$filterObject = undefined;

@@ -24,7 +24,7 @@ QmlWeb.registerQmlType({
 }, class Canvas extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Canvas);
+    this.$engine.initMeta(this, meta, Canvas);
   }
   cancelRequestAnimationFrame(/*handle*/) {
     return false;

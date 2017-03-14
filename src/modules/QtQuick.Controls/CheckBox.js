@@ -11,7 +11,7 @@ QmlWeb.registerQmlType({
 }, class CheckBox extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, CheckBox);
+    this.$engine.initMeta(this, meta, CheckBox);
 
     this.impl = document.createElement("label");
     this.impl.className = "qmllabel"

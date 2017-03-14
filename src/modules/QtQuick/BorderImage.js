@@ -22,9 +22,9 @@ QmlWeb.registerQmlType({
 }, class BorderImage extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, BorderImage);
+    this.$engine.initMeta(this, meta, BorderImage);
 
-    const engine = this.engine;
+    const engine = this.$engine;
     const createProperty = engine.createProperty;
     this.border = new QmlWeb.QObject(this, {attached:true, info:"border"});
     createProperty("int", this.border, "left");
@@ -59,7 +59,7 @@ QmlWeb.registerQmlType({
     this.progress = 0;
     this.status = this.BorderImage.Loading;
     //const style = this.impl.style;
-    const imageURL = this.engine.$resolveImageURL(source);
+    const imageURL = this.$engine.$resolveImageURL(source);
     QmlWeb.setStyle(this.icss, "OBorderImageSource", `url("${imageURL}")`);
     QmlWeb.setStyle(this.icss, "borderImageSource", `url("${imageURL}")`);
     this.$img.src = imageURL;

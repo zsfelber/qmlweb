@@ -311,7 +311,7 @@ class QMLEngine {
       // Create and initialize objects
       // TODO gz undefined->component.$basePathUrl
 
-      this.rootObject = QmlWeb.createComponentAndElement(
+      this.rootObject = this.createComponentAndElement(
                     {clazz: clazz, $file: file}, parent,
                     QmlWeb.QMLComponentFlags.Root | QmlWeb.QMLComponentFlags.LoadImports);
 

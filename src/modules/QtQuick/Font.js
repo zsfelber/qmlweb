@@ -9,12 +9,12 @@ QmlWeb.registerQmlType({
 }, class QFont extends QObject {
   constructor(parent, meta) {
     super(parent, meta);
-    QmlWeb.initMeta(this, meta, QFont);
+    this.$engine.initMeta(this, meta, QFont);
     this.Font = global.Font; // TODO: make a sane enum
     this.target = this.$parent;
 
     const Font = this.Font;
-    const engine = this.engine;
+    const engine = this.$engine;
     const createProperty = engine.createProperty;
 
     createProperty("bool", this, "bold");

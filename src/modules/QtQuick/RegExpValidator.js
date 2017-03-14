@@ -9,7 +9,7 @@ QmlWeb.registerQmlType({
 }, class RegExpValidator extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, RegExpValidator);
+    this.$engine.initMeta(this, meta, RegExpValidator);
   }
   validate(string) {
     if (!this.regExp) return true;

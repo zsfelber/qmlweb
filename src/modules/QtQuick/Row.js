@@ -9,7 +9,7 @@ QmlWeb.registerQmlType({
 }, class Row extends Positioner {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Row);
+    this.$engine.initMeta(this, meta, Row);
 
     this.layoutDirectionChanged.connect(this, this.layoutChildren);
     this.layoutChildren();

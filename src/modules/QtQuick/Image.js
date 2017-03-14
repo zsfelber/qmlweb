@@ -2,9 +2,9 @@
 class QImage extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, QImage);
+    this.$engine.initMeta(this, meta, QImage);
 
-    const engine = this.engine;
+    const engine = this.$engine;
     const createProperty = engine.createProperty;
 
     this.sourceSize = new QmlWeb.QObject(this, {attached:true, info:"sourceSize"});
@@ -63,7 +63,7 @@ class QImage extends Item {
   $onSourceChanged(source) {
     this.progress = 0;
     this.status = this.Image.Loading;
-    const imageURL = this.engine.$resolveImageURL(source);
+    const imageURL = this.$engine.$resolveImageURL(source);
     QmlWeb.setStyle(this.icss, "backgroundImage", `url("${imageURL}")`);
     this.$img.src = imageURL;
     if (this.$img.complete) {

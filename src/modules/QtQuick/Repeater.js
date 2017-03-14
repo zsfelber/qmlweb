@@ -1,7 +1,7 @@
 class Repeater extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Repeater);
+    this.$engine.initMeta(this, meta, Repeater);
 
     //this.parent = meta.parent;
     // TODO: some (all ?) of the components including Repeater needs to know own
@@ -131,7 +131,7 @@ class Repeater extends Item {
     }
 
     const QMLOperationState = QmlWeb.QMLOperationState;
-    const engine = this.engine;
+    const engine = this.$engine;
     const createProperty = engine.createProperty;
     const model = this.$getModel();
     const container = this.repeaterContainer();

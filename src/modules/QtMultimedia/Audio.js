@@ -51,7 +51,7 @@ QmlWeb.registerQmlType({
 }, class Audio extends QtObject {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Audio);
+    this.$engine.initMeta(this, meta, Audio);
 
     // TODO
   }

@@ -14,7 +14,7 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     super(meta);
     super(meta);
-    QmlWeb.initMeta(this, meta, Binding);
+    this.$engine.initMeta(this, meta, Binding);
 
     this.$property = undefined;
 

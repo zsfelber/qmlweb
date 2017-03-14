@@ -2,7 +2,7 @@
 class Positioner extends Item {
   constructor(meta) {
     super(meta);
-    QmlWeb.initMeta(this, meta, Positioner);
+    this.$engine.initMeta(this, meta, Positioner);
 
     this.childrenChanged.connect(this, this.$onChildrenChanged);
     this.spacingChanged.connect(this, this.layoutChildren);
