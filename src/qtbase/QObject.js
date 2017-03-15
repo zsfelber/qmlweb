@@ -63,7 +63,7 @@ class QObject {
       opId
     };
 
-    const engine = item.engine;
+    const engine = item.$engine;
     engine.addPendingOp(itm);
   }
 

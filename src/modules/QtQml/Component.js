@@ -377,6 +377,7 @@ class QMLComponent {
 class AttachedComponent {
   constructor(parent) {
     this.parent = parent;
+    this.$engine = QmlWeb.getEngine();
     this.$properties = {};
     this.$engine.initMeta(this, {}, AttachedComponent);
     QObject.attach(parent, this);

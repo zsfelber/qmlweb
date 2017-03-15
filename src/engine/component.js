@@ -63,8 +63,13 @@ class QMLContext {
 
 
 function createComponent(meta, flags, loaderComponent) {
-  const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
-  return new QMLComponent(meta, flags, loaderComponent);
+  try {
+    this.pushengine();
+    const QMLComponent = QmlWeb.getConstructor("QtQml", "2.0", "Component");
+    return new QMLComponent(meta, flags, loaderComponent);
+  } finally {
+    this.popengine();
+  }
 }
 
 

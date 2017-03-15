@@ -142,72 +142,82 @@ function construct(meta, parent, flags) {
 }
 
 function constructSuper(meta, parent) {
+  try {
+    this.pushengine();
 
-  let item;
+    let item;
 
-  // NOTE resolve superclass info:
-  var supermeta = this.resolveClassImport(meta.$class, meta.$component);
+    // NOTE resolve superclass info:
+    var supermeta = this.resolveClassImport(meta.$class, meta.$component);
 
-  if (supermeta.classConstructor) {
-    // NOTE 1  internal class, module/qmldir cache:
+    if (supermeta.classConstructor) {
+      // NOTE 1  internal class, module/qmldir cache:
 
-    supermeta.parent = parent;
-    supermeta.$class = meta.$class;
-    supermeta.parentmeta = meta;
-    // TODO hack
-    supermeta.tagName = meta.tagName;
-    supermeta.$on = meta.$on;
+      supermeta.parent = parent;
+      supermeta.$class = meta.$class;
+      supermeta.parentmeta = meta;
+      // TODO hack
+      supermeta.tagName = meta.tagName;
+      supermeta.$on = meta.$on;
 
-    item = new supermeta.classConstructor(supermeta);
+      item = new supermeta.classConstructor(supermeta);
 
-    item.$info = item.$classname = supermeta.classConstructor.name;
+      item.$info = item.$classname = supermeta.classConstructor.name;
 
-    if (item.$attachedComponent) {
-      // for basic classes like Item, QtObject (and in complex classes' lowest non-prototype __proto__) :
-      // It needs this additional activization here (there is another one in QMLComponent.$createObject)
-      QObject.pendingComplete(item);
+      if (item.$attachedComponent) {
+        // for basic classes like Item, QtObject (and in complex classes' lowest non-prototype __proto__) :
+        // It needs this additional activization here (there is another one in QMLComponent.$createObject)
+        QObject.pendingComplete(item);
+      }
+
+    } else {
+      // NOTE 2  qml class:
+
+      if (meta.id) {
+        supermeta.id = meta.id;
+      }
+
+      // always super here:
+      item = this.createComponentAndElement(supermeta, parent, QMLComponentFlags.Super, meta.$component);
+
+      //if (typeof item.dom !== "undefined") {
+      //  item.dom.className += ` ${supermeta.$path[supermeta.$path.length - 1]}`;
+      //}
     }
 
-  } else {
-    // NOTE 2  qml class:
-
-    if (meta.id) {
-      supermeta.id = meta.id;
-    }
-
-    // always super here:
-    item = this.createComponentAndElement(supermeta, parent, QMLComponentFlags.Super, meta.$component);
-
-    //if (typeof item.dom !== "undefined") {
-    //  item.dom.className += ` ${supermeta.$path[supermeta.$path.length - 1]}`;
-    //}
+    return item;
+  } finally {
+    this.popengine();
   }
-
-  return item;
 }
 
 function createComponentAndElement(meta, parent, flags, loaderComponent) {
+  try {
+    this.pushengine();
 
-  // NOTE 1 : class component from meta. meta may be resolved superclass info (Super: from resolveClassImport)
-  // or QMLElement directly (Nested : in form {clazz:element_meta}):
-  // NOTE 2 : LoadImports is only interpreted with Super and not with Nested (so ignored in latter case)
-  const component = this.createComponent(meta, flags |= QmlWeb.QMLComponentFlags.LoadImports, loaderComponent);
+    // NOTE 1 : class component from meta. meta may be resolved superclass info (Super: from resolveClassImport)
+    // or QMLElement directly (Nested : in form {clazz:element_meta}):
+    // NOTE 2 : LoadImports is only interpreted with Super and not with Nested (so ignored in latter case)
+    const component = this.createComponent(meta, flags |= QmlWeb.QMLComponentFlags.LoadImports, loaderComponent);
 
-  if (!component) {
-    throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);
+    if (!component) {
+      throw new Error(`${meta.$name?"Toplevel:"+meta.$name:meta.id?"Element:"+meta.id:""}. No constructor found for ${meta.$class}`);
+    }
+
+    // NOTE recursive call to initialize the container for supertype  ($createObject -> constuct -> $createObject -> constuct ...) :
+    item = component.createObject(parent);
+
+    if (component !== item.$component) {
+      throw new Error("Component mismatch : "+component+" vs "+item.$component);
+    }
+    if (component.flags !== flags && component.flags !== (flags|QmlWeb.QMLComponentFlags.FirstSuper)) {
+      throw new Error("Component flags mismatch : "+flags+" vs "+component.flags);
+    }
+
+    return item;
+  } finally {
+    this.popengine();
   }
-
-  // NOTE recursive call to initialize the container for supertype  ($createObject -> constuct -> $createObject -> constuct ...) :
-  item = component.createObject(parent);
-
-  if (component !== item.$component) {
-    throw new Error("Component mismatch : "+component+" vs "+item.$component);
-  }
-  if (component.flags !== flags && component.flags !== (flags|QmlWeb.QMLComponentFlags.FirstSuper)) {
-    throw new Error("Component flags mismatch : "+flags+" vs "+component.flags);
-  }
-
-  return item;
 }
 
 
@@ -272,6 +282,7 @@ function addElementToPageContexts(item, id, ctx) {
 
 QMLEngine.prototype.initMeta = initMeta;
 QMLEngine.prototype.construct = construct;
+QMLEngine.prototype.constructSuper = constructSuper;
 QMLEngine.prototype.createComponentAndElement = createComponentAndElement;
 QMLEngine.prototype.createQmlObject = createQmlObject;
 QMLEngine.prototype.addElementToPageContexts = addElementToPageContexts;

@@ -48,31 +48,36 @@ Object.defineProperty(
 
 
 QmlWeb.debug = function(...args) {
-  if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Debug) {
+  const engine = QmlWeb.getEngine();
+  if (!engine || engine.logging & QmlWeb.QMLEngineLogging.Debug) {
     console.debug(...args);
   }
 }
 
 QmlWeb.info = function(...args) {
-  if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Info) {
+  const engine = QmlWeb.getEngine();
+  if (!engine || engine.logging & QmlWeb.QMLEngineLogging.Info) {
     console.info(...args);
   }
 }
 
 QmlWeb.log = function(...args) {
-  if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Debug) {
+  const engine = QmlWeb.getEngine();
+  if (!engine || engine.logging & QmlWeb.QMLEngineLogging.Debug) {
     console.log(...args);
   }
 }
 
 QmlWeb.warn = function(...args) {
-  if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Warning) {
+  const engine = QmlWeb.getEngine();
+  if (!engine || engine.logging & QmlWeb.QMLEngineLogging.Warning) {
     console.warn(...args);
   }
 }
 
 QmlWeb.error = function(...args) {
-  if (!QmlWeb.engine || QmlWeb.engine.logging & QmlWeb.QMLEngineLogging.Error) {
+  const engine = QmlWeb.getEngine();
+  if (!engine || engine.logging & QmlWeb.QMLEngineLogging.Error) {
     console.error(...args);
   }
 }
