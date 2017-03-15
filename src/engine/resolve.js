@@ -312,7 +312,7 @@ function $resolvePath(file, basePathUrl, component) {
   if (file && (/^(\w+):/.test(file)||file.startsWith("//"))) {
     return file;
   }
-  const engine = QmlWeb.$evaluatedObj ? QmlWeb.$evaluatedObj.$engine : this;
+  const engine = QmlWeb.getEngine(this);
 
   if (!basePathUrl) {
     if (!component) {
@@ -460,7 +460,7 @@ QMLEngine.prototype.resolveImport = resolveImport;
 
 QMLEngine.prototype.resolveClassImport = resolveClassImport;
 
-QMLEngine.prototype.$parseUrl = $parseUrl;
+QmlWeb.$parseUrl = QMLEngine.prototype.$parseUrl = $parseUrl;
 
 // Return a path to load the file
 QMLEngine.prototype.$resolvePath = $resolvePath;

@@ -1,5 +1,5 @@
 function QMLList(metaObject, parent, flags) {
-  const engine = QmlWeb.$evaluatedObj.$engine;
+  const engine = QmlWeb.getEngine(parent?parent.$engine:null);
   const list = [];
   if (metaObject instanceof Array) {
     for (const i in metaObject) {

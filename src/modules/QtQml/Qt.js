@@ -17,7 +17,7 @@ const Qt = {
   },
   // Load file, parse and construct as Component (.qml)
   createComponent: name => {
-    const engine = QmlWeb.$evaluatedObj.$engine;
+    const engine = QmlWeb.getEngine();
     let imp = engine.resolveImport(name);
 
     return engine.createComponent(imp, QmlWeb.QMLComponentFlags.LoadImports);
@@ -36,7 +36,7 @@ const Qt = {
 
   include(path, importAlias) {
     let contextMap;
-    const engine = QmlWeb.$evaluatedObj.$engine;
+    const engine = QmlWeb.getEngine();
     if (!importAlias) {
       const $c = QmlWeb.$evaluatedObj.$context;
       const $p = $c.$pageContext;

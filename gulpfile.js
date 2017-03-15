@@ -15,7 +15,7 @@ const path = require("path");
 const qtcoreSources = [
   "src/*.js",
   "src/qtbase/*.js",
-  "src/modules/*.js",
+  "src/engine/QMLEngine.js",
   "src/engine/classes.js",
   "src/engine/resolve.js",
   "src/modules/QtQml/Qt.js",

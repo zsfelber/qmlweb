@@ -1,7 +1,7 @@
 // Load resolved file, parse and construct as Component class (.qml)
 function loadClass(file) {
 
-  const url = this.$parseUrl(file);
+  const url = QmlWeb.$parseUrl(file);
   if (!url) {
     QmlWeb.warn("qmlweb loadClass: Empty url :", file);
     return undefined;
@@ -124,7 +124,7 @@ function readQmlDir(url) {
   // Q1: when this happen?
   const qmldirFileUrl = url.length > 0 ? `${url}/qmldir` : "qmldir";
 
-  const parsedUrl = this.$parseUrl(qmldirFileUrl);
+  const parsedUrl = QmlWeb.$parseUrl(qmldirFileUrl);
   if (!parsedUrl) {
     QmlWeb.warn("Unable to parse directory url : "+qmldirFileUrl);
     return false;
@@ -148,7 +148,7 @@ function readQmlDir(url) {
   // In that case, item path is meant to be absolute, and we have no need to
   // prefix it with base url
   function makeurl(path) {
-    const parsedPathUrl = this.$parseUrl(path);
+    const parsedPathUrl = QmlWeb.$parseUrl(path);
     if (parsedPathUrl) {
       return parsedPathUrl.uri;
     } else if (path[0]==="/"){
@@ -185,6 +185,6 @@ function readQmlDir(url) {
 }
 
 
-QMLEngine.prototype.loadClass = loadClass;
-QMLEngine.prototype.getUrlContents = getUrlContents;
-QMLEngine.prototype.readQmlDir = readQmlDir;
+QmlWeb.loadClass = QMLEngine.prototype.loadClass = loadClass;
+QmlWeb.getUrlContents = QMLEngine.prototype.getUrlContents = getUrlContents;
+QmlWeb.readQmlDir = QMLEngine.prototype.readQmlDir = readQmlDir;

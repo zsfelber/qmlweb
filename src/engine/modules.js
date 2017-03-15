@@ -26,11 +26,10 @@
 
 // Helper. Adds a type to the constructor list
 function registerGlobalQmlType(name, type) {
-  const constructors = this.constructors;
 
-  this.rootContext[type.name] = type;
+  //QmlWeb[type.name] = type;
   constructors[name] = type;
-  this.modules.Main[name] = type;
+  modules.Main[name] = type;
 
   applyAttachedObjects(type, name, QmlWeb.QtObject.prototype);
 
@@ -174,8 +173,9 @@ function applyAllAttachedObjects(proto) {
 }
 
 QmlWeb.modules = modules;
-QmlWeb.registerGlobalQmlType = registerGlobalQmlType;
-QmlWeb.registerQmlType = registerQmlType;
-QmlWeb.getConstructor = getConstructor;
-QmlWeb.applyAttachedObjects = applyAttachedObjects;
-QmlWeb.applyAllAttachedObjects = applyAllAttachedObjects;
+QmlWeb.constructors = constructors;
+QmlWeb.registerGlobalQmlType = QMLEngine.prototype.registerGlobalQmlType = registerGlobalQmlType;
+QmlWeb.registerQmlType = QMLEngine.prototype.registerQmlType = registerQmlType;
+QmlWeb.getConstructor = QMLEngine.prototype.getConstructor = getConstructor;
+QmlWeb.applyAttachedObjects = QMLEngine.prototype.applyAttachedObjects = applyAttachedObjects;
+QmlWeb.applyAllAttachedObjects = QMLEngine.prototype.applyAllAttachedObjects = applyAllAttachedObjects;
