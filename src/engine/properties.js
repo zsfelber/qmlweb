@@ -299,7 +299,7 @@ function applyProperty(item, i, value) {
 }
 
 function connectSignal(item, signalName, value) {
-  const engine = this;
+  const engine = QmlWeb.getEngine(this.$engine);
   const QMLBinding = QmlWeb.QMLBinding;
   const _signal = item[signalName];
 

@@ -609,10 +609,18 @@ class QMLEngine {
   }
 
   pushengine() {
+
+    if (this.prevEvalObj && QmlWeb.$evaluatedObj && this.prevEvalObj !== QmlWeb.$evaluatedObj) {
+      throw new QmlWeb.AssertionError("Another engine in stack.");
+    }
     this.prevEvalObj = QmlWeb.$evaluatedObj;
 
-    if (!this.prevEvalObj || this.prevEvalObj.$engine !== this) {
-      QmlWeb.$evaluatedObj = {$engine:this};
+    if (!QmlWeb.$evaluatedObj || QmlWeb.$evaluatedObj.$engine !== this) {
+      if (this instanceof QMLEngine) {
+        QmlWeb.$evaluatedObj = {$engine:this};
+      } else {
+        throw new QmlWeb.AssertionError("Caller is not engine.");
+      }
     }
   }
 

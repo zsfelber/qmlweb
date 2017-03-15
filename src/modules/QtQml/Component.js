@@ -411,3 +411,4 @@ QmlWeb.registerQmlType({
 });
 
 QmlWeb.QMLComponent = QMLComponent;
+QMLComponent.prototype.connectSignal = connectSignal;
