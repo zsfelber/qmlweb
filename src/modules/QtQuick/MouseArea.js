@@ -41,15 +41,15 @@ QmlWeb.registerQmlType({
 
     // TODO gz dummy
    this.drag = new QmlWeb.QObject(this, {attached:true, info:"drag"});
-   createProperty("Item", this.drag, "target");
-   createProperty("bool", this.drag, "active");
-   createProperty("enum", this.drag, "axis");
-   createProperty("int", this.drag, "minimumX");
-   createProperty("int", this.drag, "maximumX");
-   createProperty("int", this.drag, "minimumY");
-   createProperty("int", this.drag, "maximumY");
-   createProperty("bool", this.drag, "filterChildren");
-   createProperty("real", this.drag, "threshold");
+   engine.createProperty("Item", this.drag, "target");
+   engine.createProperty("bool", this.drag, "active");
+   engine.createProperty("enum", this.drag, "axis");
+   engine.createProperty("int", this.drag, "minimumX");
+   engine.createProperty("int", this.drag, "maximumX");
+   engine.createProperty("int", this.drag, "minimumY");
+   engine.createProperty("int", this.drag, "maximumY");
+   engine.createProperty("bool", this.drag, "filterChildren");
+   engine.createProperty("real", this.drag, "threshold");
 
    this.dom.addEventListener("click", e => this.$handleClick(e));
    this.dom.addEventListener("dblclick", e => this.$handleDblClick(e));

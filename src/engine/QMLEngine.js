@@ -1,6 +1,3 @@
-// There can only be one running QMLEngine.
-// This variable points to the currently running engine.
-QmlWeb.engine = null;
 
 QmlWeb.useShadowDom = true;
 
@@ -8,13 +5,9 @@ QmlWeb.useShadowDom = true;
 // QML engine. EXPORTED.
 class QMLEngine {
   constructor(element, opts={}) {
-    var committedEngine = QmlWeb.engine;
     try {
-      if (!committedEngine) {
-        committedEngine = this;
-      }
+      this.pushengine();
 
-      QmlWeb.engine = this;
       this.logging = opts.logging || QmlWeb.QMLEngineLogging.Full;
 
       //----------Public Members----------
@@ -66,228 +59,243 @@ class QMLEngine {
       //----------Construct----------
 
       window.addEventListener("resize", () => this.updateGeometry());
+
+      QMLEngine.$onConstruct.each(function(fun){
+        fun.call(this);
+      });
     } finally {
-      QmlWeb.engine = committedEngine;
+      this.pushengine();
     }
   }
 
   destroy() {
-    if (QmlWeb.engine !== this) {
-      throw new QmlWeb.AssertionError("Engine is already destroyed.");
-    }
-
     try {
-      this.stop();
-    } catch (err) {
-      console.error("engine destroy error : ", this, err);
-    }
+      this.pushengine();
 
-    var cleanup = QmlWeb.helpers.mergeObjects(this._whenStart, this._whenStop, this._tickers);
-    var cleaned = 0, invalid = [];
-
-    while (!cleanup.isEmpty()) {
       try {
-        for (const i in cleanup) {
-          try {
-            const val = cleanup[i];
-            if (val.destroy) {
-              ++cleaned;
-              val.$delete();
-            } else {
-              invalid.push(val.toString());
-            }
-          } finally {
-            delete cleanup[i];
-          }
-          break;
-        }
+        this.stop();
       } catch (err) {
-        console.error("engine destroy error : ", err.message);
+        console.error("engine destroy error : ", this, err);
       }
-    }
-    if (cleaned||invalid) {
-      console.warn("engine destroy : "+cleaned+" remaining objects destroyed. unhandled items : "+JSON.stringify(invalid)+".");
-    }
-    this.operationState |= QMLOperationState.Destroyed;
 
-    QmlWeb.engine = null;
+      var cleanup = QmlWeb.helpers.mergeObjects(this._whenStart, this._whenStop, this._tickers);
+      var cleaned = 0, invalid = [];
+
+      while (!cleanup.isEmpty()) {
+        try {
+          for (const i in cleanup) {
+            try {
+              const val = cleanup[i];
+              if (val.destroy) {
+                ++cleaned;
+                val.$delete();
+              } else {
+                invalid.push(val.toString());
+              }
+            } finally {
+              delete cleanup[i];
+            }
+            break;
+          }
+        } catch (err) {
+          console.error("engine destroy error : ", err.message);
+        }
+      }
+      if (cleaned||invalid) {
+        console.warn("engine destroy : "+cleaned+" remaining objects destroyed. unhandled items : "+JSON.stringify(invalid)+".");
+      }
+      this.operationState |= QMLOperationState.Destroyed;
+
+    } finally {
+      this.pushengine();
+    }
   }
 
   setDom(element) {
-    if (QmlWeb.engine !== this) {
-      throw new QmlWeb.AssertionError("Engine is destroyed.");
-    }
+    try {
+      this.pushengine();
 
-    //this.fps = 60;
-    // Math.floor, causes bugs to timing?
-    //this.$interval = Math.floor(1000 / this.fps);
-    this.dom = element || document.body;
+      //this.fps = 60;
+      // Math.floor, causes bugs to timing?
+      //this.$interval = Math.floor(1000 / this.fps);
+      this.dom = element || document.body;
 
-    // Target for the DOM children
-    this.domTarget = this.dom;
-    if (this.dom && QmlWeb.useShadowDom && this.dom.attachShadow) {
-      this.domTarget = this.dom.attachShadow({ mode: "open" });
-    }
+      // Target for the DOM children
+      this.domTarget = this.dom;
+      if (this.dom && QmlWeb.useShadowDom && this.dom.attachShadow) {
+        this.domTarget = this.dom.attachShadow({ mode: "open" });
+      }
 
-    //----------Construct----------
+      //----------Construct----------
 
-    if (this.dom) {
-      this.css = QmlWeb.createStyle(this.dom.style);
-      // No QML stuff should stand out the root element
-      QmlWeb.setStyle(this.css, "overflow", "hidden");
+      if (this.dom) {
+        this.css = QmlWeb.createStyle(this.dom.style);
+        // No QML stuff should stand out the root element
+        QmlWeb.setStyle(this.css, "overflow", "hidden");
 
-      // Needed to make absolute positioning work
-      if (!this.css.position) {
-        const style = window.getComputedStyle(this.dom);
-        if (style.getPropertyValue("position") === "static") {
-          QmlWeb.setStyle(this.css, "position", "relative");
-          QmlWeb.setStyle(this.css, "top", "0px");
-          QmlWeb.setStyle(this.css, "left", "0px");
+        // Needed to make absolute positioning work
+        if (!this.css.position) {
+          const style = window.getComputedStyle(this.dom);
+          if (style.getPropertyValue("position") === "static") {
+            QmlWeb.setStyle(this.css, "position", "relative");
+            QmlWeb.setStyle(this.css, "top", "0px");
+            QmlWeb.setStyle(this.css, "left", "0px");
+          }
         }
       }
+    } finally {
+      this.pushengine();
     }
   }
 
   //---------- Public Methods ----------
 
   updateGeometry() {
-    if (QmlWeb.engine !== this) {
-      throw new QmlWeb.AssertionError("Engine is destroyed.");
-    }
+    try {
+      this.pushengine();
 
-    // we have to call `this.implicitHeight =` and `this.implicitWidth =`
-    // each time the root element changes it's geometry
-    // to reposition child elements of qml scene
-    let width;
-    let height;
-    if (this.dom === document.body) {
-      width = window.innerWidth;
-      height = window.innerHeight;
-    } else {
-      const style = window.getComputedStyle(this.dom);
-      width = parseFloat(style.getPropertyValue("width"), 10);
-      height = parseFloat(style.getPropertyValue("height"), 10);
-    }
-    if (width) {
-      this.rootObject.width = width;
-    }
-    if (height) {
-      this.rootObject.height = height;
+      // we have to call `this.implicitHeight =` and `this.implicitWidth =`
+      // each time the root element changes it's geometry
+      // to reposition child elements of qml scene
+      let width;
+      let height;
+      if (this.dom === document.body) {
+        width = window.innerWidth;
+        height = window.innerHeight;
+      } else {
+        const style = window.getComputedStyle(this.dom);
+        width = parseFloat(style.getPropertyValue("width"), 10);
+        height = parseFloat(style.getPropertyValue("height"), 10);
+      }
+      if (width) {
+        this.rootObject.width = width;
+      }
+      if (height) {
+        this.rootObject.height = height;
+      }
+    } finally {
+      this.pushengine();
     }
   }
 
   // Start the engine
   start() {
-    if (QmlWeb.engine !== this) {
-      throw new QmlWeb.AssertionError("Engine is destroyed.");
-    }
+    try {
+      this.pushengine();
 
-    const QMLOperationState = QmlWeb.QMLOperationState;
-    if (!(this.operationState & QMLOperationState.Running)) {
-      this.operationState |= QMLOperationState.Running;
-      //this._tickerId = setInterval(this._tick.bind(this), this.$interval);
-      //this._tickers.forEach(ticker => ticker(now, elapsed));
-      for (const i in this._whenStart) {
-        const val = this._whenStart[i];
-        try {
-          val();
-        } catch (err) {
-          if (err instanceof QmlWeb.FatalError) throw err;
-          if (!err.ctType) {
-            QmlWeb.warn("Error in startup script : ", err);
-          } else {
-            QmlWeb.warn(err.ctType+" error in startup script.");
+      const QMLOperationState = QmlWeb.QMLOperationState;
+      if (!(this.operationState & QMLOperationState.Running)) {
+        this.operationState |= QMLOperationState.Running;
+        //this._tickerId = setInterval(this._tick.bind(this), this.$interval);
+        //this._tickers.forEach(ticker => ticker(now, elapsed));
+        for (const i in this._whenStart) {
+          const val = this._whenStart[i];
+          try {
+            val();
+          } catch (err) {
+            if (err instanceof QmlWeb.FatalError) throw err;
+            if (!err.ctType) {
+              QmlWeb.warn("Error in startup script : ", err);
+            } else {
+              QmlWeb.warn(err.ctType+" error in startup script.");
+            }
+          }
+        }
+        for (const i in this._tickers) {
+          const val = this._tickers[i];
+          try {
+            this.$startTicker(val);
+          } catch (err) {
+            if (err instanceof QmlWeb.FatalError) throw err;
+            if (!err.ctType) {
+              QmlWeb.warn("Startup error in ticker : ", err);
+            } else {
+              QmlWeb.warn(err.ctType+" : Startup error in ticker.");
+            }
           }
         }
       }
-      for (const i in this._tickers) {
-        const val = this._tickers[i];
-        try {
-          this.$startTicker(val);
-        } catch (err) {
-          if (err instanceof QmlWeb.FatalError) throw err;
-          if (!err.ctType) {
-            QmlWeb.warn("Startup error in ticker : ", err);
-          } else {
-            QmlWeb.warn(err.ctType+" : Startup error in ticker.");
-          }
-        }
-      }
+    } finally {
+      this.pushengine();
     }
   }
 
   // Stop the engine
   stop() {
-    if (QmlWeb.engine !== this) {
-      throw new QmlWeb.AssertionError("Engine is destroyed.");
-    }
+    try {
+      this.pushengine();
 
-    const QMLOperationState = QmlWeb.QMLOperationState;
-    if (this.operationState & QMLOperationState.Running) {
-      //clearInterval(this._tickerId);
-      for (const i in this._tickers) {
-        const val = this._tickers[i];
-        this.$stopTicker(val);
+      const QMLOperationState = QmlWeb.QMLOperationState;
+      if (this.operationState & QMLOperationState.Running) {
+        //clearInterval(this._tickerId);
+        for (const i in this._tickers) {
+          const val = this._tickers[i];
+          this.$stopTicker(val);
+        }
+        this.operationState &= ~QMLOperationState.Running;
+        for (const i in this._whenStop) {
+          const val = this._whenStop[i];
+          val();
+        }
       }
-      this.operationState &= ~QMLOperationState.Running;
-      for (const i in this._whenStop) {
-        const val = this._whenStop[i];
-        val();
-      }
+    } finally {
+      this.pushengine();
     }
   }
 
 
   // Load file, parse and construct (.qml or .qml.js)
   loadFile(file, parent = null, operationFlags = 0, serverWsAddress, isClientSide) {
-    if (QmlWeb.engine !== this) {
-      throw new QmlWeb.AssertionError("Engine is destroyed.");
-    }
+    try {
+      this.pushengine();
 
-    var wsUrl, webSocket;
-    if (operationFlags & QmlWeb.QMLOperationState.Remote) {
-      if (serverWsAddress !== undefined) {
-        if (/^\d+$/.test(serverWsAddress)) {
-          var url = this.$parseUrl(window.location.href);
-          wsUrl = "ws://"+url.hostname+":"+(serverWsAddress?serverWsAddress:url.port);
-        } else {
-          if (/^ws:[/]/.test(serverWsAddress)) {
-            wsUrl = serverWsAddress;
+      var wsUrl, webSocket;
+      if (operationFlags & QmlWeb.QMLOperationState.Remote) {
+        if (serverWsAddress !== undefined) {
+          if (/^\d+$/.test(serverWsAddress)) {
+            var url = this.$parseUrl(window.location.href);
+            wsUrl = "ws://"+url.hostname+":"+(serverWsAddress?serverWsAddress:url.port);
+          } else {
+            if (/^ws:[/]/.test(serverWsAddress)) {
+              wsUrl = serverWsAddress;
+            }
+          }
+          if (!wsUrl) {
+            QmlWeb.error("Invalid server websockets address : "+serverWsAddress+". Should be a ws port or 'ws:/...' url.")
           }
         }
-        if (!wsUrl) {
-          QmlWeb.error("Invalid server websockets address : "+serverWsAddress+". Should be a ws port or 'ws:/...' url.")
+
+        if (wsUrl) {
+          QmlWeb.log("Connecting to ws server : "+wsUrl);
+          webSocket = new WebSocket(wsUrl);
+          webSocket.onopen = function(evt) {
+            QmlWeb.log(wsUrl+" : Connection open ...");
+            webSocket.send(JSON.stringify({init:"hello UULord 012"}));
+          };
+          webSocket.onmessage = function(evt) {
+            var data = JSON.parse(event.data);
+            QmlWeb.log( wsUrl+" : Received Message: ", data);
+          };
+          webSocket.onclose = function(evt) {
+            QmlWeb.log(wsUrl+" : Connection closed.");
+          };
         }
       }
 
-      if (wsUrl) {
-        QmlWeb.log("Connecting to ws server : "+wsUrl);
-        webSocket = new WebSocket(wsUrl);
-        webSocket.onopen = function(evt) {
-          QmlWeb.log(wsUrl+" : Connection open ...");
-          webSocket.send(JSON.stringify({init:"hello UULord 012"}));
-        };
-        webSocket.onmessage = function(evt) {
-          var data = JSON.parse(event.data);
-          QmlWeb.log( wsUrl+" : Received Message: ", data);
-        };
-        webSocket.onclose = function(evt) {
-          QmlWeb.log(wsUrl+" : Connection closed.");
-        };
-      }
+      // used only in tests externally:
+      this.$basePathUrl = this.resolveBasePath(file);
+
+      // TODO gz resolveClass  += engine.containers[...]
+      const respath = this.$resolvePath(null, this.$basePathUrl);
+      const clazz = this.resolveClass(respath);
+
+      const component = this.loadQMLTree(clazz, parent, file, operationFlags, serverWsAddress, isClientSide, webSocket);
+      QmlWeb.log("loadFile success. LOADED : "+file);
+
+      return component;
+    } finally {
+      this.pushengine();
     }
-
-    // used only in tests externally:
-    this.$basePathUrl = this.resolveBasePath(file);
-
-    // TODO gz resolveClass  += engine.containers[...]
-    const respath = this.$resolvePath(null, this.$basePathUrl);
-    const clazz = this.resolveClass(respath);
-
-    const component = this.loadQMLTree(clazz, parent, file, operationFlags, serverWsAddress, isClientSide, webSocket);
-    QmlWeb.log("loadFile success. LOADED : "+file);
-
-    return component;
   }
 
   // parse and construct qml
@@ -298,22 +306,20 @@ class QMLEngine {
   }
 
   loadQMLTree(clazz, parent = null, file = undefined, operationFlags = 0, serverWsAddress, isClientSide, webSocket) {
-    if (QmlWeb.engine !== this) {
-      throw new QmlWeb.AssertionError("Engine is destroyed.");
-    }
-
-    // default is 0 : Idle
-    var committedState = this.operationState;
-
-    this.operationState |= operationFlags | QmlWeb.QMLOperationState.SystemInit;
-
     try {
+      this.pushengine();
+
+      // default is 0 : Idle
+      var committedState = this.operationState;
+
+      this.operationState |= operationFlags | QmlWeb.QMLOperationState.SystemInit;
+
       // Create and initialize objects
       // TODO gz undefined->component.$basePathUrl
 
       this.rootObject = this.createComponentAndElement(
-                    {clazz: clazz, $file: file}, parent,
-                    QmlWeb.QMLComponentFlags.Root | QmlWeb.QMLComponentFlags.LoadImports);
+        {clazz: clazz, $file: file}, parent,
+        QmlWeb.QMLComponentFlags.Root | QmlWeb.QMLComponentFlags.LoadImports);
 
       this.rootObject.$component.serverWsAddress = serverWsAddress;
       this.rootObject.$component.isClientSide = isClientSide;
@@ -348,6 +354,7 @@ class QMLEngine {
     } finally {
       // reset to initial state : this intended to remove "System" flag (usually but stacking logic should work)
       this.operationState = committedState;
+      this.pushengine();
     }
   }
 
@@ -361,57 +368,55 @@ class QMLEngine {
   }
 
   focusedElement() {
-    if (QmlWeb.engine !== this) {
-      throw new QmlWeb.AssertionError("Engine is destroyed.");
-    }
-
     return this.rootObject.$context.activeFocus;
   }
 
   //---------- Private Methods ----------
 
   $initKeyboard() {
-    if (QmlWeb.engine !== this) {
-      throw new QmlWeb.AssertionError("Engine is destroyed.");
+    try {
+      this.pushengine();
+
+      document.onkeypress = e => {
+        let focusedElement = this.focusedElement();
+        const event = QmlWeb.eventToKeyboard(e || window.event);
+        const eventName = QmlWeb.keyboardSignals[event.key];
+
+        while (focusedElement && !event.accepted) {
+          const backup = focusedElement.$context.event;
+          focusedElement.$context.event = event;
+          focusedElement.Keys.pressed(event);
+          if (eventName) {
+            focusedElement.Keys[eventName](event);
+          }
+          focusedElement.$context.event = backup;
+          if (event.accepted) {
+            e.preventDefault();
+          } else {
+            focusedElement = focusedElement.$parent;
+          }
+        }
+      };
+
+      document.onkeyup = e => {
+        let focusedElement = this.focusedElement();
+        const event = QmlWeb.eventToKeyboard(e || window.event);
+
+        while (focusedElement && !event.accepted) {
+          const backup = focusedElement.$context.event;
+          focusedElement.$context.event = event;
+          focusedElement.Keys.released(event);
+          focusedElement.$context.event = backup;
+          if (event.accepted) {
+            e.preventDefault();
+          } else {
+            focusedElement = focusedElement.$parent;
+          }
+        }
+      };
+    } finally {
+      this.pushengine();
     }
-
-    document.onkeypress = e => {
-      let focusedElement = this.focusedElement();
-      const event = QmlWeb.eventToKeyboard(e || window.event);
-      const eventName = QmlWeb.keyboardSignals[event.key];
-
-      while (focusedElement && !event.accepted) {
-        const backup = focusedElement.$context.event;
-        focusedElement.$context.event = event;
-        focusedElement.Keys.pressed(event);
-        if (eventName) {
-          focusedElement.Keys[eventName](event);
-        }
-        focusedElement.$context.event = backup;
-        if (event.accepted) {
-          e.preventDefault();
-        } else {
-          focusedElement = focusedElement.$parent;
-        }
-      }
-    };
-
-    document.onkeyup = e => {
-      let focusedElement = this.focusedElement();
-      const event = QmlWeb.eventToKeyboard(e || window.event);
-
-      while (focusedElement && !event.accepted) {
-        const backup = focusedElement.$context.event;
-        focusedElement.$context.event = event;
-        focusedElement.Keys.released(event);
-        focusedElement.$context.event = backup;
-        if (event.accepted) {
-          e.preventDefault();
-        } else {
-          focusedElement = focusedElement.$parent;
-        }
-      }
-    };
   }
 
   /*_tick() {
@@ -456,26 +461,36 @@ class QMLEngine {
 
   $startTicker(t) {
     if (!t.tickerId) {
-      var interval = t.interval;
-      if (!interval) {
-        // Math.floor, causes bugs to timing?
-        interval = Math.floor(1000/t.fps);
-      }
+      try {
+        this.pushengine();
+        var interval = t.interval;
+        if (!interval) {
+          // Math.floor, causes bugs to timing?
+          interval = Math.floor(1000/t.fps);
+        }
 
-      t.tickerId = setInterval(t.tick, interval);
-      if (t.$tickStarted) {
-        t.$tickStarted();
+        t.tickerId = setInterval(t.tick, interval);
+        if (t.$tickStarted) {
+          t.$tickStarted();
+        }
+      } finally {
+        this.pushengine();
       }
     }
   }
 
   $stopTicker(t) {
     if (t.tickerId) {
-      clearInterval(t.tickerId);
-      if (t.$tickStopped) {
-        t.$tickStopped();
+      try {
+        this.pushengine();
+        clearInterval(t.tickerId);
+        if (t.$tickStopped) {
+          t.$tickStopped();
+        }
+        delete t.tickerId;
+      } finally {
+        this.pushengine();
       }
-      delete t.tickerId;
     }
   }
 
@@ -491,74 +506,76 @@ class QMLEngine {
   }
 
   processOp(op) {
-    if (QmlWeb.engine !== this) {
-      throw new QmlWeb.AssertionError("Engine is destroyed.");
-    }
-
-    const oldP = this.currentPendingOp;
-    this.currentPendingOp = op;
-
-    op.errors = [];
-    op.warnings = [];
-    let mode=":"+op.opId;
-
-    const property = op.property;
-
     try {
-      if (property) {
-        this.a++;
-        if (property.updateState & QmlWeb.QMLPropertyState.Updating) {
-          this.ae++;
-          mode+=":ae";
-          op.errors.push("Property state is invalid : initialization failed : "+property);
+      this.pushengine();
+
+      const oldP = this.currentPendingOp;
+      this.currentPendingOp = op;
+
+      op.errors = [];
+      op.warnings = [];
+      let mode=":"+op.opId;
+
+      const property = op.property;
+
+      try {
+        if (property) {
+          this.a++;
+          if (property.updateState & QmlWeb.QMLPropertyState.Updating) {
+            this.ae++;
+            mode+=":ae";
+            op.errors.push("Property state is invalid : initialization failed : "+property);
+          } else {
+
+            property.$set(op.newVal, op.oldVal, op.flags, op.valParentObj, op);
+
+            this.a1++;
+            mode+=":a";
+          }
         } else {
-
-          property.$set(op.newVal, op.oldVal, op.flags, op.valParentObj, op);
-
-          this.a1++;
-          mode+=":a";
+          this.b++;
+          mode+=":b";
+          op.fun.apply(op.thisObj, op.args);
         }
-      } else {
-        this.b++;
-        mode+=":b";
-        op.fun.apply(op.thisObj, op.args);
+
+        if (op.errors.length) {
+          this.e++;
+          this.error["#"+this.i+mode+"!!"+op.info] = op;
+          op.err = op.errors[0];
+          if (op.err.err !== undefined) {
+            op.errprop = op.err.prop;
+            op.err = op.err.err;
+          }
+        } else if (op.warnings.length) {
+          this.w++;
+          this.warning["#"+this.i+mode+"!"+op.info] = op;
+          op.warn = op.warnings[0];
+          if (op.warn.err !== undefined) {
+            op.warnprop = op.warn.prop;
+            op.warn = op.warn.err;
+          }
+        } else {
+          this.info["#"+this.i+mode+":"+op.info] = op;
+        }
+
+      } catch (err) {
+        if (err instanceof QmlWeb.FatalError) throw err;
+        if (err.ctType==="UninitializedEvaluation") {
+          this.w++;
+          this.warning["#"+this.i+mode+"!"+op.info] = op;
+        } else {
+          this.e++;
+          this.error["#"+this.i+mode+"!!"+op.info] = op;
+        }
+        op.err = err;
+      } finally {
+        this.currentPendingOp = oldP;
       }
 
-      if (op.errors.length) {
-        this.e++;
-        this.error["#"+this.i+mode+"!!"+op.info] = op;
-        op.err = op.errors[0];
-        if (op.err.err !== undefined) {
-          op.errprop = op.err.prop;
-          op.err = op.err.err;
-        }
-      } else if (op.warnings.length) {
-        this.w++;
-        this.warning["#"+this.i+mode+"!"+op.info] = op;
-        op.warn = op.warnings[0];
-        if (op.warn.err !== undefined) {
-          op.warnprop = op.warn.prop;
-          op.warn = op.warn.err;
-        }
-      } else {
-        this.info["#"+this.i+mode+":"+op.info] = op;
-      }
-
-    } catch (err) {
-      if (err instanceof QmlWeb.FatalError) throw err;
-      if (err.ctType==="UninitializedEvaluation") {
-        this.w++;
-        this.warning["#"+this.i+mode+"!"+op.info] = op;
-      } else {
-        this.e++;
-        this.error["#"+this.i+mode+"!!"+op.info] = op;
-      }
-      op.err = err;
+      this.i++;
     } finally {
-      this.currentPendingOp = oldP;
+      this.pushengine();
     }
-
-    this.i++;
   }
 
   processSinglePendingOperation(op) {
@@ -591,15 +608,31 @@ class QMLEngine {
     QmlWeb.log("processPendingOperations : done  total:"+this.i+" properties:"+this.a+"("+(this.a1+","+this.ae)+") functions:"+this.b+"  Info:",this.info, "   Warning("+this.w+"):",this.warning, "   Error("+this.e+"):",this.error);
   }
 
+  pushengine() {
+    this.prevEvalObj = QmlWeb.$evaluatedObj;
+
+    if (!this.prevEvalObj || this.prevEvalObj.$engine !== this) {
+      QmlWeb.$evaluatedObj = {$engine:this};
+    }
+  }
+
+  popengine() {
+    QmlWeb.$evaluatedObj = this.prevEvalObj;
+  }
+
   static dumpErr() {
     QmlWeb.warn(this.message);
     QmlWeb.warn(this.stack);
   }
 }
 
+QMLEngine.$onConstruct = [];
 QmlWeb.QMLEngine = QMLEngine;
-QmlWeb.getEngine = function() {
-  if (!QmlWeb.engine) throw new QmlWeb.AssertionError("No engine.");
-  else if (QmlWeb.engine.operationState & QmlWeb.QMLOperationState.Destroyed) throw new QmlWeb.AssertionError("Engine is destroyed.");
-  return QmlWeb.engine;
+QmlWeb.getEngine = function(chkengine) {
+  if (!QmlWeb.$evaluatedObj) throw new QmlWeb.AssertionError("No engine.");
+  const e = QmlWeb.$evaluatedObj.$engine;
+  if (!e) throw new QmlWeb.AssertionError("No engine.");
+  if (e !== chkengine) throw new QmlWeb.AssertionError("Another engine in context.");
+  if (e.operationState & QmlWeb.QMLOperationState.Destroyed) throw new QmlWeb.AssertionError("Engine is destroyed.");
+  return e;
 };

@@ -145,7 +145,7 @@ class Repeater extends Item {
 
         const newItem = this.delegate.createObject(container, {}, outallchanges);
         const np = newItem.$properties;
-        createProperty("int", newItem, "index", { initialValue: index });
+        engine.createProperty("int", newItem, "index", { initialValue: index });
         // // TODO gz obsolete : scope
         // const scope = {
         //   $object: newItem,
@@ -154,7 +154,7 @@ class Repeater extends Item {
 
         if (typeof model === "number" || model instanceof Array) {
           if (typeof np.modelData === "undefined") {
-            createProperty("variant", newItem, "modelData");
+            engine.createProperty("variant", newItem, "modelData");
           }
           const value = model instanceof Array ?
                         model[index] :
@@ -168,7 +168,7 @@ class Repeater extends Item {
           for (let i = 0; i < model.roleNames.length; i++) {
             const roleName = model.roleNames[i];
             if (typeof np[roleName] === "undefined") {
-              createProperty("variant", newItem, roleName);
+              engine.createProperty("variant", newItem, roleName);
             }
             const roleData = model.data(index, roleName);
             modelData[roleName] = roleData;
@@ -178,7 +178,7 @@ class Repeater extends Item {
             );
           }
           if (typeof np.model === "undefined") {
-            createProperty("variant", newItem, "model");
+            engine.createProperty("variant", newItem, "model");
           }
           np.model.set(
             modelData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,

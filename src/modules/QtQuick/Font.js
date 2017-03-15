@@ -17,18 +17,18 @@ QmlWeb.registerQmlType({
     const engine = this.$engine;
     const createProperty = engine.createProperty;
 
-    createProperty("bool", this, "bold");
-    createProperty("enum", this, "capitalization", { initialValue:
+    engine.createProperty("bool", this, "bold");
+    engine.createProperty("enum", this, "capitalization", { initialValue:
                                                       Font.MixedCase });
-    createProperty("string", this, "family", { initialValue: "sans-serif" });
-    createProperty("bool", this, "italic");
-    createProperty("real", this, "letterSpacing");
-    createProperty("int", this, "pixelSize", { initialValue: 13 });
-    createProperty("real", this, "pointSize", { initialValue: 10 });
-    createProperty("bool", this, "strikeout");
-    createProperty("bool", this, "underline");
-    createProperty("enum", this, "weight", { initialValue: Font.Normal });
-    createProperty("real", this, "wordSpacing");
+    engine.createProperty("string", this, "family", { initialValue: "sans-serif" });
+    engine.createProperty("bool", this, "italic");
+    engine.createProperty("real", this, "letterSpacing");
+    engine.createProperty("int", this, "pixelSize", { initialValue: 13 });
+    engine.createProperty("real", this, "pointSize", { initialValue: 10 });
+    engine.createProperty("bool", this, "strikeout");
+    engine.createProperty("bool", this, "underline");
+    engine.createProperty("enum", this, "weight", { initialValue: Font.Normal });
+    engine.createProperty("real", this, "wordSpacing");
 
     this.$sizeLock = false;
 

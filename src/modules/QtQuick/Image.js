@@ -8,8 +8,8 @@ class QImage extends Item {
     const createProperty = engine.createProperty;
 
     this.sourceSize = new QmlWeb.QObject(this, {attached:true, info:"sourceSize"});
-    createProperty("int", this.sourceSize, "width");
-    createProperty("int", this.sourceSize, "height");
+    engine.createProperty("int", this.sourceSize, "width");
+    engine.createProperty("int", this.sourceSize, "height");
 
     const bg = this.impl = document.createElement("div");
     bg.className = "qmlimg";

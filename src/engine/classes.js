@@ -126,7 +126,7 @@ function construct(meta, parent, flags) {
 
       // Apply properties according to this metatype info
       // (Bindings won't get evaluated, yet)
-      QmlWeb.applyProperties(meta, item);
+      engine.applyProperties(meta, item);
 
     } finally {
       QmlWeb.$evaluatedObj = prevEvalObj;

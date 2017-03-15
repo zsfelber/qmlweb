@@ -49,7 +49,7 @@ const Qt = {
     }
 
     const uri = engine.$resolvePath(path);
-    const jsBinding = QmlWeb.importJavascript(uri, importAlias, contextMap);
+    const jsBinding = engine.importJavascript(uri, importAlias, contextMap);
 
     if (!jsBinding) {
       QmlWeb.error("Qt.include: Unable to load JavaScript module:", uri, path);

@@ -241,7 +241,7 @@ function applyProperty(item, i, value) {
     if (item.$setCustomSlot) {
       item.$setCustomSlot(signalName, value);
       return true;
-    } else if (connectSignal.call(item, item, signalName, value)) {
+    } else if (item.connectSignal(item, signalName, value)) {
       return true;
     }
   }
@@ -265,16 +265,16 @@ function applyProperty(item, i, value) {
       met.owner = item;
       return true;
     } else if (value instanceof QmlWeb.QMLAliasDefinition) {
-      createProperty("alias", item, i, {path:value.path, readOnly:value.readonly});
+      this.createProperty("alias", item, i, {path:value.path, readOnly:value.readonly});
       // NOTE getter/setter/target moved to inside createProperty
 
       return true;
     } else if (value instanceof QmlWeb.QMLPropertyDefinition) {
-      createProperty(value.type, item, i, {readOnly:value.readonly, initialValue:value.value});
+      this.createProperty(value.type, item, i, {readOnly:value.readonly, initialValue:value.value});
       return true;
     } else if (value instanceof QmlWeb.QMLMetaPropertyGroup && i in item) {
       // Apply properties one by one, otherwise apply at once
-      applyProperties(value, item[i]);
+      this.applyProperties(value, item[i]);
       return true;
     }
   }
@@ -382,8 +382,8 @@ function $propertyInfo(prop) {
 }
 
 
-QMLEngine.prototype.formatPath = formatPath;
+QMLWeb.formatPath = formatPath;
 QMLEngine.prototype.createProperty = createProperty;
 QMLEngine.prototype.applyProperties = applyProperties;
-QMLEngine.prototype.connectSignal = connectSignal;
+QObject.prototype.connectSignal = connectSignal;
 QMLEngine.prototype.$propertyInfo = $propertyInfo;

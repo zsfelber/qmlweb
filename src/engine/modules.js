@@ -1,7 +1,7 @@
-QMLEngine.$onConstruct.push(function(){
-  this.notfound = {};
+//QMLEngine.$onConstruct.push(function(){
+  const notfound = {};
 
-  this.modules = {
+  const modules = {
     Main: {
       int: QmlWeb.qmlInteger,
       real: QmlWeb.qmlNumber,
@@ -17,12 +17,12 @@ QMLEngine.$onConstruct.push(function(){
     }
   };
 
-  this.objectAttachors = {
+  const objectAttachors = {
   };
 
   // All object constructors
-  this.constructors = this.modules.Main;
-});
+  const constructors = modules.Main;
+//});
 
 // Helper. Adds a type to the constructor list
 function registerGlobalQmlType(name, type) {
@@ -173,9 +173,9 @@ function applyAllAttachedObjects(proto) {
   }
 }
 
-
-QMLEngine.prototype.registerGlobalQmlType = registerGlobalQmlType;
-QMLEngine.prototype.registerQmlType = registerQmlType;
-QMLEngine.prototype.getConstructor = getConstructor;
-QMLEngine.prototype.applyAttachedObjects = applyAttachedObjects;
-QMLEngine.prototype.applyAllAttachedObjects = applyAllAttachedObjects;
+QmlWeb.modules = modules;
+QmlWeb.registerGlobalQmlType = registerGlobalQmlType;
+QmlWeb.registerQmlType = registerQmlType;
+QmlWeb.getConstructor = getConstructor;
+QmlWeb.applyAttachedObjects = applyAttachedObjects;
+QmlWeb.applyAllAttachedObjects = applyAllAttachedObjects;

@@ -9,17 +9,10 @@ describe("QtQuick.Behavior", function() {
 
     var called = false;
     setTimeout(function() {
-      const oe = QmlWeb.engine;
-      try {
-        QmlWeb.engine = done.engine;
-
         called = true;
         expect(qml.gotX).toBe(true);
         expect(qml.gotY).toBe(false);
         done();
-      } finally {
-        QmlWeb.engine = oe;
-      }
     }, 500);
     expect(called).toBe(false);
     failTimeout(2000, done);

@@ -121,7 +121,7 @@ function loadImports(component, importsArray) {
   }
 
   for (let i = 0; i < importsArray.length; i++) {
-    loadImport(importsArray[i], component);
+    this.loadImport(importsArray[i], component);
   }
 }
 
@@ -207,10 +207,10 @@ function loadImport(entry, component) {
         /* Use entry[1] directly, as we don't want to include the
           * basePath, otherwise it gets prepended twice in
           * createComponent. */
-        addComponentImportPath(component,
+        this.addComponentImportPath(component,
           `${entry[1]}/`, entry[3]);
       } else {
-        addComponentImportPath(component, `${name}/`);
+        this.addComponentImportPath(component, `${name}/`);
       }
     }
 

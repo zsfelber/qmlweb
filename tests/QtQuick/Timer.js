@@ -10,15 +10,9 @@ describe("QtQuick.Timer", function() {
     qml.interval = 50;
     var now = new Date();
     qml.yield = function(arg) {
-      const oe = QmlWeb.engine;
-      try {
-        QmlWeb.engine = done.engine;
       var t = new Date() - now;
       expect(t).toBeRoughly(50, 1);
       done();
-      } finally {
-        QmlWeb.engine = oe;
-      }
     };
     qml.start();
     failTimeout(2000, done);
@@ -29,15 +23,9 @@ describe("QtQuick.Timer", function() {
     qml.interval = 500;
     var now = new Date();
     qml.yield = function(arg) {
-      const oe = QmlWeb.engine;
-      try {
-        QmlWeb.engine = done.engine;
       var t = new Date() - now;
       expect(t).toBeRoughly(500, 0.1);
       done();
-      } finally {
-        QmlWeb.engine = oe;
-      }
     };
     qml.start();
     failTimeout(2000, done);
@@ -46,14 +34,8 @@ describe("QtQuick.Timer", function() {
   it("can set Timer.running = true to start", function(done) {
     var qml = load("Running", this.div, null, done);
     qml.yield = function(succeed) {
-      const oe = QmlWeb.engine;
-      try {
-        QmlWeb.engine = done.engine;
       expect(succeed).toBe(true);
       done();
-      } finally {
-        QmlWeb.engine = oe;
-      }
     };
     qml.start();
     failTimeout(2000, done);

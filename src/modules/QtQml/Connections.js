@@ -30,7 +30,7 @@ QmlWeb.registerQmlType({
         c._currentConnection.disconnect();
       }
       if (this.target) {
-        c._currentConnection = QmlWeb.connectSignal.call(this, this.target, i, c.value);
+        c._currentConnection = this.connectSignal(this.target, i, c.value);
       }
     }
   }

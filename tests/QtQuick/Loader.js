@@ -13,14 +13,8 @@ describe("QtQuick.Loader", function() {
   it("SourceDelayed", function(done) {
     const qml = load("SourceDelayed", this.div, null, done);
     qml.yield = function() {
-      const oe = QmlWeb.engine;
-      try {
-        QmlWeb.engine = done.engine;
       expect(qml.item.value).toBe(42);
       done();
-      } finally {
-        QmlWeb.engine = oe;
-      }
     };
     qml.start();
     failTimeout(2000, done);
@@ -28,14 +22,8 @@ describe("QtQuick.Loader", function() {
   it("SourceComponentDelayed", function(done) {
     const qml = load("SourceComponentDelayed", this.div, null, done);
     qml.yield = function() {
-      const oe = QmlWeb.engine;
-      try {
-        QmlWeb.engine = done.engine;
       expect(qml.item.value).toBe(42);
       done();
-      } finally {
-        QmlWeb.engine = oe;
-      }
     };
     qml.start();
     failTimeout(2000, done);

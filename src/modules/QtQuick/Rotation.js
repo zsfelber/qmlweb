@@ -17,13 +17,13 @@ QmlWeb.registerQmlType({
     const createProperty = engine.createProperty;
 
     this.axis = new QmlWeb.QObject(this, {attached:true, info:"axis"});
-    createProperty("real", this.axis, "x");
-    createProperty("real", this.axis, "y");
-    createProperty("real", this.axis, "z", { initialValue: 1 });
+    engine.createProperty("real", this.axis, "x");
+    engine.createProperty("real", this.axis, "y");
+    engine.createProperty("real", this.axis, "z", { initialValue: 1 });
 
     this.origin = new QmlWeb.QObject(this, {attached:true, info:"rotation"});
-    createProperty("real", this.origin, "x");
-    createProperty("real", this.origin, "y");
+    engine.createProperty("real", this.origin, "x");
+    engine.createProperty("real", this.origin, "y");
 
     this.angleChanged.connect(this.$parent, this.$parent.$updateTransform);
     this.axis.xChanged.connect(this.$parent, this.$parent.$updateTransform);

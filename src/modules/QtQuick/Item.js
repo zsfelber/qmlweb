@@ -29,7 +29,7 @@ class Item extends ItemBase {
     const createProperty = engine.createProperty;
 
     if (!this.$parent) {
-      createProperty("var", this, "activeFocus");
+      engine.createProperty("var", this, "activeFocus");
     }
 
     this.parentChanged.connect(this, this.$onParentChanged_);
@@ -52,19 +52,19 @@ class Item extends ItemBase {
     this.$isUsingImplicitHeight = true;
 
     this.anchors = new QmlWeb.QObject(this, {attached:true, info:"anchors"});
-    createProperty("var", this.anchors, "left");
-    createProperty("var", this.anchors, "right");
-    createProperty("var", this.anchors, "top");
-    createProperty("var", this.anchors, "bottom");
-    createProperty("var", this.anchors, "horizontalCenter");
-    createProperty("var", this.anchors, "verticalCenter");
-    createProperty("Item", this.anchors, "fill");
-    createProperty("Item", this.anchors, "centerIn");
-    createProperty("real", this.anchors, "margins");
-    createProperty("real", this.anchors, "leftMargin");
-    createProperty("real", this.anchors, "rightMargin");
-    createProperty("real", this.anchors, "topMargin");
-    createProperty("real", this.anchors, "bottomMargin");
+    engine.createProperty("var", this.anchors, "left");
+    engine.createProperty("var", this.anchors, "right");
+    engine.createProperty("var", this.anchors, "top");
+    engine.createProperty("var", this.anchors, "bottom");
+    engine.createProperty("var", this.anchors, "horizontalCenter");
+    engine.createProperty("var", this.anchors, "verticalCenter");
+    engine.createProperty("Item", this.anchors, "fill");
+    engine.createProperty("Item", this.anchors, "centerIn");
+    engine.createProperty("real", this.anchors, "margins");
+    engine.createProperty("real", this.anchors, "leftMargin");
+    engine.createProperty("real", this.anchors, "rightMargin");
+    engine.createProperty("real", this.anchors, "topMargin");
+    engine.createProperty("real", this.anchors, "bottomMargin");
     this.anchors.leftChanged.connect(this, this.$updateHGeometry);
     this.anchors.rightChanged.connect(this, this.$updateHGeometry);
     this.anchors.topChanged.connect(this, this.$updateVGeometry);
@@ -84,10 +84,10 @@ class Item extends ItemBase {
 
     // childrenRect property
     this.childrenRect = new QmlWeb.QObject(this, {attached:true, info:"childrenRect"});
-    createProperty("real", this.childrenRect, "x", {readOnly:true});
-    createProperty("real", this.childrenRect, "y", {readOnly:true});
-    createProperty("real", this.childrenRect, "width", {readOnly:true});
-    createProperty("real", this.childrenRect, "height", {readOnly:true});
+    engine.createProperty("real", this.childrenRect, "x", {readOnly:true});
+    engine.createProperty("real", this.childrenRect, "y", {readOnly:true});
+    engine.createProperty("real", this.childrenRect, "width", {readOnly:true});
+    engine.createProperty("real", this.childrenRect, "height", {readOnly:true});
 
     this.rotationChanged.connect(this, this.$updateTransform);
     this.scaleChanged.connect(this, this.$updateTransform);

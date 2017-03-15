@@ -6,9 +6,6 @@ describe("QMLEngine.states", function() {
     var qml = load("Simple", this.div, null, done);
     var count = 0;
     qml.yield = function() {
-      const oe = QmlWeb.engine;
-      try {
-        QmlWeb.engine = done.engine;
       console.log(qml.value);
       if (count === 0) {
         expect(qml.value).toBe(10);
@@ -19,9 +16,6 @@ describe("QMLEngine.states", function() {
         done();
       }
       count += 1;
-      } finally {
-        QmlWeb.engine = oe;
-      }
     };
     qml.start();
     failTimeout(2000, done);
@@ -31,9 +25,6 @@ describe("QMLEngine.states", function() {
     var qml = load("When", this.div, null, done);
     var count = 0;
     qml.yield = function() {
-      const oe = QmlWeb.engine;
-      try {
-        QmlWeb.engine = done.engine;
       console.log(qml.value);
       if (count === 0) {
         expect(qml.value).toBe(10);
@@ -46,9 +37,6 @@ describe("QMLEngine.states", function() {
         done();
       }
       count += 1;
-      } finally {
-        QmlWeb.engine = oe;
-      }
     };
     qml.start();
     failTimeout(2000, done);

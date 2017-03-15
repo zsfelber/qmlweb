@@ -17,8 +17,8 @@ QmlWeb.registerQmlType({
     const engine = this.$engine;
     const createProperty = engine.createProperty;
     this.origin = new QmlWeb.QObject(this, {attached:true, info:"origin"});
-    createProperty("real", this.origin, "x");
-    createProperty("real", this.origin, "y");
+    engine.createProperty("real", this.origin, "x");
+    engine.createProperty("real", this.origin, "y");
 
     this.xScaleChanged.connect(this.$parent, this.$parent.$updateTransform);
     this.yScaleChanged.connect(this.$parent, this.$parent.$updateTransform);

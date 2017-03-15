@@ -148,11 +148,11 @@ class QMLComponent {
       }
     }
 
-    QmlWeb.preloadImports(this, moduleImports);
+    this.$engine.preloadImports(this, moduleImports);
 
     if (this.flags & QmlWeb.QMLComponentFlags.LoadImports) {
       // TODO gz  undefined -> component.$basePathUrl  from createQmlObject
-      QmlWeb.loadImports(this, this.$imports);
+      this.$engine.loadImports(this, this.$imports);
     }
   }
 
@@ -203,7 +203,7 @@ class QMLComponent {
       const importDesc = this.$jsImports[i];
 
       const uri = this.$engine.$resolvePath(importDesc[1], this.$basePathUrl);
-      const jsBinding = QmlWeb.importJavascript(uri, importDesc[3]);
+      const jsBinding = this.$engine.importJavascript(uri, importDesc[3]);
 
       if (!jsBinding) {
         QmlWeb.error("Component.loadJsImports: failed to import JavaScript", importDesc[1]);

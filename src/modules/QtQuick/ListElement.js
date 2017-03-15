@@ -9,11 +9,11 @@ class ListElement extends QtObject {
     if (meta.parentmeta) {
       for (const i in meta.parentmeta) {
         if (i[0] !== "$") {
-          createProperty("variant", this, i);
+          engine.createProperty("variant", this, i);
         }
       }
     }
-    QmlWeb.applyProperties(meta.parentmeta, this);
+    this.$engine.applyProperties(meta.parentmeta, this);
   }
 }
 

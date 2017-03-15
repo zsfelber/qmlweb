@@ -27,10 +27,10 @@ QmlWeb.registerQmlType({
     const engine = this.$engine;
     const createProperty = engine.createProperty;
     this.border = new QmlWeb.QObject(this, {attached:true, info:"border"});
-    createProperty("int", this.border, "left");
-    createProperty("int", this.border, "right");
-    createProperty("int", this.border, "top");
-    createProperty("int", this.border, "bottom");
+    engine.createProperty("int", this.border, "left");
+    engine.createProperty("int", this.border, "right");
+    engine.createProperty("int", this.border, "top");
+    engine.createProperty("int", this.border, "bottom");
 
     const bg = this.impl = document.createElement("div");
     bg.className = "qmlborderimg";

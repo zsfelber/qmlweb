@@ -11,12 +11,12 @@ describe("QMLEngine.importPath", function() {
   it("addImportPath", function() {
     var engine = new QmlWeb.QMLEngine(this.div);
 
-    QmlWeb.addImportPath("http://example.org/path/to/qml");
+    $$engine.addImportPath("http://example.org/path/to/qml");
     expect(engine.userAddedImportPaths.length).toBe(1);
     expect(typeof engine.userAddedImportPaths[0]).toBe("string");
     expect(engine.userAddedImportPaths[0]).toBe("http://example.org/path/to/qml");
 
-    QmlWeb.addImportPath("http://example.org/second/path");
+    $$engine.addImportPath("http://example.org/second/path");
     expect(engine.userAddedImportPaths.length).toBe(2);
     expect(engine.userAddedImportPaths[0]).toBe("http://example.org/path/to/qml");
     expect(engine.userAddedImportPaths[1]).toBe("http://example.org/second/path");
@@ -25,13 +25,13 @@ describe("QMLEngine.importPath", function() {
   it("setImportPathList", function() {
     var engine = new QmlWeb.QMLEngine(this.div);
 
-    QmlWeb.addImportPath("http://example.org/path/to/qml");
-    QmlWeb.addImportPath("http://example.org/second/path");
+    $$engine.addImportPath("http://example.org/path/to/qml");
+    $$engine.addImportPath("http://example.org/second/path");
 
     $$engine.setImportPathList([]);
     expect(engine.userAddedImportPaths.length).toBe(0);
 
-    QmlWeb.addImportPath("http://example.org/path/to/qml");
+    $$engine.addImportPath("http://example.org/path/to/qml");
     expect(engine.userAddedImportPaths.length).toBe(1);
 
     $$engine.setImportPathList(["http://example.org/path3"]);

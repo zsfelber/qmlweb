@@ -21,8 +21,8 @@ class Rectangle extends Item {
     const engine = this.$engine;
     const createProperty = engine.createProperty;
     this.border = new QmlWeb.QObject(this, {attached:true, info:"border"});
-    createProperty("color", this.border, "color", { initialValue: "black" });
-    createProperty("int", this.border, "width", { initialValue: 1 });
+    engine.createProperty("color", this.border, "color", { initialValue: "black" });
+    engine.createProperty("int", this.border, "width", { initialValue: 1 });
     this.$borderActive = false;
 
     const bg = this.impl = document.createElement("div");

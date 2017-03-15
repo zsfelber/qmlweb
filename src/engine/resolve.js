@@ -134,7 +134,7 @@ function resolveClass(file) {
   let clazz = engine.classes[file];
 
   if (!clazz) {
-    clazz = QmlWeb.loadClass(file);
+    clazz = this.loadClass(file);
     engine.classes[file] = clazz;
   }
 
@@ -150,7 +150,7 @@ function resolveImport(name, component) {
     component = evalObj.$component;
   }
 
-  let file = $resolvePath(name, undefined, component);
+  let file = this.$resolvePath(name, undefined, component);
 
   let clazz;
   // If "name" was a full URL, "file" will be equivalent to name and this
@@ -312,7 +312,7 @@ function $resolvePath(file, basePathUrl, component) {
   if (file && (/^(\w+):/.test(file)||file.startsWith("//"))) {
     return file;
   }
-  const engine = this;
+  const engine = QmlWeb.$evaluatedObj ? QmlWeb.$evaluatedObj.$engine : this;
 
   if (!basePathUrl) {
     if (!component) {
