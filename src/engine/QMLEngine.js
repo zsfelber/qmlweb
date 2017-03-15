@@ -628,11 +628,18 @@ class QMLEngine {
 
 QMLEngine.$onConstruct = [];
 QmlWeb.QMLEngine = QMLEngine;
-QmlWeb.getEngine = function(chkengine) {
+QmlWeb.getEngine = getEngine;
+
+function getEngine0() {
+  const e = QmlWeb.$evaluatedObj ? QmlWeb.$evaluatedObj.$engine : null;
+  return e;
+}
+
+function getEngine(chkengine) {
   if (!QmlWeb.$evaluatedObj) throw new QmlWeb.AssertionError("No engine.");
   const e = QmlWeb.$evaluatedObj.$engine;
   if (!e) throw new QmlWeb.AssertionError("No engine.");
   if (chkengine && e !== chkengine) throw new QmlWeb.AssertionError("Another engine in context.");
   if (e.operationState & QmlWeb.QMLOperationState.Destroyed) throw new QmlWeb.AssertionError("Engine is destroyed.");
   return e;
-};
+}

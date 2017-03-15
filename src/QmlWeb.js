@@ -48,35 +48,35 @@ Object.defineProperty(
 
 
 QmlWeb.debug = function(...args) {
-  const engine = QmlWeb.getEngine();
+  const engine = getEngine0();
   if (!engine || engine.logging & QmlWeb.QMLEngineLogging.Debug) {
     console.debug(...args);
   }
 }
 
 QmlWeb.info = function(...args) {
-  const engine = QmlWeb.getEngine();
+  const engine = getEngine0();
   if (!engine || engine.logging & QmlWeb.QMLEngineLogging.Info) {
     console.info(...args);
   }
 }
 
 QmlWeb.log = function(...args) {
-  const engine = QmlWeb.getEngine();
+  const engine = getEngine0();
   if (!engine || engine.logging & QmlWeb.QMLEngineLogging.Debug) {
     console.log(...args);
   }
 }
 
 QmlWeb.warn = function(...args) {
-  const engine = QmlWeb.getEngine();
+  const engine = getEngine0();
   if (!engine || engine.logging & QmlWeb.QMLEngineLogging.Warning) {
     console.warn(...args);
   }
 }
 
 QmlWeb.error = function(...args) {
-  const engine = QmlWeb.getEngine();
+  const engine = getEngine0();
   if (!engine || engine.logging & QmlWeb.QMLEngineLogging.Error) {
     console.error(...args);
   }
