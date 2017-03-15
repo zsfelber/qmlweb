@@ -348,7 +348,7 @@ function $resolvePath(file, basePathUrl, component) {
   }
   let url;
   // Remove duplicate slashes and dot segments in the path
-  path = this.normalizePath(path);
+  path = engine.normalizePath(path);
   url = `${basePathUrl.baseUri0}${path}`;
 
   return url;
@@ -463,7 +463,7 @@ QMLEngine.prototype.resolveClassImport = resolveClassImport;
 QmlWeb.$parseUrl = QMLEngine.prototype.$parseUrl = $parseUrl;
 
 // Return a path to load the file
-QMLEngine.prototype.$resolvePath = $resolvePath;
+QmlWeb.$resolvePath = QMLEngine.prototype.$resolvePath = $resolvePath;
 
 // Return a DOM-valid path to load the image (fileURL is an already-resolved
 // URL)

@@ -171,7 +171,7 @@ function applyProperties(metaObject, item) {
     if (err instanceof QmlWeb.FatalError) throw err;
     if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
          || ((engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
-      QmlWeb.warn("Cannot apply property : "+item+" . "+i+"  opstate:"+QmlWeb.QMLOperationState.toString(engine.operationState));
+      QmlWeb.warn("Cannot apply property : "+item+" . "+i+"  opstate:"+QmlWeb.QMLOperationState.toString(engine.operationState), err.message);
     } else if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
       if (err.ctType === "UninitializedEvaluation")
         engine.currentPendingOp.warnings.push({loc:"applyProperties", err, item, i})
@@ -219,7 +219,7 @@ function applyProperties(metaObject, item) {
           continue;
         }
 
-        applyProperty(item, i, value);
+        this.applyProperty(item, i, value);
 
       } catch (err) {
         _hand_err(err, i);
@@ -385,5 +385,6 @@ function $propertyInfo(prop) {
 QmlWeb.formatPath = formatPath;
 QMLEngine.prototype.createProperty = createProperty;
 QMLEngine.prototype.applyProperties = applyProperties;
+QMLEngine.prototype.applyProperty = applyProperty;
 QObject.prototype.connectSignal = connectSignal;
 QMLEngine.prototype.$propertyInfo = $propertyInfo;

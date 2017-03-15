@@ -28,7 +28,7 @@ function initMeta(self, meta, constructor) {
           if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)
                || ((engine.operationState & QmlWeb.QMLOperationState.Init) && !err.ctType)) {
             QmlWeb.warn("Cannot create object property from module definition : "+self.$classname+"("+self.$objectId+") . "+name+"  opstate:"+
-                         QmlWeb.QMLOperationState.toString(engine.operationState), err);
+                         QmlWeb.QMLOperationState.toString(engine.operationState), err.message);
           } else if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
             if (err.ctType === "UninitializedEvaluation")
               engine.currentPendingOp.warnings.push({loc:"initMeta", type:desc.type, self, name, err})
@@ -224,7 +224,7 @@ function createComponentAndElement(meta, parent, flags, loaderComponent) {
 
 function createQmlObject(src, parent, file) {
 
-  const engine = this;
+  const engine = QmlWeb.getEngine(this);
 
 
   // Returns url resolved relative to the URL of the caller.
@@ -235,7 +235,7 @@ function createQmlObject(src, parent, file) {
   const clazz = QmlWeb.parseQML(src, file);
   file = file || "createQmlObject_function";
 
-  var component = this.createComponent({clazz, $file:file}, QmlWeb.QMLComponentFlags.LoadImports);
+  var component = engine.createComponent({clazz, $file:file}, QmlWeb.QMLComponentFlags.LoadImports);
 
   const obj = component.createObject(parent);
 
@@ -284,5 +284,5 @@ QMLEngine.prototype.initMeta = initMeta;
 QMLEngine.prototype.construct = construct;
 QMLEngine.prototype.constructSuper = constructSuper;
 QMLEngine.prototype.createComponentAndElement = createComponentAndElement;
-QMLEngine.prototype.createQmlObject = createQmlObject;
+QmlWeb.createQmlObject = QMLEngine.prototype.createQmlObject = createQmlObject;
 QMLEngine.prototype.addElementToPageContexts = addElementToPageContexts;

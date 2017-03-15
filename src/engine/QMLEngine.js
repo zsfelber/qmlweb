@@ -20,6 +20,8 @@ class QMLEngine {
       // Cached parsed JS files (post-QmlWeb.jsparse)
       this.js = {};
 
+      this.defaultEvalObj = {$engine:this};
+
       // Current operation state of the engine (Idle, init, etc.)
       this.operationState = QmlWeb.QMLOperationState.Idle;
 
@@ -610,14 +612,15 @@ class QMLEngine {
 
   pushengine() {
 
-    if (this.prevEvalObj && QmlWeb.$evaluatedObj && this.prevEvalObj !== QmlWeb.$evaluatedObj) {
+    //if (this.prevEvalObj && QmlWeb.$evaluatedObj && this.prevEvalObj !== QmlWeb.$evaluatedObj) {
+    if (this.prevEvalObj && QmlWeb.$evaluatedObj && this.prevEvalObj.$engine !== QmlWeb.$evaluatedObj.$engine) {
       throw new QmlWeb.AssertionError("Another engine in stack.");
     }
     this.prevEvalObj = QmlWeb.$evaluatedObj;
 
     if (!QmlWeb.$evaluatedObj || QmlWeb.$evaluatedObj.$engine !== this) {
       if (this instanceof QMLEngine) {
-        QmlWeb.$evaluatedObj = {$engine:this};
+        QmlWeb.$evaluatedObj = this.defaultEvalObj;
       } else {
         throw new QmlWeb.AssertionError("Caller is not engine.");
       }
@@ -626,6 +629,7 @@ class QMLEngine {
 
   popengine() {
     QmlWeb.$evaluatedObj = this.prevEvalObj;
+    this.prevEvalObj = undefined;
   }
 
   static dumpErr() {

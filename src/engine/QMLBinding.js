@@ -230,7 +230,7 @@ class QMLBinding {
 
   // this == connection : var connection = Signal.connect(...); binding.run.call(connection, ...);
   run() {
-    const engine = this.$engine;
+    const engine = this.binding.$engine;
     var prevEvalObj = QmlWeb.$evaluatedObj;
     QmlWeb.$evaluatedObj = this.bindingObj;
 
@@ -261,6 +261,7 @@ class QMLBinding {
    */
   compile() {
     this.compiled = true;
+    this.$engine = QmlWeb.getEngine();
 
     if (this.flags & QmlWeb.QMLBindingFlags.User) {
       this.implGet = this.bindGet();

@@ -3,4 +3,4 @@
 //}
 //QMLUrl.plainType = true;
 //QmlWeb.qmlUrl = QMLUrl;
-QMLEngine.prototype.$resolvePath.plainType = true;
+QmlWeb.$resolvePath.plainType = true;

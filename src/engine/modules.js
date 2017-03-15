@@ -11,7 +11,7 @@
       list: QmlWeb.qmlList,
       color: QmlWeb.QColor,
       enum: QmlWeb.qmlNumber,
-      url: QMLEngine.prototype.$resolvePath,
+      url: QmlWeb.$resolvePath,
       variant: QmlWeb.qmlVariant,
       "var": QmlWeb.qmlVariant
     }

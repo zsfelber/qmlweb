@@ -28,7 +28,7 @@ const Qt = {
   // Returns url resolved relative to the URL of the caller.
   // http://doc.qt.io/qt-5/qml-qtqml-qt.html#resolvedUrl-method
   // in QMLUrl.js
-  resolvedUrl: QMLEngine.prototype.$resolvePath,
+  resolvedUrl: QmlWeb.$resolvePath,
 
   size: function size(width, height) {
     return new QmlWeb.QSizeF(width, height);
