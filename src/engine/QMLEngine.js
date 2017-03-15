@@ -6,6 +6,7 @@ QmlWeb.useShadowDom = true;
 class QMLEngine {
   constructor(element, opts={}) {
     try {
+      this.prevEvalObjStack = [];
       this.pushengine();
 
       this.logging = opts.logging || QmlWeb.QMLEngineLogging.Full;
@@ -616,7 +617,8 @@ class QMLEngine {
     if (this.prevEvalObj && QmlWeb.$evaluatedObj && this.prevEvalObj.$engine !== QmlWeb.$evaluatedObj.$engine) {
       throw new QmlWeb.AssertionError("Another engine in stack.");
     }
-    this.prevEvalObj = QmlWeb.$evaluatedObj;
+
+    this.prevEvalObjStack.push(this.prevEvalObj = QmlWeb.$evaluatedObj);
 
     if (!QmlWeb.$evaluatedObj || QmlWeb.$evaluatedObj.$engine !== this) {
       if (this instanceof QMLEngine) {
@@ -628,8 +630,7 @@ class QMLEngine {
   }
 
   popengine() {
-    QmlWeb.$evaluatedObj = this.prevEvalObj;
-    this.prevEvalObj = undefined;
+    this.prevEvalObj = QmlWeb.$evaluatedObj = this.prevEvalObjStack.pop();
   }
 
   static dumpErr() {

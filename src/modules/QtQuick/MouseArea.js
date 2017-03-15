@@ -40,6 +40,7 @@ QmlWeb.registerQmlType({
     this.cursorShapeChanged.connect(this, this.$onCursorShapeChanged);
 
     // TODO gz dummy
+   const engine = this.$engine;
    this.drag = new QmlWeb.QObject(this, {attached:true, info:"drag"});
    engine.createProperty("Item", this.drag, "target");
    engine.createProperty("bool", this.drag, "active");
