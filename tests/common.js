@@ -14,8 +14,7 @@ function createEngine(info) {
 }
 
 function initEngine() {
-  if (!$$engine)
-    $$engine = createEngine("common.js:0");
+  if (!$$engine) $$engine = createEngine("common.js:0");
 }
 
 function loadQmlFile(file, div, opts, done) {
@@ -24,7 +23,7 @@ function loadQmlFile(file, div, opts, done) {
     if (done.engine) {
       engine = done.engine;
     } else {
-      engine = done.engine = createEngine("common.js:1");
+      engine = done.engine = createEngine("common.js:"+file);
     }
   } else {
     initEngine();
@@ -41,13 +40,14 @@ function loadQmlFile(file, div, opts, done) {
   return engine.rootObject;
 }
 
+var nofilelq = 0;
 function loadQml(src, div, opts, done) {
   var engine;
   if (done) {
     if (done.engine) {
       engine = done.engine;
     } else {
-      engine = done.engine = createEngine("common.js:2");
+      engine = done.engine = createEngine("common.js:"+++nofilelq);
     }
   } else {
     initEngine();

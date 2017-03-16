@@ -1,6 +1,7 @@
 
 QmlWeb.useShadowDom = true;
 
+const prevEvalObjStack = [];
 
 // QML engine. EXPORTED.
 class QMLEngine {
@@ -8,7 +9,6 @@ class QMLEngine {
 
     this.defaultEvalObj = {$engine:this, toString:()=>"def$eval:"+this.$info };
 
-    this.prevEvalObjStack = [];
     this.pushengine();
     this.$info = opts.info;
 
@@ -609,8 +609,7 @@ class QMLEngine {
   }
 
   pushengine() {
-
-    this.prevEvalObjStack.push(this.prevEvalObj = QmlWeb.$evaluatedObj);
+    prevEvalObjStack.push(this.prevEvalObj = QmlWeb.$evaluatedObj);
 
     if (!QmlWeb.$evaluatedObj || QmlWeb.$evaluatedObj.$engine !== this) {
       if (this instanceof QMLEngine) {
@@ -622,7 +621,19 @@ class QMLEngine {
   }
 
   popengine() {
-    this.prevEvalObj = QmlWeb.$evaluatedObj = this.prevEvalObjStack.pop();
+    if (!prevEvalObjStack.length) {
+      throw new QmlWeb.AssertionError("QMLEngine.popengine : stack is empty.   "+this);
+    }
+    QmlWeb.$evaluatedObj = prevEvalObjStack.pop();
+    this.prevEvalObj = prevEvalObjStack.peek();
+    if (QmlWeb.$evaluatedObj) {
+      const e = QmlWeb.$evaluatedObj.$engine;
+      if (e && e.operationState & QmlWeb.QMLOperationState.Destroyed) {
+        const $e = QmlWeb.$evaluatedObj;
+        this.popengine();
+        console.warn("QMLEngine.popengine : "+$e+" -> "+QmlWeb.$evaluatedObj+"  engine : "+this+" :  omit destroyed :"+e+" -> "+(QmlWeb.$evaluatedObj?QmlWeb.$evaluatedObj.$engine:"<null>"));
+      }
+    }
   }
 
   toString() {

@@ -11,11 +11,24 @@ function isEmptyThis() {
   return true;
 };
 
+function peekThis() {
+  return this.length ? this[this.length-1] : undefined;
+};
+
 Object.defineProperty(
   Object.prototype,
   "isEmpty",
   {
     value : isEmptyThis,
+    enumerable : false
+  }
+);
+
+Object.defineProperty(
+  Array.prototype,
+  "peek",
+  {
+    value : peekThis,
     enumerable : false
   }
 );
