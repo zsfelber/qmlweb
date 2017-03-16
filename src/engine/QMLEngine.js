@@ -5,77 +5,72 @@ QmlWeb.useShadowDom = true;
 // QML engine. EXPORTED.
 class QMLEngine {
   constructor(element, opts={}) {
-    try {
 
-      this.defaultEvalObj = {$engine:this};
+    this.defaultEvalObj = {$engine:this};
 
-      this.prevEvalObjStack = [];
-      this.pushengine();
-      this.$info = opts.info;
+    this.prevEvalObjStack = [];
+    this.pushengine();
+    this.$info = opts.info;
 
-      this.logging = opts.logging || QmlWeb.QMLEngineLogging.Full;
+    this.logging = opts.logging || QmlWeb.QMLEngineLogging.Full;
 
-      //----------Public Members----------
+    //----------Public Members----------
 
-      this.setDom(element);
+    this.setDom(element);
 
-      // Cached component trees (post-QmlWeb.convertToEngine)
-      this.classes = {};
+    // Cached component trees (post-QmlWeb.convertToEngine)
+    this.classes = {};
 
-      // Cached parsed JS files (post-QmlWeb.jsparse)
-      this.js = {};
+    // Cached parsed JS files (post-QmlWeb.jsparse)
+    this.js = {};
 
-      // Current operation state of the engine (Idle, init, etc.)
-      this.operationState = QmlWeb.QMLOperationState.Idle;
+    // Current operation state of the engine (Idle, init, etc.)
+    this.operationState = QmlWeb.QMLOperationState.Idle;
 
-      // List of properties whose values are bindings. For internal use only.
-      // +
-      // List of operations to perform later after init. For internal use only.
-      this.pendingOperations = {stack:[], map:{}};
+    // List of properties whose values are bindings. For internal use only.
+    // +
+    // List of operations to perform later after init. For internal use only.
+    this.pendingOperations = {stack:[], map:{}};
 
-      // Root object of the engine
-      this.rootObject = null;
-      this.rootContext = {};
-      this._rootContext = new QmlWeb.QMLContext(this.rootContext);
+    // Root object of the engine
+    this.rootObject = null;
+    this.rootContext = {};
+    this._rootContext = new QmlWeb.QMLContext(this.rootContext);
 
-      // Base path of qml engine (used for resource loading)
-      // used in tests only
-      this.$basePathUrl = "";
+    // Base path of qml engine (used for resource loading)
+    // used in tests only
+    this.$basePathUrl = "";
 
-      // Module import paths overrides
-      this.userAddedModulePaths = {};
+    // Module import paths overrides
+    this.userAddedModulePaths = {};
 
-      // Stores data for setImportPathList(), importPathList(), and addImportPath
-      this.userAddedImportPaths = [];
+    // Stores data for setImportPathList(), importPathList(), and addImportPath
+    this.userAddedImportPaths = [];
 
-      //----------Private Members---------
+    //----------Private Members---------
 
-      // Ticker resource id and ticker callbacks
-      this._tickers = {};
-      //this._lastTick = Date.now();
+    // Ticker resource id and ticker callbacks
+    this._tickers = {};
+    //this._lastTick = Date.now();
 
-      // Callbacks for stopping or starting the engine
-      this._whenStop = {};
-      this._whenStart = {};
+    // Callbacks for stopping or starting the engine
+    this._whenStop = {};
+    this._whenStart = {};
 
-      // Keyboard management
-      this.$initKeyboard();
+    // Keyboard management
+    this.$initKeyboard();
 
-      //----------Construct----------
+    //----------Construct----------
 
-      window.addEventListener("resize", () => this.updateGeometry());
+    window.addEventListener("resize", () => this.updateGeometry());
 
-      QMLEngine.$onConstruct.forEach(function(fun){
-        fun.call(this);
-      });
-    } finally {
-      this.popengine();
-    }
+    QMLEngine.$onConstruct.forEach(function(fun){
+      fun.call(this);
+    });
   }
 
   destroy() {
     try {
-      this.pushengine();
 
       try {
         this.stop();

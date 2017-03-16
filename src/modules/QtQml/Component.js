@@ -376,11 +376,16 @@ class QMLComponent {
 
 class AttachedComponent {
   constructor(parent, engine) {
-    this.parent = parent;
-    this.$engine = engine;
-    this.$properties = {};
-    this.$engine.initMeta(this, {}, AttachedComponent);
-    QObject.attach(parent, this);
+    try {
+      engine.pushengine();
+      this.parent = parent;
+      this.$engine = engine;
+      this.$properties = {};
+      this.$engine.initMeta(this, {}, AttachedComponent);
+      QObject.attach(parent, this);
+    } finally {
+      engine.popengine();
+    }
   }
   toString() {
     return "AtCmp:"+this.parent;
