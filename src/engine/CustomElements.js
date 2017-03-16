@@ -10,7 +10,7 @@ function getProperties(file) {
   // TODO: implement a cleaner way
 
   const div = document.createElement("div");
-  const engine = new QmlWeb.QMLEngine(div);
+  const engine = new QmlWeb.QMLEngine(div, {info:"CustomElement:"+file});
   QmlWeb.loadFile(file);
 
   const qml = engine.rootObject;
@@ -70,7 +70,7 @@ function registerElement(name, file) {
         QmlWeb.setStyle(this.css, "display", "inline-block", {});
       }
 
-      const engine = this.$engine = new QmlWeb.QMLEngine(this);
+      const engine = this.$engine = new QmlWeb.QMLEngine(this, {info:"CustomElement:"+file});
       QmlWeb.loadFile(file);
       engine.start();
       const qml = this.qml = engine.rootObject;

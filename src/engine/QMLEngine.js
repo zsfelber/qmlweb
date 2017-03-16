@@ -8,6 +8,7 @@ class QMLEngine {
     try {
       this.prevEvalObjStack = [];
       this.pushengine();
+      this.$info = opts.info;
 
       this.logging = opts.logging || QmlWeb.QMLEngineLogging.Full;
 
@@ -615,7 +616,7 @@ class QMLEngine {
 
     //if (this.prevEvalObj && QmlWeb.$evaluatedObj && this.prevEvalObj !== QmlWeb.$evaluatedObj) {
     if (this.prevEvalObj && QmlWeb.$evaluatedObj && this.prevEvalObj.$engine !== QmlWeb.$evaluatedObj.$engine) {
-      throw new QmlWeb.AssertionError("Another engine in stack.");
+      throw new QmlWeb.AssertionError(this+" : Another engine in stack : "+this.prevEvalObj.$engine +" !== "+QmlWeb.$evaluatedObj.$engine);
     }
 
     this.prevEvalObjStack.push(this.prevEvalObj = QmlWeb.$evaluatedObj);
@@ -624,13 +625,17 @@ class QMLEngine {
       if (this instanceof QMLEngine) {
         QmlWeb.$evaluatedObj = this.defaultEvalObj;
       } else {
-        throw new QmlWeb.AssertionError("Caller is not engine.");
+        throw new QmlWeb.AssertionError(this+" : Caller is not engine  $evalObj:"+(QmlWeb.$evaluatedObj?QmlWeb.$evaluatedObj.$engine:"<null>"));
       }
     }
   }
 
   popengine() {
     this.prevEvalObj = QmlWeb.$evaluatedObj = this.prevEvalObjStack.pop();
+  }
+
+  toString() {
+    return this.$info;
   }
 
   static dumpErr() {
@@ -652,7 +657,7 @@ function getEngine(chkengine) {
   if (!QmlWeb.$evaluatedObj) throw new QmlWeb.AssertionError("No engine.");
   const e = QmlWeb.$evaluatedObj.$engine;
   if (!e) throw new QmlWeb.AssertionError("No engine.");
-  if (chkengine instanceof QMLEngine && e !== chkengine) throw new QmlWeb.AssertionError("Another engine in context.");
-  if (e.operationState & QmlWeb.QMLOperationState.Destroyed) throw new QmlWeb.AssertionError("Engine is destroyed.");
+  if (chkengine instanceof QMLEngine && e !== chkengine) throw new QmlWeb.AssertionError("Another engine in context : "+e +" !== "+chkengine);
+  if (e.operationState & QmlWeb.QMLOperationState.Destroyed) throw new QmlWeb.AssertionError("Engine is destroyed : "+e);
   return e;
 }
