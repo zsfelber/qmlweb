@@ -53,6 +53,7 @@ class NumberAnimation extends PropertyAnimation {
                       this.easing.$add( action.from ,
                                         this.easing.$multiply(  this.easing.$subtract(action.to, action.from),
                                                                 this.easing.$valueForProgress(this.$at)   )   )  );
+      console.log("animation "+action.from+"->"+action.to+" progress:"+this.easing.$valueForProgress(this.$at)+" value:"+value);
       action.property.set(value, QmlWeb.QMLPropertyFlags.ReasonTemporally);
     }
   }
