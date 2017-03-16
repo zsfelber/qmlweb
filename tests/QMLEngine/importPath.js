@@ -2,14 +2,14 @@ describe("QMLEngine.importPath", function() {
   setupDivElement();
 
   it("importPathList default", function() {
-    var engine = new QmlWeb.QMLEngine(this.div, {info:"importPath.js:default"});
+    var engine = createEngine("importPath.js:default");
     var paths = engine.userAddedImportPaths;
     expect(Array.isArray(paths)).toBe(true);
     expect(paths.length).toBe(0);
   });
 
   it("addImportPath", function() {
-    var engine = new QmlWeb.QMLEngine(this.div, {info:"importPath.js:add"});
+    var engine = createEngine("importPath.js:add");
 
     engine.addImportPath("http://example.org/path/to/qml");
     expect(engine.userAddedImportPaths.length).toBe(1);
@@ -23,7 +23,7 @@ describe("QMLEngine.importPath", function() {
   });
 
   it("setImportPathList", function() {
-    var engine = new QmlWeb.QMLEngine(this.div, {info:"importPath.js:set~List"});
+    var engine = createEngine("importPath.js:set~List");
 
     engine.addImportPath("http://example.org/path/to/qml");
     engine.addImportPath("http://example.org/second/path");

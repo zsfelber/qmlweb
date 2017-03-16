@@ -6,7 +6,7 @@ QmlWeb.useShadowDom = true;
 class QMLEngine {
   constructor(element, opts={}) {
 
-    this.defaultEvalObj = {$engine:this};
+    this.defaultEvalObj = {$engine:this, toString:()=>"def$eval:"+this.$info };
 
     this.prevEvalObjStack = [];
     this.pushengine();
@@ -609,11 +609,6 @@ class QMLEngine {
   }
 
   pushengine() {
-
-    //if (this.prevEvalObj && QmlWeb.$evaluatedObj && this.prevEvalObj !== QmlWeb.$evaluatedObj) {
-    if (this.prevEvalObj && QmlWeb.$evaluatedObj && this.prevEvalObj.$engine !== QmlWeb.$evaluatedObj.$engine) {
-      throw new QmlWeb.AssertionError(QmlWeb.$evaluatedObj+"  engine : "+this+" : Another engine in stack : "+this.prevEvalObj.$engine +" !== "+QmlWeb.$evaluatedObj.$engine);
-    }
 
     this.prevEvalObjStack.push(this.prevEvalObj = QmlWeb.$evaluatedObj);
 

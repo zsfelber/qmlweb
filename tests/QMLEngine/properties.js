@@ -131,6 +131,7 @@ describe("QMLEngine.properties", function() {
   });
 
   it("Url exception safe", function() {
+    const engine = $$engine;
     var qml = load("UrlExceptionSafe", this.div);
     expect(qml.localNonBoundSimple).toBe(
       engine.$basePathUrl.baseUri + "PropertiesUrlDir/localNonBoundSimple.png");

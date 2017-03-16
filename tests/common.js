@@ -9,9 +9,13 @@ QmlWeb.isTesting = true;
 var $$engine;
 var cleanupList = [];
 
+function createEngine(info) {
+  return new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr,info:info});
+}
+
 function initEngine() {
   if (!$$engine)
-    $$engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr,info:"common.js:0"});
+    $$engine = createEngine("common.js:0");
 }
 
 function loadQmlFile(file, div, opts, done) {
@@ -20,7 +24,7 @@ function loadQmlFile(file, div, opts, done) {
     if (done.engine) {
       engine = done.engine;
     } else {
-      engine = done.engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr,info:"common.js:1"});
+      engine = done.engine = createEngine("common.js:1");
     }
   } else {
     initEngine();
@@ -43,7 +47,7 @@ function loadQml(src, div, opts, done) {
     if (done.engine) {
       engine = done.engine;
     } else {
-      engine = done.engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr,info:"common.js:2"});
+      engine = done.engine = createEngine("common.js:2");
     }
   } else {
     initEngine();
