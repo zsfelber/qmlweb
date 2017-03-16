@@ -101,7 +101,7 @@ class QMLEngine {
           console.error("engine destroy error : ", err.message);
         }
       }
-      if (cleaned||invalid) {
+      if (cleaned||invalid.length) {
         console.warn("engine destroy : "+cleaned+" remaining objects destroyed. unhandled items : "+JSON.stringify(invalid)+".");
       }
       this.operationState |= QMLOperationState.Destroyed;
