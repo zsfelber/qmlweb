@@ -1,4 +1,6 @@
+
 describe("Initialize.loadQml", function() {
+  initEngine();
   setupDivElement();
 
   it("it can load qml without a file", function() {
@@ -122,6 +124,7 @@ function testModule(module, element, imports, options) {
 
 Object.keys(modules).forEach(function(key) {
   //console.log("Module : "+key);
+  initEngine();
   var module = modules[key];
   if (module._version) {
     module._name = key;

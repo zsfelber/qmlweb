@@ -6,6 +6,9 @@ QmlWeb.useShadowDom = true;
 class QMLEngine {
   constructor(element, opts={}) {
     try {
+
+      this.defaultEvalObj = {$engine:this};
+
       this.prevEvalObjStack = [];
       this.pushengine();
       this.$info = opts.info;
@@ -21,8 +24,6 @@ class QMLEngine {
 
       // Cached parsed JS files (post-QmlWeb.jsparse)
       this.js = {};
-
-      this.defaultEvalObj = {$engine:this};
 
       // Current operation state of the engine (Idle, init, etc.)
       this.operationState = QmlWeb.QMLOperationState.Idle;
@@ -68,7 +69,7 @@ class QMLEngine {
         fun.call(this);
       });
     } finally {
-      this.pushengine();
+      this.popengine();
     }
   }
 
@@ -111,7 +112,7 @@ class QMLEngine {
       this.operationState |= QMLOperationState.Destroyed;
 
     } finally {
-      this.pushengine();
+      this.popengine();
     }
   }
 
@@ -148,7 +149,7 @@ class QMLEngine {
         }
       }
     } finally {
-      this.pushengine();
+      this.popengine();
     }
   }
 
@@ -178,7 +179,7 @@ class QMLEngine {
         this.rootObject.height = height;
       }
     } finally {
-      this.pushengine();
+      this.popengine();
     }
   }
 
@@ -220,7 +221,7 @@ class QMLEngine {
         }
       }
     } finally {
-      this.pushengine();
+      this.popengine();
     }
   }
 
@@ -243,7 +244,7 @@ class QMLEngine {
         }
       }
     } finally {
-      this.pushengine();
+      this.popengine();
     }
   }
 
@@ -298,7 +299,7 @@ class QMLEngine {
 
       return component;
     } finally {
-      this.pushengine();
+      this.popengine();
     }
   }
 
@@ -358,7 +359,7 @@ class QMLEngine {
     } finally {
       // reset to initial state : this intended to remove "System" flag (usually but stacking logic should work)
       this.operationState = committedState;
-      this.pushengine();
+      this.popengine();
     }
   }
 
@@ -419,7 +420,7 @@ class QMLEngine {
         }
       };
     } finally {
-      this.pushengine();
+      this.popengine();
     }
   }
 
@@ -478,7 +479,7 @@ class QMLEngine {
           t.$tickStarted();
         }
       } finally {
-        this.pushengine();
+        this.popengine();
       }
     }
   }
@@ -493,7 +494,7 @@ class QMLEngine {
         }
         delete t.tickerId;
       } finally {
-        this.pushengine();
+        this.popengine();
       }
     }
   }
@@ -578,7 +579,7 @@ class QMLEngine {
 
       this.i++;
     } finally {
-      this.pushengine();
+      this.popengine();
     }
   }
 
@@ -616,7 +617,7 @@ class QMLEngine {
 
     //if (this.prevEvalObj && QmlWeb.$evaluatedObj && this.prevEvalObj !== QmlWeb.$evaluatedObj) {
     if (this.prevEvalObj && QmlWeb.$evaluatedObj && this.prevEvalObj.$engine !== QmlWeb.$evaluatedObj.$engine) {
-      throw new QmlWeb.AssertionError(this+" : Another engine in stack : "+this.prevEvalObj.$engine +" !== "+QmlWeb.$evaluatedObj.$engine);
+      throw new QmlWeb.AssertionError(QmlWeb.$evaluatedObj+"  engine : "+this+" : Another engine in stack : "+this.prevEvalObj.$engine +" !== "+QmlWeb.$evaluatedObj.$engine);
     }
 
     this.prevEvalObjStack.push(this.prevEvalObj = QmlWeb.$evaluatedObj);
@@ -625,7 +626,7 @@ class QMLEngine {
       if (this instanceof QMLEngine) {
         QmlWeb.$evaluatedObj = this.defaultEvalObj;
       } else {
-        throw new QmlWeb.AssertionError(this+" : Caller is not engine  $evalObj:"+(QmlWeb.$evaluatedObj?QmlWeb.$evaluatedObj.$engine:"<null>"));
+        throw new QmlWeb.AssertionError(QmlWeb.$evaluatedObj+"  engine : "+this+" : Caller is not engine  $evalObj:"+(QmlWeb.$evaluatedObj?QmlWeb.$evaluatedObj.$engine:"<null>"));
       }
     }
   }
@@ -654,10 +655,10 @@ function getEngine0() {
 }
 
 function getEngine(chkengine) {
-  if (!QmlWeb.$evaluatedObj) throw new QmlWeb.AssertionError("No engine.");
+  if (!QmlWeb.$evaluatedObj) throw new QmlWeb.AssertionError("No evaluation context (no engine).");
   const e = QmlWeb.$evaluatedObj.$engine;
-  if (!e) throw new QmlWeb.AssertionError("No engine.");
-  if (chkengine instanceof QMLEngine && e !== chkengine) throw new QmlWeb.AssertionError("Another engine in context : "+e +" !== "+chkengine);
-  if (e.operationState & QmlWeb.QMLOperationState.Destroyed) throw new QmlWeb.AssertionError("Engine is destroyed : "+e);
+  if (!e) throw new QmlWeb.AssertionError("No engine : "+QmlWeb.$evaluatedObj);
+  if (chkengine instanceof QMLEngine && e !== chkengine) throw new QmlWeb.AssertionError(QmlWeb.$evaluatedObj+" : Another engine in context : "+e +" !== "+chkengine);
+  if (e.operationState & QmlWeb.QMLOperationState.Destroyed) throw new QmlWeb.AssertionError(QmlWeb.$evaluatedObj+" : Engine is destroyed : "+e);
   return e;
 }

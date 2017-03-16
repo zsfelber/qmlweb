@@ -9,6 +9,11 @@ QmlWeb.isTesting = true;
 var $$engine;
 var cleanupList = [];
 
+function initEngine() {
+  if (!$$engine)
+    $$engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr,info:"common.js:0"});
+}
+
 function loadQmlFile(file, div, opts, done) {
   var engine;
   if (done) {
@@ -18,11 +23,8 @@ function loadQmlFile(file, div, opts, done) {
       engine = done.engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr,info:"common.js:1"});
     }
   } else {
-    if ($$engine) {
-      engine = $$engine;
-    } else {
-      engine = $$engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr,info:"common.js:2"});
-    }
+    initEngine();
+    engine = $$engine;
   }
 
   engine.setDom(div);
@@ -41,14 +43,11 @@ function loadQml(src, div, opts, done) {
     if (done.engine) {
       engine = done.engine;
     } else {
-      engine = done.engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr,info:"common.js:3"});
+      engine = done.engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr,info:"common.js:2"});
     }
   } else {
-    if ($$engine) {
-      engine = $$engine;
-    } else {
-      engine = $$engine = new QmlWeb.QMLEngine(null, {logging:isDebug()?QmlWeb.QMLEngineLogging.Full:QmlWeb.QMLEngineLogging.WarnErr,info:"common.js:4"});
-    }
+    initEngine();
+    engine = $$engine;
   }
 
   engine.setDom(div);
@@ -189,7 +188,7 @@ var customMatchers = {
         try {
           F.apply(this, arguments);
         } finally {
-          if ($$engine) $$engine.stop();
+          $$engine.stop();
           cleanup();
         }
       };

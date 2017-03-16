@@ -367,7 +367,7 @@ class QMLComponent {
 
   static getAttachedObject() {
     if (!this.hasOwnProperty("$attachedComponent")) {
-      this.$attachedComponent = new AttachedComponent(this);
+      this.$attachedComponent = new AttachedComponent(this, this.$engine);
     }
     return this.$attachedComponent;
   }
@@ -375,9 +375,9 @@ class QMLComponent {
 }
 
 class AttachedComponent {
-  constructor(parent) {
+  constructor(parent, engine) {
     this.parent = parent;
-    this.$engine = QmlWeb.getEngine();
+    this.$engine = engine;
     this.$properties = {};
     this.$engine.initMeta(this, {}, AttachedComponent);
     QObject.attach(parent, this);
