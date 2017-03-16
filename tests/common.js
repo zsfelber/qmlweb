@@ -47,7 +47,7 @@ function loadQml(src, div, opts, done) {
     if (done.engine) {
       engine = done.engine;
     } else {
-      engine = done.engine = createEngine("common.js:"+++nofilelq);
+      engine = done.engine = createEngine("common.js:"+(++nofilelq));
     }
   } else {
     initEngine();
