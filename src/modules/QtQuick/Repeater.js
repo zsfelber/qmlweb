@@ -197,11 +197,11 @@ class Repeater extends Item {
             modelData[roleName] = roleData;
             let prop0 = np[roleName];
             if (typeof prop0 === "undefined") {
-              console.warn("Repeater role : "+this+"["+i+"] "+roleName+" : new : "+roleData);
+              console.warn("Repeater role : "+this+"["+roleName+"]  : new : "+roleData);
               const prop = engine.createProperty("variant", newItem, roleName);
               prop.set( roleData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, newItem );
             } else {
-              console.warn("Repeater role : "+this+"["+i+"] "+roleName+" : "+prop0.value+" queue:"+(prop0.queueItems ? prop0.queueItems.length:"<null>")+" : "+roleData);
+              console.warn("Repeater role : "+this+"["+roleName+"]  : "+prop0.value+" queue:"+(prop0.queueItems ? prop0.queueItems.length:"<null>")+" : "+roleData);
               if ((!prop0.queueItems || !prop0.queueItems.length)&&!prop0.value) {
                 prop0.set( roleData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, newItem );
               }

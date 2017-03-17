@@ -580,6 +580,10 @@ class QMLProperty {
 
       let dirtyNow;
       if (queueItem) {
+        if (!this.queueItems.dirty_seq.length) {
+          throw new QmlWeb.AssertionError("Assertion failed : "+this+" . Update state queue is empty : "+QmlWeb.QMLPropertyState.toString(dirtyNow));
+        }
+
         dirtyNow = this.queueItems.dirty_seq.shift();
         if (!(this.updateState&dirtyNow)) {
           throw new QmlWeb.AssertionError("Assertion failed : "+this+" . Queued update state not matching : "+QmlWeb.QMLPropertyState.toString(dirtyNow));
@@ -589,6 +593,10 @@ class QMLProperty {
       this.update(flags, oldVal, valParentObj, dirtyNow);
 
       if (queueItem && this.queueItems.length) {
+        if (!this.queueItems.dirty_seq.length) {
+          throw new QmlWeb.AssertionError("Assertion failed : "+this+" . Update state queue is empty : "+QmlWeb.QMLPropertyState.toString(dirtyNow));
+        }
+
         this.updateState |= this.queueItems.dirty_seq[0];
       }
 

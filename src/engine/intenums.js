@@ -106,9 +106,9 @@ const QMLPropertyState = {
   DirtyAll : 31,
 
   Valid_mnem : "ok",
-  LoadFromBinding_mnem : "!",
   Updating_mnem : "~",
   Uninitialized_mnem : "-",
+  LoadFromBinding_mnem : "!",
   ValueSaved_mnem : ">",
   DeferredChild_mnem : "DCh",
 
