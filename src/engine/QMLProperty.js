@@ -212,19 +212,6 @@ class QMLProperty {
             newVal = this.$setVal(newVal, flags, setEvaluatedObjAlreadyDone);
             this.updateState &= ~QmlWeb.QMLPropertyState.LoadFromBinding;
 
-          } else if (dirtyNow & QmlWeb.QMLPropertyState.DeferredChild)  {
-
-            this.obsoleteConnections = this.evalTreeConnections;
-            // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
-            this.evalTreeConnections = {};
-
-            // this.binding/get
-            pushed = QMLProperty.pushEvaluatingProperty(this);
-
-            if (oldVal === undefined) oldVal = this.value;
-            newVal = this.$setVal(this.deferredChildMeta, flags, setEvaluatedObjAlreadyDone);
-            this.updateState &= ~QmlWeb.QMLPropertyState.DeferredChild;
-
           } else {
             throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid update state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  Binding:"+this.binding);
           }
@@ -239,6 +226,20 @@ class QMLProperty {
 
             newVal = this.value;
             this.updateState &= ~QmlWeb.QMLPropertyState.ValueSaved;
+
+          } else if (dirtyNow & QmlWeb.QMLPropertyState.DeferredChild)  {
+
+            this.obsoleteConnections = this.evalTreeConnections;
+            // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
+            this.evalTreeConnections = {};
+
+            // this.binding/get
+            pushed = QMLProperty.pushEvaluatingProperty(this);
+
+            if (oldVal === undefined) oldVal = this.value;
+            newVal = this.$setVal(this.deferredChildMeta, flags, setEvaluatedObjAlreadyDone);
+            this.updateState &= ~QmlWeb.QMLPropertyState.DeferredChild;
+
 
           } else {
             throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid update state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  (case 'no binding')");
