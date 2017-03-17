@@ -8,7 +8,7 @@ QmlWeb.registerQmlType({
     //parent: { type: "QtObject", readOnly: true },
     parent: { type: "alias", path:["container"], overrideType: "QtObject", readOnly: true },
     repeat: "bool",
-    running: "bool",
+    running: { type: "bool", initialValue: false},
     triggeredOnStart: "bool"
   },
   signals: {
@@ -77,7 +77,7 @@ QmlWeb.registerQmlType({
     } finally {
       if (!this.repeat) {
         // Emit changed signal manually after setting the value manually above.
-        this.runningChanged();
+        this.runningChanged(false, true);
       }
     }
   }

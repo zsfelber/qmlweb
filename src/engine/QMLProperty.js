@@ -637,14 +637,17 @@ class QMLProperty {
 
 
     } else {
-      if (prevEvalObj && prevEvalObj.$context && prevEvalObj.$context.$ownerObject.$objectId === this.propDeclObj.$objectId) {
+
+      const currentEvalParent = QMLProperty.findLoader(prevEvalObj, this.propDeclObj.$objectId);
+
+      if (currentEvalParent) {
 
         // entry condition means : if   we are accessing this prop from a binding  in (some subtype of) current object:
         // then, using current binding context (and set current parent obj)
 
         // see tests/PropertiesUrl.qml and look at 'properties_url_import.remoteSet = "remoteSet.png"' :
 
-        this.valParentObj = prevEvalObj.$context.$ownerObject;
+        this.valParentObj = currentEvalParent.$context.$ownerObject;
 
       } else {
 
@@ -659,6 +662,11 @@ class QMLProperty {
     // this.bindingCtxObj.$component : the QML supertype where the current binding is initialized
     // these may be the supertype(s) of the actual parent (this.valParentObj) here:
     QmlWeb.$evaluatedObj = this.valParentObj;
+  }
+
+  static findLoader(evalObj, id) {
+    for (; evalObj&&evalObj.$objectId!==id; (evalObj=evalObj.$loaderContext) && (evalObj=evalObj.$ownerObject));
+    return evalObj;
   }
 
   static pushEvalStack() {

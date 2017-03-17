@@ -9,27 +9,44 @@ class ListModel extends QtObject {
     this.$model = new QmlWeb.JSItemModel();
     this.$model.data = (index, role) => this.$items[index][role];
     this.$model.rowCount = () => this.$items.length;
+    this.$model.rowsInserted.connect(this, this.$_onRowsInserted);
+    this.$model.modelReset.connect(this, this.$_onModelReset);
   }
   $on$itemsChanged(newVal) {
     this.count = this.$items.length;
     if (this.$firstItem && newVal.length > 0) {
-      const QMLListElement = QmlWeb.getConstructor(
-        "QtQuick", "2.0", "ListElement"
-      );
       this.$firstItem = false;
-      const roleNames = [];
-      let dict = newVal[0];
-      if (dict instanceof QMLListElement) {
-        dict = dict.$properties;
-      }
-      for (const i in dict) {
-        if (i !== "index") {
-          roleNames.push(i);
-        }
-      }
-      this.$model.setRoleNames(roleNames);
+      this.extractRoles(newVal[0]);
     }
   }
+  $_onRowsInserted(startIndex, endIndex) {
+    this.count = this.$items.length;
+    if (this.$firstItem) {
+      for (let index = startIndex; index < endIndex; index++) {
+        const item = this.$items[index];
+        this.$firstItem = false;
+        this.extractRoles(item);
+        break;
+      }
+    }
+  }
+  $_onModelReset() {
+    this.$firstItem = true;
+  }
+
+  extractRoles(dict) {
+    const roleNames = [];
+    if (dict instanceof ListElement) {
+      dict = dict.$properties;
+    }
+    for (const i in dict) {
+      if (i !== "index") {
+        roleNames.push(i);
+      }
+    }
+    this.$model.setRoleNames(roleNames);
+  }
+
   append(dict) {
     const index = this.$items.length;
     let c = 0;
@@ -44,7 +61,7 @@ class ListModel extends QtObject {
       c = 1;
     }
 
-    this.$itemsChanged(this.$items);
+    //this.$itemsChanged(this.$items);
     this.$model.rowsInserted(index, index + c);
   }
   clear() {
@@ -57,7 +74,7 @@ class ListModel extends QtObject {
   }
   insert(index, dict) {
     this.$items.splice(index, 0, dict);
-    this.$itemsChanged(this.$items);
+    //this.$itemsChanged(this.$items);
     this.$model.rowsInserted(index, index + 1);
   }
   move(from, to, n) {

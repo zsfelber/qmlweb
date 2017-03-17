@@ -61,7 +61,7 @@ class QtObject extends QmlWeb.QObject {
       oldContainer.$elementRemove(leaf, elemFlag, leaf.$component?leaf.$component.outallchanges_old:undefined);
     }
 
-    if (leaf.$loaderContext !== newContainer) {
+    if (leaf.$loaderContext !== (newContainer?newContainer.$context:undefined)) {
       leaf.cleanupContext(leaf.$loaderContext);
       if (!leaf.$isDeleted) {
         leaf.initializeContext(newContainer);
@@ -144,7 +144,7 @@ class QtObject extends QmlWeb.QObject {
       return;
     }
 
-    this.$loaderContext = parent;
+    this.$loaderContext = parent?parent.$context:undefined;
 
     const engine = this.$engine;
 

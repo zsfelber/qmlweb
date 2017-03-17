@@ -44,12 +44,33 @@ class Repeater extends Item {
 
     const model = this.$getModel();
     if (model instanceof QmlWeb.JSItemModel) {
-      const flags = QmlWeb.Signal.UniqueConnection;
-      model.dataChanged.connect(this, this.$_onModelDataChanged, flags);
-      model.rowsInserted.connect(this, this.$_onRowsInserted, flags);
-      model.rowsMoved.connect(this, this.$_onRowsMoved, flags);
-      model.rowsRemoved.connect(this, this.$_onRowsRemoved, flags);
-      model.modelReset.connect(this, this.$_onModelReset, flags);
+      if (this.$listenedModel !== this.model) {
+        if (this.$listenedModel) {
+          const lmodel = this.$listenedModel instanceof ListModel ?
+            this.$listenedModel.$model :
+            this.$listenedModel;
+
+          lmodel.dataChanged.disconnect(this, this.$_onModelDataChanged);
+          lmodel.rowsInserted.disconnect(this, this.$_onRowsInserted);
+          lmodel.rowsMoved.disconnect(this, this.$_onRowsMoved);
+          lmodel.rowsRemoved.disconnect(this, this.$_onRowsRemoved);
+          lmodel.modelReset.disconnect(this, this.$_onModelReset);
+          if (this.$listenedModel instanceof ListModel) {
+            this.$listenedModel.$itemsChanged.disconnect(this, this.$_onModel$itemsChanged);
+          }
+        }
+
+        const flags = QmlWeb.Signal.UniqueConnection;
+        model.dataChanged.connect(this, this.$_onModelDataChanged, flags);
+        model.rowsInserted.connect(this, this.$_onRowsInserted, flags);
+        model.rowsMoved.connect(this, this.$_onRowsMoved, flags);
+        model.rowsRemoved.connect(this, this.$_onRowsRemoved, flags);
+        model.modelReset.connect(this, this.$_onModelReset, flags);
+        if (this.model instanceof ListModel) {
+          this.model.$itemsChanged.connect(this, this.$_onModel$itemsChanged, flags);
+        }
+        this.$listenedModel = this.model;
+      }
 
       this.$removeChildren(0, this.$items.length);
       this.$insertChildren(0, model.rowCount());
@@ -67,6 +88,7 @@ class Repeater extends Item {
     }
     this.count = this.$items.length;
   }
+
   $_onModelDataChanged(startIndex, endIndex, roles) {
     const model = this.$getModel();
     const roleNames = roles || model.roleNames;
@@ -123,6 +145,10 @@ class Repeater extends Item {
   }
   $_onModelReset() {
     this.$applyModel();
+  }
+  $_onModel$itemsChanged() {
+    this.$_onRowsRemoved(0, this.count);
+    this.$_onRowsInserted(0, this.model.$items.count);
   }
   $insertChildren(startIndex, endIndex) {
     if (endIndex <= 0) {

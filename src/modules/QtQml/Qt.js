@@ -18,7 +18,7 @@ const Qt = {
   // Load file, parse and construct as Component (.qml)
   createComponent: name => {
     const engine = QmlWeb.getEngine();
-    let imp = engine.resolveImport(name);
+    const imp = engine.resolveImport(name);
 
     return engine.createComponent(imp, QmlWeb.QMLComponentFlags.LoadImports);
   },
