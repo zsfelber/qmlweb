@@ -100,9 +100,8 @@ const QMLPropertyState = {
   LoadFromBinding : 4,
   ValueSaved : 8,
   DeferredChild : 16,
-  InvalidityFlags : 2 | 4,
-  Changed : 31-1-2,
-  Dirty : 31-2,
+  InvalidityFlags : 2 | 4 | 16,
+  Changed : 4 | 8 | 16,
   DirtyRead : 4 | 16,
   DirtyAll : 31,
 
