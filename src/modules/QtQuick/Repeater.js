@@ -146,9 +146,9 @@ class Repeater extends Item {
   $_onModelReset() {
     this.$applyModel();
   }
-  $_onModel$itemsChanged() {
+  $_onModel$itemsChanged(newVal, oldVal) {
     this.$_onRowsRemoved(0, this.count);
-    this.$_onRowsInserted(0, this.model.$items.count);
+    this.$_onRowsInserted(0, newVal.length);
   }
   $insertChildren(startIndex, endIndex) {
     if (endIndex <= 0) {
@@ -270,7 +270,7 @@ QmlWeb.registerQmlType({
     delegate: "Component",
     // 0 to remove "Uninitialized" state
     model: { type: "variant", initialValue: 0 },
-    count: "int"
+    count: { type: "int", initialValue: 0 }
   },
   signals: {
     _childrenInserted: []

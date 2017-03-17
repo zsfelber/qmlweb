@@ -224,10 +224,10 @@ gulp.task("test-watch", ["watch-dev"], done => {
 gulp.task("test-debug", ["watch-dev"], done => {
   new karma.Server({
     configFile: path.join(__dirname, "karma.conf.js"),
-    browsers: ["PhantomJSCustom"/* "Chrome_without_security"*/],
-    reporters: ["progress"],
+    browsers: [],
+    reporters: [],
     debug: true,
-    singleRun: false,
+    //singleRun: false,
     client: {
       captureConsole: false
     }
