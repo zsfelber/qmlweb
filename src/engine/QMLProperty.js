@@ -135,14 +135,12 @@ class QMLProperty {
   }
 
   resetAnimation(oldVal, newVal, flags) {
-    this.animation.running = false;
-    this.animation.$actions = [{
-      target: this.valParentObj,
-      property: this,
-      from: oldVal,
-      to: newVal
-    }];
-    this.animation.running = true;
+    if (!(flags & QmlWeb.QMLPropertyFlags.ReasonTemporally)) {
+      this.animation.running = false;
+      this.animation.from = oldVal;
+      this.animation.to = newVal;
+      this.animation.running = true;
+    }
   }
 
   sendChanged(oldVal, newVal, flags) {
