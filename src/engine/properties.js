@@ -154,6 +154,7 @@ function createProperty(type, obj, propName, options, bindingFlags=0) {
     }
   }
 
+  return prop;
 }
 
 /**

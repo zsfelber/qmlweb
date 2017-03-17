@@ -193,16 +193,21 @@ class Repeater extends Item {
           const modelData = {};
           for (let i = 0; i < model.roleNames.length; i++) {
             const roleName = model.roleNames[i];
-            if (typeof np[roleName] === "undefined") {
-              engine.createProperty("variant", newItem, roleName);
-            }
             const roleData = model.data(index, roleName);
             modelData[roleName] = roleData;
-            np[roleName].set(
-              roleData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
-              newItem
-            );
+            let prop0 = np[roleName];
+            if (typeof prop0 === "undefined") {
+              console.warn("Repeater role : "+this+"["+i+"] "+roleName+" : new : "+roleData);
+              const prop = engine.createProperty("variant", newItem, roleName);
+              prop.set( roleData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, newItem );
+            } else {
+              console.warn("Repeater role : "+this+"["+i+"] "+roleName+" : "+prop0.value+" queue:"+(prop0.queueItems ? prop0.queueItems.length:"<null>")+" : "+roleData);
+              if ((!prop0.queueItems || !prop0.queueItems.length)&&!prop0.value) {
+                prop0.set( roleData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, newItem );
+              }
+            }
           }
+
           // This was not enough because of nested elements,
           // QMLPropertyState.DeferredChild solves it:
           //for (const propname in np) {

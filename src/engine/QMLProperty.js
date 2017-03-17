@@ -371,11 +371,10 @@ class QMLProperty {
         if (engine.currentPendingOp.property === this) {
           toUpdate = 0;
         } else if (!this.autoPendingOpsBeforeGetDisabled) {
-          const queueItems = engine.pendingOperations.map[this.$propertyId];
-          if (queueItems) {
+          if (this.queueItems) {
             try {
               toUpdate = 0;
-              engine.processSinglePendingOperation(queueItems);
+              engine.processSinglePendingOperation(this.queueItems);
             } catch (err) {
               if (err instanceof QmlWeb.FatalError) throw err;
               error = err;
@@ -526,16 +525,15 @@ class QMLProperty {
             property:this, opId:this.$propertyId, oldVal, newVal, flags, valParentObj
           };
 
-          const queueItems = engine.addPendingOp(queueItem);
-          queueItem.queueItems = queueItems;
+          this.queueItems = engine.addPendingOp(queueItem);
 
           // need to keep state flags consistency after 'update' called
           // 'update' always resets the current updated flag to 0 except the
           // remaining update tasks' dirty bits
-          if (!queueItems.dirty_seq) {
-            queueItems.dirty_seq = [dirty];
+          if (!this.queueItems.dirty_seq) {
+            this.queueItems.dirty_seq = [dirty];
           } else {
-            queueItems.dirty_seq.push(dirty);
+            this.queueItems.dirty_seq.push(dirty);
           }
 
         }
@@ -582,7 +580,7 @@ class QMLProperty {
 
       let dirtyNow;
       if (queueItem) {
-        dirtyNow = queueItem.queueItems.dirty_seq.shift();
+        dirtyNow = this.queueItems.dirty_seq.shift();
         if (!(this.updateState&dirtyNow)) {
           throw new QmlWeb.AssertionError("Assertion failed : "+this+" . Queued update state not matching : "+QmlWeb.QMLPropertyState.toString(dirtyNow));
         }
@@ -590,8 +588,8 @@ class QMLProperty {
 
       this.update(flags, oldVal, valParentObj, dirtyNow);
 
-      if (queueItem && queueItem.queueItems.length) {
-        this.updateState |= queueItem.queueItems.dirty_seq[0];
+      if (queueItem && this.queueItems.length) {
+        this.updateState |= this.queueItems.dirty_seq[0];
       }
 
     } finally {
