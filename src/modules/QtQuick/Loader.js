@@ -1,23 +1,4 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Loader",
-  versions: /.*/,
-  baseClass: "Item",
-  properties: {
-    active: { type: "bool", initialValue: true },
-    asynchronous: "bool",
-    item: "var",
-    progress: "real",
-    // null to remove "Uninitialized" state
-    source: { type: "url", initialValue: null },
-    // null to remove "Uninitialized" state
-    sourceComponent: { type: "Component", initialValue: null },
-    status: { type: "enum", initialValue: 1 }
-  },
-  signals: {
-    loaded: []
-  },
-}, class Loader extends Item {
+class Loader extends Item {
   constructor(meta) {
     super(meta);
     this.$engine.initMeta(this, meta, Loader);
@@ -146,5 +127,27 @@ QmlWeb.registerQmlType({
       // Loader size exists
       this.item.height = this.height;
     }
+  }
+}
+
+QmlWeb.registerQmlType({
+  constructor:Loader,
+  module: "QtQuick",
+  name: "Loader",
+  versions: /.*/,
+  baseClass: "Item",
+  properties: {
+    active: { type: "bool", initialValue: true },
+    asynchronous: "bool",
+    item: "var",
+    progress: "real",
+    // null to remove "Uninitialized" state
+    source: { type: "url", initialValue: null },
+    // null to remove "Uninitialized" state
+    sourceComponent: { type: "Component", initialValue: null },
+    status: { type: "enum", initialValue: 1 }
+  },
+  signals: {
+    loaded: []
   }
 });

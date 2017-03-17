@@ -203,12 +203,14 @@ class Repeater extends Item {
               newItem
             );
           }
-          for (const propname in np) {
-            const prop = np[propname];
-            if (prop.binding && !modelData[propname]) {
-              prop.updateState |= QmlWeb.QMLPropertyState.LoadFromBinding;
-            }
-          }
+          // This was not enough because of nested elements,
+          // QMLPropertyState.DeferredChild solves it:
+          //for (const propname in np) {
+          //  const prop = np[propname];
+          //  if (prop.binding && !modelData[propname]) {
+          //    prop.updateState |= QmlWeb.QMLPropertyState.LoadFromBinding;
+          //  }
+          //}
 
           if (typeof np.model === "undefined") {
             engine.createProperty("variant", newItem, "model");

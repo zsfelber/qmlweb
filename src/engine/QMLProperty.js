@@ -212,6 +212,19 @@ class QMLProperty {
             newVal = this.$setVal(newVal, flags, setEvaluatedObjAlreadyDone);
             this.updateState &= ~QmlWeb.QMLPropertyState.LoadFromBinding;
 
+          } else if (dirtyNow & QmlWeb.QMLPropertyState.DeferredChild)  {
+
+            this.obsoleteConnections = this.evalTreeConnections;
+            // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
+            this.evalTreeConnections = {};
+
+            // this.binding/get
+            pushed = QMLProperty.pushEvaluatingProperty(this);
+
+            if (oldVal === undefined) oldVal = this.value;
+            newVal = this.$setVal(this.deferredChildMeta, flags, setEvaluatedObjAlreadyDone);
+            this.updateState &= ~QmlWeb.QMLPropertyState.DeferredChild;
+
           } else {
             throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid update state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  Binding:"+this.binding);
           }
@@ -374,7 +387,7 @@ class QMLProperty {
 
       const dirty = this.updateState & QmlWeb.QMLPropertyState.Changed;
       if (toUpdate && dirty) {
-        if (dirty !== QmlWeb.QMLPropertyState.LoadFromBinding) {
+        if (dirty & ~QmlWeb.QMLPropertyState.DirtyRead) {
           throw new QmlWeb.AssertionError("Assertion failed : "+this+" . get   Invalid state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  Property setter dirty state invalid at Runtime, only valid in Init/Starting state through pendingOperations queue!");
         }
 
@@ -476,17 +489,25 @@ class QMLProperty {
         this.updateState |= dirty = QmlWeb.QMLPropertyState.LoadFromBinding;
       }
     } else {
-      newVal = this.$setVal(newVal, flags, valParentObj);
-      fwdUpdate = newVal !== oldVal;
-      if (fwdUpdate) {
-        if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
-          this.updateState |= dirty = QmlWeb.QMLPropertyState.ValueSaved;
-        } else if (origState & QmlWeb.QMLPropertyState.LoadFromBinding) {
-          this.updateState |= dirty = QmlWeb.QMLPropertyState.ValueSaved;
-        } else if (origState & QmlWeb.QMLPropertyState.Uninitialized) {
-          fwdUpdate = false;
-        } else {
-          this.updateState |= dirty = QmlWeb.QMLPropertyState.ValueSaved;
+      const isch = flags & QmlWeb.QMLPropertyFlags.SetChildren;
+      if (isch && (valParentObj instanceof Repeater || valParentObj instanceof Loader)) {
+        this.updateState |= dirty = QmlWeb.QMLPropertyState.DeferredChild;
+        this.deferredChildMeta = newVal;
+        fwdUpdate = true;
+      } else {
+        newVal = this.$setVal(newVal, flags, valParentObj);
+
+        fwdUpdate = newVal !== oldVal;
+        if (fwdUpdate) {
+          if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
+            this.updateState |= dirty = QmlWeb.QMLPropertyState.ValueSaved;
+          } else if (origState & QmlWeb.QMLPropertyState.LoadFromBinding) {
+            this.updateState |= dirty = QmlWeb.QMLPropertyState.ValueSaved;
+          } else if (origState & QmlWeb.QMLPropertyState.Uninitialized) {
+            fwdUpdate = false;
+          } else {
+            this.updateState |= dirty = QmlWeb.QMLPropertyState.ValueSaved;
+          }
         }
       }
     }

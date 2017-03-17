@@ -1,3 +1,4 @@
+const omittedRoles = {"index":1, "container":1, "parent":1, "$index":1, "$resourceIndex":1, "$childIndex":1};
 
 class ListModel extends QtObject {
   constructor(meta) {
@@ -40,7 +41,7 @@ class ListModel extends QtObject {
       dict = dict.$properties;
     }
     for (const i in dict) {
-      if (i !== "index") {
+      if (!omittedRoles[i]) {
         roleNames.push(i);
       }
     }

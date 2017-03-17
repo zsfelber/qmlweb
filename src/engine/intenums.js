@@ -99,16 +99,19 @@ const QMLPropertyState = {
   Uninitialized : 2,
   LoadFromBinding : 4,
   ValueSaved : 8,
+  DeferredChild : 16,
   InvalidityFlags : 2 | 4,
-  Changed : 15-1-2,
-  Dirty : 15-2,
-  DirtyAll : 15,
+  Changed : 31-1-2,
+  Dirty : 31-2,
+  DirtyRead : 4 | 16,
+  DirtyAll : 31,
 
   Valid_mnem : "ok",
   LoadFromBinding_mnem : "!",
   Updating_mnem : "~",
   Uninitialized_mnem : "-",
   ValueSaved_mnem : ">",
+  DeferredChild_mnem : "DCh",
 
   toString: function(flags, mnem = true) {
     return humanize.call(QMLPropertyState, flags, mnem);
