@@ -43,32 +43,6 @@ function createProperty(type, obj, propName, options, bindingFlags=0) {
   const QMLProperty = QmlWeb.QMLProperty;
   const prop = new QMLProperty(type, obj, propName, options);
 
-  function _set_prop(propName, prop, flags, binding) {
-    obj[`${propName}Changed`] = prop.changed;
-
-    // default values:
-    // undefined (not initialized at startup):
-    // property ButtonModel buttonModel;
-    // property var something;
-    // property ButtonModel buttonModel : undefined;
-
-    // initialized at startup:
-    // null:
-    // property ButtonModel buttonModel : null;
-    // 0:
-    // property int something;
-
-    if (binding) {
-      prop.set(binding, QMLPropertyFlags.ReasonInitPrivileged);
-    }
-
-    if (options.initialValue !== undefined) {
-      prop.set(options.initialValue, flags);
-    } else if (!binding) {
-      prop.set(undefined, flags);
-    }
-  }
-
   const getter = function () {
     return prop.get.call(prop);
   };
@@ -78,6 +52,7 @@ function createProperty(type, obj, propName, options, bindingFlags=0) {
   getter.$owner = prop;
   setter.$owner = prop;
 
+  let flags,binding;
   if (type === "alias") {
 
     prop.type = options.overrideType ? options.overrideType : "var";
@@ -101,16 +76,15 @@ function createProperty(type, obj, propName, options, bindingFlags=0) {
 
     var p = formatPath(path0);
     const QMLBinding = QmlWeb.QMLBinding;
-    var binding = new QMLBinding(p, proplast, QMLBindingFlags.ImplExpression|QMLBindingFlags.Alias|bindingFlags);
-
-    // NOTE alias + initialValue works too
-    _set_prop(propName, prop, QMLPropertyFlags.ReasonInit, binding);
+    binding = new QMLBinding(p, proplast, QMLBindingFlags.ImplExpression|QMLBindingFlags.Alias|bindingFlags);
 
     obj.$properties[propName] = prop;
     QmlWeb.setupGetterSetter(obj, propName, getter, setter, prop);
 
+    // NOTE alias + initialValue works too
+    flags = QMLPropertyFlags.ReasonInit;
+
   } else {
-    _set_prop(propName, prop, QMLPropertyFlags.ReasonInitPrivileged);
 
     obj.$properties[propName] = prop;
     QmlWeb.setupGetterSetter(obj, propName, getter, setter, prop);
@@ -121,8 +95,9 @@ function createProperty(type, obj, propName, options, bindingFlags=0) {
     } else if (obj.constructor!==QMLComponent) {
       QmlWeb.error("Invalid object : "+obj+"  $noalias missing.");
     }
-  }
 
+    flags = QMLPropertyFlags.ReasonInitPrivileged;
+  }
 
   var ctx = obj.$context;
 
@@ -152,6 +127,32 @@ function createProperty(type, obj, propName, options, bindingFlags=0) {
     QmlWeb.setupGetterSetter(ctx.$externalContext, propName, getter, setter, prop);
   }
 
+  obj[`${propName}Changed`] = prop.changed;
+
+  try {
+    if (binding) {
+      prop.set(binding, QMLPropertyFlags.ReasonInitPrivileged);
+    }
+  } finally {
+
+    // default values:
+    // undefined (not initialized at startup):
+    // property ButtonModel buttonModel;
+    // property var something;
+    // property ButtonModel buttonModel : undefined;
+
+    // initialized at startup:
+    // null:
+    // property ButtonModel buttonModel : null;
+    // 0:
+    // property int something;
+
+    if (options.initialValue !== undefined) {
+      prop.set(options.initialValue, flags);
+    } else if (!binding) {
+      prop.set(undefined, flags);
+    }
+  }
 
 }
 
