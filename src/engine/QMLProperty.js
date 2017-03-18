@@ -423,8 +423,15 @@ class QMLProperty {
     if (invalidityFlags) {
 
       if (this.updateState & QmlWeb.QMLPropertyState.Updating) {
-        QmlWeb.error(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this, "  recordedStack:", QMLProperty.recordStack());
-        error = new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this);
+        if (engine.currentPendingOps[this.$propertyId]) {
+          engine.currentPendingOp.warnings.push({loc:"get",
+                                                err:`(Secondary) property binding loop detected for property. recordedStack: ${QMLProperty.recordStack()}`,
+                                                prop:this});
+          return this.value;
+        } else {
+          QmlWeb.error(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this, "  recordedStack:", QMLProperty.recordStack());
+          error = new QmlWeb.PendingEvaluation(`(Secondary) property binding loop detected for property : ${this.toString(true)}`, this);
+        }
       }
     }
 
