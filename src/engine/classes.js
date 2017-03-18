@@ -93,7 +93,7 @@ function construct(meta, parent, flags) {
       item.$component = meta.$component;
       item.$componentCreateFlags = flags;
       if (meta.$component) {
-        item.$info = meta.$component.toString();
+        item.$cinfo = "c:"+meta.$component.toString();
       }
 
       item.initializeContext(parent);
@@ -162,7 +162,7 @@ function constructSuper(meta, parent) {
 
       item = new supermeta.classConstructor(supermeta);
 
-      item.$info = item.$classname = supermeta.classConstructor.name;
+      item.$cinfo = "b:"+ (item.$classname = supermeta.classConstructor.name);
 
       if (item.$attachedComponent) {
         // for basic classes like Item, QtObject (and in complex classes' lowest non-prototype __proto__) :

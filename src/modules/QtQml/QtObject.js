@@ -138,7 +138,7 @@ class QtObject extends QmlWeb.QObject {
     return this.$attributes;
   }
 
-  initializeContext(parent, flags, recursiveLoader) {
+  initializeContext(parent, flags, recursiveLoader, req=0) {
 
     if (this.$isAttachedObj || this.hasOwnProperty("$context")) {
       return;
@@ -156,7 +156,7 @@ class QtObject extends QmlWeb.QObject {
       if (parent.$component) {
         $pcinfo = parent.$component.toString();
       } else {
-        $pcinfo = parent.constructor.name;
+        $pcinfo = "("+parent.constructor.name+")";
       }
     } else {
       $pcinfo = "";
@@ -178,7 +178,7 @@ class QtObject extends QmlWeb.QObject {
       $cinfo = this.$component.toString();
       loaderComponent = this.$component.loaderComponent;
     } else {
-      $cinfo = this.constructor.name;
+      $cinfo = "("+this.constructor.name+(req?":"+req:"")+")";
     }
 
     if (!recursiveLoader) {
@@ -200,7 +200,7 @@ class QtObject extends QmlWeb.QObject {
       }
     } else if (this.$base !== this) {
       // when component added dynamically, we initialize the whole prototype chain's contexts :
-      this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super, this);
+      this.__proto__.initializeContext(parent, QmlWeb.QMLComponentFlags.Super, this, req+1);
     }
 
     // NOTE making a new level of $context inheritance :
@@ -212,6 +212,7 @@ class QtObject extends QmlWeb.QObject {
     // #scope hierarchy:
     // see also component.js/QMLContext.createChild
 
+    let info;
     if (parent) {
       if ((flags&QmlWeb.QMLComponentFlags.Super?1:0)+(flags&QmlWeb.QMLComponentFlags.Nested?1:0) > 1) {
         throw new QmlWeb.AssertionError("Assertion failed : component either factory, nested or super  It is "+QmlWeb.QMLComponentFlags.toString(flags));
@@ -225,11 +226,11 @@ class QtObject extends QmlWeb.QObject {
 
         if (parent) {
 
-          this.$context = parent.$context.createChild($pcinfo +" ~> " +$cinfo, flags);
+          this.$context = parent.$context.createChild(info = $pcinfo +" ~> " +$cinfo, flags);
 
         } else {
 
-          this.$context = engine._rootContext.createChild($pcinfo + " .. " +$cinfo, flags);
+          this.$context = engine._rootContext.createChild(info = $pcinfo + " .. " +$cinfo, flags);
 
         }
 
@@ -238,13 +239,13 @@ class QtObject extends QmlWeb.QObject {
 
         this.$context.nestedLevel = this.nestedLevel = (parent.nestedLevel||0)+1;
 
-        this.$context = parent.$context.createChild($pcinfo+" -> "+$cinfo, flags);
+        this.$context = parent.$context.createChild(info = $pcinfo+" -> "+$cinfo, flags);
       }
 
       //QmlWeb.warn("Component  "+this.$context);
     } else {
 
-      this.$context = engine._rootContext.createChild($cinfo);
+      this.$context = engine._rootContext.createChild(info = $cinfo);
 
       //QmlWeb.warn("Component  "+this);
       if (flags&QmlWeb.QMLComponentFlags.Nested) {
@@ -258,7 +259,7 @@ class QtObject extends QmlWeb.QObject {
     this.$context.$ownerObject = this;
     this.$pageElements = this.$context.$pageElements;
     this.$pageContext = this.$context.$pageContext;
-    this.$info = this.$context.$info;
+    this.$info = info;
 
     if (this.$component) {
       this.$component.loadJsImports();
@@ -286,8 +287,8 @@ QmlWeb.registerQmlType({
   properties : {
      // null to remove "Uninitialized" state because of  elementRemove / elementAdd
      container: { type: "QtObject", initialValue: null },
-     $index: { type: "int", pendingInit:true, readOnly:true },
-     $resourceIndex: { type: "int", pendingInit:true, readOnly:true },
+     $index: { type: "int", readOnly:true },
+     $resourceIndex: { type: "int", readOnly:true },
      objectName: "string"
   },
   constructor: QtObject

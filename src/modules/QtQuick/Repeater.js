@@ -202,7 +202,7 @@ class Repeater extends Item {
               prop.set( roleData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, newItem );
             } else {
               console.warn("Repeater role : "+this+"["+roleName+"]  : "+prop0.value+" queue:"+(prop0.queueItems ? prop0.queueItems.length:"<null>")+" : "+roleData);
-              if ((!prop0.queueItems || !prop0.queueItems.length)&&!prop0.value) {
+              if (!prop0.queueItems.length&&!prop0.value) {
                 prop0.set( roleData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, newItem );
               }
             }

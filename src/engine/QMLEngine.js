@@ -8,6 +8,7 @@ class QMLEngine {
   constructor(element, opts={}) {
 
     this.defaultEvalObj = {$engine:this, toString:()=>"def$eval:"+this.$info };
+    this.currentPendingOps = {};
 
     this.pushengine();
     this.$info = opts.info;
@@ -494,10 +495,14 @@ class QMLEngine {
     }
   }
 
-  addPendingOp(itm) {
+  addPendingOp(itm, itms0) {
     let itms = this.pendingOperations.map[itm.opId];
     if (!itms) {
-      this.pendingOperations.map[itm.opId] = itms = [];
+      if (itms0)
+        itms = itms0;
+      else
+        itms = [];
+      this.pendingOperations.map[itm.opId] = itms;
       this.pendingOperations.stack.push(itms);
       itms.opId = itm.opId;
     }
@@ -505,12 +510,14 @@ class QMLEngine {
     return itms;
   }
 
-  processOp(op) {
+  processOp(op, index, arr) {
     try {
+
       this.pushengine();
 
       const oldP = this.currentPendingOp;
       this.currentPendingOp = op;
+      this.currentPendingOps[op.opId] = 1;
 
       op.errors = [];
       op.warnings = [];
@@ -527,7 +534,7 @@ class QMLEngine {
             op.errors.push("Property state is invalid : initialization failed : "+property);
           } else {
 
-            property.$set(op.newVal, op.oldVal, op.flags, op.valParentObj, op);
+            property.$set(op.newVal, op.oldVal, op.flags, op.valParentObj, op, index<arr.length?arr[index+1]:undefined);
 
             this.a1++;
             mode+=":a";
@@ -570,11 +577,13 @@ class QMLEngine {
         op.err = err;
       } finally {
         this.currentPendingOp = oldP;
+        delete this.currentPendingOps[op.opId];
       }
 
       this.i++;
     } finally {
       this.popengine();
+      arr.splice(index, 1);
     }
   }
 
@@ -582,9 +591,12 @@ class QMLEngine {
     if (op.length)  {
       opId = op[0].opId;
       delete this.pendingOperations.map[opId];
-      op.forEach(this.processOp, this);
-      op.splice(0, op.length);
-      op.$cleared = true;
+      while (op.length) {
+        this.processOp.call(this, op[0], 0, op);
+      }
+      return true;
+    } else {
+      return false;
     }
   }
 

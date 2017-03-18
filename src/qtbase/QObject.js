@@ -197,9 +197,10 @@ class QObject {
 
   toString(detail) {
     var tos =
-      (typeof this.$info==="string"? this.$info : this.constructor.name) +
-        (this.$leaf?this.$leaf.id?":"+this.$leaf.id:"":
-                    (this.id?":"+this.id:""))+
+      (this.hasOwnProperty("$info")? this.$info :
+          (this.$info?this.$info:(this.$leaf.$info?"(l)"+this.$leaf.$info:(this.$cinfo?this.$cinfo:"")))+"("+this.constructor.name+")") +
+        (this.id?":"+this.id:(this.$leaf.id?":(l)"+this.$leaf.id:""))+
+        (this.$leaf===this?"($l)":"")+
         (detail?":"+this.$objectId:"");
     return tos;
   }

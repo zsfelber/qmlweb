@@ -1,8 +1,27 @@
 
 function objToStringSafe(obj, detail) {
-  var os = (typeof obj.$info==="string"?obj.$info:(obj.$base?obj.$base.toString():(obj.$classname||obj.constructor?(obj.$classname||obj.constructor.name)+":":""))+(detail&&obj.$objectId?obj.$objectId+":":""));
-
+  var os = obj ? QObject.prototype.toString.call(obj, detail) : obj;
   return os;
+}
+
+function diffStringTail(s1, s2) {
+  var l = Math.min(s1.length, s2.length);
+  var result = "";
+  for (let i = 0, started = 0; i<l; i++) {
+    if (started) {
+      result += s2[i];
+    } else if (s1[i]===s2[i]) {
+      result = "…";
+    } else {
+      started = 1;
+      result += s2[i];
+    }
+  }
+  for (let i = l; i<s2.length; i++) {
+    result += s2[i];
+  }
+
+  return result;
 }
 
 function e(msg) {
@@ -19,6 +38,7 @@ class QMLProperty {
     this.$engine = QmlWeb.getEngine();
 
     this.stacks = QMLProperty;
+    this.queueItems = [];
 
     // NOTE
     // propDeclObj : where the property declared in prototype chain
@@ -36,7 +56,6 @@ class QMLProperty {
     this.name = name;
     this.options = options;
     this.readOnly = options.readOnly;
-    this.pendingInit = options.pendingInit;
     this.autoPendingOpsBeforeGetDisabled = options.autoPendingOpsBeforeGetDisabled;
     this.updateState = QmlWeb.QMLPropertyState.Uninitialized;
     this.changed = QmlWeb.Signal.signal("changed", [{name:"val"}, {name:"oldVal"}, {name:"name"}], { obj });
@@ -315,13 +334,13 @@ class QMLProperty {
   // slot bound to signal 'when one of the dependencies changed', triggers an immediate update or schedules a lazy update :
   updateBindingLater() {
     if (this.binding) {
+
+      this.updateState |= QmlWeb.QMLPropertyState.LoadFromBinding;
+
       if (this.animation || (this.changed.$signal.connectedSlots && this.changed.$signal.connectedSlots.length>this.childEvalTreeConnections)) {
-        this.updateState = QmlWeb.QMLPropertyState.LoadFromBinding;
         this.update();
       } else {
         // lazy load for inactive properties (and its dependencies):
-        this.updateState = QmlWeb.QMLPropertyState.LoadFromBinding;
-
         this.changed.$signal.connectedSlots.forEach(QMLProperty.fwdLazy, this);
       }
 
@@ -368,17 +387,14 @@ class QMLProperty {
         // we take this property from queue and update it immediately,
         // if it is being processed, then we omit update
         // otherwise just don't do anything here:
-        if (engine.currentPendingOp.property === this) {
+        if (engine.currentPendingOps[this.$propertyId]) {
           toUpdate = 0;
         } else if (!this.autoPendingOpsBeforeGetDisabled) {
-          if (this.queueItems) {
-            try {
-              toUpdate = 0;
-              engine.processSinglePendingOperation(this.queueItems);
-            } catch (err) {
-              if (err instanceof QmlWeb.FatalError) throw err;
-              error = err;
-            }
+          try {
+            toUpdate = !engine.processSinglePendingOperation(this.queueItems);
+          } catch (err) {
+            if (err instanceof QmlWeb.FatalError) throw err;
+            error = err;
           }
         }
       } else if (engine.pendingOperations.map.hasOwnProperty(this.$propertyId)) {
@@ -521,20 +537,15 @@ class QMLProperty {
 
           // triggers update at Starting stage:
 
-          const queueItem = {
-            property:this, opId:this.$propertyId, oldVal, newVal, flags, valParentObj
-          };
-
-          this.queueItems = engine.addPendingOp(queueItem);
-
-          // need to keep state flags consistency after 'update' called
+          // 'dirty' keeps state flags consistency after 'update' called
           // 'update' always resets the current updated flag to 0 except the
           // remaining update tasks' dirty bits
-          if (!this.queueItems.dirty_seq) {
-            this.queueItems.dirty_seq = [dirty];
-          } else {
-            this.queueItems.dirty_seq.push(dirty);
-          }
+
+          const queueItem = {
+            property:this, opId:this.$propertyId, oldVal, newVal, flags, valParentObj, dirty
+          };
+
+          engine.addPendingOp(queueItem, this.queueItems);
 
         }
 
@@ -544,7 +555,7 @@ class QMLProperty {
     }
   }
 
-  $set(newVal, oldVal, flags, valParentObj, queueItem) {
+  $set(newVal, oldVal, flags, valParentObj, queueItem, nextQueueItem) {
 
     const engine = this.$engine;
     flags = flags || QmlWeb.QMLPropertyFlags.ReasonUser;
@@ -580,11 +591,8 @@ class QMLProperty {
 
       let dirtyNow;
       if (queueItem) {
-        if (!this.queueItems.dirty_seq.length) {
-          throw new QmlWeb.AssertionError("Assertion failed : "+this+" . Update state queue is empty : "+QmlWeb.QMLPropertyState.toString(dirtyNow));
-        }
+        dirtyNow = queueItem.dirty;
 
-        dirtyNow = this.queueItems.dirty_seq.shift();
         if (!(this.updateState&dirtyNow)) {
           throw new QmlWeb.AssertionError("Assertion failed : "+this+" . Queued update state not matching : "+QmlWeb.QMLPropertyState.toString(dirtyNow));
         }
@@ -592,12 +600,8 @@ class QMLProperty {
 
       this.update(flags, oldVal, valParentObj, dirtyNow);
 
-      if (queueItem && this.queueItems.length) {
-        if (!this.queueItems.dirty_seq.length) {
-          throw new QmlWeb.AssertionError("Assertion failed : "+this+" . Update state queue is empty : "+QmlWeb.QMLPropertyState.toString(dirtyNow));
-        }
-
-        this.updateState |= this.queueItems.dirty_seq[0];
+      if (nextQueueItem) {
+        this.updateState |= nextQueueItem.dirty;
       }
 
     } finally {
@@ -606,18 +610,18 @@ class QMLProperty {
   }
 
   toString(detail) {
-    var os = objToStringSafe(this.propDeclObj, detail);
+    var os = objToStringSafe(this.propDeclObj, detail), s = os;
     if (this.propDeclObj !== this.bindingCtxObj) {
-      os += "(b:"+objToStringSafe(this.bindingCtxObj)+")"
+      os += "(B:"+diffStringTail(s, s=objToStringSafe(this.bindingCtxObj))+")"
     }
     if (this.bindingCtxObj !== this.valParentObj) {
-      os += "(v:"+objToStringSafe(this.valParentObj)+")"
+      os += "(V:"+diffStringTail(s, s=objToStringSafe(this.valParentObj))+")"
     }
 
     // $base because to avoid infinite loops for overriden toString:
-    return os+" . prop:"+this.name+(detail?"#"+this.$propertyId:"")+" "+QmlWeb.QMLPropertyState.toString(this.updateState)+
+    return os+" . prop:"+this.name+(detail?"#"+this.$propertyId:"")+" ["+QmlWeb.QMLPropertyState.toString(this.updateState)+"]"+
       (detail?(this.binding?" b#"+this.binding.id+":"+QmlWeb.QMLBindingFlags.toString(this.binding.flags):""):"")+
-       (this.value?" v:"+this.value:"")+" "+(this.readOnly?"ro":"")+(this.pendingInit?"pi":"");
+       (this.value?" v:"+objToStringSafe(this.value):"")+" "+(this.readOnly?"ro":"");
   }
 
   static stackToString(stack, parent) {

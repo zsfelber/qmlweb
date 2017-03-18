@@ -258,10 +258,10 @@ QmlWeb.registerQmlType({
   baseClass: "QtQml.QtObject",
   properties: {
     parent: { type: "alias", path:["container"], overrideType: "ItemBase" },
-    data: { type: "list", pendingInit:true, readOnly:true },
-    children: { type: "list", pendingInit:true, readOnly:true },
-    resources: { type: "list", pendingInit:true, readOnly:true },
-    $childIndex: { type: "int", pendingInit:true, readOnly:true },
+    data: { type: "list", readOnly:true },
+    children: { type: "list", readOnly:true },
+    resources: { type: "list", readOnly:true },
+    $childIndex: { type: "int", readOnly:true },
     modelProperty: { type: "string", readOnly:true },
     hovered: { type: "bool", readOnly:true },
     hoverIndex: { type: "int", readOnly:true }
