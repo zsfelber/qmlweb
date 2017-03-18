@@ -11,7 +11,7 @@ class QMLComponent {
 
     this.flags = flags;
     this.createFlags = this.flags & (QmlWeb.QMLComponentFlags.Root|QmlWeb.QMLComponentFlags.Nested|QmlWeb.QMLComponentFlags.Super);
-    this.elementFlag = this.flags & QmlWeb.QMLComponentFlags.Element;
+    this.elementFlags = this.flags & QmlWeb.QMLComponentFlags.Element;
     this.cntPendingCompletions = 0;
 
     const engine = this.$engine;
@@ -216,7 +216,7 @@ class QMLComponent {
     const engine = this.$engine;
 
     const oldFlags = this.flags;
-    const oldElementFlag = this.elementFlag;
+    const oldElementFlags = this.elementFlags;
     const oldCreateFlags = this.createFlags;
     // change base path to current component base path
     const oldState = engine.operationState;
@@ -231,7 +231,7 @@ class QMLComponent {
       if (!this.createFlags) {
         if (parent) {
           this.createFlags = QmlWeb.QMLComponentFlags.Nested;
-          this.elementFlag = QmlWeb.QMLComponentFlags.Element;
+          this.elementFlags |= QmlWeb.QMLComponentFlags.Element;
 
           // (1) Nested item top level uses loader Component imports  see(2) :
           this.redirectImports(this.loaderComponent);
@@ -267,7 +267,7 @@ class QMLComponent {
       // NOTE recursive call to initialize the class then its super  ($createObject -> constuct -> $createObject -> constuct ...) :
       // parent automatically forwards context, see QObject.constructor(parent)
       // no parent -> this.context   see initMeta
-      item = engine.construct(this.meta, parent, this.createFlags|this.elementFlag);
+      item = engine.construct(this.meta, parent, this.createFlags|this.elementFlags);
       QmlWeb.helpers.mergeInPlace(item, properties);
 
       // invoked either this or one from >@see also< classes.constructSuper
@@ -287,7 +287,7 @@ class QMLComponent {
       engine.operationState = oldState;
       this.flags = oldFlags;
       this.createFlags = oldCreateFlags;
-      this.elementFlag = oldElementFlag;
+      this.elementFlags = oldElementFlags;
     }
     return item;
   }

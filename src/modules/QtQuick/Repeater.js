@@ -169,6 +169,7 @@ class Repeater extends Item {
       var outallchanges = {};
       for (index = startIndex; index < endIndex; index++) {
 
+        this.delegate.elementFlags |= QMLComponentFlags.DynamicLoad;
         const newItem = this.delegate.createObject(container, {}, outallchanges);
         const np = newItem.$properties;
         engine.createProperty("int", newItem, "index", { initialValue: index });
@@ -209,7 +210,7 @@ class Repeater extends Item {
           }
 
           // This was not enough because of nested elements,
-          // QMLPropertyState.DeferredChild solves it:
+          // QMLPropertyState.Dynamic solves it:
           //for (const propname in np) {
           //  const prop = np[propname];
           //  if (prop.binding && !modelData[propname]) {

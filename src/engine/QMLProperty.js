@@ -246,7 +246,7 @@ class QMLProperty {
             newVal = this.value;
             this.updateState &= ~QmlWeb.QMLPropertyState.ValueSaved;
 
-          } else if (dirtyNow & QmlWeb.QMLPropertyState.DeferredChild)  {
+          } else if (dirtyNow & QmlWeb.QMLPropertyState.Dynamic)  {
 
             this.obsoleteConnections = this.evalTreeConnections;
             // NOTE We replace each node in the evaluating dependencies graph by every 'get' :
@@ -257,7 +257,7 @@ class QMLProperty {
 
             if (oldVal === undefined) oldVal = this.value;
             newVal = this.$setVal(this.deferredChildMeta, flags, setEvaluatedObjAlreadyDone);
-            this.updateState &= ~QmlWeb.QMLPropertyState.DeferredChild;
+            this.updateState &= ~QmlWeb.QMLPropertyState.Dynamic;
 
 
           } else {
@@ -505,15 +505,17 @@ class QMLProperty {
     const origState = this.updateState;
     let fwdUpdate;
     let dirty = 0;
+    const p = valParentObj ? valParentObj : this.valParentObj;
+    let dynamic = p.$componentCreateFlags & QMLComponentFlags.DynamicLoad ? QMLPropertyState.Dynamic : 0;
 
     if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
-      fwdUpdate = this.binding !== newVal;
+      fwdUpdate = dynamic || this.binding !== newVal;
       if (fwdUpdate) {
         this.updateState |= dirty = QmlWeb.QMLPropertyState.LoadFromBinding;
       }
     } else {
-      if (valParentObj instanceof Repeater || valParentObj instanceof Loader) {
-        this.updateState |= dirty = QmlWeb.QMLPropertyState.DeferredChild;
+      if (dynamic) {
+        this.updateState |= dirty = dynamic;
         this.deferredChildMeta = newVal;
         fwdUpdate = true;
       } else {
@@ -536,7 +538,15 @@ class QMLProperty {
 
     if (fwdUpdate) {
 
-      if (engine.operationState & QmlWeb.QMLOperationState.Init) {
+      if (dynamic) {
+
+        const queueItem = {
+          property:this, opId:this.$propertyId, oldVal, newVal, flags, valParentObj, dirty
+        };
+
+        engine.addPendingOp(queueItem, this.queueItems);
+
+      } else if (engine.operationState & QmlWeb.QMLOperationState.Init) {
 
         if (!(engine.operationState & QmlWeb.QMLOperationState.Remote) ||
             (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
@@ -555,12 +565,6 @@ class QMLProperty {
 
         }
 
-      } else if (dirty & QmlWeb.QMLPropertyState.DeferredChild) {
-        const queueItem = {
-          property:this, opId:this.$propertyId, oldVal, newVal, flags, valParentObj, dirty
-        };
-
-        engine.addPendingOp(queueItem, this.queueItems);
       } else {
         this.$set(newVal, oldVal, flags, valParentObj);
       }

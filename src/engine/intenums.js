@@ -47,10 +47,12 @@ const QMLComponentFlags = {
   LoadImports : 16,
   Flat : 32,
   FirstSuper : 64,
+  DynamicLoad : 128,
   NestedOrFirst : 66,
 
   Super_mnem : "S",
   Nested_mnem : "N",
+  DynamicLoad_mnem : "D",
   Root_mnem : "R",
   Element_mnem : "e",
   LoadImports_mnem : "i",
@@ -99,7 +101,7 @@ const QMLPropertyState = {
   Uninitialized : 2,
   LoadFromBinding : 4,
   ValueSaved : 8,
-  DeferredChild : 16,
+  Dynamic : 16,
   InvalidityFlags : 2 | 4 | 16,
   Changed : 4 | 8 | 16,
   DirtyRead : 4 | 16,
@@ -110,7 +112,7 @@ const QMLPropertyState = {
   Uninitialized_mnem : "-",
   LoadFromBinding_mnem : "!",
   ValueSaved_mnem : ">",
-  DeferredChild_mnem : "DCh",
+  Dynamic_mnem : "D",
 
   toString: function(flags, mnem = true) {
     return humanize.call(QMLPropertyState, flags, mnem);
