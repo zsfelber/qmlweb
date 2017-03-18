@@ -512,8 +512,7 @@ class QMLProperty {
         this.updateState |= dirty = QmlWeb.QMLPropertyState.LoadFromBinding;
       }
     } else {
-      const isch = flags & QmlWeb.QMLPropertyFlags.SetChildren;
-      if (isch && (valParentObj instanceof Repeater || valParentObj instanceof Loader)) {
+      if (valParentObj instanceof Repeater || valParentObj instanceof Loader) {
         this.updateState |= dirty = QmlWeb.QMLPropertyState.DeferredChild;
         this.deferredChildMeta = newVal;
         fwdUpdate = true;
@@ -556,6 +555,12 @@ class QMLProperty {
 
         }
 
+      } else if (dirty & QmlWeb.QMLPropertyState.DeferredChild) {
+        const queueItem = {
+          property:this, opId:this.$propertyId, oldVal, newVal, flags, valParentObj, dirty
+        };
+
+        engine.addPendingOp(queueItem, this.queueItems);
       } else {
         this.$set(newVal, oldVal, flags, valParentObj);
       }
