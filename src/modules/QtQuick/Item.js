@@ -434,7 +434,7 @@ class Item extends ItemBase {
     delete this.pendingUpdateH;
     this.$updatingHGeometry = true;
 
-    const flags = QmlWeb.Signal.UniqueConnection;
+    const flags = QmlWeb.QMLSignalFlags.UniqueConnection;
     const lM = anchors.leftMargin || anchors.margins;
     const rM = anchors.rightMargin || anchors.margins;
     const w = this.width;
@@ -545,7 +545,7 @@ class Item extends ItemBase {
     delete this.pendingUpdateV;
     this.$updatingVGeometry = true;
 
-    const flags = QmlWeb.Signal.UniqueConnection;
+    const flags = QmlWeb.QMLSignalFlags.UniqueConnection;
     const tM = anchors.topMargin || anchors.margins;
     const bM = anchors.bottomMargin || anchors.margins;
     const h = this.height;

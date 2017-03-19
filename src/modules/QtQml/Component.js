@@ -270,13 +270,6 @@ class QMLComponent {
       item = engine.construct(this.meta, parent, this.createFlags|this.elementFlags);
       QmlWeb.helpers.mergeInPlace(item, properties);
 
-      // invoked either this or one from >@see also< classes.constructSuper
-      if (item.hasOwnProperty("$attachedComponent")) {
-        QObject.pendingComplete(item);
-        this.cntPendingCompletions++;
-      } else {
-        this.status = QmlWeb.Component.Ready;
-      }
 
     } catch (err) {
       //QmlWeb.warn("Cannot create Object : parent:"+parent+"  ctx:"+this.context+"  "+err.message);
@@ -306,6 +299,14 @@ class QMLComponent {
     } finally {
       this.outallchanges = undefined;
       this.outallchanges_old = undefined;
+    }
+
+    // invoked either this or one from >@see also< classes.constructSuper
+    if (item.hasOwnProperty("$attachedComponent")) {
+      QObject.pendingComplete(item);
+      this.cntPendingCompletions++;
+    } else {
+      this.status = QmlWeb.Component.Ready;
     }
 
     return item;

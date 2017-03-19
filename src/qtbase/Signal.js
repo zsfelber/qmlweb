@@ -66,7 +66,7 @@ class Signal {
       for (const i in dupcs) {
         const desc = dupcs[i];
         var args2 = args.slice(0);
-        if (desc.type & Signal.QueuedConnection) {
+        if (desc.type & QMLSignalFlags.QueuedConnection) {
           Signal.$addQueued(desc, args2);
         } else {
           Signal.$execute(desc, args2);
@@ -77,11 +77,11 @@ class Signal {
     }
   }
   connect(...args) {
-    let type = Signal.AutoConnection;
+    let type = QMLSignalFlags.AutoConnection;
     if (typeof args[args.length - 1] === "number") {
       type = args.pop();
     }
-    if (type & Signal.UniqueConnection) {
+    if (type & QMLSignalFlags.UniqueConnection) {
       const con = this.isConnected(...args);
       if (con) {
         if (!con.uses) con.uses = 1;
@@ -110,7 +110,11 @@ class Signal {
       throw new Error("Missing slot for signal:"+this.$name+"  connection   slotObj:"+connection.slotObj);
     }
 
-    this.connectedSlots.push(connection);
+    if (type & QMLSignalFlags.ToFirst) {
+      this.connectedSlots.unshift(connection);
+    } else {
+      this.connectedSlots.push(connection);
+    }
 
     // Notify object of connect
     if (this.options.obj && this.options.obj.$connectNotify) {
@@ -253,10 +257,5 @@ class Signal {
 }
 
 Signal.$queued = [];
-
-Signal.AutoConnection = 0;
-Signal.DirectConnection = 1;
-Signal.QueuedConnection = 2;
-Signal.UniqueConnection = 128;
 
 QmlWeb.Signal = Signal;

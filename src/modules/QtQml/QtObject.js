@@ -224,15 +224,7 @@ class QtObject extends QmlWeb.QObject {
 
       if (flags&QmlWeb.QMLComponentFlags.Super) {
 
-        if (parent) {
-
-          this.$context = parent.$context.createChild(info = $pcinfo +" ~> " +$cinfo, flags);
-
-        } else {
-
-          this.$context = engine._rootContext.createChild(info = $pcinfo + " .. " +$cinfo, flags);
-
-        }
+        this.$context = parent.$context.createChild(info = $pcinfo +" ~> " +$cinfo, flags);
 
       } else {
         // Nested or Factory
@@ -272,6 +264,7 @@ class QtObject extends QmlWeb.QObject {
 
     if (!this.$isAttachedObj) {
       delete this.$context;
+      delete this.$loaderContext;
       if (this.$base !== this) {
         this.__proto__.cleanupContext(parent);
       }

@@ -33,23 +33,23 @@ describe("QtBase.Signal", function() {
     var test2 = function() {
       result += 10;
     };
-    signal.connect(test1, QmlWeb.Signal.UniqueConnection);
+    signal.connect(test1, QmlWeb.QMLSignalFlags.UniqueConnection);
     expect(result).toBe(0);
     signal.execute();
     expect(result).toBe(1);
-    signal.connect(test1, QmlWeb.Signal.UniqueConnection);
+    signal.connect(test1, QmlWeb.QMLSignalFlags.UniqueConnection);
     signal.execute();
     expect(result).toBe(2);
-    signal.connect(test2, QmlWeb.Signal.UniqueConnection);
+    signal.connect(test2, QmlWeb.QMLSignalFlags.UniqueConnection);
     expect(result).toBe(2);
     signal.execute();
     expect(result).toBe(13);
-    signal.connect(test1, QmlWeb.Signal.UniqueConnection);
-    signal.connect(test1, QmlWeb.Signal.UniqueConnection);
-    signal.connect(test2, QmlWeb.Signal.UniqueConnection);
-    signal.connect(test2, QmlWeb.Signal.UniqueConnection);
-    signal.connect(test1, QmlWeb.Signal.UniqueConnection);
-    signal.connect(test2, QmlWeb.Signal.UniqueConnection);
+    signal.connect(test1, QmlWeb.QMLSignalFlags.UniqueConnection);
+    signal.connect(test1, QmlWeb.QMLSignalFlags.UniqueConnection);
+    signal.connect(test2, QmlWeb.QMLSignalFlags.UniqueConnection);
+    signal.connect(test2, QmlWeb.QMLSignalFlags.UniqueConnection);
+    signal.connect(test1, QmlWeb.QMLSignalFlags.UniqueConnection);
+    signal.connect(test2, QmlWeb.QMLSignalFlags.UniqueConnection);
     signal.execute();
     expect(result).toBe(24);
   });
@@ -63,11 +63,11 @@ describe("QtBase.Signal", function() {
     var test2 = function() {
       result += 10;
     };
-    signal.connect(test1, QmlWeb.Signal.QueuedConnection);
+    signal.connect(test1, QmlWeb.QMLSignalFlags.QueuedConnection);
     expect(result).toBe(0);
     signal.execute();
     expect(result).toBe(0);
-    signal.connect(test2, QmlWeb.Signal.QueuedConnection);
+    signal.connect(test2, QmlWeb.QMLSignalFlags.QueuedConnection);
     signal.execute();
     expect(result).toBe(0);
     signal.execute();

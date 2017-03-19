@@ -122,6 +122,23 @@ const QMLPropertyState = {
   }
 };
 
+const QMLSignalFlags = {
+  AutoConnection : 0,
+  DirectConnection : 1,
+  QueuedConnection : 2,
+  ToFirst : 4,
+  UniqueConnection : 128,
+
+  AutoConnection_mnem : "A",
+  DirectConnection_mnem : "d",
+  QueuedConnection_mnem : "q",
+  ToFirst_mnem : "1",
+  UniqueConnection_mnem : "U",
+
+  toString: function(flags, mnem = true) {
+    return humanize.call(QMLSignalFlags, flags, mnem);
+  }
+}
 
 const LogTwo = {
 };
@@ -158,3 +175,4 @@ QmlWeb.QMLComponentFlags = QMLComponentFlags;
 QmlWeb.QMLBindingFlags = QMLBindingFlags;
 QmlWeb.QMLPropertyFlags = QMLPropertyFlags;
 QmlWeb.QMLPropertyState = QMLPropertyState;
+QmlWeb.QMLSignalFlags = QMLSignalFlags;

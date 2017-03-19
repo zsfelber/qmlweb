@@ -24,7 +24,7 @@ QmlWeb.registerQmlType({
   }
 
   $onAnimatonsChanged() {
-    const flags = QmlWeb.Signal.UniqueConnection;
+    const flags = QmlWeb.QMLSignalFlags.UniqueConnection;
     for (let i = 0; i < this.animations.length; i++) {
       const animation = this.animations[i];
       animation.runningChanged.connect(this, this.$nextAnimation, flags);

@@ -60,7 +60,7 @@ class Repeater extends Item {
           }
         }
 
-        const flags = QmlWeb.Signal.UniqueConnection;
+        const flags = QmlWeb.QMLSignalFlags.UniqueConnection;
         model.dataChanged.connect(this, this.$_onModelDataChanged, flags);
         model.rowsInserted.connect(this, this.$_onRowsInserted, flags);
         model.rowsMoved.connect(this, this.$_onRowsMoved, flags);

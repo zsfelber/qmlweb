@@ -100,37 +100,46 @@ function construct(meta, parent, flags) {
         item.$componentCreateFlags |= (parent.$componentCreateFlags & QMLComponentFlags.DynamicLoad);
       }
 
-      item.initializeContext(parent);
 
-      const ctx = item.$context;
+      function _onCtxInited() {
+        const ctx = item.$context;
 
-      if (!ctx) {
-        throw new Error("No context : "+item);
+        if (!ctx) {
+          throw new Error("No context : "+item);
+        }
+
+        // We can't finish context initialization
+        // until the current construct/constructSuper/component.createObject recursion calling thread
+        // returns to the the first non-super component, see also components.js/splitExternalContext
+        if (flags & QmlWeb.QMLComponentFlags.Super) {
+          superitem.$context.splitExternalContext();
+        } else {
+          superitem.$componentCreateFlags |= QmlWeb.QMLComponentFlags.FirstSuper;
+        }
+
+        QmlWeb.applyAllAttachedObjects(item);
+
+        // each element into all parent context's elements on the page, by id :
+        // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
+        // (see properties.createProperty. )
+        if (meta.id) {
+          this.addElementToPageContexts(item, meta.id, ctx);
+        //} else if (flags & QmlWeb.QMLComponentFlags.Nested) {
+        //  QmlWeb.warn("No element id for item  : "+item+"  ctx:"+ctx);
+        }
+
+        // Apply properties according to this metatype info
+        // (Bindings won't get evaluated, yet)
+        engine.applyProperties(meta, item);
       }
 
-      // We can't finish context initialization
-      // until the current construct/constructSuper/component.createObject recursion calling thread
-      // returns to the the first non-super component, see also components.js/splitExternalContext
-      if (flags & QmlWeb.QMLComponentFlags.Super) {
-        superitem.$context.splitExternalContext();
+      if (!parent || parent.$context) {
+        // otherwise call from QtObject.$onContainerChanged_
+        item.initializeContext(parent);
+        _onCtxInited.call(this);
       } else {
-        superitem.$componentCreateFlags |= QmlWeb.QMLComponentFlags.FirstSuper;
+        parent.Component.completed.connect(this, _onCtxInited, QMLSignalFlags.ToFirst);
       }
-
-      QmlWeb.applyAllAttachedObjects(item);
-
-      // each element into all parent context's elements on the page, by id :
-      // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
-      // (see properties.createProperty. )
-      if (meta.id) {
-        this.addElementToPageContexts(item, meta.id, ctx);
-      //} else if (flags & QmlWeb.QMLComponentFlags.Nested) {
-      //  QmlWeb.warn("No element id for item  : "+item+"  ctx:"+ctx);
-      }
-
-      // Apply properties according to this metatype info
-      // (Bindings won't get evaluated, yet)
-      engine.applyProperties(meta, item);
 
     } finally {
       QmlWeb.$evaluatedObj = prevEvalObj;
