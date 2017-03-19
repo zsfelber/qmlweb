@@ -95,6 +95,10 @@ function construct(meta, parent, flags) {
       if (meta.$component) {
         item.$cinfo = "c:"+meta.$component.toString();
       }
+      if (parent) {
+        // inherit dynamic
+        item.$componentCreateFlags |= (parent.$componentCreateFlags & QMLComponentFlags.DynamicLoad);
+      }
 
       item.initializeContext(parent);
 
@@ -272,13 +276,11 @@ function addElementToPageContexts(item, id, ctx) {
     ctx.$externalContext[id] = item;
   }
 
-  if (!(item.$componentCreateFlags & QMLComponentFlags.DynamicLoad)) {
-    // current page top context $pageElements is inherited :
-    if (id in ctx.$pageElements) {
-      throw new Error("Duplicated element id:"+id+" in "+ctx);
-    }
-    ctx.$pageElements[id] = item;
+  // current page top context $pageElements is inherited :
+  if (id in ctx.$pageElements) {
+    throw new Error("Duplicated element id:"+id+" in "+ctx);
   }
+  ctx.$pageElements[id] = item;
 }
 
 

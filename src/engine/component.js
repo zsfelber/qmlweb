@@ -21,14 +21,14 @@ class QMLContext {
     childContext.$info = info;
     childContext.$self = {};
 
-    if (QmlWeb.QMLComponentFlags.Nested & componentFlags) {
-      // inherit page top $pageElements and $pageContext (Object.create(this) already do this) :
-      // childContext.$pageElements = this.$pageElements;
-      // childContext.$pageContext = this.$pageContext;
-    } else {
+    if (!(QMLComponentFlags.Nested & componentFlags) || (QMLComponentFlags._FirstDynamic & componentFlags)) {
       childContext.$pageElements = {};
       childContext.$pageContext = Object.create(childContext.$pageElements);
       childContext.$pageContext.$top = childContext;
+    } else {
+      // inherit page top $pageElements and $pageContext (Object.create(this) already do this) :
+      // childContext.$pageElements = this.$pageElements;
+      // childContext.$pageContext = this.$pageContext;
     }
 
     childContext.$externalContext = Object.create(childContext.$externalContext);

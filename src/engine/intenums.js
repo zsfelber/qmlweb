@@ -47,17 +47,20 @@ const QMLComponentFlags = {
   LoadImports : 16,
   Flat : 32,
   FirstSuper : 64,
-  DynamicLoad : 128,
   NestedOrFirst : 66,
+  DynamicLoad : 128,
+  _FirstDynamic : 256,
+  FirstDynamic : 128 | 256,
 
   Super_mnem : "S",
   Nested_mnem : "N",
-  DynamicLoad_mnem : "D",
   Root_mnem : "R",
   Element_mnem : "e",
   LoadImports_mnem : "i",
   Flat_mnem : "_",
   FirstSuper_mnem : "1st",
+  DynamicLoad_mnem : "D",
+  _FirstDynamic_mnem : "d1",
 
   toString: function(flags, mnem = true) {
     return humanize.call(QMLComponentFlags, flags, mnem);

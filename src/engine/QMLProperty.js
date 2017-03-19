@@ -379,7 +379,7 @@ class QMLProperty {
 
       if ((engine.operationState & QmlWeb.QMLOperationState.Starting) || (this.updateState & QMLPropertyState.Dynamic)) {
         if (!engine.currentPendingOp) {
-          throw new QmlWeb.AssertionError("Assertion failed : no engine.currentPendingOp  "+this);
+          console.warn("No engine.currentPendingOp  "+this);
         }
         // if it has been found and is not being already processed,
         // we take this property from queue and update it immediately,

@@ -171,7 +171,7 @@ class Repeater extends Item {
 
         // (*) properties will be created with "Dynamic" flag which defer all initialization
         // to processPendingOperations :
-        this.delegate.elementFlags |= QMLComponentFlags.DynamicLoad;
+        this.delegate.elementFlags |= QMLComponentFlags.FirstDynamic;
         const newItem = this.delegate.createObject(container, {}, outallchanges);
 
         const np = newItem.$properties;
