@@ -260,7 +260,7 @@ class QtObject extends QmlWeb.QObject {
     // We can't finish context initialization
     // until the current construct/constructSuper/component.createObject recursion calling thread
     // returns to the the first non-super component, see also classes.construct, components.js/splitExternalContext
-    if (flags & QmlWeb.QMLComponentFlags.Super) {
+    if (flags & QmlWeb.QMLComponentFlags.Super && this.__proto__.$context) {
       this.__proto__.$context.splitExternalContext();
     }
 

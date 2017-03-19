@@ -285,7 +285,7 @@ class QMLComponent {
     return item;
   }
 
-  createObject(parent, properties = {}) {
+  createObject(parent, properties = {}, outallchanges, outallchanges_old) {
     const item = this.$createObject(parent, properties);
 
     if (!parent || parent.$context) {
