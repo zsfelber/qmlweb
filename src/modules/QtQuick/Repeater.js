@@ -90,16 +90,13 @@ class Repeater extends Item {
   }
 
   $_onModelDataChanged(startIndex, endIndex, roles) {
+    const engine = this.$engine;
     const model = this.$getModel();
     const roleNames = roles || model.roleNames;
     for (let index = startIndex; index <= endIndex; index++) {
       const item = this.$items[index];
-      const modelData = item.$properties.model;
-      // // TODO gz obsolete : scope
-      // const scope = {
-      //   $object: item,
-      //   $context: this.model.$context
-      // };
+      const modelData = item.model;
+
       for (const i in roleNames) {
         const roleName = roleNames[i];
         const roleData = model.data(index, roleName);
@@ -110,11 +107,14 @@ class Repeater extends Item {
         );
         modelData[roleName] = roleData;
       }
-      item.$properties.model.set(
-        modelData,
-        QmlWeb.QMLPropertyFlags.ReasonInitPrivileged,
-        item
-      );
+
+      if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+        // We don't call those on first creation, as they will be called
+        // by the regular creation-procedures at the right time.
+        engine.processPendingOperations();
+      }
+
+      item.$properties.model.sendChanged(modelData, modelData);
     }
   }
   $_onRowsInserted(startIndex, endIndex) {
@@ -169,15 +169,13 @@ class Repeater extends Item {
       var outallchanges = {};
       for (index = startIndex; index < endIndex; index++) {
 
+        // (*) properties will be created with "Dynamic" flag which defer all initialization
+        // to processPendingOperations :
         this.delegate.elementFlags |= QMLComponentFlags.DynamicLoad;
         const newItem = this.delegate.createObject(container, {}, outallchanges);
+
         const np = newItem.$properties;
         engine.createProperty("int", newItem, "index", { initialValue: index });
-        // // TODO gz obsolete : scope
-        // const scope = {
-        //   $object: newItem,
-        //   $context: ...
-        // };
 
         if (typeof model === "number" || model instanceof Array) {
           if (typeof np.modelData === "undefined") {
@@ -197,26 +195,19 @@ class Repeater extends Item {
             const roleData = model.data(index, roleName);
             modelData[roleName] = roleData;
             let prop0 = np[roleName];
+            // (*) so all object or nested properties will initialized lately, which depend on model roles inserted here :
             if (typeof prop0 === "undefined") {
               console.warn("Repeater role : "+this+"["+roleName+"]  : new : "+roleData);
               const prop = engine.createProperty("variant", newItem, roleName);
+              prop.$isRole = true;
               prop.set( roleData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, newItem );
             } else {
               console.warn("Repeater role : "+this+"["+roleName+"]  : "+prop0.value+" queue:"+(prop0.queueItems ? prop0.queueItems.length:"<null>")+" : "+roleData);
-              if (!prop0.queueItems.length&&!prop0.value) {
+              if (prop0.$isRole || (!prop0.queueItems.length&&!prop0.value) ) {
                 prop0.set( roleData, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, newItem );
               }
             }
           }
-
-          // This was not enough because of nested elements,
-          // QMLPropertyState.Dynamic solves it:
-          //for (const propname in np) {
-          //  const prop = np[propname];
-          //  if (prop.binding && !modelData[propname]) {
-          //    prop.updateState |= QmlWeb.QMLPropertyState.LoadFromBinding;
-          //  }
-          //}
 
           if (typeof np.model === "undefined") {
             engine.createProperty("variant", newItem, "model");

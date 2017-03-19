@@ -215,7 +215,6 @@ class QMLProperty {
             // NOTE valParentObj/bindingCtxObj is passed through property.set,$set or $setVal, its in the descendant level in object type hierarchy (proto chain),
             // NOTE we don't pass this.valParentObj as valParentObj because it only belongs to this property and not to newVal or another property
             this.binding.set(this.bindingCtxObj, newVal, flags);
-            this.updateState &= ~QmlWeb.QMLPropertyState.ValueSaved;
 
           } else if (dirtyNow & QmlWeb.QMLPropertyState.LoadFromBinding)  {
 
@@ -229,7 +228,6 @@ class QMLProperty {
             if (oldVal === undefined) oldVal = this.value;
             newVal = this.binding.get(this.bindingCtxObj);
             newVal = this.$setVal(newVal, flags, setEvaluatedObjAlreadyDone);
-            this.updateState &= ~QmlWeb.QMLPropertyState.LoadFromBinding;
 
           } else {
             throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid update state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  Binding:"+this.binding);
@@ -244,7 +242,6 @@ class QMLProperty {
             this.evalTreeConnections = {};
 
             newVal = this.value;
-            this.updateState &= ~QmlWeb.QMLPropertyState.ValueSaved;
 
           } else if (dirtyNow & QmlWeb.QMLPropertyState.Dynamic)  {
 
@@ -257,13 +254,14 @@ class QMLProperty {
 
             if (oldVal === undefined) oldVal = this.value;
             newVal = this.$setVal(this.deferredChildMeta, flags, setEvaluatedObjAlreadyDone);
-            this.updateState &= ~QmlWeb.QMLPropertyState.Dynamic;
 
 
           } else {
             throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid update state:"+QmlWeb.QMLPropertyState.toString(this.updateState)+"  (case 'no binding')");
           }
         }
+
+        this.updateState &= ~dirtyNow;
 
       } catch (err) {
         if (err instanceof QmlWeb.FatalError) throw err;
@@ -379,7 +377,7 @@ class QMLProperty {
 
       let toUpdate = 1;
 
-      if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
+      if ((engine.operationState & QmlWeb.QMLOperationState.Starting) || (this.updateState & QMLPropertyState.Dynamic)) {
         if (!engine.currentPendingOp) {
           throw new QmlWeb.AssertionError("Assertion failed : no engine.currentPendingOp  "+this);
         }
@@ -511,7 +509,7 @@ class QMLProperty {
     if (newVal instanceof QmlWeb.QMLBinding || newVal instanceof QmlWeb.QtBindingDefinition) {
       fwdUpdate = dynamic || this.binding !== newVal;
       if (fwdUpdate) {
-        this.updateState |= dirty = QmlWeb.QMLPropertyState.LoadFromBinding;
+        this.updateState |= dirty = dynamic | QmlWeb.QMLPropertyState.LoadFromBinding;
       }
     } else {
       if (dynamic) {
