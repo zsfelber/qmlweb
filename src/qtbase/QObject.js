@@ -42,6 +42,7 @@ class QObject {
     // see also $ownerObject
     QmlWeb.setupGetter(child, "$component", ()=>parent.$component, child);
     QmlWeb.setupGetter(child, "$context", ()=>parent.$context, child);
+    QmlWeb.setupGetter(child, "$componentCreateFlags", ()=>parent.$componentCreateFlags, child);
   }
 
   static pendingComplete(item, destruction) {
