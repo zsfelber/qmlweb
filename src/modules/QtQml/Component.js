@@ -285,28 +285,14 @@ class QMLComponent {
     return item;
   }
 
-  createObject(parent, properties = {}, outallchanges, outallchanges_old) {
+  createObject(parent, properties = {}) {
     const item = this.$createObject(parent, properties);
 
-    this.outallchanges = outallchanges;
-    this.outallchanges_old = outallchanges_old;
-    try {
-      if (item instanceof QmlWeb.QtObject) {
-        item.$properties.container.set(parent, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, item);
-      } else if (item instanceof QMLComponent) {
-        item.$component = this;
-      }
-    } finally {
-      this.outallchanges = undefined;
-      this.outallchanges_old = undefined;
-    }
-
-    // invoked either this or one from >@see also< classes.constructSuper
-    if (item.hasOwnProperty("$attachedComponent")) {
-      QObject.pendingComplete(item);
-      this.cntPendingCompletions++;
+    if (!parent || parent.$context) {
+      QMLComponent.objectCreated.call(item, this, parent, outallchanges, outallchanges_old);
     } else {
-      this.status = QmlWeb.Component.Ready;
+      const con = parent.Component.completed.connect(item, QMLComponent.objectCreated);
+      con.args = [this, parent, outallchanges, outallchanges_old];
     }
 
     return item;
@@ -333,6 +319,31 @@ class QMLComponent {
     if (!name) name = "";
 
     return c+"["+name+(this.nestedLevel?" l"+this.nestedLevel:"")+(long?" "+QmlWeb.Component.toString(this.status):"")+"]";
+  }
+
+  static objectCreated(component, parent, outallchanges, outallchanges_old) {
+
+    component.outallchanges = outallchanges;
+    component.outallchanges_old = outallchanges_old;
+
+    try {
+      if (this instanceof QmlWeb.QtObject) {
+        this.$properties.container.set(parent, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, this);
+      } else if (this instanceof QMLComponent) {
+        this.$component = component;
+      }
+    } finally {
+      component.outallchanges = undefined;
+      component.outallchanges_old = undefined;
+    }
+
+    // invoked either this or one from >@see also< classes.constructSuper
+    if (this.hasOwnProperty("$attachedComponent")) {
+      QObject.pendingComplete(this);
+      component.cntPendingCompletions++;
+    } else {
+      component.status = QmlWeb.Component.Ready;
+    }
   }
 
   static complete() {

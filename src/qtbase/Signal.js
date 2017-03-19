@@ -208,6 +208,11 @@ class Signal {
 
   static $execute(desc, args) {
     try {
+      if (desc.args) {
+        desc.args.push(args);
+        args = desc.args;
+      }
+
       desc.slot.apply(desc.thisObj, args);
     } catch (err) {
       if (err instanceof QmlWeb.FatalError) throw err;
