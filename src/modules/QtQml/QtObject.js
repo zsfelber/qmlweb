@@ -256,6 +256,29 @@ class QtObject extends QmlWeb.QObject {
     if (this.$component) {
       this.$component.loadJsImports();
     }
+
+    // We can't finish context initialization
+    // until the current construct/constructSuper/component.createObject recursion calling thread
+    // returns to the the first non-super component, see also classes.construct, components.js/splitExternalContext
+    if (flags & QmlWeb.QMLComponentFlags.Super) {
+      this.__proto__.$context.splitExternalContext();
+    }
+
+    QmlWeb.applyAllAttachedObjects(this);
+
+    // each element into all parent context's elements on the page, by id :
+    // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
+    // (see properties.createProperty. )
+    if (this.id) {
+      engine.addElementToPageContexts(this, this.id, this.$context);
+    //} else if (flags & QmlWeb.QMLComponentFlags.Nested) {
+    //  QmlWeb.warn("No element id for this  : "+this+"  ctx:"+ctx);
+    }
+
+    // Apply properties according to this metatype info
+    // (Bindings won't get evaluated, yet)
+    engine.applyProperties(this.$meta, this);
+
   }
 
   cleanupContext(parent) {

@@ -90,6 +90,8 @@ function construct(meta, parent, flags) {
       //  }
       //}
 
+      item.$meta = meta;
+      item.id = meta.id;
       item.$component = meta.$component;
       item.$componentCreateFlags = flags;
       if (meta.$component) {
@@ -99,46 +101,17 @@ function construct(meta, parent, flags) {
         // inherit dynamic
         item.$componentCreateFlags |= (parent.$componentCreateFlags & QMLComponentFlags.DynamicLoad);
       }
-
-
-      function _onCtxInited() {
-        const ctx = item.$context;
-
-        if (!ctx) {
-          throw new Error("No context : "+item);
-        }
-
+      if (!(flags & QmlWeb.QMLComponentFlags.Super)) {
         // We can't finish context initialization
         // until the current construct/constructSuper/component.createObject recursion calling thread
-        // returns to the the first non-super component, see also components.js/splitExternalContext
-        if (flags & QmlWeb.QMLComponentFlags.Super) {
-          superitem.$context.splitExternalContext();
-        } else {
-          superitem.$componentCreateFlags |= QmlWeb.QMLComponentFlags.FirstSuper;
-        }
-
-        QmlWeb.applyAllAttachedObjects(item);
-
-        // each element into all parent context's elements on the page, by id :
-        // There is no ctx for internal modules (not created by Component but its constructor) : then no need to register..
-        // (see properties.createProperty. )
-        if (meta.id) {
-          this.addElementToPageContexts(item, meta.id, ctx);
-        //} else if (flags & QmlWeb.QMLComponentFlags.Nested) {
-        //  QmlWeb.warn("No element id for item  : "+item+"  ctx:"+ctx);
-        }
-
-        // Apply properties according to this metatype info
-        // (Bindings won't get evaluated, yet)
-        engine.applyProperties(meta, item);
+        // returns to the the first non-super component, see also QtObject.initializeContext, components.js/splitExternalContext,
+        superitem.$componentCreateFlags |= QmlWeb.QMLComponentFlags.FirstSuper;
       }
 
+
       if (!parent || parent.$context) {
-        // otherwise call from QtObject.$onContainerChanged_
+        // otherwise call from  QMLComponent.createObject.container.set -> QtObject.$onContainerChanged_
         item.initializeContext(parent);
-        _onCtxInited.call(this);
-      } else {
-        parent.Component.completed.connect(this, _onCtxInited, QMLSignalFlags.ToFirst);
       }
 
     } finally {
