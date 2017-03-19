@@ -109,7 +109,7 @@ function construct(meta, parent, flags) {
       }
 
 
-      if (!parent || parent.$context) {
+      if (!parent || parent.hasOwnProperty("$context")) {
         // otherwise call from  QMLComponent.createObject.container.set -> QtObject.$onContainerChanged_
         item.initializeContext(parent);
       }

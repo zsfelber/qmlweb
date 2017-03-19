@@ -275,15 +275,10 @@ class QtObject extends QmlWeb.QObject {
     //  QmlWeb.warn("No element id for this  : "+this+"  ctx:"+ctx);
     }
 
-    if (this.$meta2) {
+    if (this.hasOwnProperty("$meta2")) {
       // Apply properties according to this metatype info
       // (Bindings won't get evaluated, yet)
       engine.applyProperties(this.$meta2, this);
-      if (req) {
-        console.warn("meta2 but req:"+req);
-      }
-    } else {
-      console.warn("!meta2 req:"+req);
     }
   }
 

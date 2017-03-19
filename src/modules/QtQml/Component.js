@@ -288,7 +288,7 @@ class QMLComponent {
   createObject(parent, properties = {}, outallchanges, outallchanges_old) {
     const item = this.$createObject(parent, properties);
 
-    if (!parent || parent.$context) {
+    if (!parent || parent.hasOwnProperty("$context")) {
       QMLComponent.objectCreated.call(item, this, parent, outallchanges, outallchanges_old);
     } else {
       const con = parent.Component.completed.connect(item, QMLComponent.objectCreated);
