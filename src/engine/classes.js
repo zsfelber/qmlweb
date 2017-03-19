@@ -268,14 +268,16 @@ function addElementToPageContexts(item, id, ctx) {
   // nothing but self :
   ctx.$self[id] = item;
 
-  // current page top context $pageElements is inherited :
-  if (id in ctx.$pageElements) {
-    throw new Error("Duplicated element id:"+id+" in "+ctx);
-  }
-  ctx.$pageElements[id] = item;
-
   if (!ctx.$externalContext.hasOwnProperty(id)) {
     ctx.$externalContext[id] = item;
+  }
+
+  if (!(item.$componentCreateFlags & QMLComponentFlags.DynamicLoad)) {
+    // current page top context $pageElements is inherited :
+    if (id in ctx.$pageElements) {
+      throw new Error("Duplicated element id:"+id+" in "+ctx);
+    }
+    ctx.$pageElements[id] = item;
   }
 }
 
