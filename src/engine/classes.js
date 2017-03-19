@@ -90,7 +90,7 @@ function construct(meta, parent, flags) {
       //  }
       //}
 
-      item.$meta = meta;
+      item.$meta2 = meta;
       item.id = meta.id;
       item.$component = meta.$component;
       item.$componentCreateFlags = flags;
