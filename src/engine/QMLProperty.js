@@ -297,7 +297,7 @@ class QMLProperty {
       }
 
       try {
-        if (oldVal!==newVal && !(origState & QMLPropertyState.Uninitialized)) {
+        if (oldVal!==newVal && !(origState & QMLPropertyState.Uninitialized && !(engine.operationState & QMLOperationState.Running))) {
           if (this.updateState & QMLPropertyState.Uninitialized) {
             throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid state:"+QMLPropertyState.toString(this.updateState)+"  Property became Uninitialized meanwhile but value seems changed!");
           }
@@ -370,7 +370,7 @@ class QMLProperty {
       return undefined;
     }
 
-    if (engine.operationState & QmlWeb.QMLOperationState.Init) {
+    if (engine.operationState & QMLOperationState.Init) {
       if (this.updateState & QMLPropertyState.LoadFromBinding) {
         // not possible to update at init stage :
         throw new QmlWeb.AssertionError(`Assertion failed. Init time, cannot update : Binding get in invalid state : ${QMLPropertyState.toString(this.updateState)}`, this);
@@ -381,7 +381,7 @@ class QMLProperty {
 
       let toUpdate = 1;
 
-      if ((engine.operationState & QmlWeb.QMLOperationState.Starting) || (this.updateState & QMLPropertyState.Dynamic)) {
+      if ((engine.operationState & QMLOperationState.Starting) || (this.updateState & QMLPropertyState.Dynamic)) {
         if (!engine.currentPendingOp) {
           console.warn("No engine.currentPendingOp  "+this);
         }
@@ -474,7 +474,7 @@ class QMLProperty {
 
     if (invalidityFlags) {
       if (invalidityFlags & QMLPropertyState.Uninitialized) {
-        if (engine.operationState & QmlWeb.QMLOperationState.Starting) {
+        if (engine.operationState & QMLOperationState.Starting) {
           // This 'get' is directed to an unitialized property
           engine.currentPendingOp.warnings.push({loc:"get",
                                                 err:`Binding get in invalid state : ${QMLPropertyState.toString(invalidityFlags)} -> ${QMLPropertyState.toString(this.updateState)}`,
@@ -529,7 +529,7 @@ class QMLProperty {
             this.updateState |= dirty = QMLPropertyState.ValueSaved;
           } else if (origState & QMLPropertyState.LoadFromBinding) {
             this.updateState |= dirty = QMLPropertyState.ValueSaved;
-          } else if (origState & QMLPropertyState.Uninitialized) {
+          } else if (origState & QMLPropertyState.Uninitialized && !(engine.operationState & QMLOperationState.Running)) {
             fwdUpdate = false;
           } else {
             this.updateState |= dirty = QMLPropertyState.ValueSaved;
@@ -548,9 +548,9 @@ class QMLProperty {
 
         engine.addPendingOp(queueItem, this.queueItems);
 
-      } else if (engine.operationState & QmlWeb.QMLOperationState.Init) {
+      } else if (engine.operationState & QMLOperationState.Init) {
 
-        if (!(engine.operationState & QmlWeb.QMLOperationState.Remote) ||
+        if (!(engine.operationState & QMLOperationState.Remote) ||
             (!this.$rootComponent.serverWsAddress === !this.$rootComponent.isClientSide)) {
 
           // triggers update at Starting stage:
@@ -580,7 +580,7 @@ class QMLProperty {
     if (this.readOnly && !(flags & QmlWeb.QMLPropertyFlags.Privileged)) {
       throw new Error(`property '${this.name}' has read only access`);
     }
-    if (engine.operationState & QmlWeb.QMLOperationState.Init) {
+    if (engine.operationState & QMLOperationState.Init) {
       throw new QmlWeb.AssertionError(`Assertion failed. Init time, cannot invoke $set: `, this);
     }
 

@@ -12,10 +12,10 @@ window.failingTests = {
   },
   Initialize: {
     QtQuick: [
-      // "Translate",
-      // "Scale",
-      // "Rotation",
-      // "Font"
+      "Translate",
+      "Scale",
+      "Rotation",
+      "Font"
     ]
   }
 };
