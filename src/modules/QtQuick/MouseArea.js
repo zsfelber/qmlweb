@@ -17,7 +17,7 @@ QmlWeb.registerQmlType({
   signals: {
    clicked: [{ type: "variant", name: "mouse" }],
    doubleClicked: [{ type: "variant", name: "mouse" }],
-   pressed: [{ type: "variant", name: "mouse" }],
+   _pressed: [{ type: "variant", name: "mouse" }],
    released: [{ type: "variant", name: "mouse" }],
    entered: [],
    exited: [],
@@ -67,7 +67,8 @@ QmlWeb.registerQmlType({
       this.$clientTransform = undefined;
       document.removeEventListener("mousemove", handleMouseMove);
 
-      this.released(mouse);
+      //this.released(mouse);
+      this.released(null);
     };
     this.dom.addEventListener("mousedown", e => {
       if (!this.enabled) return;
@@ -87,7 +88,7 @@ QmlWeb.registerQmlType({
       this.pressed = true;
       this.pressedButtons = mouse.button;
 
-      this.pressed(mouse);
+      this._pressed(mouse);
 
       document.addEventListener("mouseup", handleMouseUp);
       document.addEventListener("mousemove", handleMouseMove);
@@ -126,7 +127,7 @@ QmlWeb.registerQmlType({
     // not
     return !(this.acceptedButtons & QmlWeb.Qt.RightButton);
   }
-  $handleClick(e) {
+  $handleDblClick(e) {
     const mouse = this.$eventToMouse(e);
     if (this.enabled && this.acceptedButtons & mouse.button) {
       this.doubleClicked(mouse);
