@@ -4,19 +4,6 @@
   //  return;
   //}
 
-  function exportCanvasAsPNG(imgURL, fileName, mime="image/png") {
-
-      var dlLink = document.createElement('a');
-      dlLink.download = fileName;
-      dlLink.href = imgURL;
-      dlLink.dataset.downloadurl = [mime, dlLink.download, dlLink.href].join(':');
-
-      document.body.appendChild(dlLink);
-      dlLink.click();
-      document.body.removeChild(dlLink);
-  }
-
-
   function screenshot(div, options) {
 
     var rect0 = div.getBoundingClientRect();
@@ -58,9 +45,6 @@
       matching = false;
     } else {
       matching = (d1=image2data(result)) === image2data(expected);
-    }
-    if (!matching) {
-      exportCanvasAsPNG(d1, savefilenm);
     }
 
     return matching;
