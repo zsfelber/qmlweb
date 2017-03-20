@@ -66,7 +66,7 @@ function construct(meta, parent, flags) {
   // undefined -> 0
   flags |= 0;
 
-  let superitem = this.constructSuper(meta, parent);
+  let superitem = this.constructSuper(meta, parent, flags & QMLComponentFlags.DynamicLoad);
 
   let item;
   // NOTE making a new level of class inheritance :
@@ -127,7 +127,7 @@ function construct(meta, parent, flags) {
   return item;
 }
 
-function constructSuper(meta, parent) {
+function constructSuper(meta, parent, superflags) {
   try {
     this.pushengine();
 
@@ -135,6 +135,8 @@ function constructSuper(meta, parent) {
 
     // NOTE resolve superclass info:
     var supermeta = this.resolveClassImport(meta.$class, meta.$component);
+    // always super + inherit dynamic
+    superflags |= QMLComponentFlags.Super | (parent ? parent.$componentCreateFlags & QMLComponentFlags.DynamicLoad : 0);
 
     if (supermeta.classConstructor) {
       // NOTE 1  internal class, module/qmldir cache:
@@ -147,6 +149,7 @@ function constructSuper(meta, parent) {
       supermeta.$on = meta.$on;
 
       item = new supermeta.classConstructor(supermeta);
+      item.$componentCreateFlags = superflags;
 
       item.$cinfo = "b:"+ (item.$classname = supermeta.classConstructor.name);
 
@@ -163,8 +166,7 @@ function constructSuper(meta, parent) {
         supermeta.id = meta.id;
       }
 
-      // always super here:
-      item = this.createComponentAndElement(supermeta, parent, QMLComponentFlags.Super, meta.$component);
+      item = this.createComponentAndElement(supermeta, parent, superflags, meta.$component);
 
       //if (typeof item.dom !== "undefined") {
       //  item.dom.className += ` ${supermeta.$path[supermeta.$path.length - 1]}`;
