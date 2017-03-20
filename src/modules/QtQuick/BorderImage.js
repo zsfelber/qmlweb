@@ -10,7 +10,7 @@ QmlWeb.registerQmlType({
     }
   },
   properties: {
-    source: "url",
+    source: { type: "url", initialValue: null},
     smooth: { type: "bool", initialValue: true },
     // BorderImage.Stretch
     horizontalTileMode: { type: "enum", initialValue: "stretch" },

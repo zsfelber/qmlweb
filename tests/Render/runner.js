@@ -47,6 +47,7 @@
   }
 
   function delayedFrames(callback, frames) {
+    console.log("delayedFrames : "+frames);
     if (frames === 0) {
       return callback;
     }
@@ -83,29 +84,41 @@
       setupDivElement();
       tests[group].forEach(function(test) {
         it(test.name, function(done) {
-          var div = loadQmlFile(test.qml, this.div).dom;
+          const div = this.div;
+          var div = loadQmlFile(test.qml, div, {}, done).dom;
           var result;
           var expected;
           var loaded = 0;
 
           var process = function() {
-            if (++loaded !== 2) return;
+            ++loaded;
+            console.log("loaded:"+loaded);
+            if (loaded !== 2) return;
             expect(imagesEqual(result, expected)).toBe(true);
             done();
           };
 
           expected = document.createElement("img");
           expected.src = test.png;
+          console.log("expected png:"+expected.src);
           expected.onload = process;
-
-          var onTestLoad = function() {
-            result = screenshot(div, {
-              fileName: test.group + "/" + test.name + ".png"
-            });
-            result.onload = process;
+          expected.onerror = function() {
+            console.error("Could not load expected : "+test.png);
           };
 
-          if (group.indexOf("Async") !== -1) {
+          var onTestLoad = function() {
+            const f = test.group + "/" + test.name + ".png";
+            console.log("screenshot ... "+f);
+            result = screenshot(div, {
+              fileName: f
+            });
+            result.onload = process;
+            result.onerror = function() {
+              console.error("Could not load screenshot : "+f);
+            };
+          };
+
+          if (group.endsWith("Async")) {
             window.onTestLoad = function(options) {
               delayedFrames(onTestLoad, options && options.framesDelay || 0)();
             };

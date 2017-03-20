@@ -35,7 +35,7 @@ QmlWeb.registerQmlType({
     playlinst: "Playlist",
     position: "int",
     seekable: "bool",
-    source: "url",
+    source: { type: "url", initialValue: null},
     status: "enum", // Audio.NoMedia
     volume: { type: "real", initialValue: 1 }
   },

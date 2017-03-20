@@ -35,7 +35,7 @@ QmlWeb.registerQmlType({
     playbackState: "enum", // MediaPlayer.StoppedState
     position: "int",
     seekable: "bool",
-    source: "url",
+    source: { type: "url", initialValue: null},
     status: "enum", // MediaPlayer.NoMedia
     volume: "real"
   },

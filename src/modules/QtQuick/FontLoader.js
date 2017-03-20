@@ -8,7 +8,7 @@ QmlWeb.registerQmlType({
   },
   properties: {
     name: "string",
-    source: "url",
+    source: { type: "url", initialValue: null},
     status: "enum" // FontLoader.Null
   }
 }, class FontLoader extends QtObject {

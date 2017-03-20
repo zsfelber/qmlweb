@@ -117,7 +117,7 @@ QmlWeb.registerQmlType({
     fillMode: { type: "enum", initialValue: 1 }, // Image.Stretch
     mirror: "bool",
     progress: "real",
-    source: "url",
+    source: { type: "url", initialValue: null},
     status: { type: "enum", initialValue: 1 } // Image.Null
   },
   constructor:QImage
