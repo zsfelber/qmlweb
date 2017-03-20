@@ -15,7 +15,8 @@ module.exports = function(config) {
       { pattern: "tests/*/**/qmldir", included: false },
       { pattern: "tests/*/**/qml/*.js", included: false },
       { pattern: "tests/*/**/*.qml", included: false },
-      { pattern: "tests/*/**/*.png", included: false }
+      { pattern: "tests/*/**/*.png", included: false },
+      "lib/qmlweb.css"
     ],
     browsers: ["PhantomJSCustom"],
     reporters: ["spec", "coverage"],
