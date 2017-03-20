@@ -85,8 +85,8 @@
       setupDivElement();
       tests[group].forEach(function(test) {
         it(test.name, function(done) {
-          const div = this.div;
-          const qml = loadQmlFile(test.qml, div, {}, done).dom;
+          const qml = loadQmlFile(test.qml, this.div, {}, done);
+          const div = qml.dom;
           var result;
           var expected;
           var loaded = 0;

@@ -337,7 +337,8 @@ function connectSignal(item, signalName, value) {
           throw new Error("Invalid compiled slot binding, it should be a function : "+value.src);
         }
         //QmlWeb.warn("connectSignal  convert Binding to function : "+ps);
-        value.src = "{" + value.src + "}";
+        //"\n" : maybe comment
+        value.src = "{" + value.src + "\n}";
       }
 
       value.args = ps;

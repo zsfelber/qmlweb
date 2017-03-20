@@ -16,19 +16,20 @@ class QImage extends Item {
     this.icss = QmlWeb.createStyle(bg.style);
     this.dom.appendChild(bg);
 
+    const that = this;
     this.$img = new Image();
     this.$img.addEventListener("load", () => {
-      const w = this.$img.naturalWidth;
-      const h = this.$img.naturalHeight;
-      this.sourceSize.width = w;
-      this.sourceSize.height = h;
-      this.implicitWidth = w;
-      this.implicitHeight = h;
-      this.progress = 1;
-      this.status = this.Image.Ready;
+      const w = that.$img.naturalWidth;
+      const h = that.$img.naturalHeight;
+      that.sourceSize.width = w;
+      that.sourceSize.height = h;
+      that.implicitWidth = w;
+      that.implicitHeight = h;
+      that.progress = 1;
+      that.status = that.Image.Ready;
     });
     this.$img.addEventListener("error", () => {
-      this.status = this.Image.Error;
+      that.status = that.Image.Error;
     });
 
     this.sourceChanged.connect(this, this.$onSourceChanged);

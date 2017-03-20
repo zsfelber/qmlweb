@@ -37,13 +37,14 @@ QmlWeb.registerQmlType({
     this.icss = QmlWeb.createStyle(bg.style);
     this.dom.appendChild(bg);
 
+    const that = this;
     this.$img = new Image();
     this.$img.addEventListener("load", () => {
-      this.progress = 1;
-      this.status = this.BorderImage.Ready;
+      that.progress = 1;
+      that.status = that.BorderImage.Ready;
     });
     this.$img.addEventListener("error", () => {
-      this.status = this.BorderImage.Error;
+      that.status = that.BorderImage.Error;
     });
 
     this.sourceChanged.connect(this, this.$onSourceChanged);
