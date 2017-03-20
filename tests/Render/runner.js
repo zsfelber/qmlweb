@@ -4,6 +4,18 @@
   //  return;
   //}
 
+  function exportCanvasAsPNG(imgURL, fileName, mime="image/png") {
+
+      var dlLink = document.createElement('a');
+      dlLink.download = fileName;
+      dlLink.href = imgURL;
+      dlLink.dataset.downloadurl = [mime, dlLink.download, dlLink.href].join(':');
+
+      document.body.appendChild(dlLink);
+      dlLink.click();
+      document.body.removeChild(dlLink);
+  }
+
 
   function screenshot(div, options) {
 
@@ -22,7 +34,7 @@
     if (window.top.callPhantom) {
       var base64 = window.top.callPhantom("render", {
         offset: offset,
-        fileName: options && options.fileName || undefined
+        fileName: options && options.fileName ? options.fileName : undefined
       });
       image.src = "data:image/png;base64," + base64;
     }
@@ -39,12 +51,19 @@
     return canvas.toDataURL("image/png", 1);
   }
 
-  function imagesEqual(a, b) {
-    if (a.width !== b.width || a.height !== b.height) {
-      return false;
+  function imagesEqual(result, expected, savefilenm) {
+    var matching,d1;
+    if (result.width !== expected.width || result.height !== expected.height) {
+      console.warn("dimensions not matching : "+result.width+"x"+result.height+" vs "+expected.width+"x"+expected.height)
+      matching = false;
+    } else {
+      matching = (d1=image2data(result)) === image2data(expected);
+    }
+    if (!matching) {
+      exportCanvasAsPNG(d1, savefilenm);
     }
 
-    return image2data(a) === image2data(b);
+    return matching;
   }
 
   function delayedFrames(callback, frames) {
@@ -91,11 +110,13 @@
           var expected;
           var loaded = 0;
 
+          const f = test.group + "/" + test.name + ".png";
+
           var process = function() {
             ++loaded;
             console.log("loaded:"+loaded);
             if (loaded !== 2) return;
-            expect(imagesEqual(result, expected)).toBe(true);
+            expect(imagesEqual(result, expected, "_"+f)).toBe(true);
             done();
           };
 
@@ -108,7 +129,6 @@
           };
 
           var onTestLoad = function() {
-            const f = test.group + "/" + test.name + ".png";
             console.log("screenshot ... "+f);
             result = screenshot(div, {
               fileName: f
