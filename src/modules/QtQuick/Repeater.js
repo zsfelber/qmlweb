@@ -195,7 +195,8 @@ class Repeater extends Item {
             const roleData = model.data(index, roleName);
             modelData[roleName] = roleData;
             let prop0 = np[roleName];
-            // (*) so all object or nested properties will initialized lately, which depend on model roles inserted here :
+            // (*) so all object or nested properties will initialized lately
+            // including those depending on model roles inserted here :
             if (typeof prop0 === "undefined") {
               console.warn("Repeater role : "+this+"["+roleName+"]  : new : "+roleData);
               const prop = engine.createProperty("variant", newItem, roleName);
@@ -231,9 +232,13 @@ class Repeater extends Item {
       QmlWeb.$evaluatedObj = prevEvalObj;
     }
 
-    if (!(engine.operationState & QmlWeb.QMLOperationState.BeforeStart)) {
+    if (!(engine.operationState & QmlWeb.QMLOperationState.Init)) {
       // We don't call those on first creation, as they will be called
       // by the regular creation-procedures at the right time.
+      // but also calling in "Starting" :
+      // it may notify prerequisites of some evaluation should be present,
+      // see RepeaterNestedCompletedDestruction.qml (onCompleted runs in Starting state
+      // which cannot let defer queue executions at 'console.log(internal_created, internal_destroyed)')
       engine.processPendingOperations();
     }
 

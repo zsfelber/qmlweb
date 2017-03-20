@@ -277,7 +277,7 @@ class QtObject extends QmlWeb.QObject {
 
     if (this.hasOwnProperty("$meta2")) {
       // Apply properties according to this metatype info
-      // (Bindings won't get evaluated, yet)
+      // (In case it is dynamic load or before engine started, Bindings won't get evaluated, yet)
       engine.applyProperties(this.$meta2, this);
     }
   }
