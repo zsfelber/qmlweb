@@ -36,6 +36,7 @@ QmlWeb.registerQmlType({
     this.textChanged.connect(this, this.$onTextChanged);
     this.colorChanged.connect(this, this.$onColorChanged);
     this.checkedChanged.connect(this, this.$onCheckedChanged);
+    setTimeout(this.Component$onCompleted.bind(this), 0);
   }
   $onTextChanged(newVal) {
     this.impl.children[1].innerHTML = newVal;

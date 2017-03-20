@@ -442,7 +442,7 @@ class Item extends ItemBase {
 
     // Width
     if (propName === "width") {
-      this.$isUsingImplicitWidth = false;
+      this.$isUsingImplicitWidth = !newVal;
     }
 
     // Position TODO: Layouts
@@ -553,7 +553,7 @@ class Item extends ItemBase {
 
     // HeighttopProp
     if (propName === "height") {
-      this.$isUsingImplicitHeight = false;
+      this.$isUsingImplicitHeight = !newVal;
     }
 
     // Position TODO: Layouts
@@ -678,8 +678,8 @@ QmlWeb.registerQmlType({
     z: { type: "real", initialValue: 0 },
     width: { type: "real", initialValue: 0 },
     height: { type: "real", initialValue: 0 },
-    implicitWidth: "real",
-    implicitHeight: "real",
+    implicitWidth: { type: "real", initialValue: 0 },
+    implicitHeight: { type: "real", initialValue: 0 },
     left: "real",
     right: "real",
     top: "real",

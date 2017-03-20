@@ -14,6 +14,7 @@ class Button extends Item {
     button.onclick = () => {
       this.clicked();
     };
+    setTimeout(this.Component$onCompleted.bind(this), 0);
   }
   Component$onCompleted() {
     this.implicitWidth = this.impl.offsetWidth;

@@ -40,6 +40,7 @@ QmlWeb.registerQmlType({
     this.Keys.pressed.connect(this, this.Keys$onPressed);
 
     this.impl.addEventListener("input", () => this.$updateValue());
+    setTimeout(this.Component$onCompleted.bind(this), 0);
   }
   Component$onCompleted() {
     this.implicitWidth = this.impl.offsetWidth;

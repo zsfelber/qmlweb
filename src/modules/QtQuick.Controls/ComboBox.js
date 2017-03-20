@@ -42,6 +42,7 @@ QmlWeb.registerQmlType({
         this.dom.focus();
       }
     });
+    setTimeout(this.Component$onCompleted.bind(this), 0);
   }
   find(text) {
     if (this.model.find)
@@ -66,7 +67,7 @@ QmlWeb.registerQmlType({
 
   $updateImpl() {
     this.currentIndex = 0;
-    this.count = this.model.length;
+    this.count = this.model?this.model.length:0;
     const entries = [];
     for (let i = 0; i < this.count; i++) {
       const elt = this.model[i];

@@ -37,6 +37,7 @@ class TextEdit extends Item {
     this.colorChanged.connect(this, this.$onColorChanged);
 
     this.impl.addEventListener("input", () => this.$updateValue());
+    setTimeout(this.Component$onCompleted.bind(this), 0);
   }
   append(text) {
     this.text += text;
@@ -119,7 +120,7 @@ class TextEdit extends Item {
     if (this.text !== this.impl.value) {
       this.text = this.impl.value;
     }
-    this.length = this.text.length;
+    this.length = this.text?this.text.length:0;
     this.lineCount = this.$getLineCount();
     this.$updateCss();
   }
@@ -144,7 +145,7 @@ class TextEdit extends Item {
     }
   }
   $getLineCount() {
-    return this.text.split(/\n/).length;
+    return this.text?this.text.split(/\n/).length:0;
   }
 }
 
