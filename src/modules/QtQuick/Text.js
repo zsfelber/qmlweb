@@ -1,3 +1,9 @@
+var defaultTextStyle = QmlWeb.helpers.mergeObjects(QmlWeb.defaultItemStyle, {
+  "whiteSpace": "pre",
+  "wordWrap": "none",
+  "textAlign": "left"
+});
+
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Text",
@@ -31,7 +37,7 @@ QmlWeb.registerQmlType({
     this.fcss = QmlWeb.createStyle(fc.style);
     fc.className = "qmltext";
 
-    QmlWeb.setStyle(this.fcss, "textAlign", "left", {});
+    QmlWeb.setStyle(this.fcss, "textAlign", "left", defaultTextStyle);
 
     this.dom.appendChild(fc);
 
@@ -60,10 +66,18 @@ QmlWeb.registerQmlType({
     this.font.letterSpacingChanged.connect(this, this.$onFontChanged);
     this.font.wordSpacingChanged.connect(this, this.$onFontChanged);
 
+    // 1 . http://stackoverflow.com/questions/6492683/how-to-detect-divs-dimension-changed
+    // https://raw.githubusercontent.com/sdecima/javascript-detect-element-resize/master/detect-element-resize.js
+    // 2 . https://www.npmjs.com/package/element-resize-detector
+    //this.impl.addEventListener("resize", () => this.$updateImplicit());
+    //addResizeListener(this.impl, this.$updateImplicit.bind(this));
+
     this.Component.completed.connect(this, this.Component$onCompleted);
+
+    setTimeout(this.$updateImplicit.bind(this), 0);
   }
   $onColorChanged(newVal) {
-    QmlWeb.setStyle(this.getImplStyle(), "color", new QmlWeb.QColor(newVal), {});
+    QmlWeb.setStyle(this.getImplStyle(), "color", new QmlWeb.QColor(newVal), defaultTextStyle);
   }
   $onTextChanged(newVal) {
     this.impl.innerHTML = newVal;
@@ -73,7 +87,7 @@ QmlWeb.registerQmlType({
     this.$updateImplicit();
   }
   $onLineHeightChanged(newVal) {
-    QmlWeb.setStyle(this.getImplStyle(), "lineHeight", `${newVal}px`, {});
+    QmlWeb.setStyle(this.getImplStyle(), "lineHeight", `${newVal}px`, defaultTextStyle);
     this.$updateImplicit();
   }
   $onStyleChanged(newVal) {
@@ -86,21 +100,21 @@ QmlWeb.registerQmlType({
     const css = this.getImplStyle();
     switch (newVal) {
       case this.Text.NoWrap:
-        QmlWeb.setStyle(css, "whiteSpace", "pre", {});
-        QmlWeb.setStyle(css, "wordWrap", "none", {});
+        QmlWeb.setStyle(css, "whiteSpace", "pre", defaultTextStyle);
+        QmlWeb.setStyle(css, "wordWrap", "none", defaultTextStyle);
         break;
       case this.Text.WordWrap:
-        QmlWeb.setStyle(css, "whiteSpace", "pre-wrap", {});
-        QmlWeb.setStyle(css, "wordWrap", "normal", {});
+        QmlWeb.setStyle(css, "whiteSpace", "pre-wrap", defaultTextStyle);
+        QmlWeb.setStyle(css, "wordWrap", "normal", defaultTextStyle);
         break;
       case this.Text.WrapAnywhere:
-        QmlWeb.setStyle(css, "whiteSpace", "pre-wrap", {});
-        QmlWeb.setStyle(css, "wordBreak", "break-all", {});
+        QmlWeb.setStyle(css, "whiteSpace", "pre-wrap", defaultTextStyle);
+        QmlWeb.setStyle(css, "wordBreak", "break-all", defaultTextStyle);
         break;
       case this.Text.Wrap:
       case this.Text.WrapAtWordBoundaryOrAnywhere:
-        QmlWeb.setStyle(css, "whiteSpace", "pre-wrap", {});
-        QmlWeb.setStyle(css, "wordWrap", "break-word", {});
+        QmlWeb.setStyle(css, "whiteSpace", "pre-wrap", defaultTextStyle);
+        QmlWeb.setStyle(css, "wordWrap", "break-word", defaultTextStyle);
     }
     this.$updateJustifyWhiteSpace();
   }
@@ -121,7 +135,7 @@ QmlWeb.registerQmlType({
         textAlign = "justify";
         break;
     }
-    QmlWeb.setStyle(this.css, "textAlign", textAlign, {});
+    QmlWeb.setStyle(this.css, "textAlign", textAlign, defaultTextStyle);
     this.$updateJustifyWhiteSpace();
   }
   $onFontChanged() {
@@ -165,7 +179,7 @@ QmlWeb.registerQmlType({
     const css = this.getImplStyle();
     switch (textStyle) {
       case 0:
-        QmlWeb.setStyle(css, "textShadow", "none", {});
+        QmlWeb.setStyle(css, "textShadow", "none", defaultTextStyle);
         break;
       case 1:
         QmlWeb.setStyle(css, "textShadow", [
@@ -173,13 +187,13 @@ QmlWeb.registerQmlType({
           `-1px 0 0 ${styleColor}`,
           `0 1px 0 ${styleColor}`,
           `0 -1px 0 ${styleColor}`
-        ].join(","), {});
+        ].join(","), defaultTextStyle);
         break;
       case 2:
-        QmlWeb.setStyle(css, "textShadow", `1px 1px 0 ${styleColor}`, {});
+        QmlWeb.setStyle(css, "textShadow", `1px 1px 0 ${styleColor}`, defaultTextStyle);
         break;
       case 3:
-        QmlWeb.setStyle(css, "textShadow", `-1px -1px 0 ${styleColor}`, {});
+        QmlWeb.setStyle(css, "textShadow", `-1px -1px 0 ${styleColor}`, defaultTextStyle);
         break;
     }
   }
@@ -188,7 +202,7 @@ QmlWeb.registerQmlType({
     // AlignJustify doesn't work with pre/pre-wrap, so we decide the lesser of
     // the two evils to be ignoring "\n"s inside the text.
     if (this.horizontalAlignment === this.Text.AlignJustify) {
-      QmlWeb.setStyle(css, "whiteSpace", "normal", {});
+      QmlWeb.setStyle(css, "whiteSpace", "normal", defaultTextStyle);
     }
     this.$updateImplicit();
   }

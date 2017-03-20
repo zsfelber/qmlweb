@@ -30,7 +30,8 @@
     "phantomjs-prebuilt": "^2.1.4",
     "qmlweb-parser": "^0.3.2",
     "remark-cli": "^2.0.0",
-    "remark-lint": "^5.0.0"
+    "remark-lint": "^5.0.0",
+    "element-resize-detector":""
   },
   "scripts": {
     "eslint": "eslint --cache *.js src tests",
