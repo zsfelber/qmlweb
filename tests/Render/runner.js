@@ -1,14 +1,11 @@
 (function() {
-  if (!window.top.callPhantom) {
-    console.log("Render tests require PhantomJS");
-    return;
-  }
+  //if (!window.top.callPhantom) {
+  //  console.log("Render tests require PhantomJS");
+  //  return;
+  //}
 
 
   function screenshot(div, options) {
-    if (!window.top.callPhantom) {
-      return undefined;
-    }
 
     var rect0 = div.getBoundingClientRect();
     var rect1 = window.parent.document.getElementById("context")
@@ -20,12 +17,16 @@
       left: rect0.left + rect1.left
     };
 
-    var base64 = window.top.callPhantom("render", {
-      offset: offset,
-      fileName: options && options.fileName || undefined
-    });
     var image = document.createElement("img");
-    image.src = "data:image/png;base64," + base64;
+
+    if (window.top.callPhantom) {
+      var base64 = window.top.callPhantom("render", {
+        offset: offset,
+        fileName: options && options.fileName || undefined
+      });
+      image.src = "data:image/png;base64," + base64;
+    }
+
     return image;
   }
 
@@ -85,7 +86,7 @@
       tests[group].forEach(function(test) {
         it(test.name, function(done) {
           const div = this.div;
-          var div = loadQmlFile(test.qml, div, {}, done).dom;
+          const qml = loadQmlFile(test.qml, div, {}, done).dom;
           var result;
           var expected;
           var loaded = 0;
