@@ -697,7 +697,7 @@ class QMLProperty {
 
         // see tests/PropertiesUrl.qml and look at 'properties_url_import.remoteSet = "remoteSet.png"' :
 
-        this.valParentObj = currentEvalParent.$context.$ownerObject;
+        this.valParentObj = currentEvalParent;
 
       } else {
 
@@ -715,6 +715,10 @@ class QMLProperty {
   }
 
   static findLoader(evalObj, id) {
+    if (evalObj.$context) {
+      evalObj=evalObj.$context.$ownerObject;
+    }
+
     for (; evalObj&&evalObj.$objectId!==id; (evalObj=evalObj.$loaderContext) && (evalObj=evalObj.$ownerObject));
     return evalObj;
   }

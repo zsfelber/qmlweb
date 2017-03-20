@@ -120,6 +120,7 @@ describe("QMLEngine.properties", function() {
       engine.$basePathUrl.baseUri + "remoteNonBoundSimple.png");
     expect(qml.remoteBinding).toBe(
       engine.$basePathUrl.baseUri + "remoteBinding.png");
+    expect(qml.properties_url_import.remoteSet).toBe(engine.$basePathUrl.baseUri + "remoteSet.png");
     expect(qml.remoteSet).toBe(engine.$basePathUrl.baseUri + "remoteSet.png");
     expect(qml.http).toBe("http://http-url");
     /* Get the base address of the URL */
