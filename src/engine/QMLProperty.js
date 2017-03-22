@@ -1,6 +1,15 @@
 
 function objToStringSafe(obj, detail) {
-  var os = obj ? QObject.prototype.toString.call(obj, detail) : obj;
+  var os;
+  if (obj) {
+    if (obj instanceof QObject) {
+      os = QObject.prototype.toString.call(obj, detail);
+    } else {
+      os = obj;
+    }
+  } else {
+    os = obj;
+  }
   return os;
 }
 
