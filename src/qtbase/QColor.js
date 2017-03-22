@@ -95,6 +95,9 @@ class QColor {
   $to4() {
     var a = this.$tonum();
     var result = [a&0xff000000,a&0x00ff0000,a&0x0000ff00,a&0x000000ff];
+    result[0]>>=6;
+    result[1]>>=4;
+    result[2]>>=2;
     return result;
   }
 
@@ -124,6 +127,7 @@ class QColor {
     this.$value = `#${argb}`;
   }
   $from4(a) {
+    a = Math.round(a);
     this.$value = ((Math.max(0,a[0])&0xff000000)<<6) + ((Math.max(0,a[1])&0x00ff0000)<<4) + ((Math.max(0,a[2])&0x0000ff00)<<2) + (Math.max(0,a[3])&0x000000ff);
   }
 
