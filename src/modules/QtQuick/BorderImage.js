@@ -2,6 +2,9 @@ var borderImage0Style = {
   OBorderImageSlice: "0 0 0 0 fill",
   OBorderImageWidth: "0px 0px 0px 0px",
   OBorderImageRepeat: "stretch stretch",
+  WebkitBorderImageSlice: "0 0 0 0 fill",
+  WebkitBorderImageWidth: "0px 0px 0px 0px",
+  WebkitBorderImageRepeat: "stretch stretch",
   borderImageSlice: "0 0 0 0 fill",
   borderImageWidth: "0px 0px 0px 0px",
   borderImageRepeat: "stretch stretch"
@@ -87,6 +90,9 @@ QmlWeb.registerQmlType({
     QmlWeb.setStyle(this.icss, "OBorderImageSlice", slice, borderImage0Style);
     QmlWeb.setStyle(this.icss, "OBorderImageRepeat", repeat, borderImage0Style);
     QmlWeb.setStyle(this.icss, "OBorderImageWidth", width, borderImage0Style);
+    QmlWeb.setStyle(this.icss, "WebkitBorderImageSlice", slice, borderImage0Style);
+    QmlWeb.setStyle(this.icss, "WebkitBorderImageRepeat", repeat, borderImage0Style);
+    QmlWeb.setStyle(this.icss, "WebkitBorderImageWidth", width, borderImage0Style);
     QmlWeb.setStyle(this.icss, "borderImageSlice", slice, borderImage0Style);
     QmlWeb.setStyle(this.icss, "borderImageRepeat", repeat, borderImage0Style);
     QmlWeb.setStyle(this.icss, "borderImageWidth", width, borderImage0Style);

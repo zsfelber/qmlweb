@@ -10,10 +10,10 @@ const otherGeometryProperties = {
 
 var transform0Style = QmlWeb.helpers.mergeObjects(QmlWeb.defaultItemStyle, {
   transform: "rotate(0deg) scale(1) translate3d(0, 0, 0px)",
-  webkitTransform: "rotate(0deg) scale(1) translate3d(0, 0, 0px)",
-  msTransform: "rotate(0deg) scale(1) translate3d(0, 0, 0px)",
+  WebkitTransform: "rotate(0deg) scale(1) translate3d(0, 0, 0px)",
+  MsTransform: "rotate(0deg) scale(1) translate3d(0, 0, 0px)",
   transformStyle: "preserve-3d",
-  webkitTransformStyle: "preserve-3d"
+  WebkitTransformStyle: "preserve-3d"
 });
 
 class Item extends ItemBase {
@@ -319,11 +319,11 @@ class Item extends ItemBase {
     }
     QmlWeb.setStyle(this.css, "transform", transform, transform0Style);
     QmlWeb.setStyle(this.css, "transformStyle", transformStyle, transform0Style);
-    QmlWeb.setStyle(this.css, "webkitTransform", transform, transform0Style); // Chrome, Safari and Opera
-    QmlWeb.setStyle(this.css, "webkitTransformStyle", transformStyle, transform0Style);
-    QmlWeb.setStyle(this.css, "msTransform", transform, transform0Style);     // IE
+    QmlWeb.setStyle(this.css, "WebkitTransform", transform, transform0Style); // Chrome, Safari and Opera
+    QmlWeb.setStyle(this.css, "WebkitTransformStyle", transformStyle, transform0Style);
+    QmlWeb.setStyle(this.css, "MsTransform", transform, transform0Style);     // IE
     QmlWeb.setStyle(this.css, "filter", filter, transform0Style);
-    QmlWeb.setStyle(this.css, "webkitFilter", filter, transform0Style); // Chrome, Safari and Opera
+    QmlWeb.setStyle(this.css, "WebkitFilter", filter, transform0Style); // Chrome, Safari and Opera
   }
   Component$onCompleted_() {
     this.$calculateOpacity();

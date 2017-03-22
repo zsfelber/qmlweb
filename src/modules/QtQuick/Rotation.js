@@ -39,6 +39,6 @@ QmlWeb.registerQmlType({
   $updateOrigin() {
     const css = this.getTargetStyle();
     QmlWeb.setStyle(css, "transformOrigin", `${this.origin.x}px ${this.origin.y}px`);
-    QmlWeb.setStyle(css, "webkitTransformOrigin", `${this.origin.x}px ${this.origin.y}px`);
+    QmlWeb.setStyle(css, "WebkitTransformOrigin", `${this.origin.x}px ${this.origin.y}px`);
   }
 });
