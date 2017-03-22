@@ -34,26 +34,9 @@ class QColor {
       // Copy constructor
       this.$value = val.$value;
     } else if (typeof val === "string") {
-      let cap;
-      if (cap=/^\#([0-9a-fA-F]+)$/.exec(val)) {
-        val = parseInt("0x"+cap[1]);
-        if (val < 0x1000000) {// alpha not defined  -> 255
-          val += 0xff000000;
-        }
-        const argb = val.toString(16).substr(-8);
-        this.$value = `#${argb}`;
-      } else {
-        this.$value = val.toLowerCase();
-      }
+      this.$fromstr(val);
     } else if (typeof val === "number") {
-      // we assume it is int value and must be converted to css hex with padding
-      val = Math.round(val);
-      if (val < 0x1000000) {// alpha not defined  -> 255
-        val += 0xff000000;
-      }
-
-      const argb = val.toString(16).substr(-8);
-      this.$value = `#${argb}`;
+      this.$fromnum(val);
     } else if (val instanceof Array) {
       this.$from4(val);
     } else {
@@ -66,11 +49,11 @@ class QColor {
   }
   toCssValue() {
     const val = this.$value;
-    if (typeof val === "string") {
-      return val;
-    } else {
+    if (/^\#([0-9a-fA-F]+)$/.test(val)) {
       const argb = this.$to4();
       return `rgba(${argb[1]}, ${argb[2]}, ${argb[3]}, ${argb[0]*p255})`;
+    } else {
+      return val;
     }
   }
 
@@ -95,9 +78,15 @@ class QColor {
     }
     return QColor.$colors[this.$value];
   }
+
   $tonum() {
-    var val = this.$value;
-    if (typeof val === "string") {
+    var val = this.$value,cap;
+    if (cap=/^\#([0-9a-fA-F]+)$/.exec(val)) {
+      val = parseInt("0x"+cap[1]);
+      if (val < 0x1000000) {// alpha not defined  -> 255
+        val += 0xff000000;
+      }
+    } else {
       val = colours[val];
       val += 0xff000000;
     }
@@ -107,6 +96,32 @@ class QColor {
     var a = this.$tonum();
     var result = [a&0xff000000,a&0x00ff0000,a&0x0000ff00,a&0x000000ff];
     return result;
+  }
+
+  $fromstr(val) {
+    let cap;
+    if (cap=/^\#([0-9a-fA-F]+)$/.exec(val)) {
+      this.$value = `${cap[0]}`.toLowerCase();
+      if (this.$value.length === 4) {
+        this.$value = "#"+this.$value[1]+this.$value[1]+this.$value[2]+this.$value[2]+this.$value[3]+this.$value[3];
+      }
+
+      const num = this.$tonum();
+      this.$fromnum(num);
+    } else {
+      this.$value = val.toLowerCase();
+    }
+  }
+
+  $fromnum(val) {
+    // we assume it is int value and must be converted to css hex with padding
+    val = Math.round(val);
+    if (val < 0x1000000) {// alpha not defined  -> 255
+      val += 0xff000000;
+    }
+
+    const argb = val.toString(16).substr(-8).toLowerCase();
+    this.$value = `#${argb}`;
   }
   $from4(a) {
     this.$value = ((Math.max(0,a[0])&0xff000000)<<6) + ((Math.max(0,a[1])&0x00ff0000)<<4) + ((Math.max(0,a[2])&0x0000ff00)<<2) + (Math.max(0,a[3])&0x000000ff);
