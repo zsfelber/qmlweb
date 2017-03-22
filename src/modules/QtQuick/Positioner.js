@@ -6,7 +6,6 @@ class Positioner extends Item {
 
     this.childrenChanged.connect(this, this.$onChildrenChanged);
     this.spacingChanged.connect(this, this.layoutChildren);
-    this.childrenChanged.connect(this, this.layoutChildren);
     this.layoutChildren();
   }
   $onChildrenChanged() {
@@ -17,6 +16,7 @@ class Positioner extends Item {
       child.heightChanged.connect(this, this.layoutChildren, flags);
       child.visibleChanged.connect(this, this.layoutChildren, flags);
     }
+    this.layoutChildren();
   }
 }
 

@@ -379,10 +379,10 @@ class Item extends ItemBase {
     //   and call each one for each instance only once (if required ).
 
     if (this.pendingUpdateH) {
-      this.$updateHGeometry(0, 0, this.pendingUpdateH, true);
+      this.$updateHGeometry(this.width, 0, this.pendingUpdateH, true);
     }
     if (this.pendingUpdateV) {
-      this.$updateVGeometry(0, 0, this.pendingUpdateV, true);
+      this.$updateVGeometry(this.height, 0, this.pendingUpdateV, true);
     }
 
   }

@@ -286,13 +286,17 @@ class QMLComponent {
   }
 
   createObject(parent, properties = {}, outallchanges, outallchanges_old) {
+
+    this.outallchanges = outallchanges;
+    this.outallchanges_old = outallchanges_old;
+
     const item = this.$createObject(parent, properties);
 
     if (!parent || parent.hasOwnProperty("$context")) {
-      QMLComponent.objectCreated.call(item, this, parent, outallchanges, outallchanges_old);
+      QMLComponent.objectCreated.call(item, this, parent);
     } else {
       const con = parent.Component.completed.connect(item, QMLComponent.objectCreated);
-      con.args = [this, parent, outallchanges, outallchanges_old];
+      con.args = [this, parent];
     }
 
     return item;
@@ -321,20 +325,12 @@ class QMLComponent {
     return c+"["+name+(this.nestedLevel?" l"+this.nestedLevel:"")+(long?" "+QmlWeb.Component.toString(this.status):"")+"]";
   }
 
-  static objectCreated(component, parent, outallchanges, outallchanges_old) {
+  static objectCreated(component, parent) {
 
-    component.outallchanges = outallchanges;
-    component.outallchanges_old = outallchanges_old;
-
-    try {
-      if (this instanceof QmlWeb.QtObject) {
-        this.$properties.container.set(parent, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, this);
-      } else if (this instanceof QMLComponent) {
-        this.$component = component;
-      }
-    } finally {
-      component.outallchanges = undefined;
-      component.outallchanges_old = undefined;
+    if (this instanceof QmlWeb.QtObject) {
+      this.$properties.container.set(parent, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged, this);
+    } else if (this instanceof QMLComponent) {
+      this.$component = component;
     }
 
     // invoked either this or one from >@see also< classes.constructSuper

@@ -4,11 +4,11 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   baseClass: "Positioner",
   enums: {
-    Flow: { LeftToRight: 0, TopToBottom: 1 }
+    Flow: { LeftToRight: 0, TopToBottom: 1, RightToLeft: 1 }
   },
   properties: {
     flow: "enum", // Flow.LeftToRight
-    layoutDirection: "enum" // Flow.LeftToRight
+    layoutDirection: "enum" // Qt.LeftToRight (vs Qt.RightToLeft)
   }
 }, class Flow extends Positioner {
   constructor(meta) {
