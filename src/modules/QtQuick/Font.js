@@ -46,8 +46,6 @@ QmlWeb.registerQmlType({
   }
 
   getTargetImplStyle() {
-    // TODO firstChild : it's a draft
-    //return this.fcss ? this.fcss : this.fcss = QmlWeb.createStyle(this.target.dom.firstChild.style);
     return this.target.getImplStyle();
   }
 

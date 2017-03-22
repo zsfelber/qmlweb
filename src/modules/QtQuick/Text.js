@@ -34,12 +34,11 @@ QmlWeb.registerQmlType({
     this.$engine.initMeta(this, meta, Text);
 
     const fc = this.impl = document.createElement("span");
-    this.fcss = QmlWeb.createStyle(fc.style);
     fc.className = "qmltext";
-
-    QmlWeb.setStyle(this.fcss, "textAlign", "left", defaultTextStyle);
-
     this.dom.appendChild(fc);
+    const css = getImplStyle();
+
+    QmlWeb.setStyle(css, "textAlign", "left", defaultTextStyle);
 
     const QMLFont = QmlWeb.getConstructor("QtQuick", "2.0", "Font");
     this.font = new QMLFont(this, {attached:true, info:"drag"});
