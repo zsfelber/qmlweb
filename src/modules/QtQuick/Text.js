@@ -36,7 +36,7 @@ QmlWeb.registerQmlType({
     const fc = this.impl = document.createElement("span");
     fc.className = "qmltext";
     this.dom.appendChild(fc);
-    const css = getImplStyle();
+    const css = this.getImplStyle();
 
     QmlWeb.setStyle(css, "textAlign", "left", defaultTextStyle);
 

@@ -25,6 +25,8 @@ const colours = {"aliceblue":"#f0f8ff","antiquewhite":"#faebd7","aqua":"#00ffff"
     "wheat":"#f5deb3","white":"#ffffff","whitesmoke":"#f5f5f5",
     "yellow":"#ffff00","yellowgreen":"#9acd32"};
 
+const p255 = 1.0/255.0;
+
 class QColor {
   constructor(val) {
     this.$value = "black";
@@ -47,7 +49,6 @@ class QColor {
       // we assume it is int value and must be converted to css hex with padding
       val = Math.round(val);
       if (val < 0x1000000) {// alpha not defined  -> 255
-        //val += 0x1000000;
         val += 0xff000000;
       }
 
@@ -63,6 +64,16 @@ class QColor {
   toString() {
     return this.$value;
   }
+  toCssValue() {
+    const val = this.$value;
+    if (typeof val === "string") {
+      return val;
+    } else {
+      const argb = this.$to4();
+      return `rgba(${argb[1]}, ${argb[2]}, ${argb[3]}, ${argb[0]*p255})`;
+    }
+  }
+
   $get() {
     // Returns the same instance for all equivalent colors.
     // NOTE: the returned value should not be changed using method calls, if
@@ -85,7 +96,7 @@ class QColor {
     return QColor.$colors[this.$value];
   }
   $tonum() {
-    var val = this.$value
+    var val = this.$value;
     if (typeof val === "string") {
       val = colours[val];
       val += 0xff000000;
