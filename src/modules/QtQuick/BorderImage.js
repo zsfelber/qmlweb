@@ -1,3 +1,12 @@
+var borderImage0Style = {
+  OBorderImageSlice: "0 0 0 0 fill",
+  OBorderImageWidth: "0px 0px 0px 0px",
+  OBorderImageRepeat: "stretch stretch",
+  borderImageSlice: "0 0 0 0 fill",
+  borderImageWidth: "0px 0px 0px 0px",
+  borderImageRepeat: "stretch stretch"
+};
+
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "BorderImage",
@@ -27,15 +36,17 @@ QmlWeb.registerQmlType({
     const engine = this.$engine;
     const createProperty = engine.createProperty;
     this.border = new QmlWeb.QObject(this, {attached:true, info:"border"});
-    engine.createProperty("int", this.border, "left");
-    engine.createProperty("int", this.border, "right");
-    engine.createProperty("int", this.border, "top");
-    engine.createProperty("int", this.border, "bottom");
+    engine.createProperty("int", this.border, "left", {initialValue:0});
+    engine.createProperty("int", this.border, "right", {initialValue:0});
+    engine.createProperty("int", this.border, "top", {initialValue:0});
+    engine.createProperty("int", this.border, "bottom", {initialValue:0});
 
     const bg = this.impl = document.createElement("div");
     bg.className = "qmlborderimg";
     this.icss = QmlWeb.createStyle(bg.style);
     this.dom.appendChild(bg);
+
+    QmlWeb.setCssClass(this.impl, "qmlborderimg0", "qmlborderimg0");
 
     const that = this;
     this.$img = new Image();
@@ -61,8 +72,8 @@ QmlWeb.registerQmlType({
     this.status = this.BorderImage.Loading;
     //const style = this.impl.style;
     const imageURL = this.$engine.$resolveImageURL(source);
-    QmlWeb.setStyle(this.icss, "OBorderImageSource", `url("${imageURL}")`);
-    QmlWeb.setStyle(this.icss, "borderImageSource", `url("${imageURL}")`);
+    QmlWeb.setStyle(this.icss, "OBorderImageSource", `url("${imageURL}")`, borderImage0Style);
+    QmlWeb.setStyle(this.icss, "borderImageSource", `url("${imageURL}")`, borderImage0Style);
     this.$img.src = imageURL;
     if (this.$img.complete) {
       this.progress = 1;
@@ -75,22 +86,19 @@ QmlWeb.registerQmlType({
     const slice = `${top} ${right} ${bottom} ${left} fill`;
     const width = `${top}px ${right}px ${bottom}px ${left}px`;
     const repeat = `${this.horizontalTileMode} ${this.verticalTileMode}`;
-    QmlWeb.setStyle(this.icss, "OBorderImageSlice", slice);
-    QmlWeb.setStyle(this.icss, "OBorderImageRepeat", repeat);
-    QmlWeb.setStyle(this.icss, "OBorderImageWidth", width);
-    QmlWeb.setStyle(this.icss, "borderImageSlice", slice);
-    QmlWeb.setStyle(this.icss, "borderImageRepeat", repeat);
-    QmlWeb.setStyle(this.icss, "borderImageWidth", width);
+    QmlWeb.setStyle(this.icss, "OBorderImageSlice", slice, borderImage0Style);
+    QmlWeb.setStyle(this.icss, "OBorderImageRepeat", repeat, borderImage0Style);
+    QmlWeb.setStyle(this.icss, "OBorderImageWidth", width, borderImage0Style);
+    QmlWeb.setStyle(this.icss, "borderImageSlice", slice, borderImage0Style);
+    QmlWeb.setStyle(this.icss, "borderImageRepeat", repeat, borderImage0Style);
+    QmlWeb.setStyle(this.icss, "borderImageWidth", width, borderImage0Style);
   }
   $onSmoothChanged(val) {
     //const style = this.impl.style;
     if (val) {
-      QmlWeb.setStyle(this.icss, "imageRendering", "auto");
+      QmlWeb.setCssClass(this.impl, "smooth", "qmlsmooth");
     } else {
-      QmlWeb.setStyle(this.icss, "imageRendering", "-webkit-optimize-contrast");
-      QmlWeb.setStyle(this.icss, "imageRendering", "-moz-crisp-edges");
-      QmlWeb.setStyle(this.icss, "imageRendering", "crisp-edges");
-      QmlWeb.setStyle(this.icss, "imageRendering", "pixelated");
+      QmlWeb.setCssClass(this.impl, "smooth", "qmluglyimg");
     }
   }
 });
