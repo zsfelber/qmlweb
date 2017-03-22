@@ -74,6 +74,7 @@ function prefixedQmlLoader(prefix) {
 function setupDivElement() {
   beforeEach(function() {
     this.div = document.createElement("div");
+    this.div.className = "qmlweb";
   });
   afterEach(function() {
     this.div.remove();

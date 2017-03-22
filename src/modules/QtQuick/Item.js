@@ -8,6 +8,14 @@ const otherGeometryProperties = {
   "anchors":{"fill":1},
 };
 
+var transform0Style = QmlWeb.helpers.mergeObjects(QmlWeb.defaultItemStyle, {
+  transform: "rotate(0deg) scale(1) translate3d(0, 0, 0px)",
+  webkitTransform: "rotate(0deg) scale(1) translate3d(0, 0, 0px)",
+  msTransform: "rotate(0deg) scale(1) translate3d(0, 0, 0px)",
+  transformStyle: "preserve-3d",
+  webkitTransformStyle: "preserve-3d"
+});
+
 class Item extends ItemBase {
   constructor(meta) {
     super(meta);
@@ -281,6 +289,7 @@ class Item extends ItemBase {
     element.addEventListener("blur", updateFocus);
   }
   $updateTransform() {
+
     const QMLTranslate = QmlWeb.getConstructor("QtQuick", "2.0", "Translate");
     const QMLRotation = QmlWeb.getConstructor("QtQuick", "2.0", "Rotation");
     const QMLScale = QmlWeb.getConstructor("QtQuick", "2.0", "Scale");
@@ -308,13 +317,13 @@ class Item extends ItemBase {
     if (typeof this.z === "number") {
       transform += ` translate3d(0, 0, ${this.z}px)`;
     }
-    QmlWeb.setStyle(this.css, "transform", transform);
-    QmlWeb.setStyle(this.css, "transformStyle", transformStyle);
-    QmlWeb.setStyle(this.css, "webkitTransform", transform); // Chrome, Safari and Opera
-    QmlWeb.setStyle(this.css, "webkitTransformStyle", transformStyle);
-    QmlWeb.setStyle(this.css, "msTransform", transform);     // IE
-    QmlWeb.setStyle(this.css, "filter", filter);
-    QmlWeb.setStyle(this.css, "webkitFilter", filter); // Chrome, Safari and Opera
+    QmlWeb.setStyle(this.css, "transform", transform, transform0Style);
+    QmlWeb.setStyle(this.css, "transformStyle", transformStyle, transform0Style);
+    QmlWeb.setStyle(this.css, "webkitTransform", transform, transform0Style); // Chrome, Safari and Opera
+    QmlWeb.setStyle(this.css, "webkitTransformStyle", transformStyle, transform0Style);
+    QmlWeb.setStyle(this.css, "msTransform", transform, transform0Style);     // IE
+    QmlWeb.setStyle(this.css, "filter", filter, transform0Style);
+    QmlWeb.setStyle(this.css, "webkitFilter", filter, transform0Style); // Chrome, Safari and Opera
   }
   Component$onCompleted_() {
     this.$calculateOpacity();
