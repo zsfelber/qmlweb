@@ -46,8 +46,6 @@ QmlWeb.registerQmlType({
     this.icss = QmlWeb.createStyle(bg.style);
     this.dom.appendChild(bg);
 
-    QmlWeb.setCssClass(this.impl, "qmlborderimg0", "qmlborderimg0");
-
     const that = this;
     this.$img = new Image();
     this.$img.addEventListener("load", () => {
