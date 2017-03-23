@@ -63,6 +63,7 @@ function registerQmlType(options, constructor) {
   };
 
   if (descriptor.global) {
+    descriptor.constructor.$isGlobal = true;
     registerGlobalQmlType(descriptor.name, descriptor.constructor);
   }
 
@@ -165,10 +166,12 @@ function applyAllAttachedObjects(proto) {
   // applied to QtQml.QtObject first from registerGlobalQmlType
   // then from classes.construct() when proto has just created
 
-  for(var m in objectAttachors) {
-    var mtype = objectAttachors[m];
+  if (!proto.constructor.$isGlobal) {
+    for(var m in objectAttachors) {
+      var mtype = objectAttachors[m];
 
-    applyAttachedObjects(mtype, m, proto);
+      applyAttachedObjects(mtype, m, proto);
+    }
   }
 }
 

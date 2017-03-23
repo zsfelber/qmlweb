@@ -92,7 +92,7 @@ function createProperty(type, obj, propName, options, bindingFlags=0) {
     if (obj.$noalias) {
       obj.$properties_noalias[propName] = prop;
       QmlWeb.setupGetterSetter(obj.$noalias, propName, getter, setter, prop);
-    } else if (obj.constructor!==QMLComponent) {
+    } else if (!obj.constructor.$isGlobal) {
       QmlWeb.error("Invalid object : "+obj+"  $noalias missing.");
     }
 

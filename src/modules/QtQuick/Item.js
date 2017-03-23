@@ -692,10 +692,10 @@ class anchors {
   }
 
   static getAttachedObject() {
-    if (!this.hasOwnProperty("anchors")) {
-      this.anchors = new anchors(this, this.$engine);
+    if (!this.hasOwnProperty("$anchors")) {
+      this.$anchors = new anchors(this, this.$engine);
     }
-    return this.anchors;
+    return this.$anchors;
   }
 
   toString() {
