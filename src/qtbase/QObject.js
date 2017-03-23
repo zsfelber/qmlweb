@@ -40,9 +40,9 @@ class QObject {
 
     // context for attached properties like "anchors" and so
     // see also $ownerObject
-    QmlWeb.setupGetter(child, "$component", ()=>parent.$leaf.$component, child);
-    QmlWeb.setupGetter(child, "$context", ()=>parent.$leaf.$context, child);
-    QmlWeb.setupGetter(child, "$componentCreateFlags", ()=>parent.$leaf.$componentCreateFlags, child);
+    QmlWeb.setupGetter(child, "$component", ()=>parent.$component, child);
+    QmlWeb.setupGetter(child, "$context", ()=>parent.$context, child);
+    QmlWeb.setupGetter(child, "$componentCreateFlags", ()=>parent.$componentCreateFlags, child);
   }
 
   static pendingComplete(item, destruction) {
