@@ -80,8 +80,7 @@ QmlWeb.registerQmlType({
     }
 
     const val = `${newVal}px`;
-    this.target.dom.QmlWeb.setStyle(css, "fontSize", val);
-    getTargetImplStyle().fontSize = val;
+    QmlWeb.setStyle(this.getTargetImplStyle(), "fontSize", val);
   }
   $onPointSizeChanged(newVal) {
     this.$sizeLock = true;

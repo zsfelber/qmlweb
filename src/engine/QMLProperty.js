@@ -531,8 +531,8 @@ class QMLProperty {
         fwdUpdate = true;
       } else {
         if (newVal===undefined) {
+          fwdUpdate = newVal !== oldVal;
           newVal = this.$setVal(newVal, flags, valParentObj);
-          fwdUpdate = false;
         } else {
           newVal = this.$setVal(newVal, flags, valParentObj);
           fwdUpdate = newVal !== oldVal;
