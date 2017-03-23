@@ -65,7 +65,7 @@ class QImage extends Item {
     this.progress = 0;
     this.status = this.Image.Loading;
     const imageURL = this.$engine.$resolveImageURL(source);
-    QmlWeb.setStyle(this.icss, "backgroundImage", `url("${imageURL}")`);
+    QmlWeb.setStyle(this.icss, "backgroundImage", `url(${imageURL})`);
     this.$img.src = imageURL;
     if (this.$img.complete) {
       this.progress = 1;

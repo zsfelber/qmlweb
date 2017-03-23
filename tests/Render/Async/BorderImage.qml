@@ -7,8 +7,11 @@ BorderImage {
   smooth: false
   border { left: 1; top: 3; right: 2; bottom: 3 }
   onStatusChanged: {
-    if (typeof window !== 'undefined' && status !== BorderImage.Loading) {
-      window.onTestLoad({ framesDelay: 2 });
+    if (typeof window !== 'undefined' && {2:1,4:1}[status]) {
+      if (status === BorderImage.Error)
+        console.log("Status : error");
+      else
+        window.onTestLoad({ framesDelay: 10 });
     }
   }
 

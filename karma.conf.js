@@ -16,7 +16,8 @@ module.exports = function(config) {
       { pattern: "tests/*/**/qml/*.js", included: false },
       { pattern: "tests/*/**/*.qml", included: false },
       { pattern: "tests/*/**/*.png", included: false },
-      "lib/qmlweb.css"
+      "lib/qmlweb.css",
+      { pattern: "tests/Render/Async/BorderImage.png", included: false }
     ],
     browsers: ["PhantomJSCustom"],
     reporters: ["spec", "coverage"],
@@ -28,7 +29,21 @@ module.exports = function(config) {
       PhantomJSCustom: {
         base: "PhantomJS",
         options: {
-          onCallback: require("./tests/phantom.callback.js")
+          onCallback: require("./tests/phantom.callback.js"),
+          onResourceError: function(resourceError) {
+            console.warn('onResourceError  Unable to load resource (#' + resourceError.id + 'URL:' + resourceError.url + ')');
+            console.warn('onResourceError  Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
+          },
+          onResourceTimeout: function(request) {
+            console.warn('onResourceTimeout  Response (#' + request.id + '): ' + JSON.stringify(request));
+          },
+          onResourceReceived: function(response) {
+           console.warn('onResourceReceived  Response (#' + response.id + ', stage "' + response.stage + '"): ' + JSON.stringify(response));
+          },
+          onLoadFinished: function(status) {
+            console.log('Status: ' + status);
+            // Do other things here...
+          }
         }
       }
    }

@@ -1,3 +1,4 @@
+
 (function() {
   //if (!window.top.callPhantom) {
   //  console.log("Render tests require PhantomJS");
@@ -48,6 +49,16 @@
     }
 
     return matching;
+  }
+
+  function delayedFrames0(callback, frames, timeout) {
+    console.log("delayedFrames0 : "+frames);
+    if (frames === 0) {
+      return callback;
+    }
+    setTimeout(function() {
+      window.requestAnimationFrame(delayedFrames(callback, frames - 1));
+    }, timeout);
   }
 
   function delayedFrames(callback, frames) {
@@ -125,7 +136,7 @@
 
           if (group.endsWith("Async")) {
             window.onTestLoad = function(options) {
-              delayedFrames(onTestLoad, options && options.framesDelay || 0)();
+              delayedFrames(onTestLoad, options && options.framesDelay || 0, 1000)();
             };
           } else {
             onTestLoad();
