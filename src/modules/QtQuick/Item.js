@@ -59,36 +59,7 @@ class Item extends ItemBase {
     this.$isUsingImplicitWidth = true;
     this.$isUsingImplicitHeight = true;
 
-    this.anchors = new QmlWeb.QObject(this, {attached:true, info:"anchors"});
-    engine.createProperty("var", this.anchors, "left");
-    engine.createProperty("var", this.anchors, "right");
-    engine.createProperty("var", this.anchors, "top");
-    engine.createProperty("var", this.anchors, "bottom");
-    engine.createProperty("var", this.anchors, "horizontalCenter");
-    engine.createProperty("var", this.anchors, "verticalCenter");
-    engine.createProperty("Item", this.anchors, "fill");
-    engine.createProperty("Item", this.anchors, "centerIn");
-    engine.createProperty("real", this.anchors, "margins");
-    engine.createProperty("real", this.anchors, "leftMargin");
-    engine.createProperty("real", this.anchors, "rightMargin");
-    engine.createProperty("real", this.anchors, "topMargin");
-    engine.createProperty("real", this.anchors, "bottomMargin");
-    this.anchors.leftChanged.connect(this, this.$updateHGeometry);
-    this.anchors.rightChanged.connect(this, this.$updateHGeometry);
-    this.anchors.topChanged.connect(this, this.$updateVGeometry);
-    this.anchors.bottomChanged.connect(this, this.$updateVGeometry);
-    this.anchors.horizontalCenterChanged.connect(this, this.$updateHGeometry);
-    this.anchors.verticalCenterChanged.connect(this, this.$updateVGeometry);
-    this.anchors.fillChanged.connect(this, this.$updateHGeometry);
-    this.anchors.fillChanged.connect(this, this.$updateVGeometry);
-    this.anchors.centerInChanged.connect(this, this.$updateHGeometry);
-    this.anchors.centerInChanged.connect(this, this.$updateVGeometry);
-    this.anchors.leftMarginChanged.connect(this, this.$updateHGeometry);
-    this.anchors.rightMarginChanged.connect(this, this.$updateHGeometry);
-    this.anchors.topMarginChanged.connect(this, this.$updateVGeometry);
-    this.anchors.bottomMarginChanged.connect(this, this.$updateVGeometry);
-    this.anchors.marginsChanged.connect(this, this.$updateHGeometry);
-    this.anchors.marginsChanged.connect(this, this.$updateVGeometry);
+    //this.anchors = new QmlWeb.QObject(this, {attached:true, info:"anchors"});
 
     // childrenRect property
     this.childrenRect = new QmlWeb.QObject(this, {attached:true, info:"childrenRect"});
@@ -672,6 +643,66 @@ class Item extends ItemBase {
   }
 };
 
+class anchors {
+  constructor(parent, engine) {
+    try {
+      engine.pushengine();
+
+      this.parent = parent;
+      this.$engine = engine;
+      this.$properties = {};
+      this.$engine.initMeta(this, {}, anchors);
+
+      engine.createProperty("var", this, "left");
+      engine.createProperty("var", this, "right");
+      engine.createProperty("var", this, "top");
+      engine.createProperty("var", this, "bottom");
+      engine.createProperty("var", this, "horizontalCenter");
+      engine.createProperty("var", this, "verticalCenter");
+      engine.createProperty("Item", this, "fill");
+      engine.createProperty("Item", this, "centerIn");
+      engine.createProperty("real", this, "margins");
+      engine.createProperty("real", this, "leftMargin");
+      engine.createProperty("real", this, "rightMargin");
+      engine.createProperty("real", this, "topMargin");
+      engine.createProperty("real", this, "bottomMargin");
+
+      const item = parent.$base;
+      this.leftChanged.connect(parent, item.$updateHGeometry);
+      this.rightChanged.connect(parent, item.$updateHGeometry);
+      this.topChanged.connect(parent, item.$updateVGeometry);
+      this.bottomChanged.connect(parent, item.$updateVGeometry);
+      this.horizontalCenterChanged.connect(parent, item.$updateHGeometry);
+      this.verticalCenterChanged.connect(parent, item.$updateVGeometry);
+      this.fillChanged.connect(parent, item.$updateHGeometry);
+      this.fillChanged.connect(parent, item.$updateVGeometry);
+      this.centerInChanged.connect(parent, item.$updateHGeometry);
+      this.centerInChanged.connect(parent, item.$updateVGeometry);
+      this.leftMarginChanged.connect(parent, item.$updateHGeometry);
+      this.rightMarginChanged.connect(parent, item.$updateHGeometry);
+      this.topMarginChanged.connect(parent, item.$updateVGeometry);
+      this.bottomMarginChanged.connect(parent, item.$updateVGeometry);
+      this.marginsChanged.connect(parent, item.$updateHGeometry);
+      this.marginsChanged.connect(parent, item.$updateVGeometry);
+
+      QObject.attach(parent, this);
+    } finally {
+      engine.popengine();
+    }
+  }
+
+  static getAttachedObject() {
+    if (!this.hasOwnProperty("anchors")) {
+      this.anchors = new anchors(this, this.$engine);
+    }
+    return this.anchors;
+  }
+
+  toString() {
+    return "anchors:"+this.parent;
+  }
+}
+
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Item",
@@ -707,6 +738,16 @@ QmlWeb.registerQmlType({
   },
   defaultProperty: "data",
   constructor: Item
+});
+
+QmlWeb.registerQmlType({
+  global: true,
+  module: "QtQml",
+  name: "anchors",
+  versions: /.*/,
+  signals: {
+  },
+  constructor: anchors
 });
 
 QmlWeb.Item = Item;

@@ -379,7 +379,6 @@ class QMLComponent {
     }
     return this.$attachedComponent;
   }
-
 }
 
 class AttachedComponent {
@@ -395,6 +394,7 @@ class AttachedComponent {
       engine.popengine();
     }
   }
+
   toString() {
     return "AtCmp:"+this.parent;
   }
