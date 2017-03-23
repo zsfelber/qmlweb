@@ -75,6 +75,8 @@ QmlWeb.registerQmlType({
     const imageURL = this.$engine.$resolveImageURL(source);
     QmlWeb.setStyle(this.icss, "OBorderImageSource", `url(${imageURL})`, borderImage0Style);
     QmlWeb.setStyle(this.icss, "borderImageSource", `url(${imageURL})`, borderImage0Style);
+                           // phantom js test seems only working with this dirty resolution (doesn't load image):
+                           QmlWeb.setStyle(this.icss, "backgroundImage", `url(${imageURL})`);
     this.$img.src = imageURL;
     if (this.$img.complete) {
       this.progress = 1;

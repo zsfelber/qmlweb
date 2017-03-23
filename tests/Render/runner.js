@@ -39,7 +39,7 @@
     return canvas.toDataURL("image/png", 1);
   }
 
-  function imagesEqual(result, expected, savefilenm) {
+  function imagesEqual(result, expected) {
     var matching,d1;
     if (result.width !== expected.width || result.height !== expected.height) {
       console.warn("dimensions not matching : "+result.width+"x"+result.height+" vs "+expected.width+"x"+expected.height)
@@ -111,7 +111,7 @@
             ++loaded;
             console.log("loaded:"+loaded);
             if (loaded !== 2) return;
-            expect(imagesEqual(result, expected, "_"+f)).toBe(true);
+            expect(imagesEqual(result, expected)).toBe(true);
             done();
           };
 

@@ -192,9 +192,15 @@ gulp.task("test", ["build-dev"], () => {
   var g = typeof window!=="undefined" ? window : global;
   g.testernodebug = true;
   new karma.Server({
-    singleRun: true,
+    //debug: true,
+    //singleRun: true,
     configFile: path.join(__dirname, "karma.conf.js"),
-    browsers: ["PhantomJSCustom"]
+    browsers: ["PhantomJSCustom"],
+    settings: {
+    },
+    client: {
+      //captureConsole: false
+    }
   }, code => {
     process.exit(code);
   }).start();

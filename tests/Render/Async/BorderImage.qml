@@ -8,10 +8,11 @@ BorderImage {
   border { left: 1; top: 3; right: 2; bottom: 3 }
   onStatusChanged: {
     if (typeof window !== 'undefined' && {2:1,4:1}[status]) {
+      console.log("Image: "+source);
       if (status === BorderImage.Error)
         console.log("Status : error");
       else
-        window.onTestLoad({ framesDelay: 10 });
+        window.onTestLoad({ framesDelay: 5});
     }
   }
 
