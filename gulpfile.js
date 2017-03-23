@@ -193,7 +193,7 @@ gulp.task("test", ["build-dev"], () => {
   g.testernodebug = true;
   new karma.Server({
     //debug: true,
-    //singleRun: true,
+    singleRun: true,
     configFile: path.join(__dirname, "karma.conf.js"),
     browsers: ["PhantomJSCustom"],
     settings: {

@@ -83,6 +83,7 @@ class QImage extends Item {
     } else {
       this.transform.push(transformRule);
     }
+    console.log(this+".transform:"+JSON.stringify(this.transform));
     this.$updateTransform();
   }
   $onFillModeChanged(val) {
@@ -116,7 +117,7 @@ QmlWeb.registerQmlType({
     cache: { type: "bool", initialValue: true },
     smooth: { type: "bool", initialValue: true },
     fillMode: { type: "enum", initialValue: 1 }, // Image.Stretch
-    mirror: "bool",
+    mirror: { type: "bool", initialValue: false},
     progress: "real",
     source: { type: "url", initialValue: null},
     status: { type: "enum", initialValue: 1 } // Image.Null

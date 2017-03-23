@@ -74,8 +74,13 @@ QmlWeb.registerQmlType({
     if (!this.$sizeLock) {
       this.pointSize = newVal * 0.75;
     }
+    if (!this.target) {
+      console.log("Missing Font target : "+this.toString(1));
+      return;
+    }
+
     const val = `${newVal}px`;
-    this.$parent.dom.QmlWeb.setStyle(css, "fontSize", val);
+    this.target.dom.QmlWeb.setStyle(css, "fontSize", val);
     getTargetImplStyle().fontSize = val;
   }
   $onPointSizeChanged(newVal) {
@@ -84,16 +89,24 @@ QmlWeb.registerQmlType({
     this.$sizeLock = false;
   }
   $onStrikeoutChanged(newVal) {
+    if (!this.target) {
+      console.log("Missing Font target : "+this.toString(1));
+      return;
+    }
     const css = this.getTargetImplStyle();
     QmlWeb.setStyle(css, "textDecoration", newVal
       ? "line-through"
-      : this.$parent.font.underline
+      : this.target.font.underline
         ? "underline"
         : "none");
   }
   $onUnderlineChanged(newVal) {
+    if (!this.target) {
+      console.log("Missing Font target : "+this.toString(1));
+      return;
+    }
     const css = this.getTargetImplStyle();
-    QmlWeb.setStyle(css, "textDecoration", this.$parent.font.strikeout
+    QmlWeb.setStyle(css, "textDecoration", this.target.font.strikeout
       ? "line-through"
       : newVal
         ? "underline"

@@ -7,6 +7,7 @@ Rectangle {
   property int loaded: 0
 
   Image {
+    id:i1
     x: 0
     y: 0
     height: 10
@@ -16,6 +17,7 @@ Rectangle {
     onStatusChanged: if (status !== Image.Loading) parent.loaded++
   }
   Image {
+    id:i2
     x: 4
     y: 0
     height: 10
@@ -47,6 +49,12 @@ Rectangle {
     fillMode: Image.Tile
     smooth: false
     onStatusChanged: if (status !== Image.Loading) parent.loaded++
+  }
+
+  Component.onCompleted: {
+    image3.mirror = true;
+    image4.mirror = true;
+    image4.mirror = false;
   }
 
   onLoadedChanged: {

@@ -530,9 +530,14 @@ class QMLProperty {
         this.deferredChildMeta = newVal;
         fwdUpdate = true;
       } else {
-        newVal = this.$setVal(newVal, flags, valParentObj);
+        if (newVal===undefined) {
+          newVal = this.$setVal(newVal, flags, valParentObj);
+          fwdUpdate = false;
+        } else {
+          newVal = this.$setVal(newVal, flags, valParentObj);
+          fwdUpdate = newVal !== oldVal;
+        }
 
-        fwdUpdate = newVal !== oldVal;
         if (fwdUpdate) {
           if (this.binding && (this.binding.flags & QmlWeb.QMLBindingFlags.Bidirectional)) {
             this.updateState |= dirty = QMLPropertyState.ValueSaved;

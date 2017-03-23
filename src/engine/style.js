@@ -27,7 +27,8 @@ function setStyle(style, arg, value, defaultStyle = defaultItemStyle) {
   if (value && defaultStyle[arg] !== value) {
     style.$css[arg] = value.toCssValue ? value.toCssValue() : (value.toString ? value.toString() : value);
   } else {
-    delete style.$css[arg];
+    style.$css[arg] = value;
+    style.$css[arg] = undefined;
   }
 }
 

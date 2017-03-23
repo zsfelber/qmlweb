@@ -308,10 +308,10 @@ class Item extends ItemBase {
         transform += ` translate(${t.x}px, ${t.y}px)`;
       } else if (typeof t.transformType !== "undefined") {
         if (t.transformType === "filter") {
-          filter += `${t.operation}(${t.parameters}) `;
+          filter += ` ${t.operation}(${t.parameters})`;
         }
       } else if (typeof t === "string") {
-        transform += t;
+        transform += ` ${t}`;
       }
     }
     if (typeof this.z === "number") {
@@ -325,6 +325,7 @@ class Item extends ItemBase {
     QmlWeb.setStyle(this.css, "filter", filter, transform0Style);
     QmlWeb.setStyle(this.css, "WebkitFilter", filter, transform0Style); // Chrome, Safari and Opera
   }
+
   Component$onCompleted_() {
     this.$calculateOpacity();
 
