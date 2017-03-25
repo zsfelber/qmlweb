@@ -653,20 +653,6 @@ class ItemAnchors {
       this.$properties = {};
       this.$engine.initMeta(this, {}, ItemAnchors);
 
-      engine.createProperty("var", this, "left");
-      engine.createProperty("var", this, "right");
-      engine.createProperty("var", this, "top");
-      engine.createProperty("var", this, "bottom");
-      engine.createProperty("var", this, "horizontalCenter");
-      engine.createProperty("var", this, "verticalCenter");
-      engine.createProperty("Item", this, "fill");
-      engine.createProperty("Item", this, "centerIn");
-      engine.createProperty("real", this, "margins");
-      engine.createProperty("real", this, "leftMargin");
-      engine.createProperty("real", this, "rightMargin");
-      engine.createProperty("real", this, "topMargin");
-      engine.createProperty("real", this, "bottomMargin");
-
       const item = parent.$base;
       this.leftChanged.connect(parent, item.$updateHGeometry);
       this.rightChanged.connect(parent, item.$updateHGeometry);
@@ -746,6 +732,21 @@ QmlWeb.registerQmlType({
   name: "anchors",
   versions: /.*/,
   signals: {
+  },
+  properties: {
+    left: "var",
+    right: "var",
+    top: "var",
+    bottom: "var",
+    horizontalCenter: "var",
+    verticalCenter: "var",
+    fill: "Item",
+    centerIn: "Item",
+    margins: "real",
+    leftMargin: "real",
+    rightMargin: "real",
+    topMargin: "real",
+    bottomMargin: "real"
   },
   constructor: ItemAnchors
 });
