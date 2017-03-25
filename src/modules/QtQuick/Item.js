@@ -643,7 +643,7 @@ class Item extends ItemBase {
   }
 };
 
-class anchors {
+class ItemAnchors {
   constructor(parent, engine) {
     try {
       engine.pushengine();
@@ -651,7 +651,7 @@ class anchors {
       this.parent = parent;
       this.$engine = engine;
       this.$properties = {};
-      this.$engine.initMeta(this, {}, anchors);
+      this.$engine.initMeta(this, {}, ItemAnchors);
 
       engine.createProperty("var", this, "left");
       engine.createProperty("var", this, "right");
@@ -693,7 +693,7 @@ class anchors {
 
   static getAttachedObject() {
     if (!this.hasOwnProperty("$anchors")) {
-      this.$anchors = new anchors(this, this.$engine);
+      this.$anchors = new ItemAnchors(this, this.$engine);
     }
     return this.$anchors;
   }
@@ -747,7 +747,7 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   signals: {
   },
-  constructor: anchors
+  constructor: ItemAnchors
 });
 
 QmlWeb.Item = Item;
