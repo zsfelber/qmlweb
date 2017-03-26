@@ -395,7 +395,7 @@ class Item extends ItemBase {
     }
   }
   $updateHGeometry(newVal, oldVal, propName, oncompl) {
-    const anchors = this.anchors || this;
+    const anchors = this.$anchors || this;
     if (this.$updatingHGeometry) {
       return;
     }
@@ -506,7 +506,7 @@ class Item extends ItemBase {
     if (this.parent) this.$updateChildrenRect(this.parent);
   }
   $updateVGeometry(newVal, oldVal, propName, oncompl) {
-    const anchors = this.anchors || this;
+    const anchors = this.$anchors || this;
     if (this.$updatingVGeometry) {
       return;
     }
