@@ -19,36 +19,6 @@ class QtObject extends QmlWeb.QObject {
       }
     }
 
-    const Signal = QmlWeb.Signal;
-
-    this.Keys = new QmlWeb.QObject(this, {attached:true, info:"Keys"});
-    this.Keys.asteriskPresed = Signal.signal("asteriskPresed");
-    this.Keys.backPressed = Signal.signal("backPressed");
-    this.Keys.backtabPressed = Signal.signal("backtabPressed");
-    this.Keys.callPressed = Signal.signal("callPressed");
-    this.Keys.cancelPressed = Signal.signal("cancelPressed");
-    this.Keys.deletePressed = Signal.signal("deletePressed");
-    for (let i = 0; i < 10; ++i) {
-      this.Keys[`digit${i}Pressed`] = Signal.signal(`digit${i}Pressed`);
-    }
-    this.Keys.escapePressed = Signal.signal("escapePressed");
-    this.Keys.flipPressed = Signal.signal("flipPressed");
-    this.Keys.hangupPressed = Signal.signal("hangupPressed");
-    this.Keys.leftPressed = Signal.signal("leftPressed");
-    this.Keys.menuPressed = Signal.signal("menuPressed");
-    this.Keys.noPressed = Signal.signal("noPressed");
-    this.Keys.pressed = Signal.signal("pressed");
-    this.Keys.released = Signal.signal("released");
-    this.Keys.returnPressed = Signal.signal("returnPressed");
-    this.Keys.rightPressed = Signal.signal("rightPressed");
-    this.Keys.selectPressed = Signal.signal("selectPressed");
-    this.Keys.spacePressed = Signal.signal("spacePressed");
-    this.Keys.tabPressed = Signal.signal("tabPressed");
-    this.Keys.upPressed = Signal.signal("upPressed");
-    this.Keys.volumeDownPressed = Signal.signal("volumeDownPressed");
-    this.Keys.volumeUpPressed = Signal.signal("volumeUpPressed");
-    this.Keys.yesPressed = Signal.signal("yesPressed");
-
     this.containerChanged.connect(this, this.$onContainerChanged_);
   }
 
@@ -297,6 +267,34 @@ class QtObject extends QmlWeb.QObject {
 
 };
 
+class QtKeys {
+  constructor(parent, engine) {
+    try {
+      engine.pushengine();
+
+      this.parent = parent;
+      this.$engine = engine;
+      this.$properties = {};
+      this.$engine.initMeta(this, {}, ItemChidrenRect);
+
+      QObject.attach(parent, this);
+    } finally {
+      engine.popengine();
+    }
+  }
+
+  static getAttachedObject() {
+    if (!this.hasOwnProperty("$Keys")) {
+      this.$Keys = new QtKeys(this, this.$engine);
+    }
+    return this.$Keys;
+  }
+
+  toString() {
+    return "Keys:"+this.parent;
+  }
+}
+
 QmlWeb.registerQmlType({
   module: "QtQml",
   name: "QtObject",
@@ -309,6 +307,26 @@ QmlWeb.registerQmlType({
      objectName: "string"
   },
   constructor: QtObject
+});
+
+QmlWeb.registerQmlType({
+  global: true,
+  module: "QtQml",
+  name: "Keys",
+  versions: /.*/,
+  signals: {
+    asteriskPresed : [], backPressed : [], backtabPressed : [], callPressed : [],
+    cancelPressed : [], deletePressed : [], digit0Pressed : [], digit1Pressed : [],
+    digit2Pressed : [], digit3Pressed : [], digit4Pressed : [], digit5Pressed : [],
+    digit6Pressed : [], digit7Pressed : [], digit8Pressed : [], digit9Pressed : [],
+    escapePressed : [], flipPressed : [], hangupPressed : [], leftPressed : [],
+    menuPressed : [], noPressed : [], pressed : [], released : [], returnPressed : [],
+    rightPressed : [], selectPressed : [], spacePressed : [], tabPressed : [],
+    upPressed : [], volumeDownPressed : [], volumeUpPressed : [], yesPressed : [],
+  },
+  properties: {
+  },
+  constructor: QtKeys
 });
 
 QmlWeb.QtObject = QtObject;

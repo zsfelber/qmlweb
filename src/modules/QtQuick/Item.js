@@ -60,13 +60,11 @@ class Item extends ItemBase {
     this.$isUsingImplicitHeight = true;
 
     //this.anchors = new QmlWeb.QObject(this, {attached:true, info:"anchors"});
+    // debug:
+    // if (!this.anchors) throw new AssertionError("Assertion error : attached anchors not created !")
 
     // childrenRect property
-    this.childrenRect = new QmlWeb.QObject(this, {attached:true, info:"childrenRect"});
-    engine.createProperty("real", this.childrenRect, "x", {readOnly:true});
-    engine.createProperty("real", this.childrenRect, "y", {readOnly:true});
-    engine.createProperty("real", this.childrenRect, "width", {readOnly:true});
-    engine.createProperty("real", this.childrenRect, "height", {readOnly:true});
+    //this.childrenRect = new QmlWeb.QObject(this, {attached:true, info:"childrenRect"});
 
     this.rotationChanged.connect(this, this.$updateTransform);
     this.scaleChanged.connect(this, this.$updateTransform);
@@ -654,22 +652,22 @@ class ItemAnchors {
       this.$engine.initMeta(this, {}, ItemAnchors);
 
       const item = parent.$base;
-      this.leftChanged.connect(parent, item.$updateHGeometry);
-      this.rightChanged.connect(parent, item.$updateHGeometry);
-      this.topChanged.connect(parent, item.$updateVGeometry);
-      this.bottomChanged.connect(parent, item.$updateVGeometry);
-      this.horizontalCenterChanged.connect(parent, item.$updateHGeometry);
-      this.verticalCenterChanged.connect(parent, item.$updateVGeometry);
-      this.fillChanged.connect(parent, item.$updateHGeometry);
-      this.fillChanged.connect(parent, item.$updateVGeometry);
-      this.centerInChanged.connect(parent, item.$updateHGeometry);
-      this.centerInChanged.connect(parent, item.$updateVGeometry);
-      this.leftMarginChanged.connect(parent, item.$updateHGeometry);
-      this.rightMarginChanged.connect(parent, item.$updateHGeometry);
-      this.topMarginChanged.connect(parent, item.$updateVGeometry);
-      this.bottomMarginChanged.connect(parent, item.$updateVGeometry);
-      this.marginsChanged.connect(parent, item.$updateHGeometry);
-      this.marginsChanged.connect(parent, item.$updateVGeometry);
+      this.leftChanged.connect(item, item.$updateHGeometry);
+      this.rightChanged.connect(item, item.$updateHGeometry);
+      this.topChanged.connect(item, item.$updateVGeometry);
+      this.bottomChanged.connect(item, item.$updateVGeometry);
+      this.horizontalCenterChanged.connect(item, item.$updateHGeometry);
+      this.verticalCenterChanged.connect(item, item.$updateVGeometry);
+      this.fillChanged.connect(item, item.$updateHGeometry);
+      this.fillChanged.connect(item, item.$updateVGeometry);
+      this.centerInChanged.connect(item, item.$updateHGeometry);
+      this.centerInChanged.connect(item, item.$updateVGeometry);
+      this.leftMarginChanged.connect(item, item.$updateHGeometry);
+      this.rightMarginChanged.connect(item, item.$updateHGeometry);
+      this.topMarginChanged.connect(item, item.$updateVGeometry);
+      this.bottomMarginChanged.connect(item, item.$updateVGeometry);
+      this.marginsChanged.connect(item, item.$updateHGeometry);
+      this.marginsChanged.connect(item, item.$updateVGeometry);
 
       QObject.attach(parent, this);
     } finally {
@@ -686,6 +684,34 @@ class ItemAnchors {
 
   toString() {
     return "anchors:"+this.parent;
+  }
+}
+
+class ItemChildrenRect {
+  constructor(parent, engine) {
+    try {
+      engine.pushengine();
+
+      this.parent = parent;
+      this.$engine = engine;
+      this.$properties = {};
+      this.$engine.initMeta(this, {}, ItemChidrenRect);
+
+      QObject.attach(parent, this);
+    } finally {
+      engine.popengine();
+    }
+  }
+
+  static getAttachedObject() {
+    if (!this.hasOwnProperty("$childrenRect")) {
+      this.$childrenRect = new ItemChildrenRect(this, this.$engine);
+    }
+    return this.$childrenRect;
+  }
+
+  toString() {
+    return "childrenRect:"+this.parent;
   }
 }
 
@@ -749,6 +775,22 @@ QmlWeb.registerQmlType({
     bottomMargin: "real"
   },
   constructor: ItemAnchors
+});
+
+QmlWeb.registerQmlType({
+  global: true,
+  module: "QtQml",
+  name: "childrenRect",
+  versions: /.*/,
+  signals: {
+  },
+  properties: {
+    x: { type: "real", readOnly:true},
+    y: { type: "real", readOnly:true},
+    width: { type: "real", readOnly:true},
+    height: { type: "real", readOnly:true}
+  },
+  constructor: ItemChildrenRect
 });
 
 QmlWeb.Item = Item;

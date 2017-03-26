@@ -13,7 +13,7 @@
       enum: QmlWeb.qmlNumber,
       url: QmlWeb.$resolvePath,
       variant: QmlWeb.qmlVariant,
-      "var": QmlWeb.qmlVariant
+      var: QmlWeb.qmlVariant
     }
   };
 
