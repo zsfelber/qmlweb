@@ -6,10 +6,6 @@ class QObject {
     this.$base = this;
     this.$engine = QmlWeb.getEngine();
 
-    if (parent && parent.$tidyupList) {
-      parent.$tidyupList.push(this);
-    }
-
     // List of things to tidy up when deleting this object.
     // TODO use hash !
     this.$tidyupList = [];
@@ -22,12 +18,18 @@ class QObject {
 
     this.$objectId = ++objectIds;
 
+    let att = 0;
     if (meta) {
       this.$meta = meta;
 
       if (meta.attached) {
         QObject.attach(parent, this, meta.$info);
+        att = 1;
       }
+    }
+
+    if (!att && parent && parent.$tidyupList) {
+      parent.$tidyupList.push(this);
     }
   }
 
@@ -43,6 +45,18 @@ class QObject {
     QmlWeb.setupGetter(child, "$component", ()=>parent.$component, child);
     QmlWeb.setupGetter(child, "$context", ()=>parent.$context, child);
     QmlWeb.setupGetter(child, "$componentCreateFlags", ()=>parent.$componentCreateFlags, child);
+
+    if (!child.destroy) child.destroy = 1;
+    if (!child.$leaf) child.$leaf = child;
+    if (!child.$base) child.$base = child;
+    if (!child.$tidyupList) child.$tidyupList = [];
+    if (!child.$signals) child.$signals = [];
+    if (!child.$parent) child.$parent = parent;
+    else if (child.$parent !== parent) throw new AssertionError("Assertion failed : attached object parent is not target : "+child.$parent+" vs "+parent);
+
+    if (parent && parent.$tidyupList) {
+      parent.$tidyupList.push(child);
+    }
   }
 
   static pendingComplete(item, destruction) {

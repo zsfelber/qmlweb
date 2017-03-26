@@ -275,7 +275,7 @@ class QtKeys {
       this.parent = parent;
       this.$engine = engine;
       this.$properties = {};
-      this.$engine.initMeta(this, {}, ItemChidrenRect);
+      this.$engine.initMeta(this, {}, QtKeys);
 
       QObject.attach(parent, this);
     } finally {

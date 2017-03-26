@@ -31,7 +31,7 @@ function registerGlobalQmlType(name, type) {
   constructors[name] = type;
   modules.Main[name] = type;
 
-  applyAttachedObjects(type, name, QmlWeb.QtObject.prototype);
+  applyAttachedObjects(type, name, QtObject.prototype);
 
 }
 

@@ -695,7 +695,7 @@ class ItemChildrenRect {
       this.parent = parent;
       this.$engine = engine;
       this.$properties = {};
-      this.$engine.initMeta(this, {}, ItemChidrenRect);
+      this.$engine.initMeta(this, {}, ItemChildrenRect);
 
       QObject.attach(parent, this);
     } finally {
