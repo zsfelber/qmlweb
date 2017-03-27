@@ -158,10 +158,17 @@ function applyAttachedObjects(type, name, proto) {
   if (type.getAttachedObject && !proto.hasOwnProperty(name)) {
     let found = 0;
     if (type.$descriptor.owners) {
-      for (var cons = proto.constructor, cons0; cons&&cons!==cons0; cons0=cons, cons = (cons.prototype?cons.prototype.constructor:0)) {
+      var cons = proto.$constructor, cons0;
+      if (proto.$base === proto) {
+        for (; cons&&cons!==cons0; cons0=cons, cons = (cons.prototype?cons.prototype.constructor:0)) {
+          if (cons.$descriptor && type.$descriptor.owners.test(cons.$descriptor.fullname)) {
+            found = 1;
+            break;
+          }
+        }
+      } else {
         if (cons.$descriptor && type.$descriptor.owners.test(cons.$descriptor.fullname)) {
           found = 1;
-          break;
         }
       }
     } else {
