@@ -412,7 +412,7 @@ class Item extends ItemBase {
     delete this.pendingUpdateH;
     this.$updatingHGeometry = true;
 
-    const anchors = this.$anchors;
+    const anchors = this.$leaf.$anchors;
     const flags = QmlWeb.QMLSignalFlags.UniqueConnection;
     const w = this.width;
     const left = this.parent ? this.parent.left : 0;
@@ -531,7 +531,7 @@ class Item extends ItemBase {
     delete this.pendingUpdateV;
     this.$updatingVGeometry = true;
 
-    const anchors = this.$anchors;
+    const anchors = this.$leaf.$anchors;
     const flags = QmlWeb.QMLSignalFlags.UniqueConnection;
     const h = this.height;
     const top = this.parent ? this.parent.top : 0;
