@@ -395,7 +395,6 @@ class Item extends ItemBase {
     }
   }
   $updateHGeometry(newVal, oldVal, propName, oncompl) {
-    const anchors = this.$anchors || this;
     if (this.$updatingHGeometry) {
       return;
     }
@@ -413,9 +412,8 @@ class Item extends ItemBase {
     delete this.pendingUpdateH;
     this.$updatingHGeometry = true;
 
+    const anchors = this.$anchors;
     const flags = QmlWeb.QMLSignalFlags.UniqueConnection;
-    const lM = anchors.leftMargin || anchors.margins;
-    const rM = anchors.rightMargin || anchors.margins;
     const w = this.width;
     const left = this.parent ? this.parent.left : 0;
 
@@ -424,69 +422,79 @@ class Item extends ItemBase {
       this.$isUsingImplicitWidth = !newVal;
     }
 
-    // Position TODO: Layouts
-
     const u = {}; // our update object
+    let ok = 1;
+    if (anchors) {
+      const lM = anchors.leftMargin || anchors.margins;
+      const rM = anchors.rightMargin || anchors.margins;
 
-    if (anchors.fill !== undefined) {
-      const fill = anchors.fill;
-      const props = fill.$properties;
-      props.left.changed.connect(this, this.$updateHGeometry, flags);
-      props.right.changed.connect(this, this.$updateHGeometry, flags);
-      props.width.changed.connect(this, this.$updateHGeometry, flags);
+      // Position TODO: Layouts
 
-      this.$isUsingImplicitWidth = false;
-      u.width = fill.width - lM - rM;
-      u.x = fill.left - left + lM;
-      u.left = fill.left + lM;
-      u.right = fill.right - rM;
-      u.horizontalCenter = (u.left + u.right) / 2;
-    } else if (anchors.centerIn !== undefined) {
-      const horizontalCenter = anchors.centerIn.$properties.horizontalCenter;
-      horizontalCenter.changed.connect(this, this.$updateHGeometry, flags);
+      if (anchors.fill !== undefined) {
+        const fill = anchors.fill;
+        const props = fill.$properties;
+        props.left.changed.connect(this, this.$updateHGeometry, flags);
+        props.right.changed.connect(this, this.$updateHGeometry, flags);
+        props.width.changed.connect(this, this.$updateHGeometry, flags);
 
-      u.horizontalCenter = anchors.centerIn.horizontalCenter;
-      u.x = u.horizontalCenter - w / 2 - left;
-      u.left = u.horizontalCenter - w / 2;
-      u.right = u.horizontalCenter + w / 2;
-    } else if (anchors.left !== undefined) {
-      u.left = anchors.left + lM;
-      if (anchors.right !== undefined) {
-        u.right = anchors.right - rM;
         this.$isUsingImplicitWidth = false;
-        u.width = u.right - u.left;
-        u.x = u.left - left;
-        u.horizontalCenter = (u.right + u.left) / 2;
+        u.width = fill.width - lM - rM;
+        u.x = fill.left - left + lM;
+        u.left = fill.left + lM;
+        u.right = fill.right - rM;
+        u.horizontalCenter = (u.left + u.right) / 2;
+      } else if (anchors.centerIn !== undefined) {
+        const horizontalCenter = anchors.centerIn.$properties.horizontalCenter;
+        horizontalCenter.changed.connect(this, this.$updateHGeometry, flags);
+
+        u.horizontalCenter = anchors.centerIn.horizontalCenter;
+        u.x = u.horizontalCenter - w / 2 - left;
+        u.left = u.horizontalCenter - w / 2;
+        u.right = u.horizontalCenter + w / 2;
+      } else if (anchors.left !== undefined) {
+        u.left = anchors.left + lM;
+        if (anchors.right !== undefined) {
+          u.right = anchors.right - rM;
+          this.$isUsingImplicitWidth = false;
+          u.width = u.right - u.left;
+          u.x = u.left - left;
+          u.horizontalCenter = (u.right + u.left) / 2;
+        } else if (anchors.horizontalCenter !== undefined) {
+          u.horizontalCenter = anchors.horizontalCenter;
+          this.$isUsingImplicitWidth = false;
+          u.width = (u.horizontalCenter - u.left) * 2;
+          u.x = u.left - left;
+          u.right = 2 * u.horizontalCenter - u.left;
+        } else {
+          u.x = u.left - left;
+          u.right = u.left + w;
+          u.horizontalCenter = u.left + w / 2;
+        }
+      } else if (anchors.right !== undefined) {
+        u.right = anchors.right - rM;
+        if (anchors.horizontalCenter !== undefined) {
+          u.horizontalCenter = anchors.horizontalCenter;
+          this.$isUsingImplicitWidth = false;
+          u.width = (u.right - u.horizontalCenter) * 2;
+          u.x = 2 * u.horizontalCenter - u.right - left;
+          u.left = 2 * u.horizontalCenter - u.right;
+        } else {
+          u.x = u.right - w - left;
+          u.left = u.right - w;
+          u.horizontalCenter = u.right - w / 2;
+        }
       } else if (anchors.horizontalCenter !== undefined) {
         u.horizontalCenter = anchors.horizontalCenter;
-        this.$isUsingImplicitWidth = false;
-        u.width = (u.horizontalCenter - u.left) * 2;
-        u.x = u.left - left;
-        u.right = 2 * u.horizontalCenter - u.left;
+        u.x = u.horizontalCenter - w / 2 - left;
+        u.left = u.horizontalCenter - w / 2;
+        u.right = u.horizontalCenter + w / 2;
       } else {
-        u.x = u.left - left;
-        u.right = u.left + w;
-        u.horizontalCenter = u.left + w / 2;
+        ok = 0;
       }
-    } else if (anchors.right !== undefined) {
-      u.right = anchors.right - rM;
-      if (anchors.horizontalCenter !== undefined) {
-        u.horizontalCenter = anchors.horizontalCenter;
-        this.$isUsingImplicitWidth = false;
-        u.width = (u.right - u.horizontalCenter) * 2;
-        u.x = 2 * u.horizontalCenter - u.right - left;
-        u.left = 2 * u.horizontalCenter - u.right;
-      } else {
-        u.x = u.right - w - left;
-        u.left = u.right - w;
-        u.horizontalCenter = u.right - w / 2;
-      }
-    } else if (anchors.horizontalCenter !== undefined) {
-      u.horizontalCenter = anchors.horizontalCenter;
-      u.x = u.horizontalCenter - w / 2 - left;
-      u.left = u.horizontalCenter - w / 2;
-      u.right = u.horizontalCenter + w / 2;
     } else {
+      ok = 0;
+    }
+    if (!ok) {
       if (this.parent) {
         const leftProp = this.parent.$properties.left;
         leftProp.changed.connect(this, this.$updateHGeometry, flags);
@@ -506,7 +514,6 @@ class Item extends ItemBase {
     if (this.parent) this.$updateChildrenRect(this.parent);
   }
   $updateVGeometry(newVal, oldVal, propName, oncompl) {
-    const anchors = this.$anchors || this;
     if (this.$updatingVGeometry) {
       return;
     }
@@ -524,9 +531,8 @@ class Item extends ItemBase {
     delete this.pendingUpdateV;
     this.$updatingVGeometry = true;
 
+    const anchors = this.$anchors;
     const flags = QmlWeb.QMLSignalFlags.UniqueConnection;
-    const tM = anchors.topMargin || anchors.margins;
-    const bM = anchors.bottomMargin || anchors.margins;
     const h = this.height;
     const top = this.parent ? this.parent.top : 0;
 
@@ -535,67 +541,77 @@ class Item extends ItemBase {
       this.$isUsingImplicitHeight = !newVal;
     }
 
-    // Position TODO: Layouts
-
     const u = {}; // our update object
+    let ok = 1;
+    if (anchors) {
+      const tM = anchors.topMargin || anchors.margins;
+      const bM = anchors.bottomMargin || anchors.margins;
 
-    if (anchors.fill !== undefined) {
-      const fill = anchors.fill;
-      const props = fill.$properties;
-      props.top.changed.connect(this, this.$updateVGeometry, flags);
-      props.bottom.changed.connect(this, this.$updateVGeometry, flags);
-      props.height.changed.connect(this, this.$updateVGeometry, flags);
+      // Position TODO: Layouts
 
-      this.$isUsingImplicitHeight = false;
-      u.height = fill.height - tM - bM;
-      u.y = fill.top - top + tM;
-      u.top = fill.top + tM;
-      u.bottom = fill.bottom - bM;
-      u.verticalCenter = (u.top + u.bottom) / 2;
-    } else if (anchors.centerIn !== undefined) {
-      const verticalCenter = anchors.centerIn.$properties.verticalCenter;
-      verticalCenter.changed.connect(this, this.$updateVGeometry, flags);
+      if (anchors.fill !== undefined) {
+        const fill = anchors.fill;
+        const props = fill.$properties;
+        props.top.changed.connect(this, this.$updateVGeometry, flags);
+        props.bottom.changed.connect(this, this.$updateVGeometry, flags);
+        props.height.changed.connect(this, this.$updateVGeometry, flags);
 
-      u.verticalCenter = anchors.centerIn.verticalCenter;
-      u.y = u.verticalCenter - h / 2 - top;
-      u.top = u.verticalCenter - h / 2;
-      u.bottom = u.verticalCenter + h / 2;
-    } else if (anchors.top !== undefined) {
-      u.top = anchors.top + tM;
-      if (anchors.bottom !== undefined) {
+        this.$isUsingImplicitHeight = false;
+        u.height = fill.height - tM - bM;
+        u.y = fill.top - top + tM;
+        u.top = fill.top + tM;
+        u.bottom = fill.bottom - bM;
+        u.verticalCenter = (u.top + u.bottom) / 2;
+      } else if (anchors.centerIn !== undefined) {
+        const verticalCenter = anchors.centerIn.$properties.verticalCenter;
+        verticalCenter.changed.connect(this, this.$updateVGeometry, flags);
+
+        u.verticalCenter = anchors.centerIn.verticalCenter;
+        u.y = u.verticalCenter - h / 2 - top;
+        u.top = u.verticalCenter - h / 2;
+        u.bottom = u.verticalCenter + h / 2;
+      } else if (anchors.top !== undefined) {
+        u.top = anchors.top + tM;
+        if (anchors.bottom !== undefined) {
+          u.bottom = anchors.bottom - bM;
+          this.$isUsingImplicitHeight = false;
+          u.height = u.bottom - u.top;
+          u.y = u.top - top;
+          u.verticalCenter = (u.bottom + u.top) / 2;
+        } else if ((u.verticalCenter = anchors.verticalCenter) !== undefined) {
+          this.$isUsingImplicitHeight = false;
+          u.height = (u.verticalCenter - u.top) * 2;
+          u.y = u.top - top;
+          u.bottom = 2 * u.verticalCenter - u.top;
+        } else {
+          u.y = u.top - top;
+          u.bottom = u.top + h;
+          u.verticalCenter = u.top + h / 2;
+        }
+      } else if (anchors.bottom !== undefined) {
         u.bottom = anchors.bottom - bM;
-        this.$isUsingImplicitHeight = false;
-        u.height = u.bottom - u.top;
-        u.y = u.top - top;
-        u.verticalCenter = (u.bottom + u.top) / 2;
-      } else if ((u.verticalCenter = anchors.verticalCenter) !== undefined) {
-        this.$isUsingImplicitHeight = false;
-        u.height = (u.verticalCenter - u.top) * 2;
-        u.y = u.top - top;
-        u.bottom = 2 * u.verticalCenter - u.top;
+        if ((u.verticalCenter = anchors.verticalCenter) !== undefined) {
+          this.$isUsingImplicitHeight = false;
+          u.height = (u.bottom - u.verticalCenter) * 2;
+          u.y = 2 * u.verticalCenter - u.bottom - top;
+          u.top = 2 * u.verticalCenter - u.bottom;
+        } else {
+          u.y = u.bottom - h - top;
+          u.top = u.bottom - h;
+          u.verticalCenter = u.bottom - h / 2;
+        }
+      } else if (anchors.verticalCenter !== undefined) {
+        u.verticalCenter = anchors.verticalCenter;
+        u.y = u.verticalCenter - h / 2 - top;
+        u.top = u.verticalCenter - h / 2;
+        u.bottom = u.verticalCenter + h / 2;
       } else {
-        u.y = u.top - top;
-        u.bottom = u.top + h;
-        u.verticalCenter = u.top + h / 2;
+        ok = 0;
       }
-    } else if (anchors.bottom !== undefined) {
-      u.bottom = anchors.bottom - bM;
-      if ((u.verticalCenter = anchors.verticalCenter) !== undefined) {
-        this.$isUsingImplicitHeight = false;
-        u.height = (u.bottom - u.verticalCenter) * 2;
-        u.y = 2 * u.verticalCenter - u.bottom - top;
-        u.top = 2 * u.verticalCenter - u.bottom;
-      } else {
-        u.y = u.bottom - h - top;
-        u.top = u.bottom - h;
-        u.verticalCenter = u.bottom - h / 2;
-      }
-    } else if (anchors.verticalCenter !== undefined) {
-      u.verticalCenter = anchors.verticalCenter;
-      u.y = u.verticalCenter - h / 2 - top;
-      u.top = u.verticalCenter - h / 2;
-      u.bottom = u.verticalCenter + h / 2;
     } else {
+      ok = 0;
+    }
+    if (!ok) {
       if (this.parent) {
         const topProp = this.parent.$properties.top;
         topProp.changed.connect(this, this.$updateVGeometry, flags);
