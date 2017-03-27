@@ -155,11 +155,23 @@ function applyAttachedObjects(type, name, proto) {
     engine.pendingOperations/map["C:"+componentId] by getAttachedObject.
   */
 
-  if (type.getAttachedObject && !proto.hasOwnProperty(name) &&
-      (!type.$descriptor.owners || (proto.$descriptor&&type.$descriptor.owners.test(proto.$descriptor.fullname)))) {
+  if (type.getAttachedObject && !proto.hasOwnProperty(name)) {
+    let found = 0;
+    if (type.$descriptor.owners) {
+      for (var cons = proto.constructor, cons0; cons&&cons!==cons0; cons0=cons, cons = (cons.prototype?cons.prototype.constructor:0)) {
+        if (cons.$descriptor && type.$descriptor.owners.test(cons.$descriptor.fullname)) {
+          found = 1;
+          break;
+        }
+      }
+    } else {
+      found = 1;
+    }
 
-    QmlWeb.setupGetter(proto, name, type.getAttachedObject);
-    objectAttachors[name] = type;
+    if (found) {
+      QmlWeb.setupGetter(proto, name, type.getAttachedObject);
+      objectAttachors[name] = type;
+    }
   }
 }
 
