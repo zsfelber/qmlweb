@@ -649,11 +649,16 @@ class Item extends ItemBase {
       minY = Math.min(minX, child.y);
     }
 
-    const c = component.childrenRect.$properties;
-    c.x.set(minX, QmlWeb.QMLPropertyFlags.Privileged);
-    c.y.set(minY, QmlWeb.QMLPropertyFlags.Privileged);
-    c.width.set(maxWidth, QmlWeb.QMLPropertyFlags.Privileged);
-    c.height.set(maxHeight, QmlWeb.QMLPropertyFlags.Privileged);
+    if (component.childrenRect) {
+      if (!component.$childrenRect) throw new AssertionError(this+" : childrenRect with no $childrenRect  of component:"+component);
+      const c = component.$childrenRect.$properties;
+      c.x.set(minX, QmlWeb.QMLPropertyFlags.Privileged);
+      c.y.set(minY, QmlWeb.QMLPropertyFlags.Privileged);
+      c.width.set(maxWidth, QmlWeb.QMLPropertyFlags.Privileged);
+      c.height.set(maxHeight, QmlWeb.QMLPropertyFlags.Privileged);
+    } else {
+      console.warn(this+" : no childrenRect of component:"+component);
+    }
   }
 };
 

@@ -157,7 +157,7 @@ function applyAttachedObjects(type, name, proto) {
     engine.pendingOperations/map["C:"+componentId] by getAttachedObject.
   */
 
-  if (type.getAttachedObject && !proto.hasOwnProperty(name)) {
+  if (type.getAttachedObject && (type.$descriptor.multilevel ? !proto.hasOwnProperty(name) : !(name in proto))) {
     let found = 0;
     if (type.$descriptor.owners) {
       for (var p = proto; ; p = p.__proto__) {
@@ -169,6 +169,11 @@ function applyAttachedObjects(type, name, proto) {
           }
         } else {
           var cons = p.$constructor;
+          if (!cons) {
+            console.error("No $constructor : #"+p.$objectId+"  "+(typeof p)+"  "+p.constructor.name);
+            cons = p.constructor;
+          }
+
           if (cons.$descriptor && type.$descriptor.owners.test(cons.$descriptor.fullname)) {
             found = 1;
             break;
@@ -177,12 +182,9 @@ function applyAttachedObjects(type, name, proto) {
             break;
           }
         }
-        if (!type.$descriptor.multilevel) {
-          break;
-        }
       }
     } else {
-      found = type.$descriptor.multilevel || !(name in proto);
+      found = 1;
     }
 
     if (found) {
