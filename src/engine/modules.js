@@ -62,6 +62,9 @@ function registerQmlType(options, constructor) {
     $name: options.module+"."+options.name
   };
 
+  descriptor.fullname = descriptor.module+"."+descriptor.name;
+  descriptor.constructor.$descriptor = descriptor;
+
   if (descriptor.global) {
     descriptor.constructor.$isGlobal = true;
     registerGlobalQmlType(descriptor.name, descriptor.constructor);
@@ -152,7 +155,9 @@ function applyAttachedObjects(type, name, proto) {
     engine.pendingOperations/map["C:"+componentId] by getAttachedObject.
   */
 
-  if (type.getAttachedObject && !proto.hasOwnProperty(name)) {
+  if (type.getAttachedObject && !proto.hasOwnProperty(name) &&
+      (!type.$descriptor.owners || (proto.$descriptor&&type.$descriptor.owners.test(proto.$descriptor.fullname)))) {
+
     QmlWeb.setupGetter(proto, name, type.getAttachedObject);
     objectAttachors[name] = type;
   }

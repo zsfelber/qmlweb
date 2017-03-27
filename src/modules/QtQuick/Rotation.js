@@ -4,41 +4,135 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
-    target: "QtObject",
-    angle: "real"
+    target: {type:"QtObject", initialValue:null},
+    angle: { type:"real", initialValue: 0}
   }
 }, class Rotation extends QtObject {
   constructor(meta) {
     super(meta);
     this.$engine.initMeta(this, meta, Rotation);
+
+    this.targetChanged.connect(this, this.$onTargetChanged);
     this.target = this.$parent;
 
-    const engine = this.$engine;
-    const createProperty = engine.createProperty;
-
-    this.axis = new QmlWeb.QObject(this, {attached:true, info:"axis"});
-    engine.createProperty("real", this.axis, "x");
-    engine.createProperty("real", this.axis, "y");
-    engine.createProperty("real", this.axis, "z", { initialValue: 1 });
-
-    this.origin = new QmlWeb.QObject(this, {attached:true, info:"rotation"});
-    engine.createProperty("real", this.origin, "x");
-    engine.createProperty("real", this.origin, "y");
-
-    this.angleChanged.connect(this.$parent, this.$parent.$updateTransform);
-    this.axis.xChanged.connect(this.$parent, this.$parent.$updateTransform);
-    this.axis.yChanged.connect(this.$parent, this.$parent.$updateTransform);
-    this.axis.zChanged.connect(this.$parent, this.$parent.$updateTransform);
-    this.origin.xChanged.connect(this, this.$updateOrigin);
-    this.origin.yChanged.connect(this, this.$updateOrigin);
-    this.$parent.$updateTransform();
   }
   getTargetStyle() {
     return this.target.css;
+  }
+  $onTargetChanged(newVal, oldVal) {
+    if (oldVal) {
+      this.angleChanged.disconnect(oldVal, oldVal.$updateTransform);
+    }
+
+    const engine = this.$engine;
+
+    this.angleChanged.connect(this.target, this.target.$updateTransform);
+
+    this.target.$updateTransform();
   }
   $updateOrigin() {
     const css = this.getTargetStyle();
     QmlWeb.setStyle(css, "transformOrigin", `${this.origin.x}px ${this.origin.y}px`);
     QmlWeb.setStyle(css, "WebkitTransformOrigin", `${this.origin.x}px ${this.origin.y}px`);
   }
+});
+
+
+
+class RotationOrigin {
+  constructor(parent, engine) {
+    try {
+      engine.pushengine();
+
+      this.parent = parent;
+      this.$engine = engine;
+      this.$properties = {};
+      this.$engine.initMeta(this, {}, RotationOrigin);
+
+      const item = parent.$base;
+      this.xChanged.connect(item, item.$updateOrigin);
+      this.yChanged.connect(item, item.$updateOrigin);
+
+      QObject.attach(parent, this);
+    } finally {
+      engine.popengine();
+    }
+  }
+
+  static getAttachedObject() {
+    if (!this.hasOwnProperty("$rotationOrigin")) {
+      this.$rotationOrigin = new RotationOrigin(this, this.$engine);
+    }
+    return this.$rotationOrigin;
+  }
+
+  toString() {
+    return "RotationOrigin:"+this.parent;
+  }
+}
+
+class RotationAxis {
+  constructor(parent, engine) {
+    try {
+      engine.pushengine();
+
+      this.parent = parent;
+      this.$engine = engine;
+      this.$properties = {};
+      this.$engine.initMeta(this, {}, RotationAxis);
+
+      const titem = parent.target.$base;
+      this.xChanged.connect(titem, titem.$updateTransform);
+      this.yChanged.connect(titem, titem.$updateTransform);
+      this.zChanged.connect(titem, titem.$updateTransform);
+
+      QObject.attach(parent, this);
+    } finally {
+      engine.popengine();
+    }
+  }
+
+  static getAttachedObject() {
+    if (!this.hasOwnProperty("$rotationAxis")) {
+      this.$rotationAxis = new RotationAxis(this, this.$engine);
+    }
+    return this.$rotationAxis;
+  }
+
+  toString() {
+    return "RotationAxis:"+this.parent;
+  }
+}
+
+
+QmlWeb.registerQmlType({
+  global: true,
+  module: "QtQml",
+  name: "origin",
+  versions: /.*/,
+  owners: /QtQuick\.Rotation/,
+  signals: {
+  },
+  properties: {
+    x: { type:"real", initialValue: 0},
+    y: { type:"real", initialValue: 0}
+  },
+  constructor: RotationOrigin
+});
+
+
+QmlWeb.registerQmlType({
+  global: true,
+  module: "QtQml",
+  name: "axis",
+  versions: /.*/,
+  owners: /QtQuick\.Rotation/,
+  signals: {
+  },
+  properties: {
+    x: { type:"real", initialValue: 0},
+    y: { type:"real", initialValue: 0},
+    z: { type:"real", initialValue: 1 }
+  },
+  constructor: RotationAxis
 });

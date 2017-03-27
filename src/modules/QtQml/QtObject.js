@@ -314,6 +314,7 @@ QmlWeb.registerQmlType({
   module: "QtQml",
   name: "Keys",
   versions: /.*/,
+  owners: /QtQml\.QtObject/,
   signals: {
     asteriskPresed : [], backPressed : [], backtabPressed : [], callPressed : [],
     cancelPressed : [], deletePressed : [], digit0Pressed : [], digit1Pressed : [],

@@ -4,37 +4,88 @@ QmlWeb.registerQmlType({
   versions: /.*/,
   baseClass: "QtQml.QtObject",
   properties: {
-    target: "QtObject",
-    xScale: "real",
-    yScale: "real"
+    target: {type:"QtObject", initialValue:null},
+    xScale: { type:"real", initialValue: 1},
+    yScale: { type:"real", initialValue: 1}
   }
 }, class Scale extends QtObject {
   constructor(meta) {
     super(meta);
     this.$engine.initMeta(this, meta, Scale);
+
+    this.targetChanged.connect(this, this.$onTargetChanged);
     this.target = this.$parent;
-
-    const engine = this.$engine;
-    const createProperty = engine.createProperty;
-    this.origin = new QmlWeb.QObject(this, {attached:true, info:"origin"});
-    engine.createProperty("real", this.origin, "x");
-    engine.createProperty("real", this.origin, "y");
-
-    this.xScaleChanged.connect(this.$parent, this.$parent.$updateTransform);
-    this.yScaleChanged.connect(this.$parent, this.$parent.$updateTransform);
-    this.origin.xChanged.connect(this, this.$updateOrigin);
-    this.origin.yChanged.connect(this, this.$updateOrigin);
-
-    /* QML default origin is top-left, while CSS default origin is centre, so
-     * $updateOrigin must be called to set the initial transformOrigin. */
-    this.$updateOrigin();
   }
   getTargetStyle() {
     return this.target.css;
+  }
+  $onTargetChanged(newVal, oldVal) {
+    if (oldVal) {
+      this.xScaleChanged.disconnect(oldVal, oldVal.$updateTransform);
+      this.yScaleChanged.disconnect(oldVal, oldVal.$updateTransform);
+    }
+
+    const engine = this.$engine;
+
+    this.xScaleChanged.connect(this.target, this.target.$updateTransform);
+    this.yScaleChanged.connect(this.target, this.target.$updateTransform);
+
+    /* QML default origin is top-left, while CSS default origin is centre, so
+    * $updateOrigin must be called to set the initial transformOrigin. */
+    this.$updateOrigin();
   }
   $updateOrigin() {
     const css = this.getTargetStyle();
     QmlWeb.setStyle(css, "transformOrigin", `${this.origin.x}px ${this.origin.y}px`);
     QmlWeb.setStyle(css, "WebkitTransformOrigin", `${this.origin.x}px ${this.origin.y}px`);
   }
+});
+
+
+class ScaleOrigin {
+  constructor(parent, engine) {
+    try {
+      engine.pushengine();
+
+      this.parent = parent;
+      this.$engine = engine;
+      this.$properties = {};
+      this.$engine.initMeta(this, {}, ScaleOrigin);
+
+      const item = parent.$base;
+      this.xChanged.connect(item, item.$updateOrigin);
+      this.yChanged.connect(item, item.$updateOrigin);
+
+      QObject.attach(parent, this);
+    } finally {
+      engine.popengine();
+    }
+  }
+
+  static getAttachedObject() {
+    if (!this.hasOwnProperty("$scaleOrigin")) {
+      this.$scaleOrigin = new ScaleOrigin(this, this.$engine);
+    }
+    return this.$scaleOrigin;
+  }
+
+  toString() {
+    return "scaleOrigin:"+this.parent;
+  }
+}
+
+
+QmlWeb.registerQmlType({
+  global: true,
+  module: "QtQml",
+  name: "origin",
+  versions: /.*/,
+  owners: /QtQuick.Scale/,
+  signals: {
+  },
+  properties: {
+    x: { type:"real", initialValue: 0},
+    y: { type:"real", initialValue: 0}
+  },
+  constructor: ScaleOrigin
 });
