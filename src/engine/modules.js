@@ -31,7 +31,7 @@ function registerGlobalQmlType(name, type) {
   constructors[name] = type;
   modules.Main[name] = type;
 
-  applyAttachedObjects(type, name, QtObject.prototype);
+  applyAttachedObjects(type, name, (type.$descriptor.$owner ? type.$descriptor.$owner:QtObject).prototype );
 
 }
 
@@ -46,7 +46,7 @@ function registerQmlType(options, constructor) {
     // TODO ok?   >     <
     name: options.element,
     versions: options.versions,
-    owners: options.owners,
+    $owner: options.$owner,
     multilevel: options.multilevel,
     baseClass: options.baseClass,
     enums: options.enums,
@@ -157,39 +157,12 @@ function applyAttachedObjects(type, name, proto) {
     engine.pendingOperations/map["C:"+componentId] by getAttachedObject.
   */
 
-  if (type.getAttachedObject && (type.$descriptor.multilevel ? !proto.hasOwnProperty(name) : !(name in proto))) {
-    let found = 0;
-    if (type.$descriptor.owners) {
-      for (var p = proto; ; p = p.__proto__) {
-        if (p.hasOwnProperty("$meta2")) {
-          var m2 = p.$meta2;
-          if (type.$descriptor.owners.test(m2.$class)) {
-            found = 1;
-            break;
-          }
-        } else {
-          var cons = p.$constructor;
-          if (!cons) {
-            console.error("No $constructor : #"+p.$objectId+"  "+(typeof p)+"  "+p.constructor.name);
-            cons = p.constructor;
-          }
+  if (type.getAttachedObject) {
 
-          if (cons.$descriptor && type.$descriptor.owners.test(cons.$descriptor.fullname)) {
-            found = 1;
-            break;
-          }
-          if (p === QObject.prototype || p === Object.prototype) {
-            break;
-          }
-        }
-      }
-    } else {
-      found = 1;
-    }
+    objectAttachors[name] = type;
 
-    if (found) {
+    if (type.$descriptor.multilevel ? !proto.hasOwnProperty(name) : !(name in proto)) {
       QmlWeb.setupGetter(proto, name, type.getAttachedObject);
-      objectAttachors[name] = type;
     }
   }
 }

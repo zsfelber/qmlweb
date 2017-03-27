@@ -778,7 +778,7 @@ QmlWeb.registerQmlType({
   module: "QtQml",
   name: "anchors",
   versions: /.*/,
-  owners: /QtQuick\.Item/,
+  $owner: Item,
   signals: {
   },
   properties: {
@@ -804,7 +804,7 @@ QmlWeb.registerQmlType({
   module: "QtQml",
   name: "childrenRect",
   versions: /.*/,
-  owners: /QtQuick\.Item/,
+  $owner: Item,
   signals: {
   },
   properties: {

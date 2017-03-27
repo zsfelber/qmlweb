@@ -1,13 +1,4 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Rotation",
-  versions: /.*/,
-  baseClass: "QtQml.QtObject",
-  properties: {
-    target: {type:"QtObject", initialValue:null},
-    angle: { type:"real", initialValue: 0}
-  }
-}, class Rotation extends QtObject {
+class Rotation extends QtObject {
   constructor(meta) {
     super(meta);
     this.$engine.initMeta(this, meta, Rotation);
@@ -35,7 +26,7 @@ QmlWeb.registerQmlType({
     QmlWeb.setStyle(css, "transformOrigin", `${this.origin.x}px ${this.origin.y}px`);
     QmlWeb.setStyle(css, "WebkitTransformOrigin", `${this.origin.x}px ${this.origin.y}px`);
   }
-});
+}
 
 
 
@@ -106,11 +97,23 @@ class RotationAxis {
 
 
 QmlWeb.registerQmlType({
+  module: "QtQuick",
+  name: "Rotation",
+  versions: /.*/,
+  baseClass: "QtQml.QtObject",
+  properties: {
+    target: {type:"QtObject", initialValue:null},
+    angle: { type:"real", initialValue: 0}
+  },
+  constructor: Rotation
+});
+
+QmlWeb.registerQmlType({
   global: true,
-  module: "QtQml",
+  module: "QtQuick.Rotation",
   name: "origin",
   versions: /.*/,
-  owners: /QtQuick\.Rotation/,
+  $owner: Rotation,
   signals: {
   },
   properties: {
@@ -123,10 +126,10 @@ QmlWeb.registerQmlType({
 
 QmlWeb.registerQmlType({
   global: true,
-  module: "QtQml",
+  module: "QtQuick.Rotation",
   name: "axis",
   versions: /.*/,
-  owners: /QtQuick\.Rotation/,
+  $owner: Rotation,
   signals: {
   },
   properties: {

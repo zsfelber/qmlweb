@@ -405,6 +405,7 @@ QmlWeb.registerQmlType({
   module: "QtQml",
   name: "Component",
   versions: /.*/,
+  multilevel: true,
   constructor: QMLComponent,
   properties: {
     status : "int"
@@ -415,7 +416,6 @@ QmlWeb.registerQmlType({
   global: true,
   module: "QtQml",
   name: "AttachedComponent",
-  multilevel: true,
   versions: /.*/,
   signals: {
     completed: [],

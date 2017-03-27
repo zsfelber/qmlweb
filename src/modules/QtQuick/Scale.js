@@ -1,14 +1,4 @@
-QmlWeb.registerQmlType({
-  module: "QtQuick",
-  name: "Scale",
-  versions: /.*/,
-  baseClass: "QtQml.QtObject",
-  properties: {
-    target: {type:"QtObject", initialValue:null},
-    xScale: { type:"real", initialValue: 1},
-    yScale: { type:"real", initialValue: 1}
-  }
-}, class Scale extends QtObject {
+class Scale extends QtObject {
   constructor(meta) {
     super(meta);
     this.$engine.initMeta(this, meta, Scale);
@@ -39,8 +29,7 @@ QmlWeb.registerQmlType({
     QmlWeb.setStyle(css, "transformOrigin", `${this.origin.x}px ${this.origin.y}px`);
     QmlWeb.setStyle(css, "WebkitTransformOrigin", `${this.origin.x}px ${this.origin.y}px`);
   }
-});
-
+}
 
 class ScaleOrigin {
   constructor(parent, engine) {
@@ -74,13 +63,25 @@ class ScaleOrigin {
   }
 }
 
+QmlWeb.registerQmlType({
+  module: "QtQuick",
+  name: "Scale",
+  versions: /.*/,
+  baseClass: "QtQml.QtObject",
+  properties: {
+    target: {type:"QtObject", initialValue:null},
+    xScale: { type:"real", initialValue: 1},
+    yScale: { type:"real", initialValue: 1}
+  },
+  constructor: Scale
+});
 
 QmlWeb.registerQmlType({
   global: true,
-  module: "QtQml",
+  module: "QtQuick.Scale",
   name: "origin",
   versions: /.*/,
-  owners: /QtQuick.Scale/,
+  $owner: Scale,
   signals: {
   },
   properties: {
