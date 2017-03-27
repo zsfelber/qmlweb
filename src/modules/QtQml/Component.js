@@ -415,6 +415,7 @@ QmlWeb.registerQmlType({
   global: true,
   module: "QtQml",
   name: "AttachedComponent",
+  multilevel: true,
   versions: /.*/,
   signals: {
     completed: [],

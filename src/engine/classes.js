@@ -2,8 +2,8 @@
 function initMeta(self, meta, constructor) {
   const engine = this;
   const info = constructor.$qmlTypeInfo;
+  self.$constructor = constructor;
   if (info) {
-    self.$constructor = constructor;
     self.$modinf = info;
     self.$classname = info.$name;
     if (info.enums) {

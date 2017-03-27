@@ -46,6 +46,8 @@ function registerQmlType(options, constructor) {
     // TODO ok?   >     <
     name: options.element,
     versions: options.versions,
+    owners: options.owners,
+    multilevel: options.multilevel,
     baseClass: options.baseClass,
     enums: options.enums,
     signals: options.signals,
@@ -158,21 +160,29 @@ function applyAttachedObjects(type, name, proto) {
   if (type.getAttachedObject && !proto.hasOwnProperty(name)) {
     let found = 0;
     if (type.$descriptor.owners) {
-      var cons = proto.$constructor, cons0;
-      if (proto.$base === proto) {
-        for (; cons&&cons!==cons0; cons0=cons, cons = (cons.prototype?cons.prototype.constructor:0)) {
+      for (var p = proto; ; p = p.__proto__) {
+        if (p.hasOwnProperty("$meta2")) {
+          var m2 = p.$meta2;
+          if (type.$descriptor.owners.test(m2.$class)) {
+            found = 1;
+            break;
+          }
+        } else {
+          var cons = p.$constructor;
           if (cons.$descriptor && type.$descriptor.owners.test(cons.$descriptor.fullname)) {
             found = 1;
             break;
           }
+          if (p === QObject.prototype || p === Object.prototype) {
+            break;
+          }
         }
-      } else {
-        if (cons.$descriptor && type.$descriptor.owners.test(cons.$descriptor.fullname)) {
-          found = 1;
+        if (!type.$descriptor.multilevel) {
+          break;
         }
       }
     } else {
-      found = 1;
+      found = type.$descriptor.multilevel || !(name in proto);
     }
 
     if (found) {
