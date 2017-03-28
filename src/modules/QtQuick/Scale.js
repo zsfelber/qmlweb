@@ -55,8 +55,8 @@ class ScaleOrigin {
 
   static getAttachedObject() {
     if (!this.hasOwnProperty("$scaleOrigin")) {
-      if (this.__proto__.origin)
-        this.$scaleOrigin = setupValue(this, "$scaleOrigin", QObject.createChild(this.__proto__.origin));
+      if (this !== this.$base)
+        this.$scaleOrigin = QObject.createAttachmentChild(this.__proto__.origin, this);
       else
         this.$scaleOrigin = new ScaleOrigin(this, this.$engine);
     }

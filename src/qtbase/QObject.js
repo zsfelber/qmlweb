@@ -39,12 +39,13 @@ class QObject {
     }
     child.$isAttachedObj = true;
     child.$attached_as = info;
+    child.parent = parent;
 
     // context for attached properties like "anchors" and so
     // see also $ownerObject
-    QmlWeb.setupGetter(child, "$component", ()=>parent.$component, child);
-    QmlWeb.setupGetter(child, "$context", ()=>parent.$context, child);
-    QmlWeb.setupGetter(child, "$componentCreateFlags", ()=>parent.$componentCreateFlags, child);
+    QmlWeb.setupGetter(child, "$component", ()=>child.parent.$component, child);
+    QmlWeb.setupGetter(child, "$context", ()=>child.parent.$context, child);
+    QmlWeb.setupGetter(child, "$componentCreateFlags", ()=>child.parent.$componentCreateFlags, child);
 
     if (!child.destroy) child.destroy = 1;
     if (!child.$leaf) child.$leaf = child;
@@ -99,6 +100,17 @@ class QObject {
     childObj.$signals = Object.create(this.$signals);
 
     this.$base.$leaf = childObj;
+
+    return childObj;
+  }
+
+  static createAttachmentChild(attObj, parent) {
+    const childObj = Object.create(attObj);
+    childObj.parent = parent;
+    if (attObj.$properties) childObj.$properties = Object.create(attObj.$properties);
+    if (attObj.$signals) childObj.$signals = Object.create(attObj.$signals);
+
+    attObj.$base.$leaf = childObj;
 
     return childObj;
   }

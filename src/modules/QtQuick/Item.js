@@ -700,8 +700,8 @@ class ItemAnchors {
 
   static getAttachedObject() {
     if (!this.hasOwnProperty("$anchors")) {
-      if (this.__proto__.anchors)
-        this.$anchors = setupValue(this, "$anchors", QObject.createChild(this.__proto__.anchors));
+      if (this !== this.$base)
+        this.$anchors = QObject.createAttachmentChild(this.__proto__.anchors, this);
       else
         this.$anchors = new ItemAnchors(this, this.$engine);
     }
@@ -733,8 +733,8 @@ class ItemChildrenRect {
 
   static getAttachedObject() {
     if (!this.hasOwnProperty("$childrenRect")) {
-      if (this.__proto__.childrenRect)
-        this.$childrenRect = setupValue(this, "$childrenRect", QObject.createChild(this.__proto__.childrenRect));
+      if (this !== this.$base)
+        this.$childrenRect = QObject.createAttachmentChild(this.__proto__.childrenRect, this);
       else
         this.$childrenRect = new ItemChildrenRect(this, this.$engine);
     }

@@ -287,8 +287,8 @@ class QtKeys {
 
   static getAttachedObject() {
     if (!this.hasOwnProperty("$Keys")) {
-      if (this.__proto__.Keys)
-        this.$Keys = setupValue(this, "$Keys", QObject.createChild(this.__proto__.Keys));
+      if (this !== this.$base)
+        this.$Keys = QObject.createAttachmentChild(this.__proto__.Keys, this);
       else
         this.$Keys = new QtKeys(this, this.$engine);
     }

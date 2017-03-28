@@ -54,8 +54,8 @@ class RotationOrigin {
 
   static getAttachedObject() {
     if (!this.hasOwnProperty("$rotationOrigin")) {
-      if (this.__proto__.origin)
-        this.$rotationOrigin = setupValue(this, "$rotationOrigin", QObject.createChild(this.__proto__.origin));
+      if (this !== this.$base)
+        this.$rotationOrigin = QObject.createAttachmentChild(this.__proto__.origin, this);
       else
         this.$rotationOrigin = new RotationOrigin(this, this.$engine);
     }
@@ -92,8 +92,8 @@ class RotationAxis {
 
   static getAttachedObject() {
     if (!this.hasOwnProperty("$rotationAxis")) {
-      if (this.__proto__.axis)
-        this.$rotationAxis = setupValue(this, "$rotationAxis", QObject.createChild(this.__proto__.axis));
+      if (this !== this.$base)
+        this.$rotationAxis = QObject.createAttachmentChild(this.__proto__.axis, this);
       else
         this.$rotationAxis = new RotationAxis(this, this.$engine);
     }
