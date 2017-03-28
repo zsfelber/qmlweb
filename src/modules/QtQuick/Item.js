@@ -425,8 +425,8 @@ class Item extends ItemBase {
     const u = {}; // our update object
     let ok = 1;
     if (anchors) {
-      const lM = anchors.leftMargin || anchors.margins;
-      const rM = anchors.rightMargin || anchors.margins;
+      const lM = anchors.leftMargin || anchors.margins || 0;
+      const rM = anchors.rightMargin || anchors.margins || 0;
 
       // Position TODO: Layouts
 
@@ -544,8 +544,8 @@ class Item extends ItemBase {
     const u = {}; // our update object
     let ok = 1;
     if (anchors) {
-      const tM = anchors.topMargin || anchors.margins;
-      const bM = anchors.bottomMargin || anchors.margins;
+      const tM = anchors.topMargin || anchors.margins || 0;
+      const bM = anchors.bottomMargin || anchors.margins || 0;
 
       // Position TODO: Layouts
 
