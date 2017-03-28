@@ -387,6 +387,8 @@ class AttachedComponent {
       engine.pushengine();
       this.parent = parent;
       this.$engine = engine;
+      this.$base = this;
+      this.$leaf = this;
       this.$properties = {};
       this.$engine.initMeta(this, {}, AttachedComponent);
       QObject.attach(parent, this);

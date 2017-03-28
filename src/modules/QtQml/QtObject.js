@@ -274,6 +274,8 @@ class QtKeys {
 
       this.parent = parent;
       this.$engine = engine;
+      this.$base = this;
+      this.$leaf = this;
       this.$properties = {};
       this.$engine.initMeta(this, {}, QtKeys);
 
@@ -285,7 +287,10 @@ class QtKeys {
 
   static getAttachedObject() {
     if (!this.hasOwnProperty("$Keys")) {
-      this.$Keys = new QtKeys(this, this.$engine);
+      if (this.__proto__.Keys)
+        this.$Keys = setupValue(this, "$Keys", QObject.createChild(this.__proto__.Keys));
+      else
+        this.$Keys = new QtKeys(this, this.$engine);
     }
     return this.$Keys;
   }

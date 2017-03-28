@@ -38,6 +38,8 @@ class ScaleOrigin {
 
       this.parent = parent;
       this.$engine = engine;
+      this.$base = this;
+      this.$leaf = this;
       this.$properties = {};
       this.$engine.initMeta(this, {}, ScaleOrigin);
 
@@ -53,7 +55,10 @@ class ScaleOrigin {
 
   static getAttachedObject() {
     if (!this.hasOwnProperty("$scaleOrigin")) {
-      this.$scaleOrigin = new ScaleOrigin(this, this.$engine);
+      if (this.__proto__.origin)
+        this.$scaleOrigin = setupValue(this, "$scaleOrigin", QObject.createChild(this.__proto__.origin));
+      else
+        this.$scaleOrigin = new ScaleOrigin(this, this.$engine);
     }
     return this.$scaleOrigin;
   }

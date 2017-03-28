@@ -156,16 +156,16 @@ function applyAttachedObjects(type, name, proto) {
 
   if (type.getAttachedObject) {
 
-    if (!proto) {
+    if (proto) {
+      if (type.$descriptor.multilevel ? !proto.hasOwnProperty(name) : !(name in proto)) {
+        QmlWeb.setupGetter(proto, name, type.getAttachedObject);
+      }
+    } else {
       proto = (type.$descriptor.$owner ? type.$descriptor.$owner : QtObject).prototype ;
       if (!proto.objectAttachors) {
         proto.objectAttachors = {  };
       }
       proto.objectAttachors[name] = type;
-    }
-
-
-    if (type.$descriptor.multilevel ? !proto.hasOwnProperty(name) : !(name in proto)) {
       QmlWeb.setupGetter(proto, name, type.getAttachedObject);
     }
   }
@@ -179,13 +179,13 @@ function applyAllAttachedObjects(proto) {
   // applied to QtQml.QtObject first from registerGlobalQmlType
   // then from classes.construct() when proto has just created
 
-  if (proto.objectAttachors && proto.$constructor && !proto.$constructor.$isGlobal) {
+  /*if (proto.objectAttachors && proto.$constructor && !proto.$constructor.$isGlobal) {
     for(var m in proto.objectAttachors) {
       var mtype = proto.objectAttachors[m];
 
       applyAttachedObjects(mtype, m, proto);
     }
-  }
+  }*/
 }
 
 QmlWeb.modules = modules;

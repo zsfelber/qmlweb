@@ -669,6 +669,8 @@ class ItemAnchors {
 
       this.parent = parent;
       this.$engine = engine;
+      this.$base = this;
+      this.$leaf = this;
       this.$properties = {};
       this.$engine.initMeta(this, {}, ItemAnchors);
 
@@ -698,7 +700,10 @@ class ItemAnchors {
 
   static getAttachedObject() {
     if (!this.hasOwnProperty("$anchors")) {
-      this.$anchors = new ItemAnchors(this, this.$engine);
+      if (this.__proto__.anchors)
+        this.$anchors = setupValue(this, "$anchors", QObject.createChild(this.__proto__.anchors));
+      else
+        this.$anchors = new ItemAnchors(this, this.$engine);
     }
     return this.$anchors;
   }
@@ -715,6 +720,8 @@ class ItemChildrenRect {
 
       this.parent = parent;
       this.$engine = engine;
+      this.$base = this;
+      this.$leaf = this;
       this.$properties = {};
       this.$engine.initMeta(this, {}, ItemChildrenRect);
 
@@ -726,7 +733,10 @@ class ItemChildrenRect {
 
   static getAttachedObject() {
     if (!this.hasOwnProperty("$childrenRect")) {
-      this.$childrenRect = new ItemChildrenRect(this, this.$engine);
+      if (this.__proto__.childrenRect)
+        this.$childrenRect = setupValue(this, "$childrenRect", QObject.createChild(this.__proto__.childrenRect));
+      else
+        this.$childrenRect = new ItemChildrenRect(this, this.$engine);
     }
     return this.$childrenRect;
   }

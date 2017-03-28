@@ -37,6 +37,8 @@ class RotationOrigin {
 
       this.parent = parent;
       this.$engine = engine;
+      this.$base = this;
+      this.$leaf = this;
       this.$properties = {};
       this.$engine.initMeta(this, {}, RotationOrigin);
 
@@ -52,7 +54,10 @@ class RotationOrigin {
 
   static getAttachedObject() {
     if (!this.hasOwnProperty("$rotationOrigin")) {
-      this.$rotationOrigin = new RotationOrigin(this, this.$engine);
+      if (this.__proto__.origin)
+        this.$rotationOrigin = setupValue(this, "$rotationOrigin", QObject.createChild(this.__proto__.origin));
+      else
+        this.$rotationOrigin = new RotationOrigin(this, this.$engine);
     }
     return this.$rotationOrigin;
   }
@@ -69,6 +74,8 @@ class RotationAxis {
 
       this.parent = parent;
       this.$engine = engine;
+      this.$base = this;
+      this.$leaf = this;
       this.$properties = {};
       this.$engine.initMeta(this, {}, RotationAxis);
 
@@ -85,7 +92,10 @@ class RotationAxis {
 
   static getAttachedObject() {
     if (!this.hasOwnProperty("$rotationAxis")) {
-      this.$rotationAxis = new RotationAxis(this, this.$engine);
+      if (this.__proto__.axis)
+        this.$rotationAxis = setupValue(this, "$rotationAxis", QObject.createChild(this.__proto__.axis));
+      else
+        this.$rotationAxis = new RotationAxis(this, this.$engine);
     }
     return this.$rotationAxis;
   }
