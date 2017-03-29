@@ -227,9 +227,11 @@ class Item extends ItemBase {
     this.$updateVGeometry();
   }
   $onWidthChanged_(newVal) {
+    this.$width = newVal;
     QmlWeb.setStyle(this.css, "width", newVal>=0 ? `${newVal}px` : (newVal<0 ? "0" : "auto"));
   }
   $onHeightChanged_(newVal) {
+    this.$height = newVal;
     QmlWeb.setStyle(this.css, "height", newVal>=0 ? `${newVal}px` : (newVal<0 ? "0" : "auto"));
   }
   $onFocusChanged_(newVal) {
@@ -358,10 +360,12 @@ class Item extends ItemBase {
     //   and call each one for each instance only once (if required ).
 
     if (this.pendingUpdateH) {
-      this.$updateHGeometry(this.width, 0, this.pendingUpdateH, true);
+      this.$updateHGeometry(this.pendingUpdateH==="width"?this.$width:(this.pendingUpdateH==true?undefined:this[this.pendingUpdateH]),
+                                                           0, this.pendingUpdateH, true);
     }
     if (this.pendingUpdateV) {
-      this.$updateVGeometry(this.height, 0, this.pendingUpdateV, true);
+      this.$updateVGeometry(this.pendingUpdateV==="height"?this.$height:(this.pendingUpdateH==true?undefined:this[this.pendingUpdateH]),
+                                                            0, this.pendingUpdateV, true);
     }
 
   }
@@ -762,6 +766,8 @@ QmlWeb.registerQmlType({
     z: { type: "real", initialValue: 0 },
     width: { type: "real", initialValue: 0 },
     height: { type: "real", initialValue: 0 },
+    $width: { type: "real" },
+    $height: { type: "real" },
     implicitWidth: { type: "real", initialValue: 0 },
     implicitHeight: { type: "real", initialValue: 0 },
     left: { type: "real", initialValue: 0 },
