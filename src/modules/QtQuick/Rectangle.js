@@ -18,11 +18,6 @@ class Rectangle extends Item {
     super(meta);
     this.$engine.initMeta(this, meta, Rectangle);
 
-    const engine = this.$engine;
-    const createProperty = engine.createProperty;
-    this.border = new QmlWeb.QObject(this, {attached:true, info:"border"});
-    engine.createProperty("color", this.border, "color", { initialValue: "black" });
-    engine.createProperty("int", this.border, "width", { initialValue: 1 });
     this.$borderActive = false;
 
     const bg = this.impl = document.createElement("div");
@@ -31,8 +26,6 @@ class Rectangle extends Item {
 
     this.colorChanged.connect(this, this.$onColorChanged);
     this.radiusChanged.connect(this, this.$onRadiusChanged);
-    this.border.colorChanged.connect(this, this.border$onColorChanged);
-    this.border.widthChanged.connect(this, this.border$onWidthChanged);
     this.widthChanged.connect(this, this.$updateBorder);
     this.heightChanged.connect(this, this.$updateBorder);
   }
@@ -67,6 +60,44 @@ class Rectangle extends Item {
   }
 }
 
+
+class RectBorder {
+  constructor(parent, engine) {
+    try {
+      engine.pushengine();
+
+      this.parent = parent;
+      this.$engine = engine;
+      this.$base = this;
+      this.$leaf = this;
+      this.$properties = {};
+      this.$engine.initMeta(this, {}, RectBorder);
+
+      const item = parent.$base;
+      this.colorChanged.connect(parent, item.border$onColorChanged);
+      this.widthChanged.connect(parent, item.border$onWidthChanged);
+
+      QObject.attach(parent, this);
+    } finally {
+      engine.popengine();
+    }
+  }
+
+  static getAttachedObject() {
+    if (!this.hasOwnProperty("$rectBorder")) {
+      if (this !== this.$base)
+        this.$rectBorder = QObject.createAttachmentChild(this.__proto__.border, this);
+      else
+        this.$rectBorder = new RectBorder(this, this.$engine);
+    }
+    return this.$rectBorder;
+  }
+
+  toString() {
+    return "rectBorder:"+this.parent;
+  }
+}
+
 QmlWeb.registerQmlType({
   module: "QtQuick",
   name: "Rectangle",
@@ -77,4 +108,20 @@ QmlWeb.registerQmlType({
     radius: "real"
   },
   constructor:Rectangle
+});
+
+
+QmlWeb.registerQmlType({
+  global: true,
+  module: "QtQuick.Rectangle",
+  name: "border",
+  versions: /.*/,
+  $owner: Rectangle,
+  signals: {
+  },
+  properties: {
+    color: { type: "color", initialValue:"black"},
+    width: { type: "int", initialValue:1}
+  },
+  constructor: RectBorder
 });
