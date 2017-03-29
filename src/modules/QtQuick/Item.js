@@ -399,7 +399,7 @@ class Item extends ItemBase {
       return;
     }
     const engine = this.$engine;
-    if (!oncompl && !(engine.operationState & QmlWeb.QMLOperationState.Running)) {
+    if (!oncompl && !this.$completed) {
       // resulting too expensive cyclic calls at init time:
       if (propName === "width") {
         this.pendingUpdateH = "width";
@@ -518,7 +518,7 @@ class Item extends ItemBase {
       return;
     }
     const engine = this.$engine;
-    if (!oncompl && !(engine.operationState & QmlWeb.QMLOperationState.Running)) {
+    if (!oncompl && !this.$completed) {
       // resulting too expensive cyclic calls at init time:
       if (propName === "height") {
         this.pendingUpdateV = "height";

@@ -339,7 +339,9 @@ class QMLComponent {
       component.cntPendingCompletions++;
     } else {
       component.status = QmlWeb.Component.Ready;
+      this.$completed = true;
     }
+
   }
 
   static complete() {
@@ -362,6 +364,7 @@ class QMLComponent {
 
       try {
         this.$attachedComponent.completed();
+        this.$completed = true;
         //QmlWeb.log("Completed : "+this+" : "+item);
       } catch (err) {
         if (err.ctType) {
