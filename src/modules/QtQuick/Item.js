@@ -227,10 +227,10 @@ class Item extends ItemBase {
     this.$updateVGeometry();
   }
   $onWidthChanged_(newVal) {
-    QmlWeb.setStyle(this.css, "width", newVal!==undefined&&newVal!==null ? `${newVal}px` : "auto");
+    QmlWeb.setStyle(this.css, "width", newVal>=0 ? `${newVal}px` : (newVal<0 ? "0" : "auto"));
   }
   $onHeightChanged_(newVal) {
-    QmlWeb.setStyle(this.css, "height", newVal!==undefined&&newVal!==null ? `${newVal}px` : "auto");
+    QmlWeb.setStyle(this.css, "height", newVal>=0 ? `${newVal}px` : (newVal<0 ? "0" : "auto"));
   }
   $onFocusChanged_(newVal) {
     if (newVal) {
