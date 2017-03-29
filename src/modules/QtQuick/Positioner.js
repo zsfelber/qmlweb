@@ -6,7 +6,6 @@ class Positioner extends Item {
 
     this.childrenChanged.connect(this, this.$onChildrenChanged);
     this.spacingChanged.connect(this, this.layoutChildren);
-    this.layoutChildren();
   }
   $onChildrenChanged() {
     const flags = QmlWeb.QMLSignalFlags.UniqueConnection;

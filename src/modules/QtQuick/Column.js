@@ -7,6 +7,7 @@ QmlWeb.registerQmlType({
   constructor(meta) {
     super(meta);
     this.$engine.initMeta(this, meta, Column);
+    this.layoutChildren();
   }
   layoutChildren() {
     let curPos = 0;
