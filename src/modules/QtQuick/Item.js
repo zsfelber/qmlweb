@@ -766,8 +766,6 @@ QmlWeb.registerQmlType({
     z: { type: "real", initialValue: 0 },
     width: { type: "real", initialValue: 0 },
     height: { type: "real", initialValue: 0 },
-    $width: { type: "real" },
-    $height: { type: "real" },
     implicitWidth: { type: "real", initialValue: 0 },
     implicitHeight: { type: "real", initialValue: 0 },
     left: { type: "real", initialValue: 0 },
