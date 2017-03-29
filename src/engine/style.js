@@ -24,7 +24,7 @@ function createStyle(css) {
 
 function setStyle(style, arg, value, defaultStyle = defaultItemStyle) {
   style[arg] = value;
-  if (value && defaultStyle[arg] !== value) {
+  if (value!==undefined && value!==null && defaultStyle[arg] !== value) {
     style.$css[arg] = value.toCssValue ? value.toCssValue() : (value.toString ? value.toString() : value);
   } else {
     style.$css[arg] = "inherit";
