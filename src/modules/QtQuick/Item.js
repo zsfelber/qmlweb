@@ -419,7 +419,7 @@ class Item extends ItemBase {
 
     // Width
     if (propName === "width") {
-      this.$isUsingImplicitWidth = !newVal;
+      this.$isUsingImplicitWidth = !newVal || newVal<0;
     }
 
     const u = {}; // our update object
@@ -538,7 +538,7 @@ class Item extends ItemBase {
 
     // HeighttopProp
     if (propName === "height") {
-      this.$isUsingImplicitHeight = !newVal;
+      this.$isUsingImplicitHeight = !newVal || newVal<0;
     }
 
     const u = {}; // our update object
