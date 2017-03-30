@@ -138,7 +138,7 @@ function loadImport(entry, component) {
   // is it a js file
   const nameIsJs = name.slice(-3) === ".js";
   // local [relative] dir
-  const nameIsDir = !nameIsQualifiedModuleName && !nameIsUrl && !nameIsJs;
+  let nameIsDir = !nameIsQualifiedModuleName && !nameIsUrl && !nameIsJs;
 
   if (nameIsDir) {
     name = this.$resolvePath(name, curBaseUrl);
@@ -157,6 +157,14 @@ function loadImport(entry, component) {
       // module with addModulePath
       qrcName = engine.userAddedModulePaths[name];
       content = QmlWeb.readQmlDir(qrcName);
+      if (!content) {
+        nameIsDir = true;
+        name = this.$resolvePath(qrcName, curBaseUrl);
+        if (name[name.length - 1] === "/") {
+          // remove trailing slash as it required for `readQmlDir`
+          name = name.substr(0, name.length - 1);
+        }
+      }
     } else if (nameIsUrl || nameIsDir) {
       // 2. direct load
       // nameIsUrl => url do not need dirs
