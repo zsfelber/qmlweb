@@ -47,22 +47,23 @@ class QtObject extends QmlWeb.QObject {
     const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
 
     if (elemFlag) {
-      if (this.$defaultProperty) {
-        var prop = this.$properties[this.$defaultProperty];
+      const $d = this.$base===this?this.$defaultProperty:this.__proto__.$defaultProperty;
+      if ($d) {
+        var prop = this.$properties[$d];
         if (prop.type === "list") {
           var parr = prop.value;
           element.$properties.$index.set(parr.length, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
           parr.push(element);
           if (outallchanges) {
-            outallchanges[this.$defaultProperty] = (outallchanges[this.$defaultProperty] || 0) + 1;
+            outallchanges[$d] = (outallchanges[$d] || 0) + 1;
           } else {
-            prop.changed(parr, parr, this.$defaultProperty);
+            prop.changed(parr, parr, $d);
           }
         } else {
           element.$properties.$index.set(0, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
           if (element === prop.value) {
             // notifying always :
-            prop.changed(element, element, this.$defaultProperty);
+            prop.changed(element, element, $d);
           } else {
             prop.set(element);
           }
@@ -77,8 +78,9 @@ class QtObject extends QmlWeb.QObject {
     const elemFlag = flags & QmlWeb.QMLComponentFlags.Element;
 
     if (elemFlag) {
-      if (this.$defaultProperty) {
-        var prop = this.$properties[this.$defaultProperty];
+      const $d = this.$base===this?this.$defaultProperty:this.__proto__.$defaultProperty;
+      if ($d) {
+        var prop = this.$properties[$d];
         if (prop.type === "list") {
           var parr = prop.get();
           parr.splice(element.$index, 1);
@@ -87,12 +89,12 @@ class QtObject extends QmlWeb.QObject {
             if (p) {
               p.$index.set(i, QmlWeb.QMLPropertyFlags.ReasonInitPrivileged);
               if (outallchanges) {
-                outallchanges[this.$defaultProperty] = (outallchanges[this.$defaultProperty] || 0) + 1;
+                outallchanges[$d] = (outallchanges[$d] || 0) + 1;
               } else {
-                prop.changed(parr, parr, this.$defaultProperty);
+                prop.changed(parr, parr, $d);
               }
             } else {
-              console.warn(this+" . $elementRemove : default property : "+this.$defaultProperty+", no array["+i+"].$properties : "+parr);
+              console.warn(this+" . $elementRemove : default property : "+$d+", no array["+i+"].$properties : "+parr);
             }
           }
         } else {
