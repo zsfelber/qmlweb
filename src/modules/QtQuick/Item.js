@@ -402,6 +402,12 @@ class Item extends ItemBase {
     if (this.$updatingHGeometry) {
       return;
     }
+
+    // Width
+    if (propName === "width") {
+      this.$isUsingImplicitWidth = !newVal || newVal<0;
+    }
+
     const engine = this.$engine;
     if (!oncompl && !this.$completed) {
       // resulting too expensive cyclic calls at init time:
@@ -420,11 +426,6 @@ class Item extends ItemBase {
     const flags = QmlWeb.QMLSignalFlags.UniqueConnection;
     const w = this.width;
     const left = this.parent ? this.parent.left : 0;
-
-    // Width
-    if (propName === "width") {
-      this.$isUsingImplicitWidth = !newVal || newVal<0;
-    }
 
     const u = {}; // our update object
     let ok = 1;
@@ -521,6 +522,12 @@ class Item extends ItemBase {
     if (this.$updatingVGeometry) {
       return;
     }
+
+    // HeighttopProp
+    if (propName === "height") {
+      this.$isUsingImplicitHeight = !newVal || newVal<0;
+    }
+
     const engine = this.$engine;
     if (!oncompl && !this.$completed) {
       // resulting too expensive cyclic calls at init time:
@@ -539,11 +546,6 @@ class Item extends ItemBase {
     const flags = QmlWeb.QMLSignalFlags.UniqueConnection;
     const h = this.height;
     const top = this.parent ? this.parent.top : 0;
-
-    // HeighttopProp
-    if (propName === "height") {
-      this.$isUsingImplicitHeight = !newVal || newVal<0;
-    }
 
     const u = {}; // our update object
     let ok = 1;

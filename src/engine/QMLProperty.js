@@ -69,7 +69,16 @@ class QMLProperty {
     this.updateState = QMLPropertyState.Uninitialized;
     this.changed = QmlWeb.Signal.signal("changed", [{name:"val"}, {name:"oldVal"}, {name:"name"}], { obj });
     this.binding = null;
+
     this.value = undefined;
+    // debug
+    // setupGetterSetter(this, "value",
+    //   function get() {
+    //     return this.$value;
+    //   }, function set(v) {
+    //     this.$value = v;
+    //   } );
+
     this.type = type;
     this.animation = null;
     this.get.$owner = this;
