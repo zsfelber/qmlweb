@@ -126,9 +126,9 @@ class QMLBinding {
     if (src) {
       let match;
       if (this.flags & QmlWeb.QMLBindingFlags.ImplFunction) {
-        match = /^(?:function\b)?\s*(?:\w|\$)*\(((?:(?:\w|\$)*\s*\,\s*)*(?:\w|\$)*)\)\s*\{/m.exec(src);
+        match = /^(?:function\b)?\s*(?:\w|\$)*\(\s*((?:(?:\w|\$)*\s*\,\s*)*(?:\w|\$)*)\s*\)\s*\{/m.exec(src);
       } else {
-        match = /^function\s*(?:\w|\$)*\(((?:(?:\w|\$)*\s*\,\s*)*(?:\w|\$)*)\)\s*\{/m.exec(src);
+        match = /^function\s*(?:\w|\$)*\(\s*((?:(?:\w|\$)*\s*\,\s*)*(?:\w|\$)*)\s*\)\s*\{/m.exec(src);
       }
       if (match && src[src.length-1]==='}') {
         if (!this.flags) {
