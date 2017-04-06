@@ -534,7 +534,8 @@ class QMLEngine {
             op.errors.push("Property state is invalid : initialization failed : "+property);
           } else {
 
-            property.$set(op.newVal, op.oldVal, op.flags, op.valParentObj, op, index<arr.length?arr[index+1]:undefined);
+            const pindex = index+1;
+            property.$set(op.newVal, op.oldVal, op.flags, op.valParentObj, op, pindex<arr.length?arr[pindex]:undefined);
 
             this.a1++;
             mode+=":a";
