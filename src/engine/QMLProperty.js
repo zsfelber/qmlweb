@@ -641,11 +641,10 @@ class QMLProperty {
 
       this.update(flags, oldVal, valParentObj, dirtyNow);
 
+    } finally {
       if (nextQueueItem) {
         this.updateState |= nextQueueItem.dirty;
       }
-
-    } finally {
       if (pushed) QmlWeb.QMLProperty.popEvalStack();
     }
   }

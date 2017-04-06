@@ -248,9 +248,10 @@ class Repeater extends Item {
     if (outallchanges.resources) {
       container.resourcesChanged();
     }
-    if (outallchanges[container.$defaultProperty]) {
-      const prop = container.$properties[container.$defaultProperty];
-      prop.changed(prop.value, prop.value, container.$defaultProperty);
+    const $d = container.$base===container?container.$defaultProperty:container.__proto__.$defaultProperty;
+    if (outallchanges[$d]) {
+      const prop = container.$properties[$d];
+      prop.changed(prop.value, prop.value, $d);
     }
 
     for (let i = endIndex; i < this.$items.length; i++) {
