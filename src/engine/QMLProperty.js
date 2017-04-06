@@ -354,7 +354,7 @@ class QMLProperty {
       this.updateState |= QMLPropertyState.LoadFromBinding;
 
       if (this.animation || (this.changed.$signal.connectedSlots && this.changed.$signal.connectedSlots.length>this.childEvalTreeConnections)) {
-        this.update();
+        this.update(0, undefined, undefined, QMLPropertyState.LoadFromBinding);
       } else {
         // lazy load for inactive properties (and its dependencies):
         this.changed.$signal.connectedSlots.forEach(QMLProperty.fwdLazy, this);
@@ -428,7 +428,7 @@ class QMLProperty {
         }
 
         try {
-          this.update();
+          this.update(0, undefined, undefined, dirty);
         } catch (err) {
           if (err instanceof QmlWeb.FatalError) throw err;
           error = err;
