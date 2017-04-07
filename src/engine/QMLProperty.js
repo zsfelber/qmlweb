@@ -312,6 +312,16 @@ class QMLProperty {
         }
 
         this.updateState &= ~QMLPropertyState.Updating;
+
+        if (this.queueItems.length) {
+          if (engine.currentPendingOps[this.$propertyId]) {
+            if (this.queueItems.length>1) {
+              this.updateState |= this.queueItems[1].dirty;
+            }
+          } else {
+            this.updateState |= this.queueItems[0].dirty;
+          }
+        }
       }
 
       try {
@@ -563,9 +573,10 @@ class QMLProperty {
 
     if (fwdUpdate) {
 
+      let queueItem;
       if (dynamic) {
 
-        const queueItem = {
+        queueItem = {
           property:this, opId:this.$propertyId, oldVal, newVal, flags, valParentObj, dirty
         };
 
@@ -582,7 +593,7 @@ class QMLProperty {
           // 'update' always resets the current updated flag to 0 except the
           // remaining update tasks' dirty bits
 
-          const queueItem = {
+          queueItem = {
             property:this, opId:this.$propertyId, oldVal, newVal, flags, valParentObj, dirty
           };
 
@@ -591,12 +602,12 @@ class QMLProperty {
         }
 
       } else {
-        this.$set(newVal, oldVal, flags, valParentObj);
+        this.$set(newVal, oldVal, flags, valParentObj, undefined, dirty);
       }
     }
   }
 
-  $set(newVal, oldVal, flags, valParentObj, queueItem, nextQueueItem) {
+  $set(newVal, oldVal, flags, valParentObj, queueItem, dirtyNow) {
 
     const engine = this.$engine;
     flags = flags || QmlWeb.QMLPropertyFlags.ReasonUser;
@@ -630,7 +641,6 @@ class QMLProperty {
         this.bindingCtxObj = this.propDeclObj;
       }
 
-      let dirtyNow;
       if (queueItem) {
         dirtyNow = queueItem.dirty;
 
@@ -642,9 +652,6 @@ class QMLProperty {
       this.update(flags, oldVal, valParentObj, dirtyNow);
 
     } finally {
-      if (nextQueueItem) {
-        this.updateState |= nextQueueItem.dirty;
-      }
       if (pushed) QmlWeb.QMLProperty.popEvalStack();
     }
   }

@@ -511,11 +511,14 @@ class QMLEngine {
   }
 
   processOp(op, index, arr) {
+
+    const oldP = this.currentPendingOp;
+    const oldPs = this.currentPendingOps[op.opId];
+
     try {
 
       this.pushengine();
 
-      const oldP = this.currentPendingOp;
       this.currentPendingOp = op;
       this.currentPendingOps[op.opId] = 1;
 
@@ -525,67 +528,65 @@ class QMLEngine {
 
       const property = op.property;
 
-      try {
-        if (property) {
-          this.a++;
-          if (property.updateState & QmlWeb.QMLPropertyState.Updating) {
-            this.ae++;
-            mode+=":ae";
-            op.errors.push("Property state is invalid : initialization failed : "+property);
-          } else {
-
-            const pindex = index+1;
-            property.$set(op.newVal, op.oldVal, op.flags, op.valParentObj, op, pindex<arr.length?arr[pindex]:undefined);
-
-            this.a1++;
-            mode+=":a";
-          }
+      if (property) {
+        this.a++;
+        if (property.updateState & QmlWeb.QMLPropertyState.Updating) {
+          this.ae++;
+          mode+=":ae";
+          op.errors.push("Property state is invalid : initialization failed : "+property);
         } else {
-          this.b++;
-          mode+=":b";
-          op.fun.apply(op.thisObj, op.args);
-        }
 
-        if (op.errors.length) {
-          this.e++;
-          this.error["#"+this.i+mode+"!!"+op.info] = op;
-          op.err = op.errors[0];
-          if (op.err.err !== undefined) {
-            op.errprop = op.err.prop;
-            op.err = op.err.err;
-          }
-        } else if (op.warnings.length) {
-          this.w++;
-          this.warning["#"+this.i+mode+"!"+op.info] = op;
-          op.warn = op.warnings[0];
-          if (op.warn.err !== undefined) {
-            op.warnprop = op.warn.prop;
-            op.warn = op.warn.err;
-          }
-        } else {
-          this.info["#"+this.i+mode+":"+op.info] = op;
-        }
+          const pindex = index+1;
+          property.$set(op.newVal, op.oldVal, op.flags, op.valParentObj, op);
 
-      } catch (err) {
-        if (err instanceof QmlWeb.FatalError) throw err;
-        if (err.ctType==="UninitializedEvaluation") {
-          this.w++;
-          this.warning["#"+this.i+mode+"!"+op.info] = op;
-        } else {
-          this.e++;
-          this.error["#"+this.i+mode+"!!"+op.info] = op;
+          this.a1++;
+          mode+=":a";
         }
-        op.err = err;
-      } finally {
-        this.currentPendingOp = oldP;
-        delete this.currentPendingOps[op.opId];
+      } else {
+        this.b++;
+        mode+=":b";
+        op.fun.apply(op.thisObj, op.args);
+      }
+
+      if (op.errors.length) {
+        this.e++;
+        this.error["#"+this.i+mode+"!!"+op.info] = op;
+        op.err = op.errors[0];
+        if (op.err.err !== undefined) {
+          op.errprop = op.err.prop;
+          op.err = op.err.err;
+        }
+      } else if (op.warnings.length) {
+        this.w++;
+        this.warning["#"+this.i+mode+"!"+op.info] = op;
+        op.warn = op.warnings[0];
+        if (op.warn.err !== undefined) {
+          op.warnprop = op.warn.prop;
+          op.warn = op.warn.err;
+        }
+      } else {
+        this.info["#"+this.i+mode+":"+op.info] = op;
       }
 
       this.i++;
+
+    } catch (err) {
+      if (err instanceof QmlWeb.FatalError) throw err;
+      if (err.ctType==="UninitializedEvaluation") {
+        this.w++;
+        this.warning["#"+this.i+mode+"!"+op.info] = op;
+      } else {
+        this.e++;
+        this.error["#"+this.i+mode+"!!"+op.info] = op;
+      }
+      op.err = err;
     } finally {
+      this.currentPendingOp = oldP;
+      if (!oldPs) delete this.currentPendingOps[op.opId];
       this.popengine();
       arr.splice(index, 1);
     }
+
   }
 
   processSinglePendingOperation(op) {
