@@ -514,6 +514,7 @@ class QMLEngine {
 
     const oldP = this.currentPendingOp;
     const oldPs = this.currentPendingOps[op.opId];
+    let mode=":"+op.opId;
 
     try {
 
@@ -524,7 +525,6 @@ class QMLEngine {
 
       op.errors = [];
       op.warnings = [];
-      let mode=":"+op.opId;
 
       const property = op.property;
 
