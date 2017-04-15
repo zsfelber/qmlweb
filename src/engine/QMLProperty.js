@@ -248,7 +248,7 @@ class QMLProperty {
             newVal = this.$setVal(newVal, flags, setEvaluatedObjAlreadyDone);
 
           } else {
-            throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid update state:"+QMLPropertyState.toString(this.updateState)+"  Binding:"+this.binding);
+            throw new QmlWeb.AssertionError("Assertion failed : update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid update state:"+this.toString(1)+"  Binding:"+this.binding);
           }
 
         } else {
@@ -275,7 +275,7 @@ class QMLProperty {
 
 
           } else {
-            throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid update state:"+QMLPropertyState.toString(this.updateState)+"  (case 'no binding')");
+            throw new QmlWeb.AssertionError("Assertion failed : update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid update state:"+this.toString(1)+"  (case 'no binding')");
           }
         }
 
@@ -286,7 +286,7 @@ class QMLProperty {
 
         if (err.ctType) {
           if (dirtyNow & QMLPropertyState.ValueSaved) {
-            throw new QmlWeb.AssertionError("Assertion failed : "+err.ctType+" : "+QMLPropertyState.toString(dirtyNow) +" -> "+ QMLPropertyState.toString(this.updateState)+"  Invalid Error:", err);
+            throw new QmlWeb.AssertionError("Assertion failed : "+err.ctType+" : "+QMLPropertyState.toString(dirtyNow) +" -> "+ this.toString(1)+"  Invalid Error:", err);
           //} else {
             // when err.ctType==true: && LoadFromBinding
             // PendingEval uses custom logic in get() implementation :
@@ -327,7 +327,7 @@ class QMLProperty {
       try {
         if (oldVal!==newVal && !(origState & QMLPropertyState.Uninitialized && !(engine.operationState & QMLOperationState.Running))) {
           if (this.updateState & QMLPropertyState.Uninitialized) {
-            throw new QmlWeb.AssertionError("Assertion failed : "+this+" . update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid state:"+QMLPropertyState.toString(this.updateState)+"  Property became Uninitialized meanwhile but value seems changed!");
+            throw new QmlWeb.AssertionError("Assertion failed : update("+QmlWeb.QMLPropertyFlags.toString(flags)+", "+oldVal+")   Invalid state:"+this.toString(1)+"  Property became Uninitialized meanwhile but value seems changed!");
           }
           this.sendChanged(oldVal, newVal, flags);
         }
@@ -398,16 +398,22 @@ class QMLProperty {
       return undefined;
     }
 
+    const dirty = this.updateState & QMLPropertyState.Changed;
+    let toUpdate = 1;
+
     if (engine.operationState & QMLOperationState.Init) {
+
+      toUpdate = 0;
+
       if (this.updateState & QMLPropertyState.LoadFromBinding) {
         // not possible to update at init stage :
-        throw new QmlWeb.AssertionError(`Assertion failed. Init time, cannot update : Binding get in invalid state : ${QMLPropertyState.toString(this.updateState)}`, this);
+        throw new QmlWeb.AssertionError(`Assertion failed. Init time, cannot update : Binding get in invalid state : ${this.toString(1)}`, this);
       }
       // in case Valid/ValueSaved/ValueSaved: this.value is ok, return this.value
       // otherwise (Uninitialized) : return uninitialized this.value (undefined, [] or so) finally (as it is intended to be undefined,null or so)
     } else {
 
-      let toUpdate = 1;
+      toUpdate = 1;
 
       if ((engine.operationState & QMLOperationState.Starting) || (this.updateState & QMLPropertyState.Dynamic)) {
         if (!engine.currentPendingOp) {
@@ -431,10 +437,9 @@ class QMLProperty {
         throw new QmlWeb.AssertionError(`Assertion failed. pendingOperation/property filled at runtime : `, this);
       }
 
-      const dirty = this.updateState & QMLPropertyState.Changed;
       if (toUpdate && dirty) {
         if (dirty & ~QMLPropertyState.DirtyRead) {
-          throw new QmlWeb.AssertionError("Assertion failed : "+this+" . get   Invalid state:"+QMLPropertyState.toString(this.updateState)+"  Property setter dirty state invalid at Runtime, only valid in Init/Starting state through pendingOperations queue!");
+          throw new QmlWeb.AssertionError("Assertion failed : get   Invalid state:"+this.toString(1)+"  Property setter dirty state invalid at Runtime, only valid in Init/Starting state through pendingOperations queue!");
         }
 
         try {
@@ -455,7 +460,8 @@ class QMLProperty {
       if (this.updateState & QMLPropertyState.Updating) {
         if (engine.currentPendingOps[this.$propertyId]) {
           engine.currentPendingOp.warnings.push({loc:"get",
-                                                err:`(Secondary) property binding loop detected for property. recordedStack: ${QMLProperty.recordStack()}`,
+                                                err:"(Secondary) property binding loop detected for property.",
+                                                recordedStack: QMLProperty.recordStack(),
                                                 prop:this});
           return this.value;
         } else {
@@ -505,11 +511,11 @@ class QMLProperty {
         if (engine.operationState & QMLOperationState.Starting) {
           // This 'get' is directed to an unitialized property
           engine.currentPendingOp.warnings.push({loc:"get",
-                                                err:`Binding get in invalid state : ${QMLPropertyState.toString(invalidityFlags)} -> ${QMLPropertyState.toString(this.updateState)}`,
+                                                err:`Binding get in invalid state : ${QMLPropertyState.toString(dirty)} -> ${this.toString(1)}  toUpdate:${toUpdate}`,
                                                 prop:this});
         }
       } else {
-        throw new QmlWeb.PendingEvaluation(`Binding get in invalid state : ${QMLPropertyState.toString(invalidityFlags)} -> ${QMLPropertyState.toString(this.updateState)}`, this);
+        throw new QmlWeb.PendingEvaluation(`Binding get in invalid state : ${QMLPropertyState.toString(dirty)} -> ${this.toString(1)}  toUpdate:${toUpdate}`, this);
       }
     }
 
